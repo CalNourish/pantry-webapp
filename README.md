@@ -28,6 +28,15 @@ We are using [Tailwind CSS](https://tailwindcss.com/) which is a utility-first c
 2. Disable CSS Validation in your VS Code Workspace (this is set through the workspace setting directory in the root of the project). This needs to be turned off since Tailwind uses some syntax that is not considered valid css. Since we are using very little css, we should not need to validate our css.
 3. Using Tailwind, though, is up for debate. Because we are using Next.js, some of the main benefits of Tailwind may not be as useful, such as limiting the global css conflicts.
 
+## Intended architecture
+Firebase
+* storage/database
+* authentication
+
+Vercel
+* Hosting
+* Functions
+
 ## Local Hosting (Needs to be updated)
 
 ```firebase serve --only hosting```

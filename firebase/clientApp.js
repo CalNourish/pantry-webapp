@@ -2,6 +2,7 @@ import firebase from 'firebase/app'
 import 'firebase/auth' // If you need it
 import 'firebase/firestore' // If you need it
 import 'firebase/storage' // If you need it
+import 'firebase/database' // We need it
 import 'firebase/analytics' // If you need it
 
 const clientCredentials = {
@@ -19,6 +20,9 @@ if (typeof window !== 'undefined' && !firebase.apps.length) {
   firebase.initializeApp(clientCredentials)
   // To enable analytics. https://firebase.google.com/docs/analytics/get-started
   if ('measurementId' in clientCredentials) firebase.analytics()
+} else if (!firebase.apps.length) {
+  // Not using analytics
+  firebase.initializeApp(clientCredentials)
 }
 
 export default firebase

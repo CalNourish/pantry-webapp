@@ -10,4 +10,57 @@
 @tailwind utilities;
 /* Stop purging. */
 
-/* Your own custom utilities */
+/* Custom components */
+@layer components {
+
+  /* Button Styling */
+  .btn {
+    @apply py-2 px-4 text-sm rounded leading-5 transition duration-150 ease-in-out;
+  }
+
+  .btn:focus {
+    @apply outline-none shadow-outline
+  }
+
+  .btn-outline {
+    @apply bg-transparent text-gray-700 border border-gray-500;
+  }
+
+  .btn-outline:hover {
+    @apply bg-gray-300;
+  }
+
+  .btn-outline:focus, .btn-outline:active {
+    @apply bg-gray-400;
+  }
+
+  .btn-pantry-blue {
+    @apply text-white bg-pantry-blue-500 border border-transparent;
+  }
+
+  .btn-pantry-blue:hover {
+    @apply bg-pantry-blue-400 
+  }
+
+  .btn-pantry-blue:active {
+    @apply bg-pantry-blue-700
+  }
+
+  .btn-outline-pantry-blue {
+    @apply bg-transparent text-pantry-blue-500  border border-pantry-blue-500;
+  }
+
+  .btn-outlein-pantry-blue:hover {
+    @apply text-white  bg-pantry-blue-500 border border-transparent;
+  }
+
+  .btn-outline-pantry-blue:active, btn-outline-pantry-blue:focus {
+    @apply bg-pantry-blue-700;
+  }
+
+  .btn-pantry-green {
+    @apply text-white bg-pantry-green-500 border border-transparent;
+  }
+
+
+}
