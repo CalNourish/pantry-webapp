@@ -50,7 +50,7 @@
     @apply bg-transparent text-pantry-blue-500  border border-pantry-blue-500;
   }
 
-  .btn-outlein-pantry-blue:hover {
+  .btn-outline-pantry-blue:hover {
     @apply text-white  bg-pantry-blue-500 border border-transparent;
   }
 
@@ -60,6 +60,14 @@
 
   .btn-pantry-green {
     @apply text-white bg-pantry-green-500 border border-transparent;
+  }
+
+  .btn-pantry-green:hover {
+    @apply bg-pantry-green-400 
+  }
+
+  .btn-pantry-green:active {
+    @apply bg-pantry-green-700
   }
 
 
