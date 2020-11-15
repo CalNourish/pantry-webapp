@@ -7,6 +7,8 @@ export default function Home() {
   // Our custom hook to get context values
   const { loadingUser, user } = useUser()
 
+  
+
   useEffect(() => {
     if (!loadingUser) {
       // You know that the user is loaded: either logged in or out!
@@ -24,7 +26,9 @@ export default function Home() {
     </Head>
     <Layout>
       <h1>Home</h1>
-
+      <button onClick={() => {
+        fetch('/api/inventory/UpdateItem', {method: 'POST', body: {barcode: "222220", count: "12"}})
+      }}> button </button>
     </Layout>
   </>
 
