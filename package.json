@@ -10,7 +10,8 @@
     "firebase": "7.17.0",
     "next": "latest",
     "react": "^16.13.0",
-    "react-dom": "^16.13.0"
+    "react-dom": "^16.13.0",
+    "swr": "^0.3.8"
   },
   "license": "MIT",
   "devDependencies": {
