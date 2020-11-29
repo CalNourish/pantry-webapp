@@ -2,7 +2,7 @@ import firebase from '../../../firebase/clientApp'
 
 /*
 * /api/inventory/UpdateItem
-* req.body = {string barcode, string array categoryNames, string count, 
+* req.body = {string barcode, string array categoryName, string count, 
               string itemName, string lowStock, string packSize}
 */
 
@@ -30,7 +30,7 @@ export default async function(req,res) {
 
     // construct parameters 
     // list of item fields that can be updated
-    const FIELDS = ["categoryNames", "count", "itemName", "lowStock", "packSize"];
+    const FIELDS = ["categoryName", "count", "itemName", "lowStock", "packSize"];
     let updatedFields = {};
     // make sure barcode is a string
     let barcode = body.barcode.toString();

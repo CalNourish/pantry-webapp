@@ -69,7 +69,7 @@ export default function Home() {
                   "itemName": "API Testing Item",
                   "packSize": "31",
                   "lowStock": "2",
-                  "categoryNames": {"Grains": "Grains", "Sauces": "Sauces"},
+                  "categoryName": {"Grains": "Grains", "Sauces": "Sauces"},
                   "count": "400"
                 }),
                 headers: {'Content-Type': "application/json"}})

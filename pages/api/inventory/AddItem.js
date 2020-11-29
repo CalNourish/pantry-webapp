@@ -2,7 +2,7 @@ import firebase from '../../../firebase/clientApp'
 
 /*
 * /api/inventory/AddItem
-* req.body = {string barcode, string array categoryNames, string count, 
+* req.body = {string barcode, string array categoryName, string count, 
               string itemName, default string lowStock = "-1", default string packSize = "1"}
 * every field is required except for lowStock and packsize
 */
@@ -24,7 +24,7 @@ function requireParams(body, res) {
         return false;
     }
     // require categories obj with at least one entry
-    if (!body.categoryNames || body.categoryNames.length < 1) {
+    if (!body.categoryName || body.categoryName.length < 1) {
         res.status(400);
         res.json({error: "missing categories"});
         return false;
@@ -49,7 +49,7 @@ export default async function(req,res) {
     newItem["barcode"] = barcode;
     newItem["count"] = body.count.toString();
     newItem["itemName"] = body.itemName;
-    newItem["categoryNames"] = body.categoryNames;
+    newItem["categoryName"] = body.categoryName;
     newItem["lowStock"] = body.lowStock ? body.lowStock.toString() : "-1";
     newItem["packSize"] = body.packSize ? body.packSize.toString() : "1";    
     
@@ -57,7 +57,7 @@ export default async function(req,res) {
     firebase.database().ref('/category')
     .once('value', snapshot => {
         let verifiedCategories = Object.keys(snapshot.val());
-        Object.keys(body.categoryNames).forEach(category =>{
+        Object.keys(body.categoryName).forEach(category =>{
             if (!verifiedCategories.includes(category.toLowerCase())) {
                 res.status(400);
                 res.json({error: "not all provided cateogries were valid"});
