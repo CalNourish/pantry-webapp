@@ -2,35 +2,77 @@ import firebase from '../../../firebase/clientApp'
 
 /*
 * /api/inventory/UpdateItem
-* req.body = {string barcode, default categoryNames = [], default count = "0", 
-              default itemName = "", default lowStock = -1, default packSize = "1"}
+* req.body = {string barcode, string array categoryNames, string count, 
+              string itemName, string lowStock, string packSize}
 */
 
-export default (req,res) => { 
-  let body = req.body;
-  // construct parameters
-  let barcode = body.barcode;
-  let categoryNames = body.categoryNames ? body.categoryNames : [];
-  let count = body.count ? body.count : [];
-  let itemName = body.itemName ? body.itemName : "";
-  let lowStock = body.lowStock ? body.lowStock : -1;
-  let packSize = body.packSize ? body.packSize : 1;
+// something to do with not using the next js body parsing...?
+// may need to disable this in production environments
+export const config = {
+  api: {
+    bodyParser: true,
+  },
+}
 
-  firebase.database()
-    .ref('/inventory/' + barcode)
-    .once('value')  
-    .then(function(resp){
-      // the version of the item in the database
-      var dbItem = resp.val();
-      firebase.database()
-      .ref('/inventory/' + barcode)
-      .update({count})
-      .catch(function(error) {
-        res.status(500);
-        res.json({error: "error writing update to inventory database", errorstack: error});
-      })
-      .then(() => {
-        res.status(200);
-      });
+
+
+export default async function(req,res) {   
+  return new Promise((resolve, reject) => {
+    const {body} = req
+    console.log("req: ", body);
+
+    // construct parameters 
+    // list of item fields that can be updated
+    const FIELDS = ["categoryNames", "count", "itemName", "lowStock", "packSize"];
+    let updatedFields = {};
+    // make sure barcode is a string
+    let barcode = body.barcode.toString();
+
+    FIELDS.forEach(field => {
+      if (body[field]) {
+        updatedFields[field] = body[field];
+      }
     });
+
+    console.log("Fields to update: ", updatedFields)
+    
+    // is there throttling on anonymous sign ins?
+    firebase.auth().signInAnonymously()
+    .then(() => {
+      firebase.database()
+      .ref('/inventory/' + body.barcode)
+      .once('value')  
+      .catch(function(error){
+        res.status(500);
+        res.json({error: "server error getting that item from the database", errorstack: error});
+        return reject();
+      })
+      .then(function(resp){
+        // the version of the item in the database
+        var dbItem = resp.val();
+        // this item was not found
+        if (dbItem === null) {
+          res.status(404);
+          res.json({error: "unable to find item with barcode " + barcode})
+          return reject();
+        }
+        
+        // otherwise the item exists and we can update it
+        firebase.database()
+        .ref('/inventory/' + body.barcode)
+        .update(updatedFields)
+        .catch(function(error) {
+          res.status(500);
+          res.json({error: "error writing update to inventory database", errorstack: error});
+          return reject();
+        })
+        .then(() => {
+          res.status(200);
+          res.json({message: "success"});
+          return resolve();
+        });
+      });
+    })
+    
+  })
 }

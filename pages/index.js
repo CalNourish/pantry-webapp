@@ -1,13 +1,17 @@
 import Head from 'next/head'
+import useSWR from 'swr'
+
 import { useEffect } from 'react'
 import { useUser } from '../context/userContext'
 import Layout from '../components/Layout'
 
+// fetcher for get requests
+const fetcher = (url) => fetch(url).then((res) => res.json())
+
 export default function Home() {
   // Our custom hook to get context values
   const { loadingUser, user } = useUser()
-
-  
+  const { data, error } = useSWR('/api/inventory/GetItem', fetcher)
 
   useEffect(() => {
     if (!loadingUser) {
@@ -27,7 +31,9 @@ export default function Home() {
     <Layout>
       <h1>Home</h1>
       <button onClick={() => {
-        fetch('/api/inventory/UpdateItem', {method: 'POST', body: {barcode: "222220", count: "12"}})
+        fetch('/api/inventory/UpdateItem', { method: 'POST', body: 
+              JSON.stringify({"barcode" : "222220", "count": "113", "lowStock": "2"}),
+              headers: {'Content-Type': "application/json"}})
       }}> button </button>
     </Layout>
   </>
