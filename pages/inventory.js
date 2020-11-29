@@ -1,55 +1,33 @@
-import React, { useMemo, useState, useEffect } from "react";
+import useSWR from 'swr';
 import Layout from '../components/Layout'
-import Table from '../components/Table'
-import firebase from '../firebase/clientApp'
-// import useSWR from 'swr'
-// import getInventory from './api/inventory'
+import Table from '../components/Table';
 
 
-//https://stackoverflow.com/questions/61925957/using-an-api-to-create-data-in-a-react-table
-// https://reactjs.org/docs/hooks-effect.html
-
-const ALL_ITEMS = []
-const FULL_TABLE = []
-let current_table = []
-let current_items = []
+const fetcher = (url) => fetch(url).then((res) => res.json())
 
 export default function Inventory() {
-
-  // define a state for whether i am getting data or not
-  // define a state for the actual data
-  // make the API call in useEffect()
-  // set the states as necessary in the callbacks from the API call
-
+  const { data, error } = useSWR("/api/inventory", fetcher);
+  if (error) return <div>Failed to load notifications</div>
+  if (!data) return <div>Loading...</div>
 
   return (
     <>
       <Layout>
-        <body>
-          <div>
-              <h2 className="text-2xl font-semibold leading-tight">Live Inventory</h2>
-          </div> 
-            <Table data={getAllItems} />      
-        </body>
+        <div className="flex">
+          <div className="flex-none w-64">
+            {/* <Sidebar className="py-4">
+              <h1>Inventory</h1>
+              <div className="my-4">
+                <button className="my-1 btn btn-pantry-blue w-56">Add new item</button>
+                <button className="my-1 btn btn-outline w-56">Edit existing item</button>
+              </div>
+            </Sidebar> */}
+          </div>
+          <div className="py-4 px-8">
+            <Table className="table-auto my-1" data={data}></Table>
+          </div>
+        </div>
       </Layout>
     </>
   )
-}
-
-
-
-function getAllItems() {
-  return [
-    {itemName: '1'},
-    {itemName: '2'}
-  ]
-}
-
-async function getInventory() {
-  const REF = firebase.database().ref('/inventory');
-  REF.once("value", snapshot => {
-      console.log(snapshot.val())
-      return snapshot.val()
-  });
-  
 }

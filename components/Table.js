@@ -1,8 +1,9 @@
-import getInventory from '../pages/api/inventory'
+import TableRow from "./TableRow"
 
 export default function Table(props) {
-    // console.log(props.data)
-return ( 
+    const data = props.data
+  return (
+    <body class="antialiased font-sans">
     <div class="container mx-auto px-4 sm:px-8">
         <div class="py-8">
             <div class="my-2 flex sm:flex-row flex-col">
@@ -10,9 +11,9 @@ return (
                     <div class="relative">
                         <select
                             class="appearance-none h-full rounded-l border block w-full bg-white border-gray-400 text-gray-700 py-2 px-4 pr-8 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
-                            <option>Grains</option>
-                            <option>Protein</option>
-                            <option>Snacks</option>
+                            <option>5</option>
+                            <option>10</option>
+                            <option>20</option>
                         </select>
                         <div
                             class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
@@ -24,8 +25,9 @@ return (
                     <div class="relative">
                         <select
                             class="appearance-none h-full rounded-r border-t sm:rounded-r-none sm:border-r-0 border-r border-b block w-full bg-white border-gray-400 text-gray-700 py-2 px-4 pr-8 leading-tight focus:outline-none focus:border-l focus:border-r focus:bg-white focus:border-gray-500">
-                            <option>In Stock</option>
-                            <option>Out of Stock</option>
+                            <option>All</option>
+                            <option>Grains</option>
+                            <option>Protein</option>
                         </select>
                         <div
                             class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
@@ -43,7 +45,7 @@ return (
                             </path>
                         </svg>
                     </span>
-                    <input placeholder="Search"
+                    <input placeholder="Search for an item"
                         class="appearance-none rounded-r rounded-l sm:rounded-l-none border border-gray-400 border-b block pl-8 pr-6 py-2 w-full bg-white text-sm placeholder-gray-400 text-gray-700 focus:bg-white focus:placeholder-gray-600 focus:text-gray-700 focus:outline-none" />
                 </div>
             </div>
@@ -54,26 +56,26 @@ return (
                             <tr>
                                 <th
                                     class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                    Category
-                                </th>
-                                <th
-                                    class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                     Item Name
                                 </th>
                                 <th
                                     class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                    Stock Amount
+                                    Category
                                 </th>
                                 <th
                                     class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                    {/* Edit and Trash button. Show this if the user is a volunteer.  */}
+                                    Count
+                                </th>
+                                <th
+                                    class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    Status
                                 </th>
                             </tr>
                         </thead>
-                        <tbody id="inventory-table-body">
-                            {displayInventory(props.data).map((item) => {
-                                return Row(item)
-                            })
+                        <tbody>
+                            { Object.keys(data).map((key) => {
+                                return <TableRow itemName={data[key].itemName} itemCount={data[key].count} itemCategories={data[key].categoryName}/>
+                            }) 
                             }
                         </tbody>
                     </table>
@@ -81,49 +83,6 @@ return (
             </div>
         </div>
     </div>
-)
-
-}
-
-function Row(props) {
-    const item = props.itemData
-    return (
-        <tr>
-        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-            <div class="flex items-center">
-                <div class="flex-shrink-0 w-10 h-10">
-                    <img class="w-full h-full rounded-full"
-                        src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.2&w=160&h=160&q=80"
-                        alt="" />
-                </div>
-            </div>
-        </td>
-        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-            <p class="text-gray-900 whitespace-no-wrap">Peanut Butter</p>
-        </td>
-        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-            <p class="text-gray-900 whitespace-no-wrap">
-                35
-            </p>
-        </td>
-        <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-            <span
-                class="relative inline-block px-3 py-1 font-semibold text-green-900 leading-tight">
-                <span aria-hidden
-                    class="absolute inset-0 bg-green-200 opacity-50 rounded-full"></span>
-                <span class="relative">Edit</span>
-            </span>
-            <span
-                class="relative inline-block px-3 py-1 font-semibold text-red-900 leading-tight">
-                <span aria-hidden
-                    class="absolute inset-0 bg-red-200 opacity-50 rounded-full"></span>
-                <span class="relative">Remove</span>
-            </span>
-        </td>
-    </tr>
-    )
-}
-
-function displayInventory(inventory) {
-    return Object.keys(inventory).map(i => inventory[i])
+</body>  
+  )
 }
