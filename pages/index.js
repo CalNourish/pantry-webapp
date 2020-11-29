@@ -11,7 +11,6 @@ const fetcher = (url) => fetch(url).then((res) => res.json())
 export default function Home() {
   // Our custom hook to get context values
   const { loadingUser, user } = useUser()
-  const { data, error } = useSWR('/api/inventory/GetItem', fetcher)
 
   useEffect(() => {
     if (!loadingUser) {
@@ -30,11 +29,24 @@ export default function Home() {
     </Head>
     <Layout>
       <h1>Home</h1>
-      <button onClick={() => {
-        fetch('/api/inventory/UpdateItem', { method: 'POST', body: 
-              JSON.stringify({"barcode" : "222220", "count": "113", "lowStock": "2"}),
-              headers: {'Content-Type': "application/json"}})
-      }}> button </button>
+      <table>
+
+      <tr><td>
+        <button onClick={() => {
+          fetch('/api/inventory/UpdateItem', { method: 'POST', body: 
+                JSON.stringify({"barcode" : "222220", "count": "113", "lowStock": "2"}),
+                headers: {'Content-Type': "application/json"}})
+        }}> UpdateItem Button </button>
+      </td></tr>
+
+      <tr><td>
+        <button onClick={() => {
+          fetch('/api/inventory/GetItem/222220', { method: 'GET',
+                headers: {'Content-Type': "application/json"}})
+        }}> GetItem Button </button>
+      </td></tr>
+
+    </table>
     </Layout>
   </>
 

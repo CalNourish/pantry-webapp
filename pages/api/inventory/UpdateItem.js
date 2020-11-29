@@ -21,6 +21,13 @@ export default async function(req,res) {
     const {body} = req
     console.log("req: ", body);
 
+    // require barcode
+    if (!body.barcode) {
+      res.status(400);
+      res.json({error: "missing barcode in request"});
+      return reject();
+    }
+
     // construct parameters 
     // list of item fields that can be updated
     const FIELDS = ["categoryNames", "count", "itemName", "lowStock", "packSize"];
@@ -40,7 +47,7 @@ export default async function(req,res) {
     firebase.auth().signInAnonymously()
     .then(() => {
       firebase.database()
-      .ref('/inventory/' + body.barcode)
+      .ref('/inventory/' + barcode)
       .once('value')  
       .catch(function(error){
         res.status(500);
@@ -59,7 +66,7 @@ export default async function(req,res) {
         
         // otherwise the item exists and we can update it
         firebase.database()
-        .ref('/inventory/' + body.barcode)
+        .ref('/inventory/' + barcode)
         .update(updatedFields)
         .catch(function(error) {
           res.status(500);
