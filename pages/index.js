@@ -34,7 +34,7 @@ export default function Home() {
       <tr><td>
         <button onClick={() => {
           fetch('/api/inventory/UpdateItem', { method: 'POST', body: 
-                JSON.stringify({"barcode" : "222220", "count": "113", "lowStock": "2"}),
+                JSON.stringify({"barcode" : "222220", "count": "111", "lowStock": "2"}),
                 headers: {'Content-Type': "application/json"}})
         }}> UpdateItem Button </button>
       </td></tr>
@@ -44,6 +44,21 @@ export default function Home() {
           fetch('/api/inventory/GetItem/222220', { method: 'GET',
                 headers: {'Content-Type': "application/json"}})
         }}> GetItem Button </button>
+      </td></tr>
+
+      <tr><td>
+        <button onClick={() => {
+          fetch('/api/inventory/GetAllItems', { method: 'GET',
+                headers: {'Content-Type': "application/json"}})
+        }}> GetAllItems Button </button>
+      </td></tr>
+
+      <tr><td>
+        <button onClick={() => {
+          fetch('/api/inventory/DeleteItem', { method: 'POST', 
+                body: JSON.stringify({"barcode": "2222200000"}),
+                headers: {'Content-Type': "application/json"}})
+        }}> DeleteItem 2222200000 Button </button>
       </td></tr>
 
     </table>

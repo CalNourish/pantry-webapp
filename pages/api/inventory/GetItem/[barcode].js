@@ -21,10 +21,7 @@ export default async function(req,res) {
         query: { barcode },
     } = req
     
-    // is there throttling on anonymous sign ins?
-    firebase.auth().signInAnonymously()
-    .then(() => {
-      firebase.database()
+    firebase.database()
       .ref('/inventory/' + barcode)
       .once('value')  
       .catch(function(error){
@@ -48,6 +45,4 @@ export default async function(req,res) {
         }
       });
     })
-    
-  })
 }
