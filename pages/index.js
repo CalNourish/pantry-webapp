@@ -61,6 +61,21 @@ export default function Home() {
         }}> DeleteItem 2222200000 Button </button>
       </td></tr>
 
+      <tr><td>
+        <button onClick={() => {
+          fetch('/api/inventory/AddItem', { method: 'POST', 
+                body: JSON.stringify({
+                  "barcode": "2222200000",
+                  "itemName": "API Testing Item",
+                  "packSize": "31",
+                  "lowStock": "2",
+                  "categoryNames": {"Grains": "Grains", "Sauces": "Sauces"},
+                  "count": "400"
+                }),
+                headers: {'Content-Type': "application/json"}})
+        }}> AddItem 2222200000 Button </button>
+      </td></tr>
+
     </table>
     </Layout>
   </>

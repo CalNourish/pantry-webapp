@@ -46,9 +46,9 @@ export default async function(req,res) {
     // is there throttling on anonymous sign ins?
     firebase.auth().signInAnonymously()
     .then(() => {
-      firebase.database()
-      .ref('/inventory/' + barcode)
-      .once('value')  
+      let itemRef = firebase.database().ref('/inventory/' + barcode);
+      
+      itemRef.once('value')  
       .catch(function(error){
         res.status(500);
         res.json({error: "server error getting that item from the database", errorstack: error});
@@ -65,9 +65,7 @@ export default async function(req,res) {
         }
         
         // otherwise the item exists and we can update it
-        firebase.database()
-        .ref('/inventory/' + barcode)
-        .update(updatedFields)
+        itemRef.update(updatedFields)
         .catch(function(error) {
           res.status(500);
           res.json({error: "error writing update to inventory database", errorstack: error});

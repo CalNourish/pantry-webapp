@@ -31,10 +31,9 @@ export default async function(req,res) {
     
     // is there throttling on anonymous sign ins?
     firebase.auth().signInAnonymously()
-    .then(() => {
-      firebase.database()
-      .ref('/inventory/' + barcode)
-      .once('value')  
+    .then(() => {  
+      let itemRef = firebase.database().ref('/inventory/' + barcode);
+      itemRef.once('value')  
       .catch(function(error){
         res.status(500);
         res.json({error: "server error finding that item in the database", errorstack: error});
@@ -52,9 +51,7 @@ export default async function(req,res) {
         }
         
         // otherwise the item exists and we can delete it
-        firebase.database()
-        .ref('/inventory/' + barcode)
-        .remove()
+        itemRef.remove()
         .catch(function(error) {
           res.status(500);
           res.json({error: "deletion failed", errorstack: error});
