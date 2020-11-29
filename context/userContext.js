@@ -13,12 +13,28 @@ export default function UserContextComp({ children }) {
       try {
         if (user) {
           // User is signed in.
-          const { uid, displayName, email, photoURL } = user
-          // You could also look for the user doc in your Firestore (if you have one):
-          // const userDoc = await firebase.firestore().doc(`users/${uid}`).get()
-          setUser({ uid, displayName, email, photoURL })
-        } else setUser(null)
+          const { uid, displayName, email, photoURL, authorized } = user
+
+          // check against firebase and see if this is an admin authorized user
+          var authorizeLogin = firebase
+          .functions()
+          .httpsCallable('authorizeLogin');
+
+          let newAuth = (await authorizeLogin({}).then(function(result) {
+            return result.data;
+          })).authorized; 
+          
+          // convert this to a boolean value from a string value
+          let status =  newAuth == "true" ? true : false;
+
+          // update user data
+          setUser({ uid, displayName, email, photoURL, authorized: status })
+        } else {  
+          console.log("No user");
+          setUser(null) 
+        }
       } catch (error) {
+        console.log(error);
         // Most probably a connection error. Handle appropriately.
       } finally {
         setLoadingUser(false)
