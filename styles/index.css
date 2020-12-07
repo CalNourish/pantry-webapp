@@ -11,3 +11,62 @@
 /* Stop purging. */
 
 /* Your own custom utilities */
+
+/* The Modal (background) */
+
+.modal {
+    background-color: #eee;
+}
+
+.modal-header {
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: blue;
+}
+
+.modal-header span {
+    font-size: 1.5rem;
+    color: white;
+    pointer: cursor
+}
+
+.modal-content {
+    padding: 1.5rem 1rem;
+}
+
+.modal-body {
+    padding-bottom: 1rem;
+}
+
+.modal-body h4 {
+    font-size: 1.8rem;
+    color: navy 
+}
+
+.modal-body p {
+    font-size: 1rem;
+    padding: 1rem;
+}
+
+.modal-footer button {
+    display: block;
+    font-size: 1rem;
+    background: darkblue;
+    color: white;
+    cursor: pointer;
+    margin-left: auto;
+    padding: 0.5rem 1.8rem;
+    
+}
+
+.open-modal-btn {
+    color: grey;
+    background: indianred;
+    margin: 1rem;
+    padding: 0.5rem 1.8rem;
+    border: none;
+    outline: none;
+    pointer: cursor;
+}

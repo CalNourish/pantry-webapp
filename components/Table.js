@@ -2,6 +2,9 @@ import TableRow from "./TableRow"
 
 export default function Table(props) {
     const data = props.data
+    if (!data) {
+        return // TODO: make a ghost table
+    }
   return (
     <body class="antialiased font-sans">
     <div class="container mx-auto px-4 sm:px-8">
