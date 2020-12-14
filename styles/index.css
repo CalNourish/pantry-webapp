@@ -14,8 +14,11 @@
 
 /* The Modal (background) */
 
-.modal {
-    background-color: #eee;
+.btn-pantry-blue {
+    background-color: rgb(21, 50,92);
+    padding: 0.25rem;
+    border-radius: 10px;
+    color: white;
 }
 
 .modal-header {
@@ -23,7 +26,6 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background-color: blue;
 }
 
 .modal-header span {

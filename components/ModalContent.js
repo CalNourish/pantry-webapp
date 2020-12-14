@@ -1,38 +1,49 @@
-
+// create a form for edit (scan barcode) and add item wothout any db reads/writes
+// get the info from the form into correct ofrmat to write to db
+// style the page
+// merge work into master and branch again to incorporate sam work
+// make db call 
+import { useForm } from "react-hook-form";
 
 export default function ModalContent(close) {
+    const { register, handleSubmit, watch, errors } = useForm();
+    const onSubmit = data => {
+        console.log(data);
+        // write to firebase
+    }
+
+    console.log(watch("example")); // watch input value by passing the name of it
+
     return (
         <div className="modal-wrapper">
-             <div className="modal-header">
-                <p>Hello I'm a modal</p>
-            </div>
             <div className="modal-content">
                 <div className="modal-body">
-                    <h4>Modal</h4>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                    </p>
                 </div>
                 <div>
-                    <form>
-                        <div>
-                            <label>First Name</label>
-                            <input type="text" name="firstName" required />
-                            <label>Last Name</label>
-                            <input type="text" name="lastName" required />
+                    <form onSubmit={handleSubmit(onSubmit)}>
+                        <div className='p-1'>
+                            <label className="p-2">Item Name</label>
+                            <input type="text" name="itemName" required ref={register}/>
                         </div>
-                        <div>
-                            <label>Email Address</label>
-                            <input type="email" name="email" required />
+                        <div className="p-1">
+                            <label className="p-2">Item Barcode</label>
+                            <input type="text" name="itemBarcode" required ref={register}/>
                         </div>
-                        <div>
-                            <label>Password</label>
-                            <input type="password" name="password1"/>
+                        <div className='p-1'> 
+                            <label className="p-2">Stock Count</label>
+                            <input type="number" min="0" name="count" required ref={register}/>
                         </div>
-                        <div>
-                            <label>Re-enter Password</label>
-                            <input type="password" name="password2"/>
+                        <div className='p-1'>
+                            <label className="p-2">Pack Size</label>
+                            <input type="number" min="0" name="packSize" required ref={register}/>
                         </div>
-                        <button type="submit">Sign Up</button>
+                        <div className='p-1'>
+                            <label className="p-2">Low Stock Threshold</label>
+                            <input type="number" min="0" name="lowStock" required ref={register}/>
+                        </div>
+                        <div className='p-3' >
+                            <button className="bg-gray-300 p-2 rounded-md" type="submit">Submit</button>
+                        </div>
                     </form> 
                 </div>
             </div>
