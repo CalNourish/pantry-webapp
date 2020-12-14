@@ -14,61 +14,57 @@
 
 /* The Modal (background) */
 
-.btn-pantry-blue {
-    background-color: rgb(21, 50,92);
-    padding: 0.25rem;
-    border-radius: 10px;
-    color: white;
-}
+/* Custom components */
+@layer components {
 
-.modal-header {
-    padding: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
+  /* Button Styling */
+  .btn {
+    @apply py-2 px-4 text-sm rounded leading-5 transition duration-150 ease-in-out;
+  }
 
-.modal-header span {
-    font-size: 1.5rem;
-    color: white;
-    pointer: cursor
-}
+  .btn:focus {
+    @apply outline-none shadow-outline
+  }
 
-.modal-content {
-    padding: 1.5rem 1rem;
-}
+  .btn-outline {
+    @apply bg-transparent text-gray-700 border border-gray-500;
+  }
 
-.modal-body {
-    padding-bottom: 1rem;
-}
+  .btn-outline:hover {
+    @apply bg-gray-300;
+  }
 
-.modal-body h4 {
-    font-size: 1.8rem;
-    color: navy 
-}
+  .btn-outline:focus, .btn-outline:active {
+    @apply bg-gray-400;
+  }
 
-.modal-body p {
-    font-size: 1rem;
-    padding: 1rem;
-}
+  .btn-pantry-blue {
+    @apply text-white bg-pantry-blue-500 border border-transparent;
+  }
 
-.modal-footer button {
-    display: block;
-    font-size: 1rem;
-    background: darkblue;
-    color: white;
-    cursor: pointer;
-    margin-left: auto;
-    padding: 0.5rem 1.8rem;
-    
-}
+  .btn-pantry-blue:hover {
+    @apply bg-pantry-blue-400 
+  }
 
-.open-modal-btn {
-    color: grey;
-    background: indianred;
-    margin: 1rem;
-    padding: 0.5rem 1.8rem;
-    border: none;
-    outline: none;
-    pointer: cursor;
+  .btn-pantry-blue:active {
+    @apply bg-pantry-blue-700
+  }
+
+  .btn-outline-pantry-blue {
+    @apply bg-transparent text-pantry-blue-500  border border-pantry-blue-500;
+  }
+
+  .btn-outlein-pantry-blue:hover {
+    @apply text-white  bg-pantry-blue-500 border border-transparent;
+  }
+
+  .btn-outline-pantry-blue:active, btn-outline-pantry-blue:focus {
+    @apply bg-pantry-blue-700;
+  }
+
+  .btn-pantry-green {
+    @apply text-white bg-pantry-green-500 border border-transparent;
+  }
+
+
 }

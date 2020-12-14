@@ -1,13 +1,4 @@
 export default function TableRow({itemName, itemCount, itemCategories}) {
-    //   return (
-    //     <tr>
-    //         <td className="border px-4 py-2">{itemName}</td>
-    //         <td className="border px-4 py-2">{itemCount}</td>
-    //     </tr>
-    //   )
-    // if (!itemCategories ) {
-    //     console.log(itemName)
-    // }
         return (
             <tr>
             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">

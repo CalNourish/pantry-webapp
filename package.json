@@ -7,13 +7,15 @@
     "start": "next start"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "firebase": "7.17.0",
-    "next": "latest",
+    "next": "^10.0.0",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "react-hook-form": "^6.13.0",
     "react-modal": "^3.12.1",
-    "swr": "^0.3.8"
+    "swr": "^0.3.8",
+    "yarn": "^1.22.10"
   },
   "license": "MIT",
   "devDependencies": {
