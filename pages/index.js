@@ -76,6 +76,16 @@ export default function Home() {
         }}> AddItem 2222200000 Button </button>
       </td></tr>
 
+      <tr><td>
+        <button onClick={() => {
+          fetch('/api/categories/AddCategory', { method: 'POST', 
+                body: JSON.stringify({
+                  "displayName": "NewCat",
+                  "iconName": "oski",
+                }),
+                headers: {'Content-Type': "application/json"}})
+        }}> Create New Category Button </button>
+      </td></tr>
     </table>
     </Layout>
   </>
