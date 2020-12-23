@@ -86,6 +86,24 @@ export default function Home() {
                 headers: {'Content-Type': "application/json"}})
         }}> Create New Category Button </button>
       </td></tr>
+
+      <tr><td>
+        <button onClick={() => {
+          fetch('/api/categories/UpdateCategory', { method: 'POST', 
+                body: JSON.stringify({
+                  "displayName": "NewCat",
+                  "iconName": "OSKI",
+                }),
+                headers: {'Content-Type': "application/json"}})
+        }}> Update NewCat Category Button </button>
+      </td></tr>
+
+      <tr><td>
+        <button onClick={() => {
+          fetch('/api/categories/ListCategories', { method: 'GET',
+                headers: {'Content-Type': "application/json"}})
+        }}> ListCategories Button </button>
+      </td></tr>
     </table>
     </Layout>
   </>
