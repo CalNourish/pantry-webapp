@@ -32,11 +32,12 @@ export default function Navbar() {
   const { loadingUser, user } = useUser()
 
   var routes = UNAUTH_ROUTES;
-
+  var name = "";
   // if they're an authorized user display extra navbar options
   if (user && user.authorized) {
     console.log("This is an authorized user");
     routes = AUTH_ROUTES;
+    name = user.displayName;
   }
 
   return (
@@ -57,8 +58,10 @@ export default function Navbar() {
               </Link>
             ))}
           </div>
+          
         </div>
       </div>
+        <div className="flex" float="right">{name}</div>
     </nav>
   )
 };

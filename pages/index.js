@@ -10,15 +10,8 @@ const fetcher = (url) => fetch(url).then((res) => res.json())
 
 export default function Home() {
   // Our custom hook to get context values
-  const { loadingUser, user } = useUser()
-
-  useEffect(() => {
-    if (!loadingUser) {
-      // You know that the user is loaded: either logged in or out!
-      console.log(user)
-    }
-  }, [loadingUser, user])
-
+  const { user, setUser, googleLogin } = useUser()
+  console.log("User:", user);
   return (
     <>
     <Head>
