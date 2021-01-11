@@ -12,7 +12,15 @@ const UNAUTH_ROUTES = [
   { title: "Donate", route: "/donate" }
 ]
 
-const AUTH_ROUTES = [
+const UNAUTH_SIGNEDIN_ROUTES = [
+  { title: "Home", route: "/" },
+  { title: "Inventory", route: "/inventory" },
+  { title: "Hours", route: "/hours" },
+  { title: "Sign Out", route: "/signout"},
+  { title: "Donate", route: "/donate" }
+]
+
+const AUTH_SIGNEDIN_ROUTES = [
   { title: "Home", route: "/" },
   { title: "Inventory", route: "/inventory" },
   { title: "Hours", route: "/hours" },
@@ -33,11 +41,16 @@ export default function Navbar() {
 
   var routes = UNAUTH_ROUTES;
   var name = "";
-  // if they're an authorized user display extra navbar options
-  if (user && user.authorized) {
-    console.log("This is an authorized user");
-    routes = AUTH_ROUTES;
+
+  // if they're signed in 
+  if (user) {
     name = user.displayName;
+    routes = UNAUTH_SIGNEDIN_ROUTES
+    // if they're an admin
+    if (user.authorized === "true") {
+      console.log("This is an authorized user");
+      routes = AUTH_SIGNEDIN_ROUTES;
+    }
   }
 
   return (
