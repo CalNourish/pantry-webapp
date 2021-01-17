@@ -18,10 +18,16 @@ export default async function(req,res) {
   return new Promise((resolve, reject) => {
     
     firebase.database()
-      .ref('/category/')
+      .ref('/category')
       .once('value', snapshot => {
         res.status(200);
-        res.json({"categories": Object.values(snapshot.val())})
+        var categories = []
+        snapshot.forEach(child => {
+          var cat = child.val()
+          cat["id"] = child.key
+          categories.push(cat)
+        })
+        res.json({"categories": categories})
         return resolve();
       })  
       .catch(function(error){
