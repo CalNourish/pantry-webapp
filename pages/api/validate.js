@@ -1,8 +1,8 @@
-import firebase from '../../firebase/clientApp'    
+import admin from '../../utils/auth/firebaseAdmin'    
 
 const validate = async (token) => {
   // Check that the user has a valid token
-  const decodedToken = await firebase.auth().verifyIdToken(token, true);
+  const decodedToken = await admin.auth().verifyIdToken(token, true);
   // assign user data
   console.log("Validating an authorized user");
   const result = {
@@ -16,6 +16,7 @@ const validate = async (token) => {
 export default async (req, res) => {
   try {
     // Check if there is a token and if not return undefined.
+    
     const { token } = JSON.parse(req.headers.authorization || '{}');
     if (!token) {
       return res.status(403).send({
