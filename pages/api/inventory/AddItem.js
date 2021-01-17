@@ -64,43 +64,41 @@ export default async function(req,res) {
                 return reject();
             }
         })
-    });
-
-
-    // is there throttling on anonymous sign ins?
-    firebase.auth().signInAnonymously()
-    .then(() => {
-      let itemRef = firebase.database().ref('/inventory/' + barcode);
-
-      itemRef.once('value')  
-      .catch(function(error){
-        res.status(500);
-        res.json({error: "server error getting reference to that item from the database", errorstack: error});
-        return reject();
-      })
-      .then(function(resp){
-        // the version of the item in the database
-        var dbItem = resp.val();
-        // this item already exists
-        if (dbItem != null) {
-          res.status(400);
-          res.json({error: "an item with barcode " + barcode + " already exists"})
-          return reject();
-        }
-        
-        // otherwise the item doesn't exist and we can create it
-        itemRef.update(newItem)
-        .catch(function(error) {
-          res.status(500);
-          res.json({error: "error writing new item to inventory database", errorstack: error});
-          return reject();
-        })
+        // is there throttling on anonymous sign ins?
+        firebase.auth().signInAnonymously()
         .then(() => {
-          res.status(200);
-          res.json({message: "success"});
-          return resolve();
+        let itemRef = firebase.database().ref('/inventory/' + barcode);
+
+        itemRef.once('value')  
+        .catch(function(error){
+            res.status(500);
+            res.json({error: "server error getting reference to that item from the database", errorstack: error});
+            return reject();
+        })
+        .then(function(resp){
+            // the version of the item in the database
+            var dbItem = resp.val();
+            // this item already exists
+            if (dbItem != null) {
+            res.status(400);
+            res.json({error: "an item with barcode " + barcode + " already exists"})
+            return reject();
+            }
+            
+            // otherwise the item doesn't exist and we can create it
+            itemRef.update(newItem)
+            .catch(function(error) {
+            res.status(500);
+            res.json({error: "error writing new item to inventory database", errorstack: error});
+            return reject();
+            })
+            .then(() => {
+            res.status(200);
+            res.json({message: "success"});
+            return resolve();
+            });
         });
-      });
-    })
+        })
+    });
   })
 }
