@@ -1,6 +1,7 @@
+
 import firebase from '../../../firebase/clientApp'    
 
-
+/*
 // something to do with not using the next js body parsing...?
 // may need to disable this in production environments
 export const config = {
@@ -69,3 +70,4 @@ export default async function(req,res) {
     return resolve();
   })
 }
+*/
