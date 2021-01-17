@@ -5,7 +5,6 @@ import Layout from '../components/Layout'
 
 export default function SignIn () {
     const { user, setUser, googleLogin } = useUser();
-    console.log("USER: ", user);
     return ( 
         <>
             <UserProvider>

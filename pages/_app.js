@@ -29,7 +29,7 @@ MyApp.getInitialProps = async (appContext) => {
     try {
       const headers = {
         'Context-Type': 'application/json',
-        Authorization: JSON.stringify({ token: firebaseToken }),
+        Authorization: JSON.stringify({ "token": firebaseToken }),
       };
       const result = await fetch(`${server}/api/validate`, { headers }).then((res) => res.json());
       return { ...result, ...appProps };
