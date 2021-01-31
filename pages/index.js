@@ -10,9 +10,6 @@ import cookie from 'js-cookie';
 // fetcher for get requests
 const fetcher = (url) => fetch(url).then((res) => res.json())
 
-// authorization token
-const authToken = cookie.get("firebaseToken")
-
 export default function Home() {
   // Our custom hook to get context values
   const { user, setUser, googleLogin } = useUser()

@@ -16,6 +16,8 @@ export default function MyApp({ Component, pageProps }) {
   )
 }
 
+// this stuff puts stuff into props...do we need to do that if everything is stored in the context?
+// when you remove this there are some issues with making CORS requests...why?
 MyApp.getInitialProps = async (appContext) => {
   const { ctx } = appContext;
   // Calls `getInitialProps` and fills `appProps.pageProps`

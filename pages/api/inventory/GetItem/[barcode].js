@@ -27,9 +27,6 @@ export default async function(req,res) {
     const {
         query: { barcode },
     } = req
-
-
-
     firebase.database()
       .ref('/inventory/' + barcode)
       .once('value')  

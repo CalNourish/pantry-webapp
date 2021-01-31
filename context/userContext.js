@@ -45,15 +45,20 @@ const UserProvider = ({ children }) => {
         .functions()
         .httpsCallable('authorizeLogin');
 
-        let authorized = (await authorizeLogin({}).then(function(result) {
-          return result.data;
+        let authorized = (await authorizeLogin({})
+          .catch(error => {
+            console.log(error)
+            return {"authorized": "false"}
+          })
+          .then(result => {
+            return result.data;
         })).authorized; 
 
         setUser({"displayName": user.displayName, "photoURL": user.photoURL, "authorized": authorized});
         
         if (authorized === "true") {
-          console.log("Giving them a token");
           const token = await user.getIdToken();
+          console.log("Giving them a token");
           cookie.set(tokenName, token, { expires: 14 });
         }
       } else {
