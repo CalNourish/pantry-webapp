@@ -23,11 +23,12 @@ export default async (req, res) => {
         message: 'Auth token missing.',
       });
     }
-    // Call the validate function above that gets the user data.
+    // Call the validate function above that gets the user data
+    // this data ends up getting passed to every page's props
     const authenticated = await validateFunc(token);
     const result = {
       "user": {
-        "authenticated": authenticated
+        "Data": "Hello"
       },
     };
     return res.status(200).send(JSON.stringify(result));
