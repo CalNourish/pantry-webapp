@@ -1,16 +1,15 @@
 import admin from '../../utils/auth/firebaseAdmin'    
 
-const validate = async (token) => {
-  // Check that the user has a valid token
-  const decodedToken = await admin.auth().verifyIdToken(token, true);
-  // assign user data
-  console.log("Validating an authorized user");
-  const result = {
-    "user": {
-      authenticated: true
-    },
-  };
-  return result;
+export const validateFunc = async (token) => {
+  
+  var authenticated = true
+
+  // Check if the user has a valid token
+  await admin.auth().verifyIdToken(token, true)
+    .catch(error => {
+      authenticated = false
+  });
+  return authenticated;
 };
 
 export default async (req, res) => {
@@ -25,7 +24,12 @@ export default async (req, res) => {
       });
     }
     // Call the validate function above that gets the user data.
-    const result = await validate(token);
+    const authenticated = await validateFunc(token);
+    const result = {
+      "user": {
+        "authenticated": authenticated
+      },
+    };
     return res.status(200).send(JSON.stringify(result));
   } catch (err) {
     // Return undefined if there is no user. You may also send a different status or handle the error in any way that you wish.

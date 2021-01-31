@@ -1,4 +1,5 @@
 import firebase from '../../../../firebase/clientApp'    
+import {validateFunc} from '../../validate'
 
 /*
 * /api/inventory/GetItem/<barcode>
@@ -15,12 +16,20 @@ export const config = {
 
 
 export default async function(req,res) {   
+  const token = req.headers.authorization
+  // THIS IS AN EXAMPLE
+  // TODO: remove this since this endpoint should be publicly accessible
+  const result = await validateFunc(token)
+  console.log("Is this user allowed to call GetItem?", result)
+
   return new Promise((resolve, reject) => {
 
     const {
         query: { barcode },
     } = req
-    
+
+
+
     firebase.database()
       .ref('/inventory/' + barcode)
       .once('value')  

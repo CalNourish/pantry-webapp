@@ -1,4 +1,5 @@
 import firebase from '../../../firebase/clientApp'    
+import {validateFunc} from '../validate'
 
 /*
 * /api/inventory/AddItem
