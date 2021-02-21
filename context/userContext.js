@@ -59,7 +59,7 @@ const UserProvider = ({ children }) => {
         if (authorized === "true") {
           const token = await user.getIdToken();
           console.log("Giving them a token");
-          cookie.set(tokenName, token, { expires: 14 });
+          cookie.set(tokenName, token, { expires: 14, sameSite: 'strict', secure: true });
         }
       } else {
         console.log("Not giving them a token");

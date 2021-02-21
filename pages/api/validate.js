@@ -5,10 +5,11 @@ export const validateFunc = async (token) => {
   var authenticated = true
 
   // Check if the user has a valid token
-  // should we also check that the email is allowed? or just trust that only
+  // should we also check that the email (in the token response) is allowed? or just trust that only
   // allowed emails are getting tokens
   await admin.auth().verifyIdToken(token, true)
     .catch(error => {
+      console.log(error)
       authenticated = false
   });
   return authenticated;

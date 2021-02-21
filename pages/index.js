@@ -31,14 +31,14 @@ export default function Home() {
         <button onClick={() => {
           fetch('/api/inventory/UpdateItem', { method: 'POST', body: 
                 JSON.stringify({"barcode" : "222220", "count": "111", "lowStock": "2"}),
-                headers: {'Content-Type': "application/json"}})
+                headers: {'Content-Type': "application/json", 'Authorization': token}})
         }}> UpdateItem Button </button>
       </td></tr>
 
       <tr><td>
         <button onClick={() => {
           fetch('/api/inventory/GetItem/2222200000', { method: 'GET',
-                headers: {'Content-Type': "application/json", 'Authorization': token}})
+                headers: {'Content-Type': "application/json"}})
         }}> GetItem Button </button>
       </td></tr>
 
@@ -53,7 +53,7 @@ export default function Home() {
         <button onClick={() => {
           fetch('/api/inventory/DeleteItem', { method: 'POST', 
                 body: JSON.stringify({"barcode": "2222200000"}),
-                headers: {'Content-Type': "application/json"}})
+                headers: {'Content-Type': "application/json", 'Authorization': token}})
         }}> DeleteItem 2222200000 Button </button>
       </td></tr>
 
@@ -68,7 +68,7 @@ export default function Home() {
                   "categoryName": {"PIXafWlKvP": "PIXafWlKvP", "kVsxgN0G1L": "kVsxgN0G1L"},
                   "count": "400"
                 }),
-                headers: {'Content-Type': "application/json"}})
+                headers: {'Content-Type': "application/json", 'Authorization': token}})
         }}> AddItem 2222200000 Button </button>
       </td></tr>
 
@@ -79,7 +79,7 @@ export default function Home() {
                   "displayName": "NewCat",
                   "iconName": "oski",
                 }),
-                headers: {'Content-Type': "application/json"}})
+                headers: {'Content-Type': "application/json", 'Authorization': token}})
         }}> Create New Category Button </button>
       </td></tr>
 
@@ -90,7 +90,7 @@ export default function Home() {
                   "displayName": "NewCat",
                   "iconName": "OSKI",
                 }),
-                headers: {'Content-Type': "application/json"}})
+                headers: {'Content-Type': "application/json", 'Authorization': token}})
         }}> Update NewCat Category Button </button>
       </td></tr>
 
