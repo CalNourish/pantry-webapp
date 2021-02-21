@@ -1,4 +1,5 @@
 import firebase from '../../../firebase/clientApp'    
+import {validateFunc} from '../validate'
 
 /*
 * /api/inventory/AddCategory
@@ -26,6 +27,17 @@ function requireParams(body, res) {
 }
 
 export default async function(req,res) {   
+
+    // verify this request is legit
+    const token = req.headers.authorization
+    console.log("TOKEN: ", token)
+    const allowed = await validateFunc(token)
+    if (!allowed) {
+        res.status(401)
+        res.json({error: "you are not authenticated to perform this action"})
+        return Promise.reject();
+    }
+
   return new Promise((resolve, reject) => {
     const {body} = req
     console.log("req: ", body);

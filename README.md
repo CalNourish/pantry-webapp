@@ -20,7 +20,7 @@ It will run on port 3000
 cp .env.local.example .env.local
 ```
 
-2. Set each variable on `.env.local` with your Firebase Configuration (found in "Project settings").
+2. Set each variable except the final two in `.env.local` with your Firebase Configuration (found in "Project settings"). For the final two, either ask someone for their values (preferable) or go to "Project Settings" and then "Service accounts" in Firebase Console and hit "Generate new private key" to get a private key.
 
 ## Styling
 We are using [Tailwind CSS](https://tailwindcss.com/) which is a utility-first css framework with goal of writing little to no custom css. For the best development experience with tailwind css:
