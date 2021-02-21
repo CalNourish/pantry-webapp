@@ -41,7 +41,7 @@ export default function Home() {
 
       <tr><td>
         <button onClick={() => {
-          fetch('/api/inventory/GetItem/222220', { method: 'GET',
+          fetch('/api/inventory/GetItem/2222200000', { method: 'GET',
                 headers: {'Content-Type': "application/json"}})
         }}> GetItem Button </button>
       </td></tr>
@@ -69,7 +69,7 @@ export default function Home() {
                   "itemName": "API Testing Item",
                   "packSize": "31",
                   "lowStock": "2",
-                  "categoryName": {"Grains": "Grains", "Sauces": "Sauces"},
+                  "categoryName": {"PIXafWlKvP": "PIXafWlKvP", "kVsxgN0G1L": "kVsxgN0G1L"},
                   "count": "400"
                 }),
                 headers: {'Content-Type': "application/json"}})
