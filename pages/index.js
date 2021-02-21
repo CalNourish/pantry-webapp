@@ -13,6 +13,7 @@ const fetcher = (url) => fetch(url).then((res) => res.json())
 export default function Home() {
   // Our custom hook to get context values
   const { user, setUser, googleLogin } = useUser()
+  const token = cookie.get("firebaseToken")
   console.log("User:", user);
   return (
     <>
@@ -37,7 +38,7 @@ export default function Home() {
       <tr><td>
         <button onClick={() => {
           fetch('/api/inventory/GetItem/2222200000', { method: 'GET',
-                headers: {'Content-Type': "application/json"}})
+                headers: {'Content-Type': "application/json", 'Authorization': token}})
         }}> GetItem Button </button>
       </td></tr>
 
