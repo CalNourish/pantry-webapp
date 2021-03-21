@@ -34,7 +34,7 @@ export default function UserContextComp({ children }) {
           setUser(null) 
         }
       } catch (error) {
-        console.log(error);
+        console.log("error: ", error);
         // Most probably a connection error. Handle appropriately.
       } finally {
         setLoadingUser(false)

@@ -15,7 +15,7 @@ export default function Home() {
   useEffect(() => {
     if (!loadingUser) {
       // You know that the user is loaded: either logged in or out!
-      console.log(user)
+      console.log("user: ", user)
     }
   }, [loadingUser, user])
 
