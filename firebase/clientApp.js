@@ -16,7 +16,7 @@ const clientCredentials = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 }
 
-// Check that `window` is in scope for the analytics module!
+// Check that `window` is in scope for the analtics module!
 if (typeof window !== 'undefined' && !firebase.apps.length) {
   firebase.initializeApp(clientCredentials)
   // To enable analytics. https://firebase.google.com/docs/analytics/get-started
@@ -25,4 +25,8 @@ if (typeof window !== 'undefined' && !firebase.apps.length) {
   // Not using analytics
   firebase.initializeApp(clientCredentials)
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> cfd318bc2e20a2b684e8cfbca5262f4a957a3f1e
 export default firebase

@@ -5,20 +5,16 @@ import { useEffect } from 'react'
 import { useUser } from '../context/userContext'
 import Layout from '../components/Layout'
 
+import cookie from 'js-cookie';
+
 // fetcher for get requests
 const fetcher = (url) => fetch(url).then((res) => res.json())
 
 export default function Home() {
   // Our custom hook to get context values
-  const { loadingUser, user } = useUser()
-
-  useEffect(() => {
-    if (!loadingUser) {
-      // You know that the user is loaded: either logged in or out!
-      console.log("user: ", user)
-    }
-  }, [loadingUser, user])
-
+  const { user, setUser, googleLogin } = useUser()
+  const token = cookie.get("firebaseToken")
+  console.log("User:", user);
   return (
     <>
     <Head>
@@ -35,13 +31,13 @@ export default function Home() {
         <button onClick={() => {
           fetch('/api/inventory/UpdateItem', { method: 'POST', body: 
                 JSON.stringify({"barcode" : "222220", "count": "111", "lowStock": "2"}),
-                headers: {'Content-Type': "application/json"}})
+                headers: {'Content-Type': "application/json", 'Authorization': token}})
         }}> UpdateItem Button </button>
       </td></tr>
 
       <tr><td>
         <button onClick={() => {
-          fetch('/api/inventory/GetItem/222220', { method: 'GET',
+          fetch('/api/inventory/GetItem/2222200000', { method: 'GET',
                 headers: {'Content-Type': "application/json"}})
         }}> GetItem Button </button>
       </td></tr>
@@ -57,7 +53,7 @@ export default function Home() {
         <button onClick={() => {
           fetch('/api/inventory/DeleteItem', { method: 'POST', 
                 body: JSON.stringify({"barcode": "2222200000"}),
-                headers: {'Content-Type': "application/json"}})
+                headers: {'Content-Type': "application/json", 'Authorization': token}})
         }}> DeleteItem 2222200000 Button </button>
       </td></tr>
 
@@ -69,10 +65,10 @@ export default function Home() {
                   "itemName": "API Testing Item",
                   "packSize": "31",
                   "lowStock": "2",
-                  "categoryName": {"Grains": "Grains", "Sauces": "Sauces"},
+                  "categoryName": {"PIXafWlKvP": "PIXafWlKvP", "kVsxgN0G1L": "kVsxgN0G1L"},
                   "count": "400"
                 }),
-                headers: {'Content-Type': "application/json"}})
+                headers: {'Content-Type': "application/json", 'Authorization': token}})
         }}> AddItem 2222200000 Button </button>
       </td></tr>
 
@@ -83,7 +79,7 @@ export default function Home() {
                   "displayName": "NewCat",
                   "iconName": "oski",
                 }),
-                headers: {'Content-Type': "application/json"}})
+                headers: {'Content-Type': "application/json", 'Authorization': token}})
         }}> Create New Category Button </button>
       </td></tr>
 
@@ -94,7 +90,7 @@ export default function Home() {
                   "displayName": "NewCat",
                   "iconName": "OSKI",
                 }),
-                headers: {'Content-Type': "application/json"}})
+                headers: {'Content-Type': "application/json", 'Authorization': token}})
         }}> Update NewCat Category Button </button>
       </td></tr>
 

@@ -1,10 +1,12 @@
 import firebase from '../../../firebase/clientApp'    
+import {validateFunc} from '../validate'
 
 /*
 * /api/inventory/AddItem
 * req.body = {string barcode, string array categoryName, string count, 
               string itemName, default string lowStock = "-1", default string packSize = "1"}
 * every field is required except for lowStock and packsize
+* categoryName is an array of internal category IDs
 */
 
 // something to do with not using the next js body parsing...?
@@ -33,6 +35,16 @@ function requireParams(body, res) {
 }
 
 export default async function(req,res) {   
+    // verify this request is legit
+    const token = req.headers.authorization
+    console.log("TOKEN: ", token)
+    const allowed = await validateFunc(token)
+    if (!allowed) {
+        res.status(401)
+        res.json({error: "you are not authenticated to perform this action"})
+        return Promise.reject();
+    }
+
   return new Promise((resolve, reject) => {
     const {body} = req
     console.log("req: ", body);
@@ -49,7 +61,7 @@ export default async function(req,res) {
     newItem["barcode"] = barcode;
     newItem["count"] = body.count.toString();
     newItem["itemName"] = body.itemName;
-    newItem["categoryName"] = body.categoryName;
+    newItem["categoryName"] = Object.keys(body.categoryName); // get it in array format
     newItem["lowStock"] = body.lowStock ? body.lowStock.toString() : "-1";
     newItem["packSize"] = body.packSize ? body.packSize.toString() : "1";    
     
@@ -57,47 +69,48 @@ export default async function(req,res) {
     firebase.database().ref('/category')
     .once('value', snapshot => {
         let verifiedCategories = Object.keys(snapshot.val());
-        Object.keys(body.categoryName).forEach(category =>{
-            if (!verifiedCategories.includes(category.toLowerCase())) {
+        for (const category in body.categoryName) {
+            if (!verifiedCategories.includes(category)) {
                 res.status(400);
                 res.json({error: "not all provided cateogries were valid"});
                 return reject();
             }
-        })
+        }
+        
+        // perform the write
         // is there throttling on anonymous sign ins?
         firebase.auth().signInAnonymously()
         .then(() => {
-        let itemRef = firebase.database().ref('/inventory/' + barcode);
+            let itemRef = firebase.database().ref('/inventory/' + barcode);
 
-        itemRef.once('value')  
-        .catch(function(error){
-            res.status(500);
-            res.json({error: "server error getting reference to that item from the database", errorstack: error});
-            return reject();
-        })
-        .then(function(resp){
-            // the version of the item in the database
-            var dbItem = resp.val();
-            // this item already exists
-            if (dbItem != null) {
-            res.status(400);
-            res.json({error: "an item with barcode " + barcode + " already exists"})
-            return reject();
-            }
-            
-            // otherwise the item doesn't exist and we can create it
-            itemRef.update(newItem)
-            .catch(function(error) {
-            res.status(500);
-            res.json({error: "error writing new item to inventory database", errorstack: error});
-            return reject();
+            itemRef.once('value')  
+            .catch(function(error){
+                res.status(500);
+                res.json({error: "server error getting reference to that item from the database", errorstack: error});
+                return reject();
             })
-            .then(() => {
-            res.status(200);
-            res.json({message: "success"});
-            return resolve();
+            .then(function(resp){
+                // the version of the item in the database
+                var dbItem = resp.val();
+                // this item already exists
+                if (dbItem != null) {
+                    res.status(400);
+                    res.json({error: "an item with barcode " + barcode + " already exists"})
+                    return reject();
+                }
+                // otherwise the item doesn't exist and we can create it
+                itemRef.update(newItem)
+                .catch(function(error) {
+                    res.status(500);
+                    res.json({error: "error writing new item to inventory database", errorstack: error});
+                    return reject();
+                })
+                .then(() => {
+                    res.status(200);
+                    res.json({message: "success"});
+                    return resolve();
+                });
             });
-        });
         })
     });
   })
