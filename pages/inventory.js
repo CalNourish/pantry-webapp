@@ -8,26 +8,21 @@ import React, { useState, useReducer } from 'react';
 import { ToastMessage } from "react-toastr";
 import toastr from 'toastr'
 
-
-
 export default function Inventory() {
   // get categories and make a table to look up name from id
   const emptyItem =  {
-
         itemName: "",
         barcode: "",
         count: "",
         packSize: "",
         categories: "",
         lowStock: "",
-    
   }
-
 
   function formReducer(state, action) {
     switch (action.type) { // actions have a type by convention, value to hold 
-        // case "reset":
-        //     return initialState
+        case "reset":
+            return emptyItem
         case 'editItemName': {
             return {
                 ...state,
@@ -63,7 +58,13 @@ export default function Inventory() {
                 ...state,
                 lowStock: action.value
             }
-        }    
+        } 
+        case 'itemLookup': {
+          return {
+            ...state,
+            ...action.value
+          }
+        }   
         default:
             break;
       }
@@ -72,37 +73,19 @@ export default function Inventory() {
  
   const fetcher = (url) => fetch(url).then((res) => res.json())
   const { data, error } = useSWR("/api/inventory", fetcher);
-
   const [showAddItem, setShowAddItem] = useState(false);
   const [showEditItem, setShowEditItem] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
   const [showEditItemLookup, setShowEditItemLookup] = useState(false);
-  const [itemLookup, setItemLookup] = useState(emptyItem);
-  const [addedItem, setAddedItem] = useState(emptyItem); // refers to the item being added
-  const [editedItem, setEditedItem] = useState(emptyItem); // refers to the item being edited
   const [barcode, setBarcode] = useState(emptyItem); //  refers to the barcode just scanned    
   const [ state, dispatch ] = useReducer(formReducer, emptyItem)
-
-
-
-
-
-  // add state for the added item, edited item, and barcode 
-  // setState will have to look like this
-  // this.setState(prevState => ({
-  //   Metadata:{
-  //     ...prevState.Metadata,
-  //     [name]: value
-  //   }
-  // }));
 
   if (error) return <div>Failed to load Inventory</div>
   if (!data) return <div>Loading...</div>
 
-  function handleItemLookupSubmit(barcode) {
-    // todo: look barcode up in the database
-    // clear barcode from form
-    const itemPayload = {
+  function handleItemLookupSubmit() {
+    console.log("just looked up: ", barcode);
+    // todo: look barcode up in firebase and set state 
+    const itemPayload = { // placeholder
       itemName: "1",
       barcode: "2",
       count: "3",
@@ -110,8 +93,7 @@ export default function Inventory() {
       categories: "",
       lowStock: "5",
     }
-    setItemLookup(itemPayload) 
-    console.log("itemLookup: ", itemLookup)
+    dispatch({type: 'itemLookup', value: itemPayload})
     return 
   }
 
@@ -121,20 +103,12 @@ export default function Inventory() {
     console.log("this is what would be in it: ", state)
 
     // after firebase call .then
-    setItemLookup(emptyItem)
-    console.log("make call")
-
-    // setShowSuccess(true)
-    
+    // would be nice to show a success message here    
+    dispatch({type: 'reset'})
+    setShowEditItem(false)
     return
   }
 
-  function handleAddAnother() {
-    // need to clear the form >:(
-    setShowSuccess(false)
-    setShowAddItem(true)
-  }
-  
   return (
     <>
       <Layout>
@@ -155,7 +129,12 @@ export default function Inventory() {
           <div className="modal-header bg-blue-800">
             <p className="text-white">Add Item</p>
           </div>
-          <ModalContent item={itemLookup} onSubmitHandler={handleItemSubmit} formReducer={formReducer} dispatch={dispatch}/>
+          <ModalContent 
+            item={emptyItem} 
+            onSubmitHandler={handleItemSubmit} 
+            formReducer={formReducer} 
+            dispatch={dispatch}
+            parentState={state}/>
           <button onClick={() => setShowAddItem(false)}>Close</button>
         </Modal>
 
@@ -178,13 +157,13 @@ export default function Inventory() {
           </div>
           <div className='p-1'>
             <label>Barcode</label>
-              <input type="text" name="itemName" required/>
+              <input type="text" name="itemName" required onChange={(e)=> {setBarcode(e.currentTarget.value)}}/>
             </div>
 
           <button className="bg-gray-300 p-2 rounded-md" onClick={() => {
             setShowEditItemLookup(false)
             setShowEditItem(true)
-            handleItemLookupSubmit() // todo get barcode value
+            handleItemLookupSubmit()
 
           }}>Next</button>
 
@@ -207,33 +186,13 @@ export default function Inventory() {
           <div className="modal-header bg-blue-800">
             <p className="text-white">Edit Item</p>
           </div>
-          <ModalContent item={itemLookup} onSubmitHandler={handleItemSubmit} formReducer={formReducer} dispatch={dispatch}/>  
+          <ModalContent 
+            item={emptyItem} 
+            onSubmitHandler={handleItemSubmit} 
+            formReducer={formReducer} 
+            dispatch={dispatch}
+            parentState={state}/>  
           <button onClick={() => setShowEditItem(false)}>Close</button>
-        </Modal>
-
-        {/* Success */}
-        <Modal id="success-modal" isOpen={showSuccess} onRequestClose={() => setShowSuccess(false)} 
-            style={{
-              overlay: {
-                backgroundColor: "rgba(128,0,128,0.3)",
-              },
-              content: {
-                borderRadius: '20px',
-                border: 'none',
-                width: '66%',
-                height: '66%',
-                margin: "0 auto"
-              }
-            }}>
-          <div className="modal-header bg-blue-800">
-            <p className="text-white">Add Item</p>
-          </div>
-          <div>
-            Success!
-          </div>
-          <button onClick={() => setShowSuccess(false)}>Close</button>
-          <button onClick={() => handleAddAnother()}>Add Another</button>
-
         </Modal>
         
         <div className="flex">
@@ -241,8 +200,8 @@ export default function Inventory() {
             <Sidebar className="py-4">
               <h1>Inventory</h1>
               <div className="my-4">
-                <button className="my-1 btn-pantry-blue w-56 " onClick={() => setShowAddItem(true)}>Add new item</button>
-                <button className="my-1 btn-pantry-blue  w-56" onClick={() => setShowEditItemLookup(true)}>Edit existing item</button>
+                <button className="my-1 btn-pantry-blue w-56 rounded-md" onClick={() => setShowAddItem(true)}>Add new item</button>
+                <button className="my-1 btn-pantry-blue w-56 rounded-md" onClick={() => setShowEditItemLookup(true)}>Edit existing item</button>
               </div>
             </Sidebar>
           </div>

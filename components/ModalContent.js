@@ -29,25 +29,25 @@ export default function ModalContent(props) {
                 <div>
                     <div className='p-1'>
                         <label className="p-2 font-bold">Item Name</label>
-                        <input type="text" name="itemName" required defaultValue={item.itemName} onBlur={(e) => {
+                        <input type="text" name="itemName" required value={props.parentState.itemName} onChange={(e) => {
                             props.dispatch({type: 'editItemName', value: e.currentTarget.value})
                         }}/>
                     </div>
                     <div className="p-1">
                         <label className="p-2 font-bold">Item Barcode</label>
-                        <input type="text" name="itemBarcode" required defaultValue={item.barcode} onBlur={(e) => {
+                        <input type="text" name="itemBarcode" required value={props.parentState.barcode} onChange={(e) => {
                             props.dispatch({type: 'editItemBarcode', value: e.currentTarget.value})
                         }}/>
                     </div>
                     <div className='p-1'> 
                         <label className="p-2 font-bold">Stock Count</label>
-                        <input type="number" min="0" name="count" required defaultValue={item.count} onBlur={(e) => {
+                        <input type="number" min="0" name="count" required value={props.parentState.count} onChange={(e) => {
                             props.dispatch({type: 'editItemCount', value: e.currentTarget.value})
                         }}/>
                     </div>
                     <div className='p-1'>
                         <label className="p-2 font-bold">Pack Size</label>
-                        <input type="number" min="0" name="packSize" required defaultValue={item.packSize} onBlur={(e) => {
+                        <input type="number" min="0" name="packSize" required value={props.parentState.packSize} onChange={(e) => {
                             props.dispatch({type: 'editItemPackSize', value: e.currentTarget.value})
                         }}/>
                     </div>                        
@@ -63,7 +63,7 @@ export default function ModalContent(props) {
                     <div className='p-1'>
                         {/* {low stock threshold is not required} */}
                         <label className="p-2 font-bold">Low Stock Threshold</label> 
-                        <input type="number" min="0" name="lowStock" defaultValue={item.lowStock} onBlur={(e) => {
+                        <input type="number" min="0" name="lowStock" value={props.parentState.lowStock} onChange={(e) => {
                             props.dispatch({type: 'editItemLowStock', value: e.currentTarget.value})
                         }}/>
                     </div>
