@@ -6,7 +6,7 @@ export default function Table(props) {
     if (!data) {
         return // TODO: make a ghost table
     }
-    // do any filtering here - edit data 
+    // do any filtering here - edit the data variable 
   return (
     <body className="antialiased font-sans">
     <div className="container mx-auto px-4 sm:px-8">
