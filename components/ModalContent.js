@@ -1,7 +1,7 @@
 import React, { useState, useReducer } from 'react';
-import ReactMultiSelectCheckboxes from 'react-multiselect-checkboxes';
 import useSWR from 'swr';
-import firebase from 'firebase/app'
+import firebase from 'firebase/app';
+import Select from 'react-select';
 
 export default function ModalContent(props) {
     let item = props.item
@@ -20,6 +20,14 @@ export default function ModalContent(props) {
         return acc
     }
     const categoryOptions = data.categories.reduce(categoryReducer, []) 
+
+    function onSelect(action) {
+        let categoryIds = action.reduce((acc, curr)=> {
+            acc.push(curr.value)
+            return acc
+        }, [])
+        props.dispatch({type: 'editCategories', value: categoryIds})
+    }
 
     return (
         <div className="modal-wrapper">
@@ -52,13 +60,17 @@ export default function ModalContent(props) {
                         }}/>
                     </div>                        
                     <div className='p-1'>
-                        <ReactMultiSelectCheckboxes options={categoryOptions} placeholderButtonLabel="Select Categories" onChange={(selectedOptions)=>{
-                            let categoryIds = selectedOptions.reduce((acc, curr)=> {
+                    <Select
+                        options={categoryOptions} // Options to display in the dropdown
+                        isMulti
+                        onChange={(action) => {
+                            let categoryIds = action.reduce((acc, curr)=> {
                                 acc.push(curr.value)
                                 return acc
                             }, [])
                             props.dispatch({type: 'editCategories', value: categoryIds})
-                        }}/>
+                        }}
+                        />
                     </div>
                     <div className='p-1'>
                         {/* {low stock threshold is not required} */}
