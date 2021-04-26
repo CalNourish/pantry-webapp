@@ -2,17 +2,34 @@ import admin from '../../utils/auth/firebaseAdmin'
 
 export const validateFunc = async (token) => {
   
-  var authenticated = true
-
-  // Check if the user has a valid token
-  // should we also check that the email (in the token response) is allowed? or just trust that only
-  // allowed emails are getting tokens
-  await admin.auth().verifyIdToken(token, true)
-    .catch(error => {
-      console.log(error)
-      authenticated = false
-  });
-  return authenticated;
+  return new Promise((resolve, reject) => {
+    // apparently getting headers that don't exist return "undefined" the string ¯\_(ツ)_/¯
+    if (token === "undefined" || typeof token === "undefined") {
+      reject("No token provided")
+      return false
+    }
+    // get list of authorized users
+    admin.database().ref('/authorizedUser') 
+    .once('value', snapshot => {
+      // check if the token is valid
+      return admin.auth().verifyIdToken(token, true)
+      .catch(error => {
+        reject(error)
+        return false
+      })
+      .then(decoded => {
+        // the ID token is valid
+        // now check if the user pulled from the token is authorized
+        var vals = snapshot.val()
+        for (const key in vals) {
+          if (vals[key] === decoded.email && decoded.email_verified) {
+            resolve(true)
+          }
+        }
+        reject("Valid token but unallowed email")
+      })      
+    });
+  })
 };
 
 export default async (req, res) => {

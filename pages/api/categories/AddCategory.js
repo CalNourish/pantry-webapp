@@ -30,8 +30,9 @@ export default async function(req,res) {
 
     // verify this request is legit
     const token = req.headers.authorization
-    console.log("TOKEN: ", token)
     const allowed = await validateFunc(token)
+    console.log("AUTHENTICATED: ", allowed)
+
     if (!allowed) {
         res.status(401)
         res.json({error: "you are not authenticated to perform this action"})
