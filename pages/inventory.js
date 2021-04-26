@@ -90,7 +90,7 @@ export default function Inventory() {
       barcode: "2",
       count: "3",
       packSize: "4",
-      categories: "",
+      categories: ["8sJAdmGbnB", "8WeYr8bkRO"],
       lowStock: "5",
     }
     dispatch({type: 'itemLookup', value: itemPayload})
@@ -130,7 +130,6 @@ export default function Inventory() {
             <p className="text-white">Add Item</p>
           </div>
           <ModalContent 
-            item={emptyItem} 
             onSubmitHandler={handleItemSubmit} 
             formReducer={formReducer} 
             dispatch={dispatch}
@@ -187,7 +186,6 @@ export default function Inventory() {
             <p className="text-white">Edit Item</p>
           </div>
           <ModalContent 
-            item={emptyItem} 
             onSubmitHandler={handleItemSubmit} 
             formReducer={formReducer} 
             dispatch={dispatch}

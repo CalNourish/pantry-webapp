@@ -1,10 +1,9 @@
-import React, { useState, useReducer } from 'react';
+import React from 'react';
 import useSWR from 'swr';
 import firebase from 'firebase/app';
 import Select from 'react-select';
 
 export default function ModalContent(props) {
-    let item = props.item
     const fetcher = (url) => fetch(url).then((res) => res.json());
     const { data, error } = useSWR("/api/categories/ListCategories", fetcher);
     if (error) return <div>Failed to load Modal</div>
@@ -21,13 +20,13 @@ export default function ModalContent(props) {
     }
     const categoryOptions = data.categories.reduce(categoryReducer, []) 
 
-    function onSelect(action) {
-        let categoryIds = action.reduce((acc, curr)=> {
-            acc.push(curr.value)
-            return acc
-        }, [])
-        props.dispatch({type: 'editCategories', value: categoryIds})
+    const lookupReducer = (acc, obj) => {
+        let label = obj.id
+        let value = obj.displayName
+        acc[label] = {label: label, value: value}
+        return acc
     }
+    const categoryLookup = data.categories.reduce(lookupReducer, []) 
 
     return (
         <div className="modal-wrapper">
@@ -60,16 +59,17 @@ export default function ModalContent(props) {
                         }}/>
                     </div>                        
                     <div className='p-1'>
-                    <Select
-                        options={categoryOptions} // Options to display in the dropdown
-                        isMulti
-                        onChange={(action) => {
-                            let categoryIds = action.reduce((acc, curr)=> {
-                                acc.push(curr.value)
-                                return acc
-                            }, [])
-                            props.dispatch({type: 'editCategories', value: categoryIds})
-                        }}
+                        <Select
+                            options={categoryOptions} 
+                            isMulti
+                            value={null||categoryLookup[props.parentState.categories[0]]} // TODO: replace with a function that maps categories to string
+                            onChange={(action) => {
+                                let categoryIds = action.reduce((acc, curr)=> {
+                                    acc.push(curr.value)
+                                    return acc
+                                }, [])
+                                props.dispatch({type: 'editCategories', value: categoryIds})
+                            }}
                         />
                     </div>
                     <div className='p-1'>
