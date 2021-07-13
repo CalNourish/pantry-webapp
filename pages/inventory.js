@@ -5,8 +5,6 @@ import Table from '../components/Table'
 import ModalContent from '../components/ModalContent'
 import Modal from 'react-modal'
 import React, { useState, useReducer } from 'react';
-import { ToastMessage } from "react-toastr";
-import toastr from 'toastr'
 import cookie from 'js-cookie';
 
 
@@ -101,7 +99,10 @@ export default function Inventory() {
       barcode: "2",
       count: "3",
       packSize: "4",
-      categoryName: [{value: "8WeYr8bkRO", label: "Frozen Foods"}, {value: "8sJAdmGbnB", label: "Hi"}],
+      categoryName: [
+        {value: "8WeYr8bkRO", label: "Frozen Foods"}, 
+        {value: "8sJAdmGbnB", label: "Hi"}
+      ],
       lowStock: "5",
     }
     dispatch({type: 'itemLookup', value: itemPayload})
@@ -118,13 +119,15 @@ export default function Inventory() {
       "itemName": "API Testing Item",
       "packSize": "31",
       "lowStock": "2",
-      "categoryName": [{value: "value1", label: "label1"}, {value: "value2", label: "label2"}],
+      "categoryName": [
+        {value: "value1", label: "label1"}, 
+        {value: "value2", label: "label2"}
+      ],
       "count": "400"
     }),
     headers: {'Content-Type': "application/json", 'Authorization': token}})
 
-    // after firebase call .then
-    // TODO: would be nice to display a success message here    
+    // TODO: would be nice to display a success message using toastr or something here (synchronously after firebase call)  
     dispatch({type: 'reset'})
     setShowEditItem(false)
     return
