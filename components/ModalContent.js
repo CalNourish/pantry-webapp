@@ -8,6 +8,8 @@ export default function ModalContent(props) {
     const { data, error } = useSWR("/api/categories/ListCategories", fetcher);
     if (error) return <div>Failed to load Modal</div>
     if (!data) return <div>Loading...</div>
+
+    // A reducer to get the categories from firebase in a format that is react-select friendly.
     const categoryReducer = (acc, obj) => {
         acc = [
             ...acc,
@@ -19,14 +21,6 @@ export default function ModalContent(props) {
         return acc
     }
     const categoryOptions = data.categories.reduce(categoryReducer, []) 
-
-    const lookupReducer = (acc, obj) => {
-        let label = obj.id
-        let value = obj.displayName
-        acc[label] = {label: label, value: value}
-        return acc
-    }
-    const categoryLookup = data.categories.reduce(lookupReducer, []) 
 
     return (
         <div className="modal-wrapper">
@@ -62,10 +56,10 @@ export default function ModalContent(props) {
                         <Select
                             options={categoryOptions} 
                             isMulti
-                            value={null||categoryLookup[props.parentState.categories[0]]} // TODO: replace with a function that maps categories to string
+                            defaultValue={null||props.parentState.categoryName}
                             onChange={(action) => {
                                 let categoryIds = action.reduce((acc, curr)=> {
-                                    acc.push(curr.value)
+                                    acc.push({value: curr.value, label: curr.label})
                                     return acc
                                 }, [])
                                 props.dispatch({type: 'editCategories', value: categoryIds})

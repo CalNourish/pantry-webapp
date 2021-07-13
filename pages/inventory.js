@@ -7,20 +7,24 @@ import Modal from 'react-modal'
 import React, { useState, useReducer } from 'react';
 import { ToastMessage } from "react-toastr";
 import toastr from 'toastr'
+import cookie from 'js-cookie';
+
 
 export default function Inventory() {
-  // get categories and make a table to look up name from id
+  const token = cookie.get("firebaseToken")
+
   const emptyItem =  {
         itemName: "",
         barcode: "",
         count: "",
         packSize: "",
-        categories: "",
+        categoryName: "",
         lowStock: "",
   }
 
+  // A reducer to manage the State of the add-item / edit-item forms. 
   function formReducer(state, action) {
-    switch (action.type) { // actions have a type by convention, value to hold 
+    switch (action.type) { 
         case "reset":
             return emptyItem
         case 'editItemName': {
@@ -50,7 +54,7 @@ export default function Inventory() {
         case 'editCategories': {
             return {
                 ...state,
-                categories: action.value
+                categoryName: action.value
             }
         }       
         case 'editItemLowStock': {
@@ -73,37 +77,54 @@ export default function Inventory() {
  
   const fetcher = (url) => fetch(url).then((res) => res.json())
   const { data, error } = useSWR("/api/inventory", fetcher);
+
+  // Manage modal show/don't show State
   const [showAddItem, setShowAddItem] = useState(false);
   const [showEditItem, setShowEditItem] = useState(false);
   const [showEditItemLookup, setShowEditItemLookup] = useState(false);
-  const [barcode, setBarcode] = useState(emptyItem); //  refers to the barcode just scanned    
+
+  // Manage just-scanned barcode State
+  const [barcode, setBarcode] = useState(emptyItem);
+  
+  // Manage form State (look up useReducer tutorials if unfamiliar)
   const [ state, dispatch ] = useReducer(formReducer, emptyItem)
 
   if (error) return <div>Failed to load Inventory</div>
   if (!data) return <div>Loading...</div>
 
+  // When a barcode is scanned in the edit-item-lookup modal, look up this barcode in Firebase.
   function handleItemLookupSubmit() {
     console.log("just looked up: ", barcode);
-    // todo: look barcode up in firebase and set state 
-    const itemPayload = { // placeholder
+    // TODO: look barcode up in firebase and set state 
+    const itemPayload = { // placeholder only. later this will come from firebase.
       itemName: "1",
       barcode: "2",
       count: "3",
       packSize: "4",
-      categories: ["8sJAdmGbnB", "8WeYr8bkRO"],
+      categoryName: [{value: "8WeYr8bkRO", label: "Frozen Foods"}, {value: "8sJAdmGbnB", label: "Hi"}],
       lowStock: "5",
     }
     dispatch({type: 'itemLookup', value: itemPayload})
     return 
   }
 
+  // When an item is submitted from the add-item or edit-item form, write the updated item to firebase.
   function handleItemSubmit() {
-    // submit to firebase
-    console.log("make firebase call")
-    console.log("this is what would be in it: ", state)
+    // TODO: submit the payload to firebase using firebase API call
+    console.log("this is what would be in the firebase API call: ", state)
+    fetch('/api/inventory/AddItem', { method: 'POST', 
+    body: JSON.stringify({
+      "barcode": "2222200000",
+      "itemName": "API Testing Item",
+      "packSize": "31",
+      "lowStock": "2",
+      "categoryName": [{value: "value1", label: "label1"}, {value: "value2", label: "label2"}],
+      "count": "400"
+    }),
+    headers: {'Content-Type': "application/json", 'Authorization': token}})
 
     // after firebase call .then
-    // would be nice to show a success message here    
+    // TODO: would be nice to display a success message here    
     dispatch({type: 'reset'})
     setShowEditItem(false)
     return
@@ -112,7 +133,7 @@ export default function Inventory() {
   return (
     <>
       <Layout>
-        {/* Add Item */}
+        {/* Add Item Modal */}
         <Modal id="add-item-modal" isOpen={showAddItem} onRequestClose={() => setShowAddItem(false)} 
             style={{
               overlay: {
@@ -137,7 +158,7 @@ export default function Inventory() {
           <button onClick={() => setShowAddItem(false)}>Close</button>
         </Modal>
 
-        {/*  Edit Item Lookup  */}
+        {/*  Edit Item Lookup Modal  */}
         <Modal id="edit-item-lookup-modal" isOpen={showEditItemLookup} onRequestClose={() => setShowEditItemLookup(false)} 
             style={{
               overlay: {
@@ -168,7 +189,7 @@ export default function Inventory() {
 
         </Modal>
 
-        {/* Edit Item */}
+        {/* Edit Item Modal */}
         <Modal id="edit-item-modal" isOpen={showEditItem} onRequestClose={() => setShowEditItem(false)} 
             style={{
               overlay: {
