@@ -1,0 +1,59 @@
+{
+  "rules": {
+    "authorizedUser": {
+      ".read": true,
+      ".write": true,
+    },
+    "barcodes": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "category": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "expoNotificationToken": {
+      ".read": false,
+      ".write": true
+    },
+    "feedback": {
+      ".read": false,
+      ".write": true
+    },
+    "info": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "inventory": {
+      ".read": true,
+      ".write": "auth != null",
+      ".indexOn": ["itemName", "barcode"]
+    },
+    "inventory2": {
+      ".read": true,
+      ".write": "auth != null",
+      ".indexOn": ["name", "categories"]
+    },
+    "lambdaAuthorization": {
+      ".read": "auth != null",
+      ".write": false
+    },
+    "notification": {
+      ".read": true,
+      ".write": "auth != null",
+      ".indexOn": ["timestamp"]
+    },
+    "notificationToken": {
+      ".read": true,
+      ".write": true
+    },
+    "googleAPI": {
+      ".read": true,
+      ".write": true
+    },
+    "environment": {
+      ".read": true,
+      ".write": false
+    },  
+  }
+}

@@ -8,26 +8,28 @@ const UNAUTH_ROUTES = [
   { title: "Home", route: "/" },
   { title: "Inventory", route: "/inventory" },
   { title: "Hours", route: "/hours" },
-  { title: "Sign in", route: "/signin"},
-  { title: "Donate", route: "/donate" }
+  { title: "Sign in", route: "/signin" },
+  { title: "Donate", route: "/donate" },
+  { title: "Order", route: "/order" }
 ]
 
 const UNAUTH_SIGNEDIN_ROUTES = [
   { title: "Home", route: "/" },
   { title: "Inventory", route: "/inventory" },
   { title: "Hours", route: "/hours" },
-  { title: "Sign Out", route: "/signout"},
-  { title: "Donate", route: "/donate" }
+  { title: "Sign Out", route: "/signout" },
+  { title: "Donate", route: "/donate" },
+  { title: "Order", route: "/order" }
 ]
 
 const AUTH_SIGNEDIN_ROUTES = [
   { title: "Home", route: "/" },
   { title: "Inventory", route: "/inventory" },
   { title: "Hours", route: "/hours" },
-  { title: "Admin", route: "/admin"},
-  { title: "Checkout", route: "/checkout"},
-  { title: "Send Notification", route: "/notification"},
-  { title: "Sign out", route: "/signout"},
+  { title: "Admin", route: "/admin" },
+  { title: "Checkout", route: "/checkout" },
+  { title: "Send Notification", route: "/notification" },
+  { title: "Sign out", route: "/signout" },
   { title: "Donate", route: "/donate" }
 ]
 
@@ -57,13 +59,13 @@ export default function Navbar() {
     <nav className="bg-pantry-blue-500 text-white p-4 flex">
       <div className="flex-1 flex items-center justify-center sm:items-stretch sm:justify-start">
         <div className="flex-shrink-0">
-          <Image className="block h-8 w-auto" src="/images/pantry_logo.png" alt="Pantry logo" priority="true" height="32" width="32"/>
+          <Image className="block h-8 w-auto" src="/images/pantry_logo.png" alt="Pantry logo" priority="true" height="32" width="32" />
         </div>
         <div className="">
           <div className="flex">
             {routes.map(navigationItem => (
               <Link href={navigationItem.route}>
-                <a href="#" className={ 
+                <a href="#" className={
                   navigationItem.route == router.pathname ? activeLink : inactiveLink}
                 >
                   {navigationItem.title}
@@ -71,10 +73,10 @@ export default function Navbar() {
               </Link>
             ))}
           </div>
-          
+
         </div>
       </div>
-        <div className="flex" float="right">{name}</div>
+      <div className="flex" float="right">{name}</div>
     </nav>
   )
 };
