@@ -11,7 +11,7 @@ This application is based on the [Next.js Firebase example](https://github.com/v
 
 To start the app: ```npm run dev```
 
-It will run on port 3000
+It will run on localhost at port 3000. You can try signing in with your email to get authenticated.
 
 ## Set up the environment variables
 1. Create a `.env.local` file and copy the contents of `.env.local.example` into it:
@@ -37,12 +37,17 @@ Vercel
 * Hosting
 * Functions
 
-## Local Hosting (Needs to be updated)
+# How this repo is set up
+The `pages` directory is the core of our app. `pages/*.js` all define pages that are rendered to the user. `pages/api/*` are our backend API endpoints. The path of the endpoint follows the directory path, so a file `/api/inventory/AddItem.js` defines an endpoint accessible at `/api/inventory/AddItem`. You can read more about Next.js API routes [here](https://nextjs.org/docs/api-routes/introduction).
 
-```firebase serve --only hosting```
-```✔  hosting: Local server: http://localhost:5000```
+The `utils` directory contains utility functions that we may need to use across multiple endpoints, such as the Firebase connection initialization logic.
 
-Ensure that you have the proper permissions to access the volunteer side of the application. Sign in with the google email that has been granted acccess.
+The `public` directory contains publicly accessible assets we use on the webapp and the `styles` directory contains some basic styling with Tailwind (see above). 
+
+The `context` directory contains a script that monitors and updates a `userContext` that handles authenticating a user with our webapp. Essentially, this script is responsible for managing a special token we give users that are allowed to access the pantry facing side of our app.
+
+The `components` directory contains all our common components.
+
 
 ## Test and Prod Environments
 
@@ -56,15 +61,9 @@ To switch between projects, run ```firebase use <alias>```.
 
 These aliases will automatically connect with the appropriate firebase projects (i.e. database, auth, etc.). In development, you should only use **TestCalNourish** with the alias of `default` or `test`.
 
-## Deployment (Needs to be updated)
 
-**Test Deployment**: Feel free to deploy with **TestCalNourish** whenever to make sure things are stable. Do this by pushing to `origin/dev` (resolving any conflicts with other people's changes) and then merging with `origin/test` which will autodeploy to Firebase.
 
-**Prod Deployment**: Any deployments to prod should be merged onto `master` from `origin/test` and then deployed using the Firebase CLI:
-```firebase deploy --except functions```. Make sure to use the `production` alias:
-```firebase use production```.
-
-Our autodeploy actions use [this Action](https://github.com/marketplace/actions/github-action-for-firebase).
+# Here on down is not necessary for initial setup
 
 ## Configuring Notifications with AWS Cognito and Lambda
 
