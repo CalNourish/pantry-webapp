@@ -5,6 +5,8 @@ This application is based on the [Next.js Firebase example](https://github.com/v
 
 ## Quick Start
 
+Run ```npm install``` to install all modules
+
 ```npm -g install firebase-tools```
 ```firebase login```
 ```firebase use default```
