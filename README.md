@@ -4,18 +4,9 @@
 This application is based on the [Next.js Firebase example](https://github.com/vercel/next.js/tree/canary/examples/with-firebase). View the [Firebase readme](./Firebase_example.md) for more details.
 
 ## Quick Start
+Clone this repo.
 
-Run ```npm install``` to install all modules
-
-```npm -g install firebase-tools```
-```firebase login```
-```firebase use default```
-
-To start the app: ```npm run dev```
-
-It will run on localhost at port 3000. You can try signing in with your email to get authenticated.
-
-## Set up the environment variables
+### Set up your environment variables
 1. Create a `.env.local` file and copy the contents of `.env.local.example` into it:
 
 ```bash
@@ -23,6 +14,21 @@ cp .env.local.example .env.local
 ```
 
 2. Set each variable except the final two in `.env.local` with your Firebase Configuration (found in "Project settings"). For the final two, either ask someone for their values (preferable) or go to "Project Settings" and then "Service accounts" in Firebase Console and hit "Generate new private key" to get a private key.
+
+### Run these comments
+
+```npm -g install firebase-tools```
+
+```npm install```
+
+```firebase login```
+
+```firebase use default```
+
+To start the app: ```npm run dev```
+
+It will run on localhost at port 3000. You can try signing in with your email to get authenticated.
+
 
 ## Styling
 We are using [Tailwind CSS](https://tailwindcss.com/) which is a utility-first css framework with goal of writing little to no custom css. For the best development experience with tailwind css:
