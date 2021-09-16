@@ -23,8 +23,6 @@ cp .env.local.example .env.local
 
 ```firebase login```
 
-```firebase use default```
-
 To start the app: ```npm run dev```
 
 It will run on localhost at port 3000. You can try signing in with your email to get authenticated.
