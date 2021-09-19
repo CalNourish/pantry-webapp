@@ -44,7 +44,7 @@ export default async function(req,res) {
     // verify parameters
     let ok = requireParams(body, res);
     if (!ok) {
-        return reject();
+        return resolve();
     }
     
     let displayName = body.displayName;
@@ -58,7 +58,7 @@ export default async function(req,res) {
         if (!allDisplayNames.includes(displayName)) {
             res.status(400);
             res.json({error: "A category with the display name \'" + displayName + "\' does not exist"});
-            return reject();
+            return resolve();
         }
 
         // the internal key mapping to the given category
@@ -74,7 +74,7 @@ export default async function(req,res) {
             .catch(function(error){
                 res.status(500);
                 res.json({error: "server error getting reference to categories ref", errorstack: error});
-                return reject();
+                return resolve();
             })
             .then(() => {
                 // write to the database, only have to update iconName since displayName is immutable
@@ -82,7 +82,7 @@ export default async function(req,res) {
                 .catch(error => {
                     res.status(500);
                     res.json({error: "Error when writing updated category to database"});
-                    return reject();
+                    return resolve();
                 })
                 .then(() => {
                     res.status(200);

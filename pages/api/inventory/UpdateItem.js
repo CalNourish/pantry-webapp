@@ -23,9 +23,8 @@ export default async function(req,res) {
   console.log("TOKEN: ", token)
   const allowed = await validateFunc(token)
   if (!allowed) {
-      res.status(401)
-      res.json({error: "you are not authenticated to perform this action"})
-      return Promise.reject();
+      res.status(401).json({error: "you are not authenticated to perform this action"})
+      return Promise.resolve();
   }
 
   return new Promise((resolve, reject) => {
@@ -34,9 +33,8 @@ export default async function(req,res) {
 
     // require barcode
     if (!body.barcode) {
-      res.status(400);
-      res.json({error: "missing barcode in request"});
-      return reject();
+      res.status(400).json({error: "missing barcode in request"});
+      return resolve();
     }
 
     // construct parameters 
