@@ -23,9 +23,8 @@ export default async function(req,res) {
   console.log("TOKEN: ", token)
   const allowed = await validateFunc(token)
   if (!allowed) {
-      res.status(401)
-      res.json({error: "you are not authenticated to perform this action"})
-      return Promise.reject();
+      res.status(401).json({error: "you are not authenticated to perform this action"})
+      return Promise.resolve();
   }
 
   return new Promise((resolve, reject) => {
@@ -34,9 +33,8 @@ export default async function(req,res) {
 
     // require barcode
     if (!body.barcode) {
-      res.status(400);
-      res.json({error: "missing barcode in request"});
-      return reject();
+      res.status(400).json({error: "missing barcode in request"});
+      return resolve();
     }
 
     // construct parameters 
@@ -63,7 +61,7 @@ export default async function(req,res) {
       .catch(function(error){
         res.status(500);
         res.json({error: "server error getting that item from the database", errorstack: error});
-        return reject();
+        return resolve();
       })
       .then(function(resp){
         // the version of the item in the database
@@ -72,7 +70,7 @@ export default async function(req,res) {
         if (dbItem === null) {
           res.status(404);
           res.json({error: "unable to find item with barcode " + barcode})
-          return reject();
+          return resolve();
         }
         
         // otherwise the item exists and we can update it
@@ -80,7 +78,7 @@ export default async function(req,res) {
         .catch(function(error) {
           res.status(500);
           res.json({error: "error writing update to inventory database", errorstack: error});
-          return reject();
+          return resolve();
         })
         .then(() => {
           res.status(200);

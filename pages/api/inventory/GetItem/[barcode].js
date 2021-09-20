@@ -26,7 +26,7 @@ export default async function(req,res) {
       .catch(function(error){
         res.status(500);
         res.json({error: "server error getting that item from the database", errorstack: error});
-        return reject();
+        return resolve();
       })
       .then(function(resp){
         // the version of the item in the database
@@ -35,7 +35,7 @@ export default async function(req,res) {
         if (dbItem === null) {
           res.status(404);
           res.json({error: "unable to find item with barcode " + barcode})
-          return reject();
+          return resolve();
         }
         else {
             res.status(200);
