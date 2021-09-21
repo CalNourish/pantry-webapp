@@ -1,7 +1,7 @@
 # Cal Nourish Web App
 
 <a aria-label="Powered by Vercel" href="https://vercel.com" title="Powered by Vercel">
-  <img src="https://www.datocms-assets.com/31049/1618983297-powered-by-vercel.svg" height="28">
+  <img src="https://www.datocms-assets.com/31049/1618983297-powered-by-vercel.svg" height="42">
 </a>
 
 The Cal Nourish Web App is an application that is being built as a tool for the UC Berkeley Food Pantry to manage inventory and orders, and perform other administrative tasks to more effectively meet the needs of pantry guests and volunteers. While the primary audience of this app is the UC Berkeley Food Pantry, this project can be repruposed for any use case.
@@ -76,7 +76,7 @@ To switch between projects, run ```firebase use <alias>```.
 These aliases will automatically connect with the appropriate firebase projects (i.e. database, auth, etc.). In development, you should only use **TestCalNourish** with the alias of `default` or `test`.
 
 ## Sponsorship notes
-In order to be considered for a sponsorship (and to continue to be sponsored if approved) from Vercel, we must adhere to the guidelines outlines on their [sponsorship page](https://vercel.com/support/articles/can-vercel-sponsor-my-open-source-project)
+In order to be considered for a sponsorship (and to continue to be sponsored if approved) from Vercel, we must adhere to the guidelines outlined on their [sponsorship page](https://vercel.com/support/articles/can-vercel-sponsor-my-open-source-project)
 
 These are the terms relevant to development, so please keep them in mind:
 - The project should be open source.
