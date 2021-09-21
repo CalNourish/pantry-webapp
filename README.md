@@ -1,7 +1,7 @@
 # Cal Nourish Web App
 
 <a aria-label="Powered by Vercel" href="https://vercel.com" title="Powered by Vercel">
-  <img src="https://www.datocms-assets.com/31049/1618983297-powered-by-vercel.svg" height="42">
+  <img src="https://www.datocms-assets.com/31049/1618983297-powered-by-vercel.svg" height="42" />
 </a>
 
 The Cal Nourish Web App is an application that is being built as a tool for the UC Berkeley Food Pantry to manage inventory and orders, and perform other administrative tasks to more effectively meet the needs of pantry guests and volunteers. While the primary audience of this app is the UC Berkeley Food Pantry, this project can be repruposed for any use case.
@@ -81,7 +81,7 @@ In order to be considered for a sponsorship (and to continue to be sponsored if 
 These are the terms relevant to development, so please keep them in mind:
 - The project should be open source.
 - The project should be static rather than server-rendered.
-- A Vercel banner in the footer of each site page.
+- A Vercel banner in the footer of each site page (assuming all pages use the layout component, or at least just the footer component, this will automatically be handled. To maintain this, the footer component should always contain the Vercel banner)
 - A Vercel banner in the source repository's README.md file
 - All links back to Vercel should use a UTM tag with the format: ?utm_source=[team-name]&utm_campaign=oss. (TODO: if approved, update the team-name value)
 
