@@ -1,4 +1,12 @@
-# CalNourish WebApp
+# Cal Nourish Web App
+
+<a aria-label="Powered by Vercel" href="https://vercel.com" title="Powered by Vercel">
+  <img src="https://www.datocms-assets.com/31049/1618983297-powered-by-vercel.svg" height="28">
+</a>
+
+The Cal Nourish Web App is an application that is being built as a tool for the UC Berkeley Food Pantry to manage inventory and orders, and perform other administrative tasks to more effectively meet the needs of pantry guests and volunteers. While the primary audience of this app is the UC Berkeley Food Pantry, this project can be repruposed for any use case.
+
+This app is powered by [Vercel](https://vercel.com) and built with [Next.js](https://nextjs.org/), [Tailwind CSS](https://tailwindcss.com/), [Firebase](https://firebase.google.com/) (for our database and authentication), and an array of AWS and Google tools.
 
 ## Setup
 This application is based on the [Next.js Firebase example](https://github.com/vercel/next.js/tree/canary/examples/with-firebase). View the [Firebase readme](./Firebase_example.md) for more details.
@@ -67,7 +75,15 @@ To switch between projects, run ```firebase use <alias>```.
 
 These aliases will automatically connect with the appropriate firebase projects (i.e. database, auth, etc.). In development, you should only use **TestCalNourish** with the alias of `default` or `test`.
 
+## Sponsorship notes
+In order to be considered for a sponsorship (and to continue to be sponsored if approved) from Vercel, we must adhere to the guidelines outlines on their [sponsorship page](https://vercel.com/support/articles/can-vercel-sponsor-my-open-source-project)
 
+These are the terms relevant to development, so please keep them in mind:
+- The project should be open source.
+- The project should be static rather than server-rendered.
+- A Vercel banner in the footer of each site page.
+- A Vercel banner in the source repository's README.md file
+- All links back to Vercel should use a UTM tag with the format: ?utm_source=[team-name]&utm_campaign=oss. (TODO: if approved, update the team-name value)
 
 # Here on down is not necessary for initial setup
 
