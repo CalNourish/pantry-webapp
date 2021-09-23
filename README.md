@@ -6,6 +6,8 @@
 
 The Cal Nourish Web App is an application that is being built as a tool for the UC Berkeley Food Pantry to manage inventory and orders, and perform other administrative tasks to more effectively meet the needs of pantry guests and volunteers. While the primary audience of this app is the UC Berkeley Food Pantry, this project can be repruposed for any use case.
 
+For more information about the UC Berkeley Food Pantry, you can visit there [website](https://basicneeds.berkeley.edu/pantry)
+
 This app is powered by [Vercel](https://vercel.com) and built with [Next.js](https://nextjs.org/), [Tailwind CSS](https://tailwindcss.com/), [Firebase](https://firebase.google.com/) (for our database and authentication), and an various AWS and Google tools as needed.
 
 ## Setup
