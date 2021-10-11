@@ -1,27 +1,39 @@
 import {validateFunc} from '../validate'
 import { google } from 'googleapis';
+//mport { firebase as fb} from 'googleapis/build/src/apis/firebase';
+//import firebase from '../../../firebase/clientApp';    
+import firebase from "firebase/app";
+export const config = { // https://nextjs.org/docs/api-routes/api-middlewares
+  api: {
+    bodyParser: true,
+  },
+} 
+
 // when you call addorder.js, it returns a promise 
 function requireParams(body, res) {
     /* require elements: First name, last name, email address, address, calID, 
-    delivery_date, order_timestamp, items in the order (orderschema as of now)*/
+    delivery_date, order_timestamp, items in the order (orderschema as of now)
+    items are represented as an object with barcode as key and quantity (count) as value*/
 
     if (!body.firstName || !body.lastName || !body.address ||
-        body.emailAddress || body.calID || body.deliveryDate) {
-          res.json({error: "missing firstName||lastName||EmailAddres||Address||calID||deliveryDate\
+        !body.emailAddress || !body.calID || !body.items || !body.deliveryDate) {
+          res.json({error: "missing firstName||lastName||EmailAddress||Address||calID||items||deliveryDate\
              in request"}); //orderTimeStamp is part of order, but not something the user cares about
             res.status(400);
             return false;
         }
     //require order items object with at least one entry (order array)
-    if (body.order.length <= 0) {
+    if (body.items.length <= 0) {
         res.json({error: "missing order item"}); //this line could be more clear
         res.status(400);
         return false;
-    }
+    } 
     return true;
 }
 
-  function addOrder(firstName, lastName, address, emailAddress, calID, deliveryDate) {
+
+
+function addOrder(firstName, lastName, address, emailAddress, calID, items, deliveryDate, rowNum) {
   const target = ['https://www.googleapis.com/auth/spreadsheets'];
   const jwt = new google.auth.JWT(
     process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
@@ -29,36 +41,34 @@ function requireParams(body, res) {
     (process.env.GOOGLE_SHEETS_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
     target
   );
-
+ // console.log(process.env.GOOGLE_SHEETS_CLIENT_EMAIL, process.env.GOOGLE_SHEETS_PRIVATE_KEY, "email, key");
+  let sheetRange = "Sheet1!A" + rowNum + ":H" + rowNum;
+  console.log(sheetRange);
   const sheets = google.sheets({ version: 'v4', auth: jwt });
-   const request = {
+  const request = {
     spreadsheetId: process.env.SPREADSHEET_ID,
-    range: "Sheet1!A1:G1",
+    range: sheetRange,
     valueInputOption: "USER_ENTERED", //as opposed to RAW
     includeValuesInResponse: true,
     resource: {
-        "range": "Sheet1!A1:G1",
+        range: sheetRange,
         "majorDimension": "ROWS",
         "values": [
-          [firstName, lastName, address, emailAddress, calID, deliveryDate, Date.now()] //each inner array is a row if we specify ROWS as majorDim
+         [firstName, lastName, address, emailAddress, calID, JSON.stringify(items), deliveryDate, Date.now()] //each inner array is a row if we specify ROWS as majorDim
         ] 
       }
   }
-//   const response = await sheets.spreadsheets.values.update(params, valueRangeBody); 
-return sheets.spreadsheets.values.update(request);
-//const response = (await sheets.spreadsheets.values.update(request)).data;
-  // TODO: Change code below to process the `response` object:
- // console.log(JSON.stringify(response, null, 2));
- 
-
- /*   try {
-      
-    } catch (err) {
-      console.log(err);
-      return Promise.reject();
-    } */
-  //  return Promise.resolve();
+  let inventoryUpdates = {}
+  for (let item in items) {
+    inventoryUpdates['/inventory/' + item] = firebase.database.ServerValue.increment(-1 * items[item]);
   }
+
+
+  firebase.database().ref().update(inventoryUpdates); 
+
+//   const response = await sheets.spreadsheets.values.update(params, valueRangeBody); 
+  return sheets.spreadsheets.values.update(request);
+  } 
   
 export default async function(req,res) {   
     // verify this request is legit
@@ -70,30 +80,34 @@ export default async function(req,res) {
         res.json({error: "you are not authenticated to perform this action"})
         return Promise.reject();
     } 
-
     const {body} = req //this line unpacks the request object 
-        console.log("req: ", body);
+    console.log("req: ", body);
     
-        // verify parameters
-        let ok = requireParams(body, res);
-        if (!ok) {
-            return Promise.reject();
-        }
-        // construct parameters 
-  //  let orderItems = body.order.toString();
- /*   let newItem = {};
-    newItem["firstName"] = body.firstName;
-    newItem["lastName"] = body.lastName;
-    newItem["address"] = body.address;
-    newItem["emailAddress"] = body.emailAddress;
-    newItem["calID"] = body.calID;
-    newItem["deliveryDate"] = body.deliveryDate;
-    newItem["orderTimeStamp"] = body.orderTimeStamp; */
-     addOrder("1", "2", "3", "4", "5", "6").then(data => {
-      console.log(data);
-     })
-     .catch(error => {
-       console.log(error);
-     });
-
-} 
+    // verify parameters, this part is causing a weird error, so i will remove it for now
+    let ok = requireParams(body, res); 
+    if (!ok) {
+      return Promise.reject();
+    } 
+      /*store rowNum in firebase and then read that
+      */
+    firebase.auth().signInAnonymously()
+    .then(() => { 
+      const ref = firebase.database().ref('orderRowNum'); 
+      ref.on('value', (snapshot) => { 
+        const updates = {}
+        updates['orderRowNum'] = firebase.database.ServerValue.increment(1);
+        firebase.database().ref().update(updates);
+        console.log("value", snapshot.val());
+        let rowNum = snapshot.val(); //need to look into .val()?
+        addOrder(body.firstName, body.lastName, body.address, body.emailAddress, 
+          body.calID, body.items, body.deliveryDate, rowNum).then(data => {
+            console.log(data, "data");
+           })
+           .catch(error => {
+            console.log("error on line 107", error);
+          });
+       }, (errorObject) => {
+         console.log('The read failed: ' + errorObject);
+       }); 
+  })
+}

@@ -89,12 +89,15 @@ export default function Home() {
         <button onClick={() => {
           fetch('/api/orders/AddOrder', { method: 'POST',
           body: JSON.stringify({
-                  "firstName": "jake",
-                  "lastName": "son",
-                  "address": "2310 blake",
-                  "emailAddress": "jakeson",
+                  "firstName": "Jake",
+                  "lastName": "Son",
+                  "address": "111 Berkeley Way",
+                  "emailAddress": "sakejon@berkeley.edu",
                   "calID": "100",
-                  "deliveryDate":"08/10"
+                  "items" : {
+                    111011 : 7, 123 : 4 //barcode:count
+                  },
+                  "deliveryDate":"09/28",
           }),
                 headers: {'Content-Type': "application/json", 'Authorization': token}}) 
         }}> AddOrder Button </button>
