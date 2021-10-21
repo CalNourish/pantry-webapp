@@ -33,7 +33,7 @@ function requireParams(body, res) {
 
 
 
-function addOrder(firstName, lastName, address, emailAddress, calID, items, deliveryDate, rowNum) {
+function addOrder(firstName, lastName, address, emailAddress, calID, items, deliveryDate) {
   const target = ['https://www.googleapis.com/auth/spreadsheets'];
   const jwt = new google.auth.JWT(
     process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
@@ -42,32 +42,33 @@ function addOrder(firstName, lastName, address, emailAddress, calID, items, deli
     target
   );
  // console.log(process.env.GOOGLE_SHEETS_CLIENT_EMAIL, process.env.GOOGLE_SHEETS_PRIVATE_KEY, "email, key");
-  let sheetRange = "Sheet1!A" + rowNum + ":H" + rowNum;
-  console.log(sheetRange);
+  //let sheetRange = "Sheet1!A" + rowNum + ":H" + rowNum;
   const sheets = google.sheets({ version: 'v4', auth: jwt });
   const request = {
     spreadsheetId: process.env.SPREADSHEET_ID,
-    range: sheetRange,
+    range: "Sheet1!A:H",
     valueInputOption: "USER_ENTERED", //as opposed to RAW
-    includeValuesInResponse: true,
+    //includeValuesInResponse: true, //this was for values.update()
+    insertDataOption: "INSERT_ROWS",
     resource: {
-        range: sheetRange,
+        range: "Sheet1!A:H",
         "majorDimension": "ROWS",
         "values": [
          [firstName, lastName, address, emailAddress, calID, JSON.stringify(items), deliveryDate, Date.now()] //each inner array is a row if we specify ROWS as majorDim
         ] 
-      }
+      } 
   }
   let inventoryUpdates = {}
   for (let item in items) {
-    inventoryUpdates['/inventory/' + item] = firebase.database.ServerValue.increment(-1 * items[item]);
+    inventoryUpdates['/inventory/' + item + "/count"] = firebase.database.ServerValue.increment(-1 * items[item]);
   }
 
 
   firebase.database().ref().update(inventoryUpdates); 
 
 //   const response = await sheets.spreadsheets.values.update(params, valueRangeBody); 
-  return sheets.spreadsheets.values.update(request);
+  //return sheets.spreadsheets.values.update(request);
+  return sheets.spreadsheets.values.append(request);
   } 
   
 export default async function(req,res) {   
@@ -88,19 +89,30 @@ export default async function(req,res) {
     if (!ok) {
       return Promise.reject();
     } 
-      /*store rowNum in firebase and then read that
-      */
     firebase.auth().signInAnonymously()
-    .then(() => { 
-      const ref = firebase.database().ref('orderRowNum'); 
-      ref.on('value', (snapshot) => { 
-        const updates = {}
-        updates['orderRowNum'] = firebase.database.ServerValue.increment(1);
-        firebase.database().ref().update(updates);
-        console.log("value", snapshot.val());
-        let rowNum = snapshot.val(); //need to look into .val()?
+    .then(() => {
+      addOrder(body.firstName, body.lastName, body.address, body.emailAddress, 
+        body.calID, body.items, body.deliveryDate).then(data => {
+          console.loga(data, "data");
+        })
+        .catch(error => {
+          consoleg.log("error:", error)
+        })
+    }
+      ,(errorObject) => {
+        console.log('The read failed: ' + errorObject);
+      }
+    )}
+   /* .then(() => { 
+      //const ref = firebase.database().ref('orderRowNum'); 
+      //ref.on('value', (snapshot) => { 
+        //const updates = {}
+        //updates['orderRowNum'] = firebase.database.ServerValue.increment(1);
+        //firebase.database().ref().update(updates);
+        //console.log("value", snapshot.val());
+        //let rowNum = snapshot.val(); //need to look into .val()?
         addOrder(body.firstName, body.lastName, body.address, body.emailAddress, 
-          body.calID, body.items, body.deliveryDate, rowNum).then(data => {
+          body.calID, body.items, body.deliveryDate).then(data => {
             console.log(data, "data");
            })
            .catch(error => {
@@ -110,4 +122,4 @@ export default async function(req,res) {
          console.log('The read failed: ' + errorObject);
        }); 
   })
-}
+} */

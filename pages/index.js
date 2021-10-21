@@ -91,11 +91,11 @@ export default function Home() {
           body: JSON.stringify({
                   "firstName": "Jake",
                   "lastName": "Son",
-                  "address": "111 Berkeley Way",
+                  "address": "1021 Berkeley Way",
                   "emailAddress": "sakejon@berkeley.edu",
                   "calID": "100",
                   "items" : {
-                    111011 : 7, 123 : 4 //barcode:count
+                    1111: 483 //barcode:count
                   },
                   "deliveryDate":"09/28",
           }),
