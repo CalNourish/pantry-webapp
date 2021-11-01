@@ -46,7 +46,7 @@ export default async function(req,res) {
     // verify parameters
     let ok = requireParams(body, res);
     if (!ok) {
-        return reject();
+        return resolve();
     }
 
     // construct parameters 
@@ -60,7 +60,7 @@ export default async function(req,res) {
         if (allDisplayNames.includes(displayName)) {
             res.status(400);
             res.json({error: "A category with the display name \'" + displayName + "\' already exists"});
-            return reject();
+            return resolve();
         }
         // is there throttling on anonymous sign ins?
         firebase.auth().signInAnonymously()
@@ -72,7 +72,7 @@ export default async function(req,res) {
             .catch(function(error){
                 res.status(500);
                 res.json({error: "server error getting reference to categories list", errorstack: error});
-                return reject();
+                return resolve();
             })
             .then(() => {
                 // first generate a random ID to use as a key
@@ -86,7 +86,7 @@ export default async function(req,res) {
                 .catch(error => {
                     res.status(500);
                     res.json({error: "Error when writing new category to database"});
-                    return reject();
+                    return resolve();
                 })
                 .then(() => {
                     res.status(200);
