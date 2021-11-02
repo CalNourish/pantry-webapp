@@ -79,14 +79,6 @@ class Cart extends React.Component {
       return
     }
 
-    /* 
-    // deletes row entry if quantity decreased to 0
-    if (itemData[1] == 1) {
-        this.deleteItem(barcode);
-        return;
-    }
-    */
-
     /* Can't decrease item quantity to negative
     *  note: can start with negative quantity using left column form
     *  - possibly in case someone accidentally checked out too much?
@@ -133,7 +125,6 @@ class Cart extends React.Component {
       } else {
         this.showError(`Invalid Barcode (${barcode})`)  
       }
-      // console.log(`Invalid barcode: ${barcode}`)    
     }
   }
 
