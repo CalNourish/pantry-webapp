@@ -22,7 +22,6 @@ function requireParams(body, res) {
 export default async function(req,res) {  
     
     const token = req.headers.authorization
-    // console.log("TOKEN: ", token)
     const allowed = await validateFunc(token)
 
     if (!allowed) {
@@ -33,37 +32,31 @@ export default async function(req,res) {
 
     return new Promise((resolve, reject) => {
         const {body} = req
-        console.log("(post-call) req: ", body);
     
         // verify parameters
         let ok = requireParams(body, res);
         if (!ok) {
             return reject();
         }
-    
-        for (let barcode in body) {
-            let count = body[barcode];
-            console.log(`${barcode}: ${count}`)
-        }
-
-        // if (!barcode) {
-        //     res.status(400);
-        //     res.json({error: `item (barcode = ${barcode}) does not exist`});
-        //     return reject();
-        // }
 
         firebase.auth().signInAnonymously()
         .then(() => {
             let inventoryUpdates = {}
             for (let barcode in body) {
-              inventoryUpdates['/inventory/' + barcode + "/count"] = firebase.database.ServerValue.increment(-1 * body[barcode]);
+              inventoryUpdates[barcode + '/count'] = firebase.database.ServerValue.increment(-1 * body[barcode]);
             }
 
-            firebase.database().ref().update(inventoryUpdates); 
-
-            res.status(200);
-            res.json({message: "success"});
-            return resolve();
+            firebase.database().ref('/inventory/').update(inventoryUpdates)
+            .catch(error => {
+                res.status(500);
+                res.json({error: "Error when checking out items."});
+                return resolve();
+            })
+            .then(() => {
+                res.status(200);
+                res.json({message: "success"});
+                return resolve();
+            });
         })
     })
 }
