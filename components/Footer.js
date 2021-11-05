@@ -12,7 +12,7 @@ export default function Footer() {
           <li className="mx-1">•</li>
           <li className="mx-1">Designed and built with ❤️ by CalNourish</li>
         </ul>
-        <div class="relative h-8 p-4">
+        <div className="relative h-8 p-4">
           <a aria-label="Powered by Vercel" href="https://vercel.com?utm_source=cal-nourish&utm_campaign=oss" title="Powered by Vercel">
             <Image src="/images/powered-by-vercel.svg" layout="fill" alt="Powered by Vercel" />
           </a>
