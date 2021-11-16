@@ -2,36 +2,49 @@ import firebase from '../../../firebase/clientApp'
 
 
 
-export default async function (req,res) { 
+export default async function handler(req,res) { 
 
+    var dayToHours = new Map();
+    let days = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"];
+    let promiseArray = [];
 
-    return returnPromise().then((dayToHours) => {
-        console.log(dayToHours);
-        return dayToHours;
-      });
+    for (let day in days) {       
+        let p = returnPromise(days[day])
+        promiseArray.push(p)
     }
     
-    function returnPromise() {
-        var dayToHours = new Map();
-        var days = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"]
+    return await Promise.all(promiseArray)
+    .then((snapshots) => {
+        for (let snapshot in snapshots) {
+            var hours = snapshots[snapshot].child("hours").val();
+            dayToHours.set(days[snapshot],hours);
+        }        
+        res.status(201).json({
+            message:Array.from(dayToHours.entries())
+        });
+      })
+    .catch(error => {
+        console.error(error.message)
+        res.status(500).json({
+            success: false,
+            blob: error,
+          });
+    });
+     
+    
+    }
+
+    
+    async function returnPromise(day) {
+
         return new Promise(function(resolve, reject) {
           
-        for (let day in days) {       
-            var ref = firebase.database().ref("/hours/"+days[day]);
-            ref.once("value")
-            
-            .then(function(snapshot) {
-                var hours = snapshot.child("hours").val();
-                dayToHours.set(days[day],hours);
-            });
-            
-            
-        }
-        resolve(dayToHours)    
+            const ref = firebase.database().ref("/hours/"+day);
+            return resolve(ref.once("value"))
       });
 
     
 
     
     
-}
+    }

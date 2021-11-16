@@ -24,42 +24,26 @@ export default async function(req, res) {
 
             // construct parameters 
         // list of item fields that can be updated
-        const FIELDS = ["hours"];
-        let updatedFields = {};
+        const {body} = req
+        console.log("req: ", body);
+        let day = body.day.toString();
+        let updatedTime = body.hours.toString();
 
-        FIELDS.forEach(field => {
-        if (body[field]) {
-            updatedFields[field] = body[field];
-        }
-        });
         
 
         // perform the write
         firebase.auth().signInAnonymously()
             .then(() => {
-                let day = firebase.database().ref('/hours/' + day);
-
-                dayRef.once('value')
-                    .catch(function (error) {
-                        res.status(500);
-                        res.json({ error: "server error getting that day from the database", errorstack: error });
-                        return resolve();
-                    })
-                    .then(function (resp) {
-                        
-                        dayRef.update(updatedTime)
-                            .catch(function (error) {
-                                res.status(500);
-                                res.json({ error: "error writing update to hours", errorstack: error });
-                                return resolve();
-                            })
-                            .then(() => {
-                                res.status(200);
-                                res.json({ message: "success" });
-                                return resolve();
-                            });
-                    });
+                let dayRef = firebase.database().ref('/hours/' + day);
+                dayRef.update({'hours':updatedTime})
             })
+            .then(() => {
+                console.log("success?")
+                res.status(200);
+                res.json({ message: "success" });
+                return resolve();
+            });
+            
     })
 }
 

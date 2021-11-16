@@ -8,33 +8,54 @@ import cookie from 'js-cookie';
 
 const fetcher = (url) => fetch(url).then((res) => res.json())
 
-
+const token = cookie.get("firebaseToken")
 
 export default function Hours() {
 
+var dayToHours;
+var dayObjects = [];
+var data1 = [
+    {
+        day:"Sunday",
+        hours:"8:00 AM - 4:00 PM"
+    }
+]
 
 
+  const fetchHours = async () => {
 
-  const fetchHours = () => {
-    fetch('/api/admin/getHours', { method: 'GET',
+    await fetch('/api/admin/getHours', { method: 'GET',
     headers: {'Content-Type': "application/json"}})
-    createDayObjects();
+    .then(function(res) {
+        res.json().then(json => { 
+            dayToHours = json.message
+            dayToHours = new Map(dayToHours)
+            createDayObjects()
+          });
+
+    })
+    .catch(function(error) {
+    });
+
+   
 
   }
+
 
   const createDayObjects = () => {
       const days = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"]
-    
-      
+
       for (let day in days) {       
         const dayObject = new Object();
-        dayObject.day = days[day];
-        //dayObject.hours = dayToHours.get(days[day])
-        //data.push(dayObject);
+        dayObject.day = days[day]; 
+        dayObject.hours = dayToHours.get(days[day]) 
+        dayObjects.push(dayObject);
     }
+
   }
 
   useEffect(() => {
+
       fetchHours();
   }, []);
 
@@ -68,17 +89,23 @@ export default function Hours() {
    * @param newHours- The new hours of the day
    */
   const onSave = ({day, newHours}) => {
-      if(validateHours(newHours)) {
-            fetch('/api/admin/updateHours', { method: 'POST', 
-            body: JSON.stringify({
-            "day": day,
-            "hours": newHours,
-            }),
+      
+        fetch('/api/admin/updateHours', { method: 'POST', 
+        body: JSON.stringify({
+        "day": day,
+        "hours": newHours,
+        }),
         headers: {'Content-Type': "application/json", 'Authorization': token}})
-      }
-      else {
-          console.log("validation failed")
-      }
+        .then(response => response.json())
+            .then(json => {
+                // reset inEditMode and unit price state values
+                onCancel();
+
+                // fetch the updated data
+                fetchHours();
+                location.reload();
+        })
+      
   }
 
   const onCancel = () => {
@@ -92,72 +119,135 @@ export default function Hours() {
   }
 
   
-  
-  
-   
-  return (
-      <div className="container">
-          <h1>Pantry Hours</h1>
-          {/* <table>
-              <thead>
-              <tr>
-                  <th>Day</th>
-                  <th>Hours</th>
-                  <th>Modify Hours</th>
-              </tr>
-              </thead>
-              <tbody>
-              {
-                  data.map((day) => (
-                      <tr key={day}>
-                          <td>{day}</td>
-                          <td>
-                              {
-                                  inEditMode.status && inEditMode.rowKey === day ? (
-                                      <input value={hours}
-                                             onChange={(event) => setHours(event.target.value)}
-                                      />
-                                  ) : (
-                                      item.hours
-                                  )
-                              }
-                          </td>
-                          <td>
-                              {
-                                  inEditMode.status && inEditMode.rowKey === day ? (
-                                      <React.Fragment>
-                                          <button
-                                              className={"btn-success"}
-                                              onClick={() => onSave({day: day, newHours: hours})}
-                                          >
-                                              Save
-                                          </button>
+  const {data,error} = useSWR('/api/admin/getHours',fetcher)
+  if(error) {
+    return (
+        <>
+        <Head>
+          <title>Pantry</title>
+          <link rel="icon" href="/favicon.ico" />
+          {/* Link to fonts for now. May look at storing fonts locally or just usign system fonts */}
+          <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Rubik:wght@400;700&display=swap" rel="stylesheet"></link>
+        </Head>
+        <Layout>
+            <th>Failed to get hours</th>
+        </Layout>
+      </>
+    )
+  }
+  if(!data)  {
+    return (
+        <>
+        <Head>
+          <title>Pantry</title>
+          <link rel="icon" href="/favicon.ico" />
+          {/* Link to fonts for now. May look at storing fonts locally or just usign system fonts */}
+          <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Rubik:wght@400;700&display=swap" rel="stylesheet"></link>
+        </Head>
+        <Layout>
+            <th>Fetching hours...</th>
+        </Layout>
+      </>
+    )
+  }
+  else {
+    dayToHours = data.message
+    dayToHours = new Map(dayToHours)
+    createDayObjects()
+    return (
+        <>
+        <Head>
+          <title>Pantry</title>
+          <link rel="icon" href="/favicon.ico" />
+          {/* Link to fonts for now. May look at storing fonts locally or just usign system fonts */}
+          <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Rubik:wght@400;700&display=swap" rel="stylesheet"></link>
+        </Head>
+        <Layout>
+        <div className="container">
+              <h1 class="text-3xl flex justify-center items-center">Pantry Hours</h1>
+              <table class="text-xl flex justify-center items-center" cellpadding="10"cellspacing="10">
+                  <thead>
+                  <tr>
+                      <th></th>
+                      <th></th>
+                      <th></th>
+                  </tr>
+                  </thead> 
+                  <tbody>
+                  {
+                      dayObjects.map((item) => (
+                          <tr key={item.day}>
+                              <td>{item.day[0].toUpperCase() + item.day.substring(1)}</td>
+                              <td>
+                                  {
+                                      inEditMode.status && inEditMode.rowKey === item.day ? (
+                                          <input value={hours}
+                                                 onChange={(event) => setHours(event.target.value)}
+                                          />
+                                      ) : (
+                                          item.hours
+                                      )
+                                  }
+                              </td>
+                              <td>
+                                  {
+                                      inEditMode.status && inEditMode.rowKey === item.day ? (
+                                          <React.Fragment>
+                                              <button
+                                                  class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 border border-blue-700 rounded"
+                                                  onClick={() => onSave({day: item.day, newHours: hours})}
+                                              >
+                                                  Save
+                                              </button>
+    
+                                              <button
+                                                  class="bg-white-500 hover:bg-white-700 text-blue py-1 px-2 border border-blue-700 rounded"
+                                                  style={{marginLeft: 8}}
+                                                  onClick={() => onCancel()}
+                                              >
+                                                  Cancel
+                                              </button>
+                                          </React.Fragment>
+                                      ) : (
+                                        //   <button
+                                        //       className={"btn-primary"}
+                                        //       onClick={() => onEdit({day: item.day, currentHours: item.hours})}
+                                        //   >
+                                        //       Edit
+                                        //   </button>
+                                        <button className="font-bold text-xl pl-2" onClick={() => onEdit({day: item.day, currentHours: item.hours})}>
+                                        <span>&#9999;</span>
+                                         </button>
+                                          
+                                      )
+                                  }
+                              </td>
+                          </tr>
+                      ))
+                  }
+                
+                    </tbody>
+                </table>
+        </div>
+        </Layout>
+      </>
+    
+    
+    
+    
+      )
+  }
+  }
 
-                                          <button
-                                              className={"btn-secondary"}
-                                              style={{marginLeft: 8}}
-                                              onClick={() => onCancel()}
-                                          >
-                                              Cancel
-                                          </button>
-                                      </React.Fragment>
-                                  ) : (
-                                      <button
-                                          className={"btn-primary"}
-                                          onClick={() => onEdit({day: day, currentHours: hours})}
-                                      >
-                                          Edit
-                                      </button>
-                                  )
-                              }
-                          </td>
-                      </tr>
-                  ))
-              }
-              </tbody>
-          </table> */}
-      </div>
-  );
-}
+
+
+
+
+
+
+ 
+
+
+    
 
 
