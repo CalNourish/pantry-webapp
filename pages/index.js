@@ -10,6 +10,19 @@ import cookie from 'js-cookie';
 // fetcher for get requests
 const fetcher = (url) => fetch(url).then((res) => res.json())
 
+function fixCounts() {
+    const token = cookie.get("firebaseToken")
+    fetch('/api/inventory/GetAllItems', { method: 'GET', headers: {'Content-Type': "application/json"}})
+    .then(response => response.json())
+    .then(data => {
+        for (var bcode in data) {
+            fetch('/api/inventory/UpdateItem', { method: 'POST', body: 
+                JSON.stringify({"barcode" : bcode, "count": data[bcode]["count"]}),
+                headers: {'Content-Type': "application/json", 'Authorization': token}})
+        }
+    });
+}
+
 export default function Home() {
   // Our custom hook to get context values
   const { user, setUser, googleLogin } = useUser()
@@ -65,7 +78,7 @@ export default function Home() {
                   "itemName": "API Testing Item",
                   "packSize": "31",
                   "lowStock": "2",
-                  "categoryName": {"PIXafWlKvP": "PIXafWlKvP", "kVsxgN0G1L": "kVsxgN0G1L"},
+                  "categoryName": {"547G7Gnikt": "547G7Gnikt"},
                   "count": "400"
                 }),
                 headers: {'Content-Type': "application/json", 'Authorization': token}})
@@ -99,6 +112,12 @@ export default function Home() {
           fetch('/api/categories/ListCategories', { method: 'GET',
                 headers: {'Content-Type': "application/json"}})
         }}> ListCategories Button </button>
+      </td></tr>
+
+      <tr><td>
+        <button onClick={() => {
+          fixCounts();
+        }}> fix count field </button>
       </td></tr>
     </table>
     </Layout>
