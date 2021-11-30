@@ -1,7 +1,14 @@
 import firebase from '../../../firebase/clientApp'
 import { validateFunc } from '../validate'
-import {onSave, onCancel} from '../../hours'
 
+
+
+/*
+* /api/admin/updateHours
+* req.body = {string day, string newHours}
+* both fields are required
+* updates the new hours for a certain time 
+*/
 
 export const config = {
     api: {
@@ -22,10 +29,7 @@ export default async function(req, res) {
 
     return new Promise((resolve, reject) => {
 
-            // construct parameters 
-        // list of item fields that can be updated
         const {body} = req
-        console.log("req: ", body);
         let day = body.day.toString();
         let updatedTime = body.hours.toString();
 
@@ -38,7 +42,6 @@ export default async function(req, res) {
                 dayRef.update({'hours':updatedTime})
             })
             .then(() => {
-                console.log("success?")
                 res.status(200);
                 res.json({ message: "success" });
                 return resolve();
@@ -47,7 +50,9 @@ export default async function(req, res) {
     })
 }
 
-
+/** Rough start to a function used to validate hours of the food pantry, currently
+ *  not utilized
+ */
 export function validateHours(hours) {
     let trimmedHours = hours.trim()
     if(trimmedHours.toString() === "Closed" || trimmedHours.toString() === "closed") {
@@ -55,8 +60,6 @@ export function validateHours(hours) {
     }
     let brokenUpHours = trimmedHours.split(" ");
     if(brokenUpHours.length !== 5) {
-        console.log("Bad input1");
-        console.log(hours);
         return false;
     }
     let startTime = brokenUpHours[0]
@@ -103,6 +106,10 @@ export function validateHours(hours) {
 
 
 }
+
+/** Rough start to a function used to validate hours of the food pantry, currently
+ *  not utilized
+ */
 const convertTime12to24toMinutes = (hours, minutes, merdiem) => {
 
     if (hours === 12) {
