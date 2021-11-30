@@ -3,9 +3,7 @@ import "../styles/index.css"
 import App from 'next/app'
 import cookies from 'next-cookies'
 
-const dev = process.env.NODE_ENV === 'development';
-const server = dev ? 'http://localhost:3000' : 'https://testcalnourish.com/';
-
+const server = process.env.VERCEL_URL;
 
 // Custom App to wrap it with context provider
 export default function MyApp({ Component, pageProps }) {
