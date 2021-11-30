@@ -3,7 +3,7 @@ import {validateFunc} from '../validate'
 
 /*
 * /api/inventory/UpdateItem
-* req.body = {string barcode, string array categoryName, string count, 
+* req.body = {string barcode, string array categoryName, string/int count, 
               string itemName, string lowStock, string packSize}
 */
 
@@ -14,8 +14,6 @@ export const config = {
     bodyParser: true,
   },
 }
-
-
 
 export default async function(req,res) {   
   // verify this request is legit
@@ -43,6 +41,14 @@ export default async function(req,res) {
     let updatedFields = {};
     // make sure barcode is a string
     let barcode = body.barcode.toString();
+    // convert count to integer
+    if (body["count"]) {
+      body["count"] = parseInt(body["count"]);
+      if (isNaN(body["count"])) {
+        res.status(400).json({error: "invalid count (not a number)"});
+        return resolve();
+      }
+    }
 
     FIELDS.forEach(field => {
       if (body[field]) {
