@@ -3,7 +3,7 @@ import {validateFunc} from '../validate'
 
 /*
 * /api/inventory/AddItem
-* req.body = {string barcode, string array categoryName, string count, 
+* req.body = {string barcode, string array categoryName, string/int count, 
               string itemName, default string lowStock = "-1", default string packSize = "1"}
 * every field is required except for lowStock and packsize
 * categoryName is an array of internal category IDs
@@ -25,6 +25,12 @@ function requireParams(body, res) {
         console.log("Not ok1")
         res.status(400).json({error: "missing barcode||count||itemName in request"});
     }
+
+    if (isNaN(parseInt(body.count))) {
+        console.log("Invalid count (not a number)");
+        res.status(400).json({error: "invalid count (not a number)"});
+    }
+
     // require categories obj with at least one entry
     if (!body.categoryName || body.categoryName.length < 1) {
         console.log("Not ok2")
@@ -57,7 +63,7 @@ export default async function(req,res) {
         let barcode = body.barcode.toString();
         let newItem = {};
         newItem["barcode"] = barcode;
-        newItem["count"] = body.count.toString();
+        newItem["count"] = parseInt(body.count);
         newItem["itemName"] = body.itemName;
         newItem["categoryName"] = Object.keys(body.categoryName); // get it in array format
         newItem["lowStock"] = body.lowStock ? body.lowStock.toString() : "-1";
