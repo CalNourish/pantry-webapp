@@ -1,14 +1,10 @@
 import firebase from '../../../firebase/clientApp'    
 
-
-
-
 /*
 * /api/admin/getHours
 * Gets the current hours of the pantry
 * req is empty 
 */
-
 
 export default async function handler(req,res) { 
 
@@ -38,22 +34,13 @@ export default async function handler(req,res) {
             blob: error,
           });
     });
-     
-    
     }
 
-    
     async function returnPromise(day) {
-
         return new Promise(function(resolve, reject) {
-          
             const ref = firebase.database().ref("/hours/"+day);
             return resolve(ref.once("value"))
       });
-
-    
-
-    
     
     }
 
