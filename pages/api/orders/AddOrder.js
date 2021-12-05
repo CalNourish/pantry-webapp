@@ -3,6 +3,7 @@ import { google } from 'googleapis';
 //mport { firebase as fb} from 'googleapis/build/src/apis/firebase';
 //import firebase from '../../../firebase/clientApp';    
 import firebase from "firebase/app";
+import useSWR from 'swr';
 export const config = { // https://nextjs.org/docs/api-routes/api-middlewares
   api: {
     bodyParser: true,
@@ -34,6 +35,32 @@ function requireParams(body, res) {
 
 
 function addOrder(firstName, lastName, address, emailAddress, calID, items, deliveryDate) {
+  //new idea: call getallitems and work with offline data 
+  //for loop in .once 
+  console.log("items", items);
+  let inventory = fetch("http://localhost:3000/api/inventory/GetAllItems"); //returns inventory as object
+
+  inventory.then((value) => {
+    value.json().then((j) => {
+       // console.log(j);
+       const inventoryUpdates = {}
+       for (let item in items) {
+         console.log(j[item]);
+
+         if (j[item]['count'] >= items[item]) { //if how much we have in inventory >= how much user wants
+          inventoryUpdates['/inventory/' + item + "/count"] = firebase.database.ServerValue.increment(-1 * items[item]);
+         }
+         else {
+           console.log("Sorry, requested count for " + j[item]["itemName"] + " exceeds inventory");
+           return Promise.reject();
+         }
+       }
+       firebase.database().ref().update(inventoryUpdates); 
+    })  
+  })
+
+  
+  //add order data to google sheets
   const target = ['https://www.googleapis.com/auth/spreadsheets'];
   const jwt = new google.auth.JWT(
     process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
@@ -42,7 +69,6 @@ function addOrder(firstName, lastName, address, emailAddress, calID, items, deli
     target
   );
  // console.log(process.env.GOOGLE_SHEETS_CLIENT_EMAIL, process.env.GOOGLE_SHEETS_PRIVATE_KEY, "email, key");
-  //let sheetRange = "Sheet1!A" + rowNum + ":H" + rowNum;
   const sheets = google.sheets({ version: 'v4', auth: jwt });
   const request = {
     spreadsheetId: process.env.SPREADSHEET_ID,
@@ -58,17 +84,9 @@ function addOrder(firstName, lastName, address, emailAddress, calID, items, deli
         ] 
       } 
   }
-  let inventoryUpdates = {}
-  for (let item in items) {
-    inventoryUpdates['/inventory/' + item + "/count"] = firebase.database.ServerValue.increment(-1 * items[item]);
-  }
 
-
-  firebase.database().ref().update(inventoryUpdates); 
-
-//   const response = await sheets.spreadsheets.values.update(params, valueRangeBody); 
-  //return sheets.spreadsheets.values.update(request);
-  return sheets.spreadsheets.values.append(request);
+  //firebase.database().ref().update(inventoryUpdates); 
+  return sheets.spreadsheets.values.append(request);  
   } 
   
 export default async function(req,res) {   
@@ -93,7 +111,8 @@ export default async function(req,res) {
     .then(() => {
       addOrder(body.firstName, body.lastName, body.address, body.emailAddress, 
         body.calID, body.items, body.deliveryDate).then(data => {
-          console.loga(data, "data");
+          //console.log("data line 114", data);
+          console.log("ok");
         })
         .catch(error => {
           consoleg.log("error:", error)
@@ -103,23 +122,3 @@ export default async function(req,res) {
         console.log('The read failed: ' + errorObject);
       }
     )}
-   /* .then(() => { 
-      //const ref = firebase.database().ref('orderRowNum'); 
-      //ref.on('value', (snapshot) => { 
-        //const updates = {}
-        //updates['orderRowNum'] = firebase.database.ServerValue.increment(1);
-        //firebase.database().ref().update(updates);
-        //console.log("value", snapshot.val());
-        //let rowNum = snapshot.val(); //need to look into .val()?
-        addOrder(body.firstName, body.lastName, body.address, body.emailAddress, 
-          body.calID, body.items, body.deliveryDate).then(data => {
-            console.log(data, "data");
-           })
-           .catch(error => {
-            console.log("error on line 107", error);
-          });
-       }, (errorObject) => {
-         console.log('The read failed: ' + errorObject);
-       }); 
-  })
-} */
