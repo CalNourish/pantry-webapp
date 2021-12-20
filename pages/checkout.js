@@ -128,7 +128,7 @@ class Cart extends React.Component {
     }
   }
 
-  submitCart = (e) => {
+  submitCart = async (e) => {
     e.preventDefault();
     const token = cookie.get("firebaseToken")
     let reqbody = this.makeReq();
@@ -143,23 +143,26 @@ class Cart extends React.Component {
       return;
     }
 
-    fetch('/api/inventory/CheckoutItems', { method: 'POST',
+    const response = await fetch('/api/inventory/CheckoutItems', { method: 'POST',
       body: reqbody,
       headers: {'Content-Type': "application/json", 'Authorization': token}
     })
-    .then(() => {
-        /* clear the cart on successful checkout */
-        let items = this.state.items;
-        items.clear();
-        this.setState({
-            items: items,
-            itemsInCart: 0,
-            error: null,
-            success: "Cart submitted successfully!"
-        })
-        setTimeout(() => this.setState({success: null}), 10000);
-    })
-    
+    // .then(() => {
+    if (response.ok) {
+      /* clear the cart on successful checkout */
+      let items = this.state.items;
+      items.clear();
+      this.setState({
+          items: items,
+          itemsInCart: 0,
+          error: null,
+          success: "Cart submitted successfully!"
+      })
+      setTimeout(() => this.setState({success: null}), 10000);
+    } else {
+      this.showError("Error submitting cart.");
+      return;
+    }
   }
 
   displayCartRow(barcode, value) {
