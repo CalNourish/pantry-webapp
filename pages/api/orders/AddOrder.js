@@ -34,30 +34,34 @@ function requireParams(body, res) {
 }
 
 
-function updateInventory(items) {
-  let inventory = fetch("http://localhost:3000/api/inventory/GetAllItems"); //returns inventory as object
-  return inventory.then((value) => {
-    value.json().then((inventoryJson) => {
-       const inventoryUpdates = {}
-       for (let item in items) {
-         console.log(inventoryJson[item]);
-
-         if (inventoryJson[item]['count'] >= items[item]) { //if how much we have in inventory >= how much user wants
-          inventoryUpdates['/inventory/' + item + "/count"] = firebase.database.ServerValue.increment(-1 * items[item]);
+function updateInventory(items) { //updates firebase
+  return new Promise((resolve, reject) => {
+    let inventory = fetch(process.env.GET_ALL_ITEMS);//returns inventory as object 
+    inventory.then((value) => {
+      value.json().then((inventoryJson) => {
+         const inventoryUpdates = {}
+         for (let item in items) {
+           console.log(inventoryJson[item]);
+  
+           if (inventoryJson[item]['count'] >= items[item]) { //if how much we have in inventory >= how much user wants
+            inventoryUpdates['/inventory/' + item + "/count"] = firebase.database.ServerValue.increment(-1 * items[item]);
+           }
+           else {
+             console.log("Sorry, requested count for " + inventoryJson[item]["itemName"] + " exceeds inventory");
+             return reject("Quantity exceeded"); 
+           }
          }
-         else {
-           console.log("Sorry, requested count for " + inventoryJson[item]["itemName"] + " exceeds inventory");
-           return Promise.reject("Quantity exceeded");
-         }
-       }
-       return firebase.database().ref().update(inventoryUpdates); 
-    })  
+         //return firebase.database().ref().update(inventoryUpdates);  should i put a return here? 
+         firebase.database().ref().update(inventoryUpdates).then(() => {
+           return resolve("Inventory updated");
+         })
+         .catch((error) => {
+           console.log("error updating to firebase: ", error);
+           return reject();
+         }) 
+      })  
+    }) 
   })
-
-  .catch((reason) => {
-    console.log('order did not go through: ', reason);
-    return Promise.reject();
-  }) 
 }
 
 function addOrder(firstName, lastName, address, emailAddress, calID, items, deliveryDate) {
@@ -108,8 +112,8 @@ export default async function(req,res) {
     } 
     firebase.auth().signInAnonymously()
     .then(() => {
-      updateInventory(body.items).then((value) => {
-       // console.log("value line 114: ", value);
+      updateInventory(body.items).then((success) => {
+        console.log("success", success);
         addOrder(body.firstName, body.lastName, body.address, body.emailAddress, 
           body.calID, body.items, body.deliveryDate).then(() => {
             console.log("Added to google sheets");
@@ -120,10 +124,9 @@ export default async function(req,res) {
           ,(errorObject) => {
             console.log('The read failed: ' + errorObject);
           }
-      })
-      .catch(error => {
-        console.log("The order failed: ", error);
       }
-        )
+      , rejection => {
+        console.log("order didn't go through: ", rejection);
+      })
     }
   )}
