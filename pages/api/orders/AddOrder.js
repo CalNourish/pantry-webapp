@@ -4,6 +4,7 @@ import { google } from 'googleapis';
 //import firebase from '../../../firebase/clientApp';    
 import firebase from "firebase/app";
 import useSWR from 'swr';
+import { resolveHref } from 'next/dist/next-server/lib/router/router';
 export const config = { // https://nextjs.org/docs/api-routes/api-middlewares
   api: {
     bodyParser: true,
@@ -33,61 +34,59 @@ function requireParams(body, res) {
 }
 
 
-
-function addOrder(firstName, lastName, address, emailAddress, calID, items, deliveryDate) {
-  //new idea: call getallitems and work with offline data 
-  //for loop in .once 
-  console.log("items", items);
+function updateInventory(items) {
   let inventory = fetch("http://localhost:3000/api/inventory/GetAllItems"); //returns inventory as object
-
-  inventory.then((value) => {
-    value.json().then((j) => {
-       // console.log(j);
+  return inventory.then((value) => {
+    value.json().then((inventoryJson) => {
        const inventoryUpdates = {}
        for (let item in items) {
-         console.log(j[item]);
+         console.log(inventoryJson[item]);
 
-         if (j[item]['count'] >= items[item]) { //if how much we have in inventory >= how much user wants
+         if (inventoryJson[item]['count'] >= items[item]) { //if how much we have in inventory >= how much user wants
           inventoryUpdates['/inventory/' + item + "/count"] = firebase.database.ServerValue.increment(-1 * items[item]);
          }
          else {
-           console.log("Sorry, requested count for " + j[item]["itemName"] + " exceeds inventory");
-           return Promise.reject();
+           console.log("Sorry, requested count for " + inventoryJson[item]["itemName"] + " exceeds inventory");
+           return Promise.reject("Quantity exceeded");
          }
        }
-       firebase.database().ref().update(inventoryUpdates); 
+       return firebase.database().ref().update(inventoryUpdates); 
     })  
   })
 
-  
-  //add order data to google sheets
-  const target = ['https://www.googleapis.com/auth/spreadsheets'];
-  const jwt = new google.auth.JWT(
-    process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
-    null,
-    (process.env.GOOGLE_SHEETS_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-    target
-  );
- // console.log(process.env.GOOGLE_SHEETS_CLIENT_EMAIL, process.env.GOOGLE_SHEETS_PRIVATE_KEY, "email, key");
-  const sheets = google.sheets({ version: 'v4', auth: jwt });
-  const request = {
-    spreadsheetId: process.env.SPREADSHEET_ID,
-    range: "Sheet1!A:H",
-    valueInputOption: "USER_ENTERED", //as opposed to RAW
-    //includeValuesInResponse: true, //this was for values.update()
-    insertDataOption: "INSERT_ROWS",
-    resource: {
-        range: "Sheet1!A:H",
-        "majorDimension": "ROWS",
-        "values": [
-         [firstName, lastName, address, emailAddress, calID, JSON.stringify(items), deliveryDate, Date.now()] //each inner array is a row if we specify ROWS as majorDim
-        ] 
-      } 
-  }
+  .catch((reason) => {
+    console.log('order did not go through: ', reason);
+    return Promise.reject();
+  }) 
+}
 
-  //firebase.database().ref().update(inventoryUpdates); 
-  return sheets.spreadsheets.values.append(request);  
-  } 
+function addOrder(firstName, lastName, address, emailAddress, calID, items, deliveryDate) {
+      //add order data to google sheets
+    const target = ['https://www.googleapis.com/auth/spreadsheets'];
+    const jwt = new google.auth.JWT(
+      process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
+      null,
+      (process.env.GOOGLE_SHEETS_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+      target
+    );
+    // console.log(process.env.GOOGLE_SHEETS_CLIENT_EMAIL, process.env.GOOGLE_SHEETS_PRIVATE_KEY, "email, key");
+    const sheets = google.sheets({ version: 'v4', auth: jwt });
+    const request = {
+      spreadsheetId: process.env.SPREADSHEET_ID,
+      range: "Sheet1!A:H",
+      valueInputOption: "USER_ENTERED", //as opposed to RAW
+      //includeValuesInResponse: true, //this was for values.update()
+      insertDataOption: "INSERT_ROWS",
+      resource: {
+          range: "Sheet1!A:H",
+          "majorDimension": "ROWS",
+          "values": [
+          [firstName, lastName, address, emailAddress, calID, JSON.stringify(items), deliveryDate, Date()] //each inner array is a row if we specify ROWS as majorDim
+          ] 
+        } 
+    }
+    return sheets.spreadsheets.values.append(request);
+} 
   
 export default async function(req,res) {   
     // verify this request is legit
@@ -109,16 +108,22 @@ export default async function(req,res) {
     } 
     firebase.auth().signInAnonymously()
     .then(() => {
-      addOrder(body.firstName, body.lastName, body.address, body.emailAddress, 
-        body.calID, body.items, body.deliveryDate).then(data => {
-          //console.log("data line 114", data);
-          console.log("ok");
-        })
-        .catch(error => {
-          consoleg.log("error:", error)
-        })
-    }
-      ,(errorObject) => {
-        console.log('The read failed: ' + errorObject);
+      updateInventory(body.items).then((value) => {
+       // console.log("value line 114: ", value);
+        addOrder(body.firstName, body.lastName, body.address, body.emailAddress, 
+          body.calID, body.items, body.deliveryDate).then(() => {
+            console.log("Added to google sheets");
+          })
+          .catch(error => {
+            console.log("error:", error)
+          })
+          ,(errorObject) => {
+            console.log('The read failed: ' + errorObject);
+          }
+      })
+      .catch(error => {
+        console.log("The order failed: ", error);
       }
-    )}
+        )
+    }
+  )}
