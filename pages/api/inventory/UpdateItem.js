@@ -3,7 +3,7 @@ import {validateFunc} from '../validate'
 
 /*
 * /api/inventory/UpdateItem
-* req.body = {string barcode, string array categoryName, string count, 
+* req.body = {string barcode, string array categoryName, string/int count, 
               string itemName, string lowStock, string packSize}
 */
 
@@ -15,17 +15,14 @@ export const config = {
   },
 }
 
-
-
 export default async function(req,res) {   
   // verify this request is legit
   const token = req.headers.authorization
   console.log("TOKEN: ", token)
   const allowed = await validateFunc(token)
   if (!allowed) {
-      res.status(401)
-      res.json({error: "you are not authenticated to perform this action"})
-      return Promise.reject();
+      res.status(401).json({error: "you are not authenticated to perform this action"})
+      return Promise.resolve();
   }
 
   return new Promise((resolve, reject) => {
@@ -34,9 +31,8 @@ export default async function(req,res) {
 
     // require barcode
     if (!body.barcode) {
-      res.status(400);
-      res.json({error: "missing barcode in request"});
-      return reject();
+      res.status(400).json({error: "missing barcode in request"});
+      return resolve();
     }
 
     // construct parameters 
@@ -45,6 +41,14 @@ export default async function(req,res) {
     let updatedFields = {};
     // make sure barcode is a string
     let barcode = body.barcode.toString();
+    // convert count to integer
+    if (body["count"]) {
+      body["count"] = parseInt(body["count"]);
+      if (isNaN(body["count"])) {
+        res.status(400).json({error: "invalid count (not a number)"});
+        return resolve();
+      }
+    }
 
     FIELDS.forEach(field => {
       if (body[field]) {
@@ -63,7 +67,7 @@ export default async function(req,res) {
       .catch(function(error){
         res.status(500);
         res.json({error: "server error getting that item from the database", errorstack: error});
-        return reject();
+        return resolve();
       })
       .then(function(resp){
         // the version of the item in the database
@@ -72,7 +76,7 @@ export default async function(req,res) {
         if (dbItem === null) {
           res.status(404);
           res.json({error: "unable to find item with barcode " + barcode})
-          return reject();
+          return resolve();
         }
         
         // otherwise the item exists and we can update it
@@ -80,7 +84,7 @@ export default async function(req,res) {
         .catch(function(error) {
           res.status(500);
           res.json({error: "error writing update to inventory database", errorstack: error});
-          return reject();
+          return resolve();
         })
         .then(() => {
           res.status(200);

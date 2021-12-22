@@ -1,19 +1,22 @@
-# CalNourish WebApp
+# Cal Nourish Web App
+
+<a aria-label="Powered by Vercel" href="https://vercel.com?utm_source=cal-nourish&utm_campaign=oss" title="Powered by Vercel">
+  <img src="https://www.datocms-assets.com/31049/1618983297-powered-by-vercel.svg" height="42" />
+</a>
+
+The Cal Nourish Web App is an application that is being built as a tool for the UC Berkeley Food Pantry to manage inventory and orders, and perform other administrative tasks to more effectively meet the needs of pantry guests and volunteers. While the primary audience of this app is the UC Berkeley Food Pantry, this project can be repruposed for any use case.
+
+For more information about the UC Berkeley Food Pantry, you can visit their [website](https://basicneeds.berkeley.edu/pantry)
+
+This app is powered by [Vercel](https://vercel.com?utm_source=cal-nourish&utm_campaign=oss) and built with [Next.js](https://nextjs.org/), [Tailwind CSS](https://tailwindcss.com/), [Firebase](https://firebase.google.com/) (for our database and authentication), and an various AWS and Google tools as needed.
 
 ## Setup
 This application is based on the [Next.js Firebase example](https://github.com/vercel/next.js/tree/canary/examples/with-firebase). View the [Firebase readme](./Firebase_example.md) for more details.
 
 ## Quick Start
+Clone this repo.
 
-```npm -g install firebase-tools```
-```firebase login```
-```firebase use default```
-
-To start the app: ```npm run dev```
-
-It will run on port 3000
-
-## Set up the environment variables
+### Set up your environment variables
 1. Create a `.env.local` file and copy the contents of `.env.local.example` into it:
 
 ```bash
@@ -21,6 +24,19 @@ cp .env.local.example .env.local
 ```
 
 2. Set each variable except the final two in `.env.local` with your Firebase Configuration (found in "Project settings"). For the final two, either ask someone for their values (preferable) or go to "Project Settings" and then "Service accounts" in Firebase Console and hit "Generate new private key" to get a private key.
+
+### Run these comments
+
+```npm -g install firebase-tools```
+
+```npm install```
+
+```firebase login```
+
+To start the app: ```npm run dev```
+
+It will run on localhost at port 3000. You can try signing in with your email to get authenticated.
+
 
 ## Styling
 We are using [Tailwind CSS](https://tailwindcss.com/) which is a utility-first css framework with goal of writing little to no custom css. For the best development experience with tailwind css:
@@ -37,12 +53,17 @@ Vercel
 * Hosting
 * Functions
 
-## Local Hosting (Needs to be updated)
+# How this repo is set up
+The `pages` directory is the core of our app. `pages/*.js` all define pages that are rendered to the user. `pages/api/*` are our backend API endpoints. The path of the endpoint follows the directory path, so a file `/api/inventory/AddItem.js` defines an endpoint accessible at `/api/inventory/AddItem`. You can read more about Next.js API routes [here](https://nextjs.org/docs/api-routes/introduction).
 
-```firebase serve --only hosting```
-```✔  hosting: Local server: http://localhost:5000```
+The `utils` directory contains utility functions that we may need to use across multiple endpoints, such as the Firebase connection initialization logic.
 
-Ensure that you have the proper permissions to access the volunteer side of the application. Sign in with the google email that has been granted acccess.
+The `public` directory contains publicly accessible assets we use on the webapp and the `styles` directory contains some basic styling with Tailwind (see above). 
+
+The `context` directory contains a script that monitors and updates a `userContext` that handles authenticating a user with our webapp. Essentially, this script is responsible for managing a special token we give users that are allowed to access the pantry facing side of our app.
+
+The `components` directory contains all our common components.
+
 
 ## Test and Prod Environments
 
@@ -56,15 +77,17 @@ To switch between projects, run ```firebase use <alias>```.
 
 These aliases will automatically connect with the appropriate firebase projects (i.e. database, auth, etc.). In development, you should only use **TestCalNourish** with the alias of `default` or `test`.
 
-## Deployment (Needs to be updated)
+## Sponsorship notes
+In order to be considered for a sponsorship (and to continue to be sponsored if approved) from Vercel, we must adhere to the guidelines outlined on their [sponsorship page](https://vercel.com/support/articles/can-vercel-sponsor-my-open-source-project?utm_source=cal-nourish&utm_campaign=oss)
 
-**Test Deployment**: Feel free to deploy with **TestCalNourish** whenever to make sure things are stable. Do this by pushing to `origin/dev` (resolving any conflicts with other people's changes) and then merging with `origin/test` which will autodeploy to Firebase.
+These are the terms relevant to development, so please keep them in mind:
+- The project should be open source.
+- The project should be static rather than server-rendered.
+- A Vercel banner in the footer of each site page (assuming all pages use the layout component, or at least just the footer component, this will automatically be handled. To maintain this, the footer component should always contain the Vercel banner)
+- A Vercel banner in the source repository's README.md file
+- All links back to Vercel should use a UTM tag with the format: `?utm_source=cal-nourish&utm_campaign=oss`
 
-**Prod Deployment**: Any deployments to prod should be merged onto `master` from `origin/test` and then deployed using the Firebase CLI:
-```firebase deploy --except functions```. Make sure to use the `production` alias:
-```firebase use production```.
-
-Our autodeploy actions use [this Action](https://github.com/marketplace/actions/github-action-for-firebase).
+# Here on down is not necessary for initial setup
 
 ## Configuring Notifications with AWS Cognito and Lambda
 

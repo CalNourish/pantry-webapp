@@ -33,7 +33,7 @@ export default async function(req,res) {
       .catch(function(error){
         res.status(500);
         res.json({error: "server error getting categories from the database", errorstack: error});
-        return reject();
+        return resolve();
       })
     })
 }
