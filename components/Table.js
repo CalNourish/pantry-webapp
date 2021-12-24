@@ -8,7 +8,7 @@ export default function Table(props) {
     }
     // do any filtering here - edit the data variable 
   return (
-    <body className="antialiased font-sans">
+    <div className="antialiased font-sans">
     <div className="container mx-auto px-4 sm:px-8">
         <div className="py-8">
             <div className="my-2 flex sm:flex-row flex-col">
@@ -79,7 +79,7 @@ export default function Table(props) {
                         </thead>
                         <tbody>
                             { Object.keys(data).map((key) => {
-                                return <TableRow itemName={data[key].itemName} itemCount={data[key].count} itemCategories={data[key].categoryName}/> // need to look up category name
+                                return <TableRow key={key} itemName={data[key].itemName} itemCount={data[key].count} itemCategories={data[key].categoryName} itemLowStock={data[key].lowStock}/> // need to look up category name
                             }) 
                             }
                         </tbody>
@@ -88,6 +88,6 @@ export default function Table(props) {
             </div>
         </div>
     </div>
-</body>  
+    </div>  
   )
 }

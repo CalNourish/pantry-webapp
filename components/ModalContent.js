@@ -2,6 +2,68 @@ import React from 'react';
 import useSWR from 'swr';
 import firebase from 'firebase/app';
 import Select from 'react-select';
+import {useReducer} from 'react';
+
+
+async function doAutofill(field, lookupFunc) {
+    var barcode = field.target.value;
+    console.log("looking up: ", barcode);
+    // lookupFunc(barcode);
+    fetch(`/api/inventory/GetItem/${barcode}`)
+    .then((result) => {
+        result.json().then((data) => {
+            if (data.error) {
+                return;
+            }
+            // const payload = {
+            //     itemName: data.itemName,
+            //     count: data.count,
+            //     packSize: data.packSize
+            //     // todo: categories
+            // };
+
+            /* todo: can use dispatch or handleBarcodeLookup to do this cleaner ? */
+            document.getElementById("itemName").value = data.itemName;
+            document.getElementById("inStock").value = data.count;
+            document.getElementById("packSize").value = data.packSize;
+            document.getElementById("packOption").value = "individual";
+            // console.log(payload);
+            // dispatcher({type:'itemLookup', payload});
+        })
+    })
+}
+
+function InputRow(props) {
+    return (
+    <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+            {props.fullName}
+        </label>
+        <input type={props.type} id={props.id} autoComplete="off"
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            placeholder={props.placeholder} onBlur={props.barcodeLookup ? ((e) => doAutofill(e, props.barcodeLookup)) : null}/>
+    </div>
+    )
+}
+
+function InputStock(props) {
+    return (
+        <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2">
+                {props.fullName}
+            </label>
+            <div className="flex relative items-stretch">
+                <input type={props.type} id={props.id} autoComplete="off"
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    placeholder="number of units" />
+                <select className="ml-2" id="packOption" defaultValue="individual">
+                    <option value="individual">Individual Items</option>
+                    <option value="packs">Packs</option>
+                </select>
+            </div>
+        </div>
+    )
+}
 
 export default function ModalContent(props) {
     const fetcher = (url) => fetch(url).then((res) => res.json());
@@ -20,62 +82,25 @@ export default function ModalContent(props) {
         ]
         return acc
     }
-    const categoryOptions = data.categories.reduce(categoryReducer, []) 
+    const categoryOptions = data.categories.reduce(categoryReducer, [])
 
     return (
         <div className="modal-wrapper">
+            <div className="model-header text-3xl font-bold">
+                {props.isAdd ? "Add Item" : "Edit Item"}
+            </div>
             <div className="modal-content">
                 <div className="modal-body">
-                </div>
-                <div>
-                    <div className='p-1'>
-                        <label className="p-2 font-bold">Item Name</label>
-                        <input type="text" name="itemName" required value={props.parentState.itemName} onChange={(e) => {
-                            props.dispatch({type: 'editItemName', value: e.currentTarget.value})
-                        }}/>
-                    </div>
-                    <div className="p-1">
-                        <label className="p-2 font-bold">Item Barcode</label>
-                        <input type="text" name="itemBarcode" required value={props.parentState.barcode} onChange={(e) => {
-                            props.dispatch({type: 'editItemBarcode', value: e.currentTarget.value})
-                        }}/>
-                    </div>
-                    <div className='p-1'> 
-                        <label className="p-2 font-bold">Stock Count</label>
-                        <input type="number" min="0" name="count" required value={props.parentState.count} onChange={(e) => {
-                            props.dispatch({type: 'editItemCount', value: e.currentTarget.value})
-                        }}/>
-                    </div>
-                    <div className='p-1'>
-                        <label className="p-2 font-bold">Pack Size</label>
-                        <input type="number" min="0" name="packSize" required value={props.parentState.packSize} onChange={(e) => {
-                            props.dispatch({type: 'editItemPackSize', value: e.currentTarget.value})
-                        }}/>
-                    </div>                        
-                    <div className='p-1'>
-                        <Select
-                            options={categoryOptions} 
-                            isMulti
-                            defaultValue={null||props.parentState.categoryName}
-                            onChange={(action) => {
-                                let categoryIds = action.reduce((acc, curr)=> {
-                                    acc.push({value: curr.value, label: curr.label})
-                                    return acc
-                                }, [])
-                                props.dispatch({type: 'editCategories', value: categoryIds})
-                            }}
-                        />
-                    </div>
-                    <div className='p-1'>
-                        {/* {low stock threshold is not required} */}
-                        <label className="p-2 font-bold">Low Stock Threshold</label> 
-                        <input type="number" min="0" name="lowStock" value={props.parentState.lowStock} onChange={(e) => {
-                            props.dispatch({type: 'editItemLowStock', value: e.currentTarget.value})
-                        }}/>
-                    </div>
-                    <div className='p-3' >
-                        <button className="bg-gray-300 p-2 rounded-md" type="submit" onClick={props.onSubmitHandler}>Submit</button>
-                    </div>
+                    <form id="modal-form" className="bg-white rounded px-8 pt-6 pb-8 mb-4" onSubmit={props.onSubmitHandler}>
+                        <InputRow id="barcode" fullName="Item Barcode" placeholder="scan or type item barcode" type="text" 
+                            barcodeLookup={props.isAdd ? null : props.barcodeLookup}/>
+                        <InputRow id="itemName" fullName="Item Name" placeholder="item name" type="text"/>
+                        <InputStock id="inStock" fullName="Quantity in Stock" type="number"/>
+                        <InputRow id="packSize" fullName="Quantity per Pack" placeholder="number of items per package" type="number"/>
+                        {/* todo: add categories later */}
+                        <button type="submit"
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Submit</button>
+                    </form>
                 </div>
             </div>
         </div>

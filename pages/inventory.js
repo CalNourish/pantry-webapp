@@ -7,6 +7,11 @@ import Modal from 'react-modal'
 import React, { useState, useReducer } from 'react';
 import cookie from 'js-cookie';
 
+/* TODO:
+  - display categories
+  - UI for add/update item
+  - add/update doesn't actually do anything?
+  - live updates */
 
 export default function Inventory() {
   const token = cookie.get("firebaseToken")
@@ -22,6 +27,7 @@ export default function Inventory() {
 
   // A reducer to manage the State of the add-item / edit-item forms. 
   function formReducer(state, action) {
+    console.log(state, action);
     switch (action.type) { 
         case "reset":
             return emptyItem
@@ -62,6 +68,7 @@ export default function Inventory() {
             }
         } 
         case 'itemLookup': {
+          console.log("newstate:", action.value)
           return {
             ...state,
             ...action.value
@@ -79,7 +86,7 @@ export default function Inventory() {
   // Manage modal show/don't show State
   const [showAddItem, setShowAddItem] = useState(false);
   const [showEditItem, setShowEditItem] = useState(false);
-  const [showEditItemLookup, setShowEditItemLookup] = useState(false);
+  // const [showEditItemLookup, setShowEditItemLookup] = useState(false);
 
   // Manage just-scanned barcode State
   const [barcode, setBarcode] = useState(emptyItem);
@@ -91,7 +98,7 @@ export default function Inventory() {
   if (!data) return <div>Loading...</div>
 
   // When a barcode is scanned in the edit-item-lookup modal, look up this barcode in Firebase.
-  function handleItemLookupSubmit() {
+  function handleBarcodeLookup(barcode) {
     console.log("just looked up: ", barcode);
     // TODO: look barcode up in firebase and set state 
     const itemPayload = { // placeholder only. later this will come from firebase.
@@ -110,26 +117,27 @@ export default function Inventory() {
   }
 
   // When an item is submitted from the add-item or edit-item form, write the updated item to firebase.
-  function handleItemSubmit() {
+  function handleItemSubmit(e) {
+    e.preventDefault();
     // TODO: submit the payload to firebase using firebase API call
-    console.log("this is what would be in the firebase API call: ", state)
-    fetch('/api/inventory/AddItem', { method: 'POST', 
-    body: JSON.stringify({
-      "barcode": "2222200000",
-      "itemName": "API Testing Item",
-      "packSize": "31",
-      "lowStock": "2",
-      "categoryName": [
-        {value: "value1", label: "label1"}, 
-        {value: "value2", label: "label2"}
-      ],
-      "count": "400"
-    }),
-    headers: {'Content-Type': "application/json", 'Authorization': token}})
+    const barcode = e.target.barcode.value
+    const itemName = e.target.itemName.value
+    const packSize = e.target.packSize.value
+    const quantity = e.target.inStock.value * (e.target.packOption.value == "individual" ? 1 : packSize)
+
+    const payload = JSON.stringify({
+      "barcode": barcode,
+      "itemName": itemName,
+      "packSize": packSize,
+      "count": quantity
+    });
+    fetch('/api/inventory/UpdateItem', { method: 'POST', 
+      body: payload,
+      headers: {'Content-Type': "application/json", 'Authorization': token}})
 
     // TODO: would be nice to display a success message using toastr or something here (synchronously after firebase call)  
     dispatch({type: 'reset'})
-    setShowEditItem(false)
+    // setShowEditItem(false)
     return
   }
 
@@ -137,84 +145,26 @@ export default function Inventory() {
     <>
       <Layout>
         {/* Add Item Modal */}
-        <Modal id="add-item-modal" isOpen={showAddItem} onRequestClose={() => setShowAddItem(false)} 
-            style={{
-              overlay: {
-                backgroundColor: "rgba(128,0,128,0.3)",
-              },
-              content: {
-                borderRadius: '20px',
-                border: 'none',
-                width: '66%',
-                height: '66%',
-                margin: "0 auto"
-              }
-            }}>
-          <div className="modal-header bg-blue-800">
-            <p className="text-white">Add Item</p>
-          </div>
-          <ModalContent 
-            onSubmitHandler={handleItemSubmit} 
-            formReducer={formReducer} 
-            dispatch={dispatch}
-            parentState={state}/>
-          <button onClick={() => setShowAddItem(false)}>Close</button>
+        <Modal id="add-item-modal" isOpen={showAddItem} onRequestClose={() => setShowAddItem(false)} ariaHideApp={false}>
+          <ModalContent
+              onSubmitHandler={handleItemSubmit} 
+              formReducer={formReducer} 
+              dispatch={dispatch}
+              parentState={state}
+              isAdd={true}/>
+          <button onClick={() => setShowAddItem(false)} type="close" className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Close</button>
         </Modal>
-
-        {/*  Edit Item Lookup Modal  */}
-        <Modal id="edit-item-lookup-modal" isOpen={showEditItemLookup} onRequestClose={() => setShowEditItemLookup(false)} 
-            style={{
-              overlay: {
-                backgroundColor: "rgba(0,128,0,0.3)",
-              },
-              content: {
-                borderRadius: '20px',
-                border: 'none',
-                width: '66%',
-                height: '66%',
-                margin: "0 auto"
-              }
-            }}>
-          <div className="modal-header bg-blue-800">
-            <p className="text-white">Scan Barcode</p>
-          </div>
-          <div className='p-1'>
-            <label>Barcode</label>
-              <input type="text" name="itemName" required onChange={(e)=> {setBarcode(e.currentTarget.value)}}/>
-            </div>
-
-          <button className="bg-gray-300 p-2 rounded-md" onClick={() => {
-            setShowEditItemLookup(false)
-            setShowEditItem(true)
-            handleItemLookupSubmit()
-
-          }}>Next</button>
-
-        </Modal>
-
-        {/* Edit Item Modal */}
-        <Modal id="edit-item-modal" isOpen={showEditItem} onRequestClose={() => setShowEditItem(false)} 
-            style={{
-              overlay: {
-                backgroundColor: "rgba(0,128,0,0.3)",
-              },
-              content: {
-                borderRadius: '20px',
-                border: 'none',
-                width: '66%',
-                height: '66%',
-                margin: "0 auto"
-              }
-            }}>
-          <div className="modal-header bg-blue-800">
-            <p className="text-white">Edit Item</p>
-          </div>
-          <ModalContent 
-            onSubmitHandler={handleItemSubmit} 
-            formReducer={formReducer} 
-            dispatch={dispatch}
-            parentState={state}/>  
-          <button onClick={() => setShowEditItem(false)}>Close</button>
+        
+        {/*  Edit Item Modal  */}
+        <Modal id="edit-item-modal" isOpen={showEditItem} onRequestClose={() => setShowEditItem(false)} ariaHideApp={false}>
+          <ModalContent
+              onSubmitHandler={handleItemSubmit} 
+              formReducer={formReducer} 
+              dispatch={dispatch}
+              parentState={state}
+              isAdd={false}
+              barcodeLookup={handleBarcodeLookup}/>
+          <button onClick={() => setShowEditItem(false)} type="close" className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Close</button>
         </Modal>
         
         <div className="flex">
@@ -223,7 +173,7 @@ export default function Inventory() {
               <h1>Inventory</h1>
               <div className="my-4">
                 <button className="my-1 btn-pantry-blue w-56 rounded-md" onClick={() => setShowAddItem(true)}>Add new item</button>
-                <button className="my-1 btn-pantry-blue w-56 rounded-md" onClick={() => setShowEditItemLookup(true)}>Edit existing item</button>
+                <button className="my-1 btn-pantry-blue w-56 rounded-md" onClick={() => setShowEditItem(true)}>Edit existing item</button>
               </div>
             </Sidebar>
           </div>

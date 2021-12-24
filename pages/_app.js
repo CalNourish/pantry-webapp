@@ -3,7 +3,7 @@ import "../styles/index.css"
 import App from 'next/app'
 import cookies from 'next-cookies'
 
-const server = process.env.VERCEL_URL;
+const server = process.env.VERCEL_URL ? process.env.VERCEL_URL : "http://localhost:3000"
 
 // Custom App to wrap it with context provider
 export default function MyApp({ Component, pageProps }) {
