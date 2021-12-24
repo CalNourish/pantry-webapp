@@ -27,55 +27,53 @@ export default function Inventory() {
 
   // A reducer to manage the State of the add-item / edit-item forms. 
   function formReducer(state, action) {
-    console.log(state, action);
     switch (action.type) { 
         case "reset":
             return emptyItem
         case 'editItemName': {
-            return {
-                ...state,
-                itemName: action.value
-            }
+          return {
+            ...state,
+            itemName: action.value
+          }
         } 
         case 'editItemBarcode': {
-            return {
-                ...state,
-                barcode: action.value
-            }
+          return {
+            ...state,
+            barcode: action.value
+          }
         }         
         case 'editItemCount': {
-            return {
-                ...state,
-                count: action.value
-            }
+          return {
+            ...state,
+            count: parseInt(action.value)
+          }
         }            
         case 'editItemPackSize': {
-            return {
-                ...state,
-                packSize: action.value
-            }
+          return {
+            ...state,
+            packSize: parseInt(action.value)
+          }
         }  
         case 'editCategories': {
-            return {
-                ...state,
-                categoryName: action.value
-            }
+          return {
+            ...state,
+            categoryName: action.value
+          }
         }       
         case 'editItemLowStock': {
-            return {
-                ...state,
-                lowStock: action.value
-            }
+          return {
+            ...state,
+            lowStock: action.value
+          }
         } 
         case 'itemLookup': {
-          console.log("newstate:", action.value)
           return {
             ...state,
             ...action.value
           }
         }   
         default:
-            break;
+          break;
       }
     return state
   }
@@ -89,7 +87,7 @@ export default function Inventory() {
   // const [showEditItemLookup, setShowEditItemLookup] = useState(false);
 
   // Manage just-scanned barcode State
-  const [barcode, setBarcode] = useState(emptyItem);
+  // const [barcode, setBarcode] = useState(emptyItem);
   
   // Manage form State (look up useReducer tutorials if unfamiliar)
   const [ state, dispatch ] = useReducer(formReducer, emptyItem)
@@ -99,31 +97,39 @@ export default function Inventory() {
 
   // When a barcode is scanned in the edit-item-lookup modal, look up this barcode in Firebase.
   function handleBarcodeLookup(barcode) {
-    console.log("just looked up: ", barcode);
-    // TODO: look barcode up in firebase and set state 
-    const itemPayload = { // placeholder only. later this will come from firebase.
-      itemName: "1",
-      barcode: "2",
-      count: "3",
-      packSize: "4",
-      categoryName: [
-        {value: "8WeYr8bkRO", label: "Frozen Foods"}, 
-        {value: "8sJAdmGbnB", label: "Hi"}
-      ],
-      lowStock: "5",
-    }
-    dispatch({type: 'itemLookup', value: itemPayload})
+    // console.log("just looked up: ", barcode);
+    fetch(`/api/inventory/GetItem/${barcode}`)
+    .then((result) => {
+        result.json().then((data) => {
+          if (data.error) {
+            /* reset everything except for the barcode */
+            dispatch({type: "reset"})
+            dispatch({type: "editItemBarcode", value: barcode})
+            return;
+          }
+          const payload = {
+            itemName: data.itemName,
+            count: data.count,
+            packSize: data.packSize
+            // todo: categories
+          };
+          
+          console.log("payload:", payload);
+          dispatch({type:'itemLookup', value: payload});
+        })
+    })
     return 
   }
 
   // When an item is submitted from the add-item or edit-item form, write the updated item to firebase.
-  function handleItemSubmit(e) {
+  function handleUpdateSubmit(e) {
     e.preventDefault();
-    // TODO: submit the payload to firebase using firebase API call
-    const barcode = e.target.barcode.value
-    const itemName = e.target.itemName.value
-    const packSize = e.target.packSize.value
-    const quantity = e.target.inStock.value * (e.target.packOption.value == "individual" ? 1 : packSize)
+    const barcode = state.barcode;                                                        // required
+    const itemName = state.itemName;                                                      // required
+    const packSize = state.packSize ? state.packSize : 1;                                 // defaults to 1
+    const quantity = state.count * (e.target.packOption.value == "packs" ? packSize : 1)  // required
+
+    /* todo: if field is empty, just don't update it at all? */
 
     const payload = JSON.stringify({
       "barcode": barcode,
@@ -141,13 +147,50 @@ export default function Inventory() {
     return
   }
 
+  function handleAddSubmit(e) {
+    e.preventDefault();
+    // TODO: submit the payload to firebase using firebase API call
+    const barcode = state.barcode;                                                                  // required
+    const itemName = state.itemName;                                                                // required
+    const packSize = parseInt(state.packSize) ? parseInt(state.packSize) : 1;                       // defaults to 1
+    const quantity = parseInt(state.count) * (e.target.packOption.value == "packs" ? packSize : 1)  // required
+
+    if (!(barcode && itemName && packSize && quantity)) {
+      console.log("field(s) missing")
+      return;
+    }
+
+    const payload = JSON.stringify({
+      "barcode": barcode,
+      "itemName": itemName,
+      "packSize": packSize,
+      "count": quantity,
+      "categoryName": {'547G7Gnikt': '547G7Gnikt'}, // todo: fix categories
+      /* created by? */
+    });
+
+    console.log("payload:", payload)
+    fetch('/api/inventory/AddItem', { method: 'POST', 
+      body: payload,
+      headers: {'Content-Type': "application/json", 'Authorization': token}})
+    .then((response) => response.json())
+    .then(json => {
+      console.log("addItem:", json.message);
+    })
+
+    // TODO: would be nice to display a success message using toastr or something here (synchronously after firebase call)  
+    dispatch({type: 'reset'})
+    // setShowEditItem(false)
+    return
+  }
+
   return (
     <>
       <Layout>
         {/* Add Item Modal */}
         <Modal id="add-item-modal" isOpen={showAddItem} onRequestClose={() => setShowAddItem(false)} ariaHideApp={false}>
           <ModalContent
-              onSubmitHandler={handleItemSubmit} 
+              onSubmitHandler={handleAddSubmit} 
               formReducer={formReducer} 
               dispatch={dispatch}
               parentState={state}
@@ -158,7 +201,7 @@ export default function Inventory() {
         {/*  Edit Item Modal  */}
         <Modal id="edit-item-modal" isOpen={showEditItem} onRequestClose={() => setShowEditItem(false)} ariaHideApp={false}>
           <ModalContent
-              onSubmitHandler={handleItemSubmit} 
+              onSubmitHandler={handleUpdateSubmit} 
               formReducer={formReducer} 
               dispatch={dispatch}
               parentState={state}
@@ -172,8 +215,8 @@ export default function Inventory() {
             <Sidebar className="py-4">
               <h1>Inventory</h1>
               <div className="my-4">
-                <button className="my-1 btn-pantry-blue w-56 rounded-md" onClick={() => setShowAddItem(true)}>Add new item</button>
-                <button className="my-1 btn-pantry-blue w-56 rounded-md" onClick={() => setShowEditItem(true)}>Edit existing item</button>
+                <button className="my-1 btn-pantry-blue w-56 rounded-md p-2" onClick={() => setShowAddItem(true)}>Add new item</button>
+                <button className="my-1 btn-pantry-blue w-56 rounded-md p-2" onClick={() => setShowEditItem(true)}>Edit existing item</button>
               </div>
             </Sidebar>
           </div>

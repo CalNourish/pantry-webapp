@@ -8,29 +8,29 @@ import {useReducer} from 'react';
 async function doAutofill(field, lookupFunc) {
     var barcode = field.target.value;
     console.log("looking up: ", barcode);
-    // lookupFunc(barcode);
-    fetch(`/api/inventory/GetItem/${barcode}`)
-    .then((result) => {
-        result.json().then((data) => {
-            if (data.error) {
-                return;
-            }
-            // const payload = {
-            //     itemName: data.itemName,
-            //     count: data.count,
-            //     packSize: data.packSize
-            //     // todo: categories
-            // };
+    lookupFunc(barcode);
+    // fetch(`/api/inventory/GetItem/${barcode}`)
+    // .then((result) => {
+    //     result.json().then((data) => {
+    //         if (data.error) {
+    //             return;
+    //         }
+    //         // const payload = {
+    //         //     itemName: data.itemName,
+    //         //     count: data.count,
+    //         //     packSize: data.packSize
+    //         //     // todo: categories
+    //         // };
 
-            /* todo: can use dispatch or handleBarcodeLookup to do this cleaner ? */
-            document.getElementById("itemName").value = data.itemName;
-            document.getElementById("inStock").value = data.count;
-            document.getElementById("packSize").value = data.packSize;
-            document.getElementById("packOption").value = "individual";
-            // console.log(payload);
-            // dispatcher({type:'itemLookup', payload});
-        })
-    })
+    //         /* todo: can use dispatch or handleBarcodeLookup to do this cleaner ? */
+    //         document.getElementById("itemName").value = data.itemName;
+    //         document.getElementById("count").value = data.count;
+    //         document.getElementById("packSize").value = data.packSize;
+    //         document.getElementById("packOption").value = "individual";
+    //         // console.log(payload);
+    //         // dispatcher({type:'itemLookup', payload});
+    //     })
+    // })
 }
 
 function InputRow(props) {
@@ -41,7 +41,8 @@ function InputRow(props) {
         </label>
         <input type={props.type} id={props.id} autoComplete="off"
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            placeholder={props.placeholder} onBlur={props.barcodeLookup ? ((e) => doAutofill(e, props.barcodeLookup)) : null}/>
+            placeholder={props.placeholder} onBlur={props.barcodeLookup ? ((e) => doAutofill(e, props.barcodeLookup)) : null}
+            value={props.value} onChange={(e) => {props.dispatch({type: props.type, value: e.currentTarget.value})}}/>
     </div>
     )
 }
@@ -92,12 +93,48 @@ export default function ModalContent(props) {
             <div className="modal-content">
                 <div className="modal-body">
                     <form id="modal-form" className="bg-white rounded px-8 pt-6 pb-8 mb-4" onSubmit={props.onSubmitHandler}>
-                        <InputRow id="barcode" fullName="Item Barcode" placeholder="scan or type item barcode" type="text" 
-                            barcodeLookup={props.isAdd ? null : props.barcodeLookup}/>
-                        <InputRow id="itemName" fullName="Item Name" placeholder="item name" type="text"/>
-                        <InputStock id="inStock" fullName="Quantity in Stock" type="number"/>
-                        <InputRow id="packSize" fullName="Quantity per Pack" placeholder="number of items per package" type="number"/>
-                        {/* todo: add categories later */}
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2">
+                                Item Barcode
+                            </label>
+                            <input type="text" id="barcode" autoComplete="off"
+                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                placeholder="scan or type item barcode" onBlur={props.barcodeLookup ? (e) => doAutofill(e, props.barcodeLookup) : null}
+                                value={props.parentState.barcode} onChange={(e) => {props.dispatch({type: 'editItemBarcode', value: e.currentTarget.value})}}/>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2">
+                                Item Name
+                            </label>
+                            <input type="text" id="itemName" autoComplete="off"
+                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                placeholder="item name" value={props.parentState.itemName} 
+                                onChange={(e) => {props.dispatch({type: 'editItemName', value: e.currentTarget.value})}} />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2">
+                                Quantity in Stock
+                            </label>
+                            <div className="flex relative items-stretch">
+                                <input type="number" id="count" autoComplete="off"
+                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    placeholder="number of units" value={props.parentState.count}
+                                    onChange={(e) => {props.dispatch({type: 'editItemCount', value: e.currentTarget.value})}}/>
+                                <select className="ml-5" id="packOption" defaultValue="individual">
+                                    <option value="individual">Individual Items</option>
+                                    <option value="packs">Packs</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2">
+                                Quantity per Pack
+                            </label>
+                            <input type="number" id="packSize" autoComplete="off"
+                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                placeholder="number of items per package" value={props.parentState.packSize} 
+                                onChange={(e) => {props.dispatch({type: 'editItemPackSize', value: e.currentTarget.value})}} />
+                        </div>
                         <button type="submit"
                             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Submit</button>
                     </form>
