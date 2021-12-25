@@ -8,73 +8,71 @@ import React, { useState, useReducer } from 'react';
 import cookie from 'js-cookie';
 
 /* TODO:
-  - display categories
-  - UI for add/update item
-  - add/update doesn't actually do anything?
-  - live updates */
+  - display categories in add/update modals. might have to wait for categories to be finished.
+  - live updates: change quantities when firebase updates */
 
 export default function Inventory() {
   const token = cookie.get("firebaseToken")
 
   const emptyItem =  {
-        itemName: "",
-        barcode: "",
-        count: "",
-        packSize: "",
-        categoryName: "",
-        lowStock: "",
+    itemName: "",
+    barcode: "",
+    count: "",
+    packSize: "",
+    categoryName: "",
+    lowStock: "",
   }
 
   // A reducer to manage the State of the add-item / edit-item forms. 
   function formReducer(state, action) {
     switch (action.type) { 
-        case "reset":
-            return emptyItem
-        case 'editItemName': {
-          return {
-            ...state,
-            itemName: action.value
-          }
-        } 
-        case 'editItemBarcode': {
-          return {
-            ...state,
-            barcode: action.value
-          }
-        }         
-        case 'editItemCount': {
-          return {
-            ...state,
-            count: parseInt(action.value)
-          }
-        }            
-        case 'editItemPackSize': {
-          return {
-            ...state,
-            packSize: parseInt(action.value)
-          }
-        }  
-        case 'editCategories': {
-          return {
-            ...state,
-            categoryName: action.value
-          }
-        }       
-        case 'editItemLowStock': {
-          return {
-            ...state,
-            lowStock: action.value
-          }
-        } 
-        case 'itemLookup': {
-          return {
-            ...state,
-            ...action.value
-          }
-        }   
-        default:
-          break;
-      }
+      case "reset":
+          return emptyItem
+      case 'editItemName': {
+        return {
+          ...state,
+          itemName: action.value
+        }
+      } 
+      case 'editItemBarcode': {
+        return {
+          ...state,
+          barcode: action.value
+        }
+      }         
+      case 'editItemCount': {
+        return {
+          ...state,
+          count: parseInt(action.value)
+        }
+      }            
+      case 'editItemPackSize': {
+        return {
+          ...state,
+          packSize: parseInt(action.value)
+        }
+      }  
+      case 'editCategories': {
+        return {
+          ...state,
+          categoryName: action.value
+        }
+      }       
+      case 'editItemLowStock': {
+        return {
+          ...state,
+          lowStock: action.value
+        }
+      } 
+      case 'itemLookup': {
+        return {
+          ...state,
+          ...action.value
+        }
+      }   
+      default:
+        break;
+    }
     return state
   }
  
@@ -84,10 +82,7 @@ export default function Inventory() {
   // Manage modal show/don't show State
   const [showAddItem, setShowAddItem] = useState(false);
   const [showEditItem, setShowEditItem] = useState(false);
-  // const [showEditItemLookup, setShowEditItemLookup] = useState(false);
-
-  // Manage just-scanned barcode State
-  // const [barcode, setBarcode] = useState(emptyItem);
+  const [barcodeError, setBarcodeError] = useState('');
   
   // Manage form State (look up useReducer tutorials if unfamiliar)
   const [ state, dispatch ] = useReducer(formReducer, emptyItem)
@@ -96,17 +91,19 @@ export default function Inventory() {
   if (!data) return <div>Loading...</div>
 
   // When a barcode is scanned in the edit-item-lookup modal, look up this barcode in Firebase.
-  function handleBarcodeLookup(barcode) {
+  function handleLookupEdit(barcode) {
     // console.log("just looked up: ", barcode);
     fetch(`/api/inventory/GetItem/${barcode}`)
     .then((result) => {
         result.json().then((data) => {
           if (data.error) {
             /* reset everything except for the barcode */
+            setBarcodeError("no existing item with this barcode");
             dispatch({type: "reset"})
             dispatch({type: "editItemBarcode", value: barcode})
             return;
           }
+          setBarcodeError('');
           const payload = {
             itemName: data.itemName,
             count: data.count,
@@ -119,6 +116,21 @@ export default function Inventory() {
         })
     })
     return 
+  }
+
+  function handleLookupAdd(barcode) {
+    // console.log("just looked up: ", barcode);
+    fetch(`/api/inventory/GetItem/${barcode}`)
+    .then((result) => {
+        result.json().then((data) => {
+          if (!data.error) {
+            /* item already exists! */
+            setBarcodeError("item already exists with this barcode");
+            return;
+          }
+          setBarcodeError("");
+        })
+    })
   }
 
   // When an item is submitted from the add-item or edit-item form, write the updated item to firebase.
@@ -140,20 +152,28 @@ export default function Inventory() {
     fetch('/api/inventory/UpdateItem', { method: 'POST', 
       body: payload,
       headers: {'Content-Type': "application/json", 'Authorization': token}})
+    .then((response) => response.json())
+    .then(json => {
+      console.log("updateItem status:", json);
+      if (json.error) {
+
+      } else {
+        dispatch({type: 'reset'});
+        // setShowEditItem(false);
+      }
+    })
 
     // TODO: would be nice to display a success message using toastr or something here (synchronously after firebase call)  
-    dispatch({type: 'reset'})
-    // setShowEditItem(false)
     return
   }
 
   function handleAddSubmit(e) {
     e.preventDefault();
     // TODO: submit the payload to firebase using firebase API call
-    const barcode = state.barcode;                                                                  // required
-    const itemName = state.itemName;                                                                // required
-    const packSize = parseInt(state.packSize) ? parseInt(state.packSize) : 1;                       // defaults to 1
-    const quantity = parseInt(state.count) * (e.target.packOption.value == "packs" ? packSize : 1)  // required
+    const barcode = state.barcode;                                                        // required
+    const itemName = state.itemName;                                                      // required
+    const packSize = state.packSize ? state.packSize : 1;                                 // defaults to 1
+    const quantity = state.count * (e.target.packOption.value == "packs" ? packSize : 1)  // required
 
     if (!(barcode && itemName && packSize && quantity)) {
       console.log("field(s) missing")
@@ -175,48 +195,68 @@ export default function Inventory() {
       headers: {'Content-Type': "application/json", 'Authorization': token}})
     .then((response) => response.json())
     .then(json => {
-      console.log("addItem:", json.message);
+      console.log("addItem status:", json);
+      if (json.error) {
+
+      } else {
+        dispatch({type: 'reset'});
+        setShowEditItem(false);
+      }
     })
 
     // TODO: would be nice to display a success message using toastr or something here (synchronously after firebase call)  
     dispatch({type: 'reset'})
-    // setShowEditItem(false)
+    setShowEditItem(false)
     return
+  }
+
+  function closeAddItem() {
+    setShowAddItem(false); 
+    setBarcodeError("");
+    dispatch({type:'reset'});
+  }
+  function closeUpdateItem() {
+    setShowEditItem(false); 
+    setBarcodeError("");
+    dispatch({type:'reset'});
   }
 
   return (
     <>
       <Layout>
         {/* Add Item Modal */}
-        <Modal id="add-item-modal" isOpen={showAddItem} onRequestClose={() => setShowAddItem(false)} ariaHideApp={false}>
+        <Modal id="add-item-modal" isOpen={showAddItem} onRequestClose={closeAddItem} ariaHideApp={false}>
           <ModalContent
               onSubmitHandler={handleAddSubmit} 
               formReducer={formReducer} 
               dispatch={dispatch}
               parentState={state}
-              isAdd={true}/>
-          <button onClick={() => setShowAddItem(false)} type="close" className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Close</button>
+              isAdd={true}
+              barcodeLookup={handleLookupAdd}
+              barcodeError={barcodeError}/>
+          <button onClick={closeAddItem} type="close" className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Close</button>
         </Modal>
         
         {/*  Edit Item Modal  */}
-        <Modal id="edit-item-modal" isOpen={showEditItem} onRequestClose={() => setShowEditItem(false)} ariaHideApp={false}>
+        <Modal id="edit-item-modal" isOpen={showEditItem} onRequestClose={closeUpdateItem} ariaHideApp={false}>
           <ModalContent
               onSubmitHandler={handleUpdateSubmit} 
-              formReducer={formReducer} 
+              formReducer={formReducer}
               dispatch={dispatch}
               parentState={state}
               isAdd={false}
-              barcodeLookup={handleBarcodeLookup}/>
-          <button onClick={() => setShowEditItem(false)} type="close" className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Close</button>
+              barcodeLookup={handleLookupEdit}
+              barcodeError={barcodeError}/>
+          <button onClick={closeUpdateItem} type="close" className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Close</button>
         </Modal>
         
         <div className="flex">
-          <div className="flex-none w-64">
+          <div className="w-64 bg-gray-200 items-center">
             <Sidebar className="py-4">
-              <h1>Inventory</h1>
+              <h1 className="text-3xl font-semibold mb-2">Inventory</h1>
               <div className="my-4">
-                <button className="my-1 btn-pantry-blue w-56 rounded-md p-2" onClick={() => setShowAddItem(true)}>Add new item</button>
-                <button className="my-1 btn-pantry-blue w-56 rounded-md p-2" onClick={() => setShowEditItem(true)}>Edit existing item</button>
+                <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowAddItem(true)}>Add new item</button>
+                <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowEditItem(true)}>Edit existing item</button>
               </div>
             </Sidebar>
           </div>

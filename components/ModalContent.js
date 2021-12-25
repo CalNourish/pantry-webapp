@@ -9,61 +9,6 @@ async function doAutofill(field, lookupFunc) {
     var barcode = field.target.value;
     console.log("looking up: ", barcode);
     lookupFunc(barcode);
-    // fetch(`/api/inventory/GetItem/${barcode}`)
-    // .then((result) => {
-    //     result.json().then((data) => {
-    //         if (data.error) {
-    //             return;
-    //         }
-    //         // const payload = {
-    //         //     itemName: data.itemName,
-    //         //     count: data.count,
-    //         //     packSize: data.packSize
-    //         //     // todo: categories
-    //         // };
-
-    //         /* todo: can use dispatch or handleBarcodeLookup to do this cleaner ? */
-    //         document.getElementById("itemName").value = data.itemName;
-    //         document.getElementById("count").value = data.count;
-    //         document.getElementById("packSize").value = data.packSize;
-    //         document.getElementById("packOption").value = "individual";
-    //         // console.log(payload);
-    //         // dispatcher({type:'itemLookup', payload});
-    //     })
-    // })
-}
-
-function InputRow(props) {
-    return (
-    <div className="mb-4">
-        <label className="block text-gray-700 text-sm font-bold mb-2">
-            {props.fullName}
-        </label>
-        <input type={props.type} id={props.id} autoComplete="off"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            placeholder={props.placeholder} onBlur={props.barcodeLookup ? ((e) => doAutofill(e, props.barcodeLookup)) : null}
-            value={props.value} onChange={(e) => {props.dispatch({type: props.type, value: e.currentTarget.value})}}/>
-    </div>
-    )
-}
-
-function InputStock(props) {
-    return (
-        <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-                {props.fullName}
-            </label>
-            <div className="flex relative items-stretch">
-                <input type={props.type} id={props.id} autoComplete="off"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    placeholder="number of units" />
-                <select className="ml-2" id="packOption" defaultValue="individual">
-                    <option value="individual">Individual Items</option>
-                    <option value="packs">Packs</option>
-                </select>
-            </div>
-        </div>
-    )
 }
 
 export default function ModalContent(props) {
@@ -98,9 +43,10 @@ export default function ModalContent(props) {
                                 Item Barcode
                             </label>
                             <input type="text" id="barcode" autoComplete="off"
-                                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                className={"shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" + (props.barcodeError ? " border-red-500" : "")}
                                 placeholder="scan or type item barcode" onBlur={props.barcodeLookup ? (e) => doAutofill(e, props.barcodeLookup) : null}
                                 value={props.parentState.barcode} onChange={(e) => {props.dispatch({type: 'editItemBarcode', value: e.currentTarget.value})}}/>
+                            {props.barcodeError && <div className="mt-2 text-sm text-red-600">{props.barcodeError}</div>}
                         </div>
                         <div className="mb-4">
                             <label className="block text-gray-700 text-sm font-bold mb-2">
@@ -137,6 +83,7 @@ export default function ModalContent(props) {
                         </div>
                         <button type="submit"
                             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Submit</button>
+                            {/* todo: disable when failed */}
                     </form>
                 </div>
             </div>

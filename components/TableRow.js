@@ -28,7 +28,8 @@ export default function TableRow({itemName, itemCount, itemCategories, itemLowSt
     }
 
     // choose a "default" low stock threshold if not set 
-    itemLowStock = (itemLowStock >= 0) ? itemLowStock : 10;
+    itemLowStock = parseInt(itemLowStock);
+    itemLowStock = (itemLowStock && itemLowStock >= 0) ? itemLowStock : 10;
 
     return (
         <tr>
