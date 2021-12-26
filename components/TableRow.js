@@ -1,7 +1,7 @@
 import useSWR from 'swr';
 
 
-export default function TableRow({itemName, itemCount, itemCategories, itemLowStock}) {
+export default function TableRow({id, itemName, itemCount, itemCategories, itemLowStock}) {
     const fetcher = (url) => fetch(url).then((res) => res.json());
     const { data, error } = useSWR("/api/categories/ListCategories", fetcher);
     const categoryReducer = (acc, obj) => {
@@ -32,7 +32,7 @@ export default function TableRow({itemName, itemCount, itemCategories, itemLowSt
     itemLowStock = (itemLowStock && itemLowStock >= 0) ? itemLowStock : 10;
 
     return (
-        <tr>
+        <tr id={id}>
         <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
             <div className="flex items-center">
                 <div className="ml-3">
@@ -46,7 +46,7 @@ export default function TableRow({itemName, itemCount, itemCategories, itemLowSt
             <p className="text-gray-900 whitespace-no-wrap">{categoryDisplay(itemCategories)}</p>
         </td>
         <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-            <p className="text-gray-900 whitespace-no-wrap font-bold">
+            <p className="text-gray-900 whitespace-no-wrap font-bold itemCount">
                 {itemCount}
             </p>
         </td>

@@ -4,14 +4,14 @@ import Sidebar from '../components/Sidebar'
 import Table from '../components/Table'
 import InventoryModal from '../components/InventoryModal'
 import Modal from 'react-modal'
-import React, { useState, useReducer } from 'react';
+import React, { useState, useReducer, useEffect } from 'react';
 import cookie from 'js-cookie';
+import firebase from 'firebase';
 
 /* TODO:
   - display categories in add/update modals. might have to wait for categories API to be finished.
-  - live updates: change quantities when firebase updates 
-  - delete items from page too?
-  - general success/error banner?
+  - live updates: whenever item is updated, immediately updates page (without refresh)
+    ... but what about add/delete? maybe rare enough that we don't need this...
 */
 
 export default function Inventory() {
@@ -98,14 +98,15 @@ export default function Inventory() {
     return state
   }
  
-  const fetcher = (url) => fetch(url).then((res) => res.json())
-  const { data, error } = useSWR("/api/inventory", fetcher);
+  // const fetcher = (url) => fetch(url).then((res) => res.json())
+  // const { data, error } = useSWR("/api/inventory", fetcher);
 
   // Manage modal show/don't show State
   const [showAddItem, setShowAddItem] = useState(false);
   const [showEditItem, setShowEditItem] = useState(false);
   const [errors, setErrors] = useState(emptyErrors);
   const [status, setStatus] = useState(emptyStatus);
+  const [dataState, changeData] = useState({});
 
   const setBarcodeError = (errorMsg) => setErrors({...errors, barcode: errorMsg})
   const setNameError = (errorMsg) => setErrors({...errors, itemName: errorMsg})
@@ -125,12 +126,29 @@ export default function Inventory() {
   // Manage form State (look up useReducer tutorials if unfamiliar)
   const [ state, dispatch ] = useReducer(formReducer, emptyItem)
 
-  if (error) return <div>Failed to load Inventory</div>
-  if (!data) return <div>Loading...</div>
+  /* initialize dataState value */
+  const ref = firebase.database().ref('/inventory')
+  if (Object.keys(dataState).length == 0) {
+    ref.once("value", snapshot => {
+      let res = snapshot.val();
+        console.log("completed loading data")
+        changeData(res);
+    })
+  }
+
+  /* do this once, after dataState is set */
+  if (Object.keys(dataState).length > 0) {
+    ref.once("child_changed", snapshot => {
+      let barcode = snapshot.val().barcode
+      changeData({
+        ...dataState,
+        [barcode]: snapshot.val()
+      });
+    });
+  }
 
   // When a barcode is scanned in the edit-item-lookup modal, look up this barcode in Firebase.
   function handleLookupEdit(barcode) {
-    // console.log("just looked up: ", barcode);
     fetch(`/api/inventory/GetItem/${barcode}`)
     .then((result) => {
       result.json().then((data) => {
@@ -149,7 +167,6 @@ export default function Inventory() {
           lowStock: data.lowStock
           // todo: categories
         };
-        // console.log("payload:", payload);
         dispatch({type:'itemLookup', value: payload});
       })
     })
@@ -162,7 +179,6 @@ export default function Inventory() {
       return;
     }
 
-    // console.log("just looked up: ", barcode);
     fetch(`/api/inventory/GetItem/${barcode}`)
     .then((result) => {
         result.json().then((data) => {
@@ -202,10 +218,8 @@ export default function Inventory() {
     .then((response) => response.json())
     .then(json => {
       if (json.error) {
-        // console.log("update item failure:", json.error);
         setStatusError(json.error);
       } else {
-        console.log("update success:", json.message);
         dispatch({type: 'reset'});
         closeUpdateItem();
         setStatusSuccess(`successfully updated: ${itemName} (${barcode})`);
@@ -244,7 +258,6 @@ export default function Inventory() {
       /* created by? */
     });
 
-    console.log("payload:", payload)
     fetch('/api/inventory/AddItem', { method: 'POST', 
       body: payload,
       headers: {'Content-Type': "application/json", 'Authorization': token}})
@@ -253,13 +266,13 @@ export default function Inventory() {
       if (json.error) {
         setStatusError(json.error) 
       } else {
-        // console.log(`successfully added item ${itemName} (${barcode})`)
         dispatch({type: 'reset'});
         setErrors(emptyErrors);
         closeAddItem();
         setStatusSuccess(`successfully added: ${itemName} (${barcode})`);
       }
     })
+    // location.reload(); // todo: should we force page refresh to show item?
     return
   }
 
@@ -321,7 +334,8 @@ export default function Inventory() {
           </div>
           <div className="py-4 px-8">
             {status.success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded relative mb-3">{status.success}</div>}
-            <Table className="table-auto my-1" data={data}></Table>
+            {Object.keys(dataState).length > 0 ? <Table className="table-auto my-1" data={dataState}></Table>
+              : "Loading inventory..."}
           </div>
         </div>
       </Layout>
