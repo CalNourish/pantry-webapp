@@ -35,6 +35,7 @@ export default function Inventory() {
   };
 
   const emptyStatus = {
+    loading: false,
     success: "",
     error: ""
   }
@@ -110,11 +111,16 @@ export default function Inventory() {
   const setNameError = (errorMsg) => setErrors({...errors, itemName: errorMsg})
   const setCountError = (errorMsg) => setErrors({...errors, count: errorMsg})
 
-  const setStatusSuccess = (msg) => {
-    setStatus({error: "", success: msg})
-    setTimeout(() => setStatus({...status, success: ""}), 5000);
+  var successTimeout;
+  const setStatusLoading = () => {
+    setStatus({error: "", success: "", loading: true})
   }
-  const setStatusError = (msg) => setStatus({error: msg, success: ""})
+  const setStatusSuccess = (msg) => {
+    setStatus({loading: false, error: "", success: msg});
+    clearTimeout(successTimeout);             // clear old timeout before starting new one
+    successTimeout = setTimeout(() => setStatus({...status, success: ""}), 5000);
+  }
+  const setStatusError = (msg) => setStatus({error: msg, success: "", loading: false})
 
   // Manage form State (look up useReducer tutorials if unfamiliar)
   const [ state, dispatch ] = useReducer(formReducer, emptyItem)
@@ -127,25 +133,25 @@ export default function Inventory() {
     // console.log("just looked up: ", barcode);
     fetch(`/api/inventory/GetItem/${barcode}`)
     .then((result) => {
-        result.json().then((data) => {
-          if (data.error) {
-            /* reset everything except for the barcode */
-            setBarcodeError("no existing item with this barcode");
-            dispatch({type: "reset"})
-            dispatch({type: "editItemBarcode", value: barcode})
-            return;
-          }
-          setBarcodeError('');
-          const payload = {
-            itemName: data.itemName,
-            count: data.count,
-            packSize: data.packSize,
-            lowStock: data.lowStock
-            // todo: categories
-          };
-          // console.log("payload:", payload);
-          dispatch({type:'itemLookup', value: payload});
-        })
+      result.json().then((data) => {
+        if (data.error) {
+          /* reset everything except for the barcode */
+          setBarcodeError("no existing item with this barcode");
+          dispatch({type: "reset"})
+          dispatch({type: "editItemBarcode", value: barcode})
+          return;
+        }
+        setBarcodeError('');
+        const payload = {
+          itemName: data.itemName,
+          count: data.count,
+          packSize: data.packSize,
+          lowStock: data.lowStock
+          // todo: categories
+        };
+        // console.log("payload:", payload);
+        dispatch({type:'itemLookup', value: payload});
+      })
     })
     return 
   }
@@ -173,6 +179,8 @@ export default function Inventory() {
 
   // When an item is submitted from the add-item or edit-item form, write the updated item to firebase.
   function handleUpdateSubmit() {
+    setStatusLoading();
+
     const barcode = state.barcode;                                                                          // required
     const itemName = state.itemName;                                                                        // required
     const packSize = state.packSize ? state.packSize : 1;                                                   // defaults to 1
@@ -195,7 +203,7 @@ export default function Inventory() {
     .then(json => {
       if (json.error) {
         // console.log("update item failure:", json.error);
-        setStatusError(`update item failure: ${json.error}`);
+        setStatusError(json.error);
       } else {
         console.log("update success:", json.message);
         dispatch({type: 'reset'});
@@ -209,6 +217,8 @@ export default function Inventory() {
   }
 
   function handleAddSubmit() {
+    setStatusLoading();
+
     const barcode = state.barcode;                                                                          // required
     const itemName = state.itemName;                                                                        // required
     const packSize = state.packSize ? state.packSize : 1;                                                   // defaults to 1
@@ -241,7 +251,7 @@ export default function Inventory() {
     .then((response) => response.json())
     .then(json => {
       if (json.error) {
-        setStatusError(`add item failure: ${json.error}`) 
+        setStatusError(json.error) 
       } else {
         // console.log(`successfully added item ${itemName} (${barcode})`)
         dispatch({type: 'reset'});
@@ -258,7 +268,7 @@ export default function Inventory() {
     setErrors(emptyErrors);
     dispatch({type:'reset'});
     setStatus({
-      ...status, error: ""
+      ...status, loading: false, error: ""
     })
   }
   function closeUpdateItem() {
@@ -266,7 +276,7 @@ export default function Inventory() {
     setErrors(emptyErrors);
     dispatch({type:'reset'});
     setStatus({
-      ...status, error: ""
+      ...status, loading: false, error: ""
     })
   }
 
@@ -310,7 +320,7 @@ export default function Inventory() {
             </Sidebar>
           </div>
           <div className="py-4 px-8">
-            {status.success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-3">{status.success}</div>}
+            {status.success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded relative mb-3">{status.success}</div>}
             <Table className="table-auto my-1" data={data}></Table>
           </div>
         </div>

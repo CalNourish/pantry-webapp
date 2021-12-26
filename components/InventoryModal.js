@@ -29,7 +29,9 @@ export default function InventoryModal(props) {
                 {props.isAdd ? "Add Item" : "Edit Item"}
             </div>
             <div className="modal-content pt-6">
-                {props.status.error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-3">{props.status.error}</div>}                
+                {props.status.loading && <div className="bg-yellow-200 border border-yellow-400 text-yellow-700 px-4 py-2 rounded relative mb-3">submitting...</div>}
+                {props.status.error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded relative mb-3">
+                    Error: <span className="font-mono font-bold">{props.status.error}</span></div>}                
                 <div className="modal-body">
                     <form id="modal-form" className="bg-white rounded mb-4" onSubmit={props.onSubmitHandler}>
                         <div className="mb-4">
