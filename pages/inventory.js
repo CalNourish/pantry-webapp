@@ -12,6 +12,7 @@ import firebase from 'firebase';
   - display categories in add/update modals. might have to wait for categories API to be finished.
   - live updates: whenever item is updated, immediately updates page (without refresh)
     ... but what about add/delete? maybe rare enough that we don't need this...
+  - make the filters work!!
 */
 
 export default function Inventory() {
