@@ -4,14 +4,7 @@ import firebase from 'firebase/app';
 import Select from 'react-select';
 import {useReducer} from 'react';
 
-
-async function doAutofill(field, lookupFunc) {
-    var barcode = field.target.value;
-    console.log("looking up: ", barcode);
-    lookupFunc(barcode);
-}
-
-export default function ModalContent(props) {
+export default function InventoryModal(props) {
     const fetcher = (url) => fetch(url).then((res) => res.json());
     const { data, error } = useSWR("/api/categories/ListCategories", fetcher);
     if (error) return <div>Failed to load Modal</div>
@@ -36,7 +29,7 @@ export default function ModalContent(props) {
                 {props.isAdd ? "Add Item" : "Edit Item"}
             </div>
             <div className="modal-content pt-6">
-                {/* <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-3">{"Fields missing"}</div> */}
+                {props.status.error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-3">{props.status.error}</div>}                
                 <div className="modal-body">
                     <form id="modal-form" className="bg-white rounded mb-4" onSubmit={props.onSubmitHandler}>
                         <div className="mb-4">
@@ -44,8 +37,8 @@ export default function ModalContent(props) {
                                 Item Barcode
                             </label>
                             <input type="text" id="barcode" autoComplete="off"
-                                className={"shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" + (props.errors.barcode && " border-red-500")}
-                                placeholder="scan or type item barcode" onBlur={props.barcodeLookup ? (e) => doAutofill(e, props.barcodeLookup) : null}
+                                className={"shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" + (props.errors.barcode && " border-2 border-red-500")}
+                                placeholder="scan or type item barcode" onBlur={props.barcodeLookup ? (e) => props.barcodeLookup(e.target.value) : null}
                                 value={props.parentState.barcode} onChange={(e) => {props.dispatch({type: 'editItemBarcode', value: e.currentTarget.value})}}/>
                             {props.errors.barcode && <div className="mt-2 text-sm text-red-600">{props.errors.barcode}</div>}
                         </div>
@@ -92,7 +85,7 @@ export default function ModalContent(props) {
                                     </label>
                                     <input type="number" id="lowStock" autoComplete="off"
                                         className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                        placeholder="default: -1" value={props.parentState.lowStock} 
+                                        placeholder="default: 10" value={props.parentState.lowStock} 
                                         onChange={(e) => {props.dispatch({type: 'editItemLowStock', value: e.currentTarget.value})}} />
                                 </div>
                             </div>
