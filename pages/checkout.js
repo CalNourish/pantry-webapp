@@ -1,4 +1,5 @@
 import Layout from '../components/Layout'
+import Sidebar from '../components/Sidebar'
 import useSWR from 'swr';
 import React from 'react';
 
@@ -41,6 +42,18 @@ class Cart extends React.Component {
     t = t ? t : 5000;
     clearTimeout(this.errorTimer);
     this.errorTimer = setTimeout(() => this.setState({error: null}), t);
+  }
+
+  showSuccess(msg, t) {
+    /* show error banner with error text for 5 seconds, or custom time */
+    this.setState({
+      error: null,
+      success: msg
+    });
+
+    t = t ? t : 5000;
+    clearTimeout(this.successTimer);
+    this.successTimer = setTimeout(() => this.setState({success: null}), t);
   }
 
   addItem(newItem, quantity) {
@@ -124,7 +137,7 @@ class Cart extends React.Component {
       if (!barcode) {
         this.showError("Please enter a barcode in the field to the left.")
       } else {
-        this.showError(`Invalid Barcode (${barcode})`)
+        this.showError(`Not a valid barcode (${barcode})`, 10000)
       }
     }
   }
@@ -133,11 +146,7 @@ class Cart extends React.Component {
     e.preventDefault();
     const token = cookie.get("firebaseToken")
     let reqbody = this.makeReq();
-    this.setState({
-      error: null,
-      success: "Submitting cart..."
-    })
-    setTimeout(() => this.setState({success: null}), 10000);
+    this.showSuccess("Submitting cart...", 10000)
 
     if (this.state.itemsInCart == 0) {
       this.showError("Cannot submit: Cart is empty");
@@ -157,9 +166,8 @@ class Cart extends React.Component {
           items: items,
           itemsInCart: 0,
           error: null,
-          success: "Cart submitted successfully!"
       })
-      setTimeout(() => this.setState({success: null}), 10000);
+      this.showSuccess("Cart submitted successfully", 10000)
     } else {
       this.showError("Error submitting cart.");
       return;
@@ -201,28 +209,30 @@ class Cart extends React.Component {
         <Layout>
           <div className="flex h-full">
             {/* Left-hand column (Barcode and Quantity form) */}
-            <div className="w-1/4 bg-gray-200 items-center p-5">
+            <div className="w-1/4">
+              <Sidebar className="py-4">
               <form className="m-2" id="checkout-item-form" onSubmit={(e) => this.itemFormSubmit(e)}>
-                <h1 className="text-3xl font-semibold mb-2">Checkout Item</h1>
-                <p className="mb-5">Please enter the amount, then scan the item to add it to the cart. Click "Check Out" to submit the cart.</p>
-                <div className="form-group" id="barcode-and-quantity">
-                  <div className="col-xs-7 mb-4">
-                    <h1 className="text-2xl font-medium mb-2" autoFocus>Barcode</h1>
-                    <input className="border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="barcode" autoComplete="off"></input>
+                  <h1 className="text-3xl font-semibold mb-2">Checkout Item</h1>
+                  <p className="mb-5">Please enter the amount, then scan the item to add it to the cart. Click "Check Out" to submit the cart.</p>
+                  <div className="form-group" id="barcode-and-quantity">
+                    <div className="col-xs-7 mb-4">
+                      <h1 className="text-2xl font-medium mb-2" autoFocus>Barcode</h1>
+                      <input className="border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="barcode" autoComplete="off"></input>
+                    </div>
+                    <div className="col-xs-8 mb-4">
+                      <h1 className="text-2xl font-medium mb-2">Quantity</h1>
+                      <input className="border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="quantity" autoComplete="off" placeholder="default: 1"></input>
+                    </div>
                   </div>
-                  <div className="col-xs-8 mb-4">
-                    <h1 className="text-2xl font-medium mb-2">Quantity</h1>
-                    <input className="border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="quantity" autoComplete="off" placeholder="default: 1"></input>
-                  </div>
-                </div>
-                <button className="btn-pantry-blue py-2 px-4 mr-3 rounded-md" type="submit">Add Item</button>
-              </form>
+                  <button className="btn-pantry-blue py-2 px-4 mr-3 rounded-md" type="submit">Add Item</button>
+                </form>
+              </Sidebar>
             </div>
 
             {/* Main body (Cart and Checkout) */}
             <div className="w-3/4 p-5">
-              {this.state.error ? errorBanner: null}
-              {this.state.success ? successBanner : null}
+              {this.state.error && errorBanner}
+              {this.state.success && successBanner}
               <h1 className="text-3xl font-medium mb-2">Cart</h1>
               <table className="w-full table-fixed my-5" id="mycart">
                 <thead>
