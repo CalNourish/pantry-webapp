@@ -8,8 +8,11 @@ import React, { useState, useReducer } from 'react';
 import cookie from 'js-cookie';
 
 /* TODO:
-  - display categories in add/update modals. might have to wait for categories to be finished.
-  - live updates: change quantities when firebase updates */
+  - display categories in add/update modals. might have to wait for categories API to be finished.
+  - live updates: change quantities when firebase updates 
+  - delete items from page too?
+  - general success/error banner?
+*/
 
 export default function Inventory() {
   const token = cookie.get("firebaseToken")
@@ -21,14 +24,26 @@ export default function Inventory() {
     packSize: "",
     categoryName: "",
     lowStock: "",
-  }
+  };
+
+  const noErrors = {
+    barcode: "",
+    itemName: "",
+    count: "",
+    packSize: "",
+    lowStock: "",
+    status: "",
+  };
 
   // A reducer to manage the State of the add-item / edit-item forms. 
   function formReducer(state, action) {
     switch (action.type) { 
       case "reset":
-          return emptyItem
+        let packOpt = document.getElementById("packOption")
+        if (packOpt) packOpt.value = 'individual'
+        return emptyItem
       case 'editItemName': {
+        setNameError("");
         return {
           ...state,
           itemName: action.value
@@ -41,6 +56,7 @@ export default function Inventory() {
         }
       }         
       case 'editItemCount': {
+        setCountError("");
         return {
           ...state,
           count: parseInt(action.value)
@@ -82,8 +98,15 @@ export default function Inventory() {
   // Manage modal show/don't show State
   const [showAddItem, setShowAddItem] = useState(false);
   const [showEditItem, setShowEditItem] = useState(false);
-  const [barcodeError, setBarcodeError] = useState('');
+  const [errors, setErrors] = useState({noErrors});
   
+
+  const setBarcodeError = (errorMsg) => setErrors({...errors, barcode: errorMsg})
+  const setNameError = (errorMsg) => setErrors({...errors, itemName: errorMsg})
+  const setCountError = (errorMsg) => setErrors({...errors, count: errorMsg})
+  const setPackError = (errorMsg) => setErrors({...errors, packSize: errorMsg})
+  const setLowStockError = (errorMsg) => setErrors({...errors, lowStock: errorMsg})
+
   // Manage form State (look up useReducer tutorials if unfamiliar)
   const [ state, dispatch ] = useReducer(formReducer, emptyItem)
 
@@ -98,7 +121,7 @@ export default function Inventory() {
         result.json().then((data) => {
           if (data.error) {
             /* reset everything except for the barcode */
-            setBarcodeError("no existing item with this barcode");
+            setErrors({...errors, barcode: "no existing item with this barcode"});
             dispatch({type: "reset"})
             dispatch({type: "editItemBarcode", value: barcode})
             return;
@@ -107,11 +130,12 @@ export default function Inventory() {
           const payload = {
             itemName: data.itemName,
             count: data.count,
-            packSize: data.packSize
+            packSize: data.packSize,
+            lowStock: data.lowStock
             // todo: categories
           };
-          
           console.log("payload:", payload);
+          document.getElementById("packOption").value = 'individual';
           dispatch({type:'itemLookup', value: payload});
         })
     })
@@ -128,36 +152,40 @@ export default function Inventory() {
             setBarcodeError("item already exists with this barcode");
             return;
           }
-          setBarcodeError("");
+          setErrors({
+            ...errors,
+            barcode: ""
+          });
         })
     })
   }
 
   // When an item is submitted from the add-item or edit-item form, write the updated item to firebase.
-  function handleUpdateSubmit(e) {
-    e.preventDefault();
-    const barcode = state.barcode;                                                        // required
-    const itemName = state.itemName;                                                      // required
-    const packSize = state.packSize ? state.packSize : 1;                                 // defaults to 1
-    const quantity = state.count * (e.target.packOption.value == "packs" ? packSize : 1)  // required
+  function handleUpdateSubmit() {
+    const barcode = state.barcode;                                                                          // required
+    const itemName = state.itemName;                                                                        // required
+    const packSize = state.packSize ? state.packSize : 1;                                                   // defaults to 1
+    const quantity = state.count * (document.getElementById("packOption").value == "packs" ? packSize : 1)  // required
+    const lowStock = state.lowStock ? state.lowStock : -1;                                                  // defaults to -1
 
-    /* todo: if field is empty, just don't update it at all? */
+    /* todo: if field is empty, just don't include it in payload at all? */
 
     const payload = JSON.stringify({
       "barcode": barcode,
       "itemName": itemName,
       "packSize": packSize,
-      "count": quantity
+      "count": quantity,
+      "lowStock": lowStock
     });
     fetch('/api/inventory/UpdateItem', { method: 'POST', 
       body: payload,
       headers: {'Content-Type': "application/json", 'Authorization': token}})
     .then((response) => response.json())
     .then(json => {
-      console.log("updateItem status:", json);
       if (json.error) {
-
+        console.log("update failure:", json.error);
       } else {
+        console.log("update success:", json.message);
         dispatch({type: 'reset'});
         // setShowEditItem(false);
       }
@@ -167,25 +195,29 @@ export default function Inventory() {
     return
   }
 
-  function handleAddSubmit(e) {
-    e.preventDefault();
-    // TODO: submit the payload to firebase using firebase API call
-    const barcode = state.barcode;                                                        // required
-    const itemName = state.itemName;                                                      // required
-    const packSize = state.packSize ? state.packSize : 1;                                 // defaults to 1
-    const quantity = state.count * (e.target.packOption.value == "packs" ? packSize : 1)  // required
+  function handleAddSubmit() {
+    const barcode = state.barcode;                                                                          // required
+    const itemName = state.itemName;                                                                        // required
+    const packSize = state.packSize ? state.packSize : 1;                                                   // defaults to 1
+    const count = state.count * (document.getElementById("packOption").value == "packs" ? packSize : 1)     // defaults to 0
+    const lowStock = state.lowStock ? state.lowStock : -1;                                                  // defaults to -1
 
-    if (!(barcode && itemName && packSize && quantity)) {
-      console.log("field(s) missing")
-      return;
+    if (!barcode || !itemName) {
+      setErrors({
+        ...errors,
+        barcode: barcode ? errors.barcode : "missing item barcode",
+        itemName: itemName ? "" : "missing item name",
+      });
+      return
     }
 
     const payload = JSON.stringify({
       "barcode": barcode,
       "itemName": itemName,
       "packSize": packSize,
-      "count": quantity,
+      "count": count,
       "categoryName": {'547G7Gnikt': '547G7Gnikt'}, // todo: fix categories
+      "lowStock": lowStock
       /* created by? */
     });
 
@@ -197,27 +229,28 @@ export default function Inventory() {
     .then(json => {
       console.log("addItem status:", json);
       if (json.error) {
-
+        console.log("add failure:", json.error);
       } else {
         dispatch({type: 'reset'});
+        setErrors(noErrors);
         setShowEditItem(false);
       }
     })
 
     // TODO: would be nice to display a success message using toastr or something here (synchronously after firebase call)  
-    dispatch({type: 'reset'})
-    setShowEditItem(false)
+    // dispatch({type: 'reset'})
+    // setShowEditItem(false)
     return
   }
 
   function closeAddItem() {
     setShowAddItem(false); 
-    setBarcodeError("");
+    setErrors(noErrors);
     dispatch({type:'reset'});
   }
   function closeUpdateItem() {
     setShowEditItem(false); 
-    setBarcodeError("");
+    setErrors(noErrors);
     dispatch({type:'reset'});
   }
 
@@ -228,26 +261,27 @@ export default function Inventory() {
         <Modal id="add-item-modal" isOpen={showAddItem} onRequestClose={closeAddItem} ariaHideApp={false}>
           <ModalContent
               onSubmitHandler={handleAddSubmit} 
+              onCloseHandler={closeAddItem}
               formReducer={formReducer} 
               dispatch={dispatch}
               parentState={state}
               isAdd={true}
               barcodeLookup={handleLookupAdd}
-              barcodeError={barcodeError}/>
-          <button onClick={closeAddItem} type="close" className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Close</button>
+              errors={errors}/>
         </Modal>
         
         {/*  Edit Item Modal  */}
         <Modal id="edit-item-modal" isOpen={showEditItem} onRequestClose={closeUpdateItem} ariaHideApp={false}>
           <ModalContent
               onSubmitHandler={handleUpdateSubmit} 
+              onCloseHandler={closeUpdateItem}
               formReducer={formReducer}
               dispatch={dispatch}
               parentState={state}
               isAdd={false}
               barcodeLookup={handleLookupEdit}
-              barcodeError={barcodeError}/>
-          <button onClick={closeUpdateItem} type="close" className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Close</button>
+              errors={errors}/>
+          
         </Modal>
         
         <div className="flex">
