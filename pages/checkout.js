@@ -39,7 +39,8 @@ class Cart extends React.Component {
     });
 
     t = t ? t : 5000;
-    setTimeout(() => this.setState({error: null}), t);
+    clearTimeout(this.errorTimer);
+    this.errorTimer = setTimeout(() => this.setState({error: null}), t);
   }
 
   addItem(newItem, quantity) {
@@ -123,7 +124,7 @@ class Cart extends React.Component {
       if (!barcode) {
         this.showError("Please enter a barcode in the field to the left.")
       } else {
-        this.showError(`Invalid Barcode (${barcode})`)  
+        this.showError(`Invalid Barcode (${barcode})`)
       }
     }
   }
@@ -201,7 +202,7 @@ class Cart extends React.Component {
           <div className="flex h-full">
             {/* Left-hand column (Barcode and Quantity form) */}
             <div className="w-1/4 bg-gray-200 items-center p-5">
-              <form className="w-4/5" id="checkout-item-form" onSubmit={(e) => this.itemFormSubmit(e)}>
+              <form className="m-2" id="checkout-item-form" onSubmit={(e) => this.itemFormSubmit(e)}>
                 <h1 className="text-3xl font-semibold mb-2">Checkout Item</h1>
                 <p className="mb-5">Please enter the amount, then scan the item to add it to the cart. Click "Check Out" to submit the cart.</p>
                 <div className="form-group" id="barcode-and-quantity">
@@ -214,7 +215,7 @@ class Cart extends React.Component {
                     <input className="border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="quantity" autoComplete="off" placeholder="default: 1"></input>
                   </div>
                 </div>
-                <button className="bg-blue-300 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">Add Item</button>
+                <button className="btn-pantry-blue py-2 px-4 mr-3 rounded-md" type="submit">Add Item</button>
               </form>
             </div>
 
@@ -240,7 +241,7 @@ class Cart extends React.Component {
                   </tr>
                 </tbody>
               </table>
-              <button className="bg-blue-300 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" onClick={(e) => this.submitCart(e)}>Checkout</button>
+              <button className="btn-pantry-blue py-2 px-4 mr-3 rounded-md" onClick={(e) => this.submitCart(e)}>Checkout</button>
             </div>
           </div>
         </Layout>
