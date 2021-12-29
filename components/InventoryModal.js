@@ -4,6 +4,52 @@ import firebase from 'firebase/app';
 import Select from 'react-select';
 import {useReducer} from 'react';
 
+
+class CheckboxGrid extends React.Component {
+    constructor(props) {
+        super(props);
+        this.options = props.categories;
+        this.dispatch = props.dispatch;
+    }
+
+    markCategory(idx) {
+        let toggleCategory = this.options[idx];
+        let itemCategories = this.props.parentState.categoryName;
+        console.log("toggle", toggleCategory.displayName);
+        if (toggleCategory.id in itemCategories) {
+            delete this.props.parentState.categoryName[toggleCategory.id];
+        } else {
+            itemCategories[toggleCategory.id] = toggleCategory.id;
+        }
+        this.dispatch({type: "editCategories", value: this.props.parentState.categoryName})
+        console.log("new checked object:", this.props.parentState.categoryName)
+    }
+
+    render() {
+        let opt = this.options;
+        let categories = this.props.parentState.categoryName;
+        console.log("categories:", categories);
+
+        return (
+            <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                    Categories
+                </label>
+                <div className="grid grid-cols-4 gap-4">
+                    { Object.keys(opt).map((idx) => {
+                        return (
+                            <div className="" onClick={() => {this.markCategory(idx)}}>
+                                <input type="checkbox" key={`category-${idx}`} className="w-4 h-4 mr-3" checked={categories && opt[idx].id in categories}/>
+                                <label>{opt[idx].displayName}</label>
+                            </div>
+                        )
+                    }) }
+                </div>
+            </div>
+        )
+    }
+}
+
 export default function InventoryModal(props) {
     const fetcher = (url) => fetch(url).then((res) => res.json());
     const { data, error } = useSWR("/api/categories/ListCategories", fetcher);
@@ -11,17 +57,7 @@ export default function InventoryModal(props) {
     if (!data) return <div>Loading...</div>
 
     // A reducer to get the categories from firebase in a format that is react-select friendly.
-    const categoryReducer = (acc, obj) => {
-        acc = [
-            ...acc,
-            {
-                label: obj.displayName,
-                value: obj.id
-            }
-        ]
-        return acc
-    }
-    const categoryOptions = data.categories.reduce(categoryReducer, [])
+    const categoryOptions = data.categories;
 
     return (
         <div className="modal-wrapper m-5">
@@ -33,7 +69,8 @@ export default function InventoryModal(props) {
                 {props.status.error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded relative mb-3">
                     Error: <span className="font-mono font-bold">{props.status.error}</span></div>}                
                 <div className="modal-body">
-                    <form id="modal-form" className="bg-white rounded mb-4" onSubmit={props.onSubmitHandler}>
+                    <form id="modal-form" className="bg-white rounded mb-4" onSubmit={(e) => props.onSubmitHandler(e)}>
+                        {/* Item Barcode */}
                         <div className="mb-4">
                             <label className="block text-gray-700 text-sm font-bold mb-2">
                                 Item Barcode
@@ -44,6 +81,8 @@ export default function InventoryModal(props) {
                                 value={props.parentState.barcode} onChange={(e) => {props.dispatch({type: 'editItemBarcode', value: e.currentTarget.value})}}/>
                             {props.errors.barcode && <div className="mt-2 text-sm text-red-600">{props.errors.barcode}</div>}
                         </div>
+
+                        {/* Item Name */}
                         <div className="mb-4">
                             <label className="block text-gray-700 text-sm font-bold mb-2">
                                 Item Name
@@ -54,6 +93,8 @@ export default function InventoryModal(props) {
                                 onChange={(e) => {props.dispatch({type: 'editItemName', value: e.currentTarget.value})}} />
                             {props.errors.itemName && <div className="mt-2 text-sm text-red-600">{props.errors.itemName}</div>}
                         </div>
+
+                        {/* Count */}
                         <div className="mb-4">
                             <label className="block text-gray-700 text-sm font-bold mb-2">
                                 Quantity in Stock
@@ -70,6 +111,8 @@ export default function InventoryModal(props) {
                             </div>
                             {props.errors.count && <div className="mt-2 text-sm text-red-600">{props.errors.count}</div>}
                         </div>
+
+                        {/* PackSize, Lowstock */}
                         <div className="mb-4">
                             <div className="flex relative items-stretch">
                                 <div className="mr-3">
@@ -92,11 +135,15 @@ export default function InventoryModal(props) {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Categories */}
+                        <CheckboxGrid categories={categoryOptions} parentState={props.parentState} dispatch={props.dispatch} />
+
+                        <button type="submit" className="btn-pantry-blue py-2 px-4 mr-3 rounded-md">Submit</button>
+                        <button onClick={props.onCloseHandler} type="close" className="btn-outline py-2 px-4 rounded-md">Close</button>
                     </form>
                 </div>
             </div>
-            <button className="btn-pantry-blue py-2 px-4 mr-3 rounded-md" onClick={props.onSubmitHandler}>Submit</button>
-            <button onClick={props.onCloseHandler} type="close" className="bg-gray-500 hover:bg-gray-400 text-white py-2 px-4 rounded-md">Close</button>
-        </div>
+            </div>
     )
   }

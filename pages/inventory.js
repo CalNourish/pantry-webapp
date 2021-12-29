@@ -23,7 +23,7 @@ export default function Inventory() {
     barcode: "",
     count: "",
     packSize: "",
-    categoryName: "",
+    categoryName: {},
     lowStock: "",
   };
 
@@ -160,14 +160,23 @@ export default function Inventory() {
           dispatch({type: "editItemBarcode", value: barcode})
           return;
         }
+
         setBarcodeError('');
+        let categories = {};
+        for (let idx in data.categoryName) {
+          let categoryId = data.categoryName[idx];
+          categories[categoryId] = categoryId;
+        }
+
         const payload = {
           itemName: data.itemName,
           count: data.count,
           packSize: data.packSize,
-          lowStock: data.lowStock
+          lowStock: data.lowStock,
+          categoryName: categories
           // todo: categories
         };
+        console.log("item lookup:", payload)
         dispatch({type:'itemLookup', value: payload});
       })
     })
@@ -195,7 +204,8 @@ export default function Inventory() {
   }
 
   // When an item is submitted from the add-item or edit-item form, write the updated item to firebase.
-  function handleUpdateSubmit() {
+  function handleUpdateSubmit(e) {
+    e.preventDefault();
     setStatusLoading();
 
     const barcode = state.barcode;                                                                          // required
@@ -203,6 +213,7 @@ export default function Inventory() {
     const packSize = state.packSize ? state.packSize : 1;                                                   // defaults to 1
     const quantity = state.count * (document.getElementById("packOption").value == "packs" ? packSize : 1)  // required
     const lowStock = state.lowStock ? state.lowStock : -1;                                                  // defaults to -1
+    const categories = state.categoryName;
 
     /* todo: if field is empty, just don't include it in payload at all? */
 
@@ -211,7 +222,8 @@ export default function Inventory() {
       "itemName": itemName,
       "packSize": packSize,
       "count": quantity,
-      "lowStock": lowStock
+      "lowStock": lowStock,
+      "categoryName": categories
     });
     fetch('/api/inventory/UpdateItem', { method: 'POST', 
       body: payload,
@@ -231,7 +243,8 @@ export default function Inventory() {
     return
   }
 
-  function handleAddSubmit() {
+  function handleAddSubmit(e) {
+    e.preventDefault();
     setStatusLoading();
 
     const barcode = state.barcode;                                                                          // required
@@ -239,6 +252,7 @@ export default function Inventory() {
     const packSize = state.packSize ? state.packSize : 1;                                                   // defaults to 1
     const count = state.count * (document.getElementById("packOption").value == "packs" ? packSize : 1)     // defaults to 0
     const lowStock = state.lowStock ? state.lowStock : -1;                                                  // defaults to -1
+    const categories = state.categoryName;
 
     if (!barcode || !itemName) {
       setErrors({
@@ -246,6 +260,7 @@ export default function Inventory() {
         barcode: barcode ? errors.barcode : "missing item barcode",
         itemName: itemName ? "" : "missing item name",
       });
+      setStatusError("missing field(s)")
       return
     }
 
@@ -254,24 +269,29 @@ export default function Inventory() {
       "itemName": itemName,
       "packSize": packSize,
       "count": count,
-      "categoryName": {'547G7Gnikt': '547G7Gnikt'}, // todo: fix categories
+      "categoryName": categories,
       "lowStock": lowStock
       /* created by? */
     });
 
+    console.log("fetching API for payload:", payload)
+
     fetch('/api/inventory/AddItem', { method: 'POST', 
       body: payload,
       headers: {'Content-Type': "application/json", 'Authorization': token}})
-    .then((response) => response.json())
-    .then(json => {
-      if (json.error) {
-        setStatusError(json.error) 
-      } else {
-        dispatch({type: 'reset'});
-        setErrors(emptyErrors);
-        closeAddItem();
-        setStatusSuccess(`successfully added: ${itemName} (${barcode})`);
-      }
+    .then((response) => {
+      // console.log(response)
+      response.json()
+      .then(json => {
+        if (json.error) {
+          setStatusError(json.error) 
+        } else {
+          dispatch({type: 'reset'});
+          setErrors(emptyErrors);
+          closeAddItem();
+          setStatusSuccess(`successfully added: ${itemName} (${barcode})`);
+        }
+      })
     })
     // location.reload(); // todo: should we force page refresh to show item?
     return
@@ -329,7 +349,7 @@ export default function Inventory() {
               <h1 className="text-3xl font-semibold mb-2">Inventory</h1>
               <div className="my-4">
                 <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowAddItem(true)}>Add new item</button>
-                <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowEditItem(true)}>Edit existing item</button>
+                <button className="my-1 btn-outline w-56 rounded-md p-1" onClick={() => setShowEditItem(true)}>Edit existing item</button>
               </div>
             </Sidebar>
           </div>

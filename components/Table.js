@@ -79,7 +79,8 @@ export default function Table(props) {
                         </thead>
                         <tbody>
                             { Object.keys(data).map((key) => {
-                                return <TableRow key={key} id={key} itemName={data[key].itemName} itemCount={data[key].count} itemCategories={data[key].categoryName} itemLowStock={data[key].lowStock}/> // need to look up category name
+                                return <TableRow key={key} id={key} itemName={data[key].itemName} itemCount={data[key].count} itemCategories={data[key].categoryName} 
+                                                 itemLowStock={data[key].lowStock} showBarcodes={true} />
                             }) 
                             }
                         </tbody>

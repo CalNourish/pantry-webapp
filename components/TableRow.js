@@ -1,7 +1,7 @@
 import useSWR from 'swr';
 
 
-export default function TableRow({id, itemName, itemCount, itemCategories, itemLowStock}) {
+export default function TableRow({id, itemName, itemCount, itemCategories, itemLowStock, showBarcodes}) {
     const fetcher = (url) => fetch(url).then((res) => res.json());
     const { data, error } = useSWR("/api/categories/ListCategories", fetcher);
     const categoryReducer = (acc, obj) => {
@@ -19,7 +19,7 @@ export default function TableRow({id, itemName, itemCount, itemCategories, itemL
             toDisplay.push(
                 <span className="relative inline-block p-1 px-3 py-1 font-semibold text-gray-900 leading-tight">
                     <span aria-hidden
-                        className="absolute inset-0 bg-gray-400 opacity-50 rounded-full"></span>
+                        className="absolute inset-0 bg-gray-400 opacity-50 rounded-full mx-1"></span>
                     <span className="relative">{categoryLookup[element]}</span>
                 </span>
             )
@@ -41,6 +41,7 @@ export default function TableRow({id, itemName, itemCount, itemCategories, itemL
                     </p>
                 </div>
             </div>
+            {showBarcodes ? <div id={`barcode-${id}`} className="ml-3 text-gray-500">{id}</div> : ""}
         </td>
         <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
             <p className="text-gray-900 whitespace-no-wrap">{categoryDisplay(itemCategories)}</p>
