@@ -50,6 +50,10 @@ export default async function(req,res) {
       }
     }
 
+    if (body["categoryName"]) {
+      body["categoryName"] = Object.keys(body["categoryName"])
+    }
+
     FIELDS.forEach(field => {
       if (body[field]) {
         updatedFields[field] = body[field];
