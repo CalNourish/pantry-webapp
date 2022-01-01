@@ -35,7 +35,7 @@ class CheckboxGrid extends React.Component {
                 <label className="block text-gray-700 text-sm font-bold mb-2">
                     Categories
                 </label>
-                <div className="grid grid-cols-4 gap-4">
+                <div className={"grid grid-cols-4 gap-4 p-2" + (this.props.error ? " rounded-md border border-red-500" : "")}>
                     { Object.keys(opt).map((idx) => {
                         return (
                             <div className="" onClick={() => {this.markCategory(idx)}}>
@@ -45,6 +45,7 @@ class CheckboxGrid extends React.Component {
                         )
                     }) }
                 </div>
+                {this.props.error && <div className="mt-2 text-sm text-red-600">{this.props.error}</div>}
             </div>
         )
     }
@@ -137,7 +138,7 @@ export default function InventoryModal(props) {
                         </div>
 
                         {/* Categories */}
-                        <CheckboxGrid categories={categoryOptions} parentState={props.parentState} dispatch={props.dispatch} />
+                        <CheckboxGrid categories={categoryOptions} parentState={props.parentState} dispatch={props.dispatch} error={props.errors.categoryName} />
 
                         <button type="submit" className="btn-pantry-blue py-2 px-4 mr-3 rounded-md">Submit</button>
                         <button onClick={props.onCloseHandler} type="close" className="btn-outline py-2 px-4 rounded-md">Close</button>

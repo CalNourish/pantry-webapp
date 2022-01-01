@@ -1,16 +1,13 @@
-import useSWR from 'swr';
-
-
-export default function TableRow({id, itemName, itemCount, itemCategories, itemLowStock, showBarcodes}) {
-    const fetcher = (url) => fetch(url).then((res) => res.json());
-    const { data, error } = useSWR("/api/categories/ListCategories", fetcher);
+export default function TableRow({id, itemName, itemCount, itemCategories, itemLowStock, showBarcodes, categoryData}) {
+    // const fetcher = (url) => fetch(url).then((res) => res.json());
+    // const { data, error } = useSWR("/api/categories/ListCategories", fetcher);
     const categoryReducer = (acc, obj) => {
         acc[obj.id] = obj.displayName
         return acc
     }
     let categoryLookup = []
-    if (data) {
-        categoryLookup = data.categories.reduce(categoryReducer, []) 
+    if (categoryData) {
+        categoryLookup = categoryData.categories.reduce(categoryReducer, []) 
     } 
 
     function categoryDisplay(itemCategories) {

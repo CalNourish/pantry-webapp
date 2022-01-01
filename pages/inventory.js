@@ -32,7 +32,8 @@ export default function Inventory() {
     itemName: "",
     count: "",
     packSize: "",
-    lowStock: ""
+    lowStock: "",
+    categoryName: ""
   };
 
   const emptyStatus = {
@@ -75,6 +76,7 @@ export default function Inventory() {
         }
       }  
       case 'editCategories': {
+        setCategoryError("");
         return {
           ...state,
           categoryName: action.value
@@ -112,6 +114,7 @@ export default function Inventory() {
   const setBarcodeError = (errorMsg) => setErrors({...errors, barcode: errorMsg})
   const setNameError = (errorMsg) => setErrors({...errors, itemName: errorMsg})
   const setCountError = (errorMsg) => setErrors({...errors, count: errorMsg})
+  const setCategoryError = (errorMsg) => setErrors({...errors, categoryName: errorMsg})
 
   var successTimeout;
   const setStatusLoading = () => {
@@ -253,12 +256,14 @@ export default function Inventory() {
     const count = state.count * (document.getElementById("packOption").value == "packs" ? packSize : 1)     // defaults to 0
     const lowStock = state.lowStock ? state.lowStock : -1;                                                  // defaults to -1
     const categories = state.categoryName;
+    let catNum = Object.keys(categories).length;
 
-    if (!barcode || !itemName) {
+    if (!barcode || !itemName || !catNum) {
       setErrors({
         ...errors,
         barcode: barcode ? errors.barcode : "missing item barcode",
         itemName: itemName ? "" : "missing item name",
+        categoryName: catNum ? "" : "missing category name(s)"
       });
       setStatusError("missing field(s)")
       return
