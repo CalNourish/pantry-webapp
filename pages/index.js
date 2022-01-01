@@ -95,9 +95,9 @@ export default function Home() {
                   "emailAddress": "sakejon@berkeley.edu",
                   "calID": "100",
                   "items" : {
-                    1111: 483 //barcode:count
+                    9797: 100, 1111:1 //barcode:count
                   },
-                  "deliveryDate":"09/28",
+                  "deliveryDate":"12/10",
           }),
                 headers: {'Content-Type': "application/json", 'Authorization': token}}) 
         }}> AddOrder Button </button>
