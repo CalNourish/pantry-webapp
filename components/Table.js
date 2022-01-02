@@ -1,26 +1,60 @@
 import TableRow from "./TableRow"
 import useSWR from 'swr';
+import React, { useState } from 'react';
+
 
 export default function Table(props) {
     // get category lookup info
-    const itemData = props.data
-
     const fetcher = (url) => fetch(url).then((res) => res.json());
     const { data, error } = useSWR("/api/categories/ListCategories", fetcher);
+    const [categoryFilter, setCategoryFilter] = useState("");
+    const [searchFilter, setSearchFilter] = useState("");
 
-    if (!itemData || !data) {
-        return null // TODO: make a ghost table
+    if (!props.data || !data) {
+        return null
     }
-    console.log(data.categories);
+
+    console.log(categoryFilter, searchFilter);
+
+    function inFilter(barcode) {
+        var success = true;
+        const categories = props.data[barcode].categoryName;
+        if (categoryFilter) {
+            success = false;
+            for (var idx in categories) {
+                if (categoryFilter == categories[idx]) {
+                    success = true;
+                    break;
+                }
+            }
+        }
+        const name = props.data[barcode].itemName.toLowerCase();
+        if (success && searchFilter) {
+            if (name.indexOf(searchFilter) == -1 && !barcode.startsWith(searchFilter)) {
+                success = false;
+            }
+        }
+        return success;
+    }
 
     // do any filtering here - edit the data variable
+    var itemData = {};
+    if (categoryFilter || searchFilter) {
+        for (let item in props.data) {
+            if (inFilter(item)) {
+                itemData[item] = props.data[item];
+            }
+        }
+    } else {
+        itemData = props.data;
+    }
 
   return (
     <div className="antialiased font-sans">
     <div className="container mx-auto px-4 sm:px-8">
         <div className="py-8">
-            <div className="w-1/2 mr-0">
-                <div className="font-semibold">Filter by...</div>
+            <div className="mr-0">
+                <div className="font-semibold">Filter:</div>
                 <div className="my-2 flex sm:flex-row flex-col">
                     <div className="flex flex-row mb-1 sm:mb-0">
                         {/* <div className="relative">
@@ -38,9 +72,9 @@ export default function Table(props) {
                             </div>
                         </div> */}
                         <div className="relative">
-                            <select
-                                className="appearance-none h-full rounded-l border block w-full bg-white border-gray-400 text-gray-700 py-2 px-4 pr-8 leading-tight focus:outline-none focus:bg-white focus:border-gray-500">
-                                <option>All categories</option>
+                            <select className="appearance-none h-full rounded-l border block w-full bg-white border-gray-400 text-gray-700 py-2 px-4 pr-8 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                    onChange={(e) => {setCategoryFilter(e.target.value)}}>
+                                <option value="">All categories</option>
                                 {data.categories.map((cat) => {
                                     return <option value={cat.id}>{cat.displayName}</option>
                                 })}
@@ -61,7 +95,7 @@ export default function Table(props) {
                                 </path>
                             </svg>
                         </span>
-                        <input placeholder="Search for an item"
+                        <input placeholder="Search name or barcode" onChange={(e) => {setSearchFilter(e.target.value.toLowerCase())}}
                             className="appearance-none rounded-r rounded-l sm:rounded-l-none border border-gray-400 border-b block pl-8 pr-6 py-2 w-full bg-white text-sm placeholder-gray-400 text-gray-700 focus:bg-white focus:placeholder-gray-600 focus:text-gray-700 focus:outline-none" />
                     </div>
                 </div>
@@ -72,7 +106,7 @@ export default function Table(props) {
                         <thead>
                             <tr>
                                 <th
-                                    className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-3/4">
                                     Item Name
                                 </th>
                                 <th
