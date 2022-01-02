@@ -7,6 +7,7 @@ import Modal from 'react-modal'
 import React, { useState, useReducer, useEffect } from 'react';
 import cookie from 'js-cookie';
 import firebase from 'firebase';
+import { useUser } from '../context/userContext'
 
 /* TODO:
   - display categories in add/update modals. might have to wait for categories API to be finished.
@@ -322,45 +323,56 @@ export default function Inventory() {
     })
   }
 
+  const { loadingUser, user } = useUser()
+  if (user && user.authorized === "true") {
+      
+  }
+
   return (
     <>
       <Layout>
-        {/* Add Item Modal */}
-        <Modal id="add-item-modal" isOpen={showAddItem} onRequestClose={closeAddItem}>
-          <InventoryModal
-              onSubmitHandler={handleAddSubmit} 
-              onCloseHandler={closeAddItem}
-              dispatch={dispatch}
-              parentState={state}
-              isAdd={true}
-              barcodeLookup={handleLookupAdd}
-              errors={errors}
-              status={status}/>
-        </Modal>
-        
-        {/*  Edit Item Modal  */}
-        <Modal id="edit-item-modal" isOpen={showEditItem} onRequestClose={closeUpdateItem}>
-          <InventoryModal
-              onSubmitHandler={handleUpdateSubmit} 
-              onCloseHandler={closeUpdateItem}
-              dispatch={dispatch}
-              parentState={state}
-              isAdd={false}
-              barcodeLookup={handleLookupEdit}
-              errors={errors}
-              status={status}/>
-        </Modal>
+        {!(user && user.authorized === "true") ? "" :
+          <>
+            {/* Add Item Modal */}
+            <Modal id="add-item-modal" isOpen={showAddItem} onRequestClose={closeAddItem}>
+              <InventoryModal
+                  onSubmitHandler={handleAddSubmit} 
+                  onCloseHandler={closeAddItem}
+                  dispatch={dispatch}
+                  parentState={state}
+                  isAdd={true}
+                  barcodeLookup={handleLookupAdd}
+                  errors={errors}
+                  status={status}/>
+            </Modal>
+            
+            {/*  Edit Item Modal  */}
+            <Modal id="edit-item-modal" isOpen={showEditItem} onRequestClose={closeUpdateItem}>
+              <InventoryModal
+                  onSubmitHandler={handleUpdateSubmit} 
+                  onCloseHandler={closeUpdateItem}
+                  dispatch={dispatch}
+                  parentState={state}
+                  isAdd={false}
+                  barcodeLookup={handleLookupEdit}
+                  errors={errors}
+                  status={status}/>
+            </Modal>
+          </>
+        }
         
         <div className="flex">
-          <div className="w-64 bg-gray-200 items-center">
-            <Sidebar className="py-4">
-              <h1 className="text-3xl font-semibold mb-2">Inventory</h1>
-              <div className="my-4">
-                <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowAddItem(true)}>Add new item</button>
-                <button className="my-1 btn-outline w-56 rounded-md p-1" onClick={() => setShowEditItem(true)}>Edit existing item</button>
+          {!(user && user.authorized === "true") ? "" :
+              <div className="w-64 bg-gray-200 items-center">
+                <Sidebar className="py-4">
+                  <h1 className="text-3xl font-semibold mb-2">Inventory</h1>
+                  <div className="my-4">
+                    <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowAddItem(true)}>Add new item</button>
+                    <button className="my-1 btn-outline w-56 rounded-md p-1" onClick={() => setShowEditItem(true)}>Edit existing item</button>
+                  </div>
+                </Sidebar>
               </div>
-            </Sidebar>
-          </div>
+          }
           <div className="py-4 px-8">
             {status.success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded relative mb-3">{status.success}</div>}
             {Object.keys(dataState).length > 0 ? <Table className="table-auto my-1" data={dataState}></Table>

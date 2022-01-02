@@ -104,8 +104,8 @@ export default function Table(props) {
         }
     }
     sortRows(itemData);
-
-  return (
+    
+    return (
     <div className="antialiased font-sans">
     <div className="container mx-auto px-4 sm:px-8">
         <div className="py-8">
@@ -153,7 +153,7 @@ export default function Table(props) {
                                 <th onClick={() => {setSortBy(sortBy == "itemName" ? "-itemName" : "itemName")}}
                                     className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer">
                                     <div className="flex">
-                                        <div>Item Name</div>
+                                        <div className="ml-3">Item Name</div>
                                         <div className="ml-auto">{sortBy == "itemName" ? "\u25BC" : sortBy == "-itemName" ? "\u25B2" : ""}</div>
                                     </div>
                                 </th>
@@ -164,7 +164,7 @@ export default function Table(props) {
                                 <th onClick={() => {setSortBy(sortBy == "count" ? "-count" : "count")}}
                                     className="px-3 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer">
                                     <div className="flex">
-                                        <div>Count</div>
+                                        <div className="mr-3">Count</div>
                                         <div className="ml-auto">{sortBy == "count" ? "\u25BC" : sortBy == "-count" ? "\u25B2" : ""}</div>
                                     </div>
                                 </th>
