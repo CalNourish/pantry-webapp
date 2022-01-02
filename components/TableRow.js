@@ -1,4 +1,4 @@
-export default function TableRow({id, itemName, itemCount, itemCategories, itemLowStock, showBarcodes, categoryData}) {
+export default function TableRow({barcode, itemName, itemCount, itemCategories, itemLowStock, showBarcodes, categoryData}) {
     // const fetcher = (url) => fetch(url).then((res) => res.json());
     // const { data, error } = useSWR("/api/categories/ListCategories", fetcher);
     const categoryReducer = (acc, obj) => {
@@ -29,7 +29,7 @@ export default function TableRow({id, itemName, itemCount, itemCategories, itemL
     itemLowStock = (itemLowStock && itemLowStock >= 0) ? itemLowStock : 10;
 
     return (
-        <tr id={id}>
+        <tr id={barcode}>
         <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
             <div className="flex items-center">
                 <div className="ml-3">
@@ -38,7 +38,7 @@ export default function TableRow({id, itemName, itemCount, itemCategories, itemL
                     </p>
                 </div>
             </div>
-            {showBarcodes ? <div id={`barcode-${id}`} className="ml-3 text-gray-500">{id}</div> : ""}
+            {showBarcodes ? <div id={`barcode-${barcode}`} className="ml-3 text-gray-500">{barcode}</div> : ""}
         </td>
         <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
             <p className="text-gray-900 whitespace-no-wrap">{categoryDisplay(itemCategories)}</p>
@@ -53,19 +53,19 @@ export default function TableRow({id, itemName, itemCount, itemCategories, itemL
                 className="relative inline-block px-3 py-1 font-semibold text-green-900 leading-tight">
                 <span aria-hidden
                     className="absolute inset-0 bg-green-200 opacity-50 rounded-full"></span>
-                <span className="relative">In Stock</span>
+                <span className="relative overflow-hidden whitespace-no-wrap">In Stock</span>
             </span>}
             {(itemLowStock >= itemCount) && (itemCount > 0) && <span
                 className="relative inline-block px-3 py-1 font-semibold text-yellow-900 leading-tight">
                 <span aria-hidden
                     className="absolute inset-0 bg-yellow-200 opacity-50 rounded-full"></span>
-                <span className="relative">Low Stock</span>
+                <span className="relative overflow-hidden whitespace-no-wrap">Low Stock</span>
             </span>}
             {(itemCount <= 0) && <span
                 className="relative inline-block px-3 py-1 font-semibold text-red-900 leading-tight">
                 <span aria-hidden
                     className="absolute inset-0 bg-red-200 opacity-50 rounded-full"></span>
-                <span className="relative">Out of Stock</span>
+                <span className="relative overflow-hidden whitespace-no-wrap">Out of Stock</span>
             </span>}
         </td>
     </tr>

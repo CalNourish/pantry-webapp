@@ -285,9 +285,12 @@ export default function Inventory() {
       body: payload,
       headers: {'Content-Type': "application/json", 'Authorization': token}})
     .then((response) => {
-      // console.log(response)
+      if (response.status == 500) {
+        setStatusError("Internal server error (make sure you're logged in)");
+      }
       response.json()
       .then(json => {
+        console.log("json success:", json)
         if (json.error) {
           setStatusError(json.error) 
         } else {
