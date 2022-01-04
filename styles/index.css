@@ -10,10 +10,6 @@
 @tailwind utilities;
 /* Stop purging. */
 
-/* Your own custom utilities */
-
-/* The Modal (background) */
-
 /* Custom components */
 @layer components {
 
