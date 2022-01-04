@@ -25,4 +25,5 @@ if (typeof window !== 'undefined' && !firebase.apps.length) {
   // Not using analytics
   firebase.initializeApp(clientCredentials)
 }
+
 export default firebase
