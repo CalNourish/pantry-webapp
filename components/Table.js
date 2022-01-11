@@ -2,7 +2,7 @@ import TableRow from "./TableRow"
 import useSWR from 'swr';
 import React, { useState } from 'react';
 
-
+/* Table used in the inventory page. */
 export default function Table(props) {
     // get category lookup info
     const fetcher = (url) => fetch(url).then((res) => res.json());

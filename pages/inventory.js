@@ -9,13 +9,6 @@ import cookie from 'js-cookie';
 import firebase from 'firebase';
 import { useUser } from '../context/userContext'
 
-/* TODO:
-  - display categories in add/update modals. might have to wait for categories API to be finished.
-  - live updates: whenever item is updated, immediately updates page (without refresh)
-    ... but what about add/delete? maybe rare enough that we don't need this...
-  - make the filters work!!
-*/
-
 export default function Inventory() {
   const token = cookie.get("firebaseToken")
 
@@ -101,9 +94,6 @@ export default function Inventory() {
     }
     return state
   }
- 
-  // const fetcher = (url) => fetch(url).then((res) => res.json())
-  // const { data, error } = useSWR("/api/inventory", fetcher);
 
   // Manage modal show/don't show State
   const [showAddItem, setShowAddItem] = useState(false);
@@ -219,8 +209,6 @@ export default function Inventory() {
     const lowStock = state.lowStock ? state.lowStock : -1;                                                  // defaults to -1
     const categories = state.categoryName;
 
-    /* todo: if field is empty, just don't include it in payload at all? */
-
     const payload = JSON.stringify({
       "barcode": barcode,
       "itemName": itemName,
@@ -242,9 +230,6 @@ export default function Inventory() {
         setStatusSuccess(`successfully updated: ${itemName} (${barcode})`);
       }
     })
-
-    // TODO: would be nice to display a success message using toastr or something here (synchronously after firebase call)  
-    return
   }
 
   function handleAddSubmit(e) {
@@ -302,8 +287,6 @@ export default function Inventory() {
         }
       })
     })
-    // location.reload(); // todo: should we force page refresh to show item?
-    return
   }
 
   function closeAddItem() {

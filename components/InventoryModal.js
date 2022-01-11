@@ -4,7 +4,7 @@ import firebase from 'firebase/app';
 import Select from 'react-select';
 import {useReducer} from 'react';
 
-
+/* category checkboxes, used in add/edit item modal */
 class CheckboxGrid extends React.Component {
     constructor(props) {
         super(props);
@@ -51,6 +51,7 @@ class CheckboxGrid extends React.Component {
     }
 }
 
+/* Add/Edit item modal used on the authenticated version of the inventory page */
 export default function InventoryModal(props) {
     const fetcher = (url) => fetch(url).then((res) => res.json());
     const { data, error } = useSWR("/api/categories/ListCategories", fetcher);
