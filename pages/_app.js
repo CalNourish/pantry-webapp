@@ -32,6 +32,8 @@ MyApp.getInitialProps = async (appContext) => {
         Authorization: JSON.stringify({ "token": firebaseToken }),
       };
       const result = await fetch(`${server}/api/validate`, { headers }).then((res) => res.json());
+      console.log("server:", server);
+      console.log("vercel_url:", process.env.VERCEL_URL);
       return { ...result, ...appProps };
     } catch (e) {
       console.log(e);

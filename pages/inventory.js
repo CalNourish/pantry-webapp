@@ -8,8 +8,9 @@ import React, { useState, useReducer, useEffect } from 'react';
 import cookie from 'js-cookie';
 import firebase from 'firebase';
 import { useUser } from '../context/userContext'
+import { server } from './_app.js'
 
-export const server = process.env.VERCEL_URL ? process.env.VERCEL_URL : "http://localhost:3000"
+// const server = process.env.VERCEL_URL ? process.env.VERCEL_URL : "http://localhost:3000"
 
 export default function Inventory() {
   const token = cookie.get("firebaseToken")
