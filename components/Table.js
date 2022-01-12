@@ -1,8 +1,9 @@
 import TableRow from "./TableRow"
 import useSWR from 'swr';
 import React, { useState } from 'react';
+import { server } from "../pages/_app.js"
 
-export const server = process.env.VERCEL_URL ? process.env.VERCEL_URL : "http://localhost:3000"
+// const server = process.env.VERCEL_URL ? process.env.VERCEL_URL : "http://localhost:3000"
 
 /* Table used in the inventory page. */
 export default function Table(props) {
@@ -14,7 +15,8 @@ export default function Table(props) {
     const [sortBy, setSortBy] = useState("");
 
     if (!props.data || !data) {
-        console.log("no category data fetched")
+        console.log("no category data fetched from", `${server}/api/categories/ListCategories`)
+        console.log(error)
         return null
     }
 
