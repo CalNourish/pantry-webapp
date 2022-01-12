@@ -16,8 +16,6 @@ export default function Inventory() {
   const token = cookie.get("firebaseToken")
 
   console.log("server:", server);
-  console.log("vercel_url:", process.env.VERCEL_URL);
-  console.log(process.env.NEXT_PUBLIC_VERCEL_URL);
 
   const emptyItem =  {
     itemName: "",

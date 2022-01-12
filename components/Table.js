@@ -18,6 +18,8 @@ export default function Table(props) {
         console.log("no category data fetched from", `${server}/api/categories/ListCategories`)
         console.log(error)
         return null
+    } else {
+        console.log("category data successfully fetched from", `${server}/api/categories/ListCategories`)
     }
 
     function inFilter(barcode) {
