@@ -129,6 +129,7 @@ export default function Inventory() {
     ref.once("value", snapshot => {
       let res = snapshot.val();
         console.log("completed loading data")
+        console.log(res);
         changeData(res);
     })
   }
