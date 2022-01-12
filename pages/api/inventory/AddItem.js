@@ -21,7 +21,7 @@ export const config = {
 function requireParams(body, res) {
     console.log(body)
     // require barcode and count and itemName
-    if (!body.barcode || !body.count || !body.itemName) {
+    if (!body.barcode || (body.count == undefined) || !body.itemName) {
         console.log("Not ok1")
         res.status(400).json({error: "missing barcode||count||itemName in request"});
     }

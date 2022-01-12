@@ -41,7 +41,7 @@ export default async function(req,res) {
 
   return new Promise((resolve, reject) => {
     const {body} = req
-    console.log("req: ", body);
+    // console.log("req: ", body);
 
     // verify parameters
     let ok = requireParams(body, res);
@@ -110,4 +110,4 @@ function makeid(length) {
     return result;
  }
  
- console.log(makeid(5));
+//  console.log(makeid(5));
