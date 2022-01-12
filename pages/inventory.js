@@ -309,6 +309,13 @@ export default function Inventory() {
     })
   }
 
+  const { loadingUser, user } = useUser();
+  if (user && user.authorized === "true") {
+    console.log(user, "authorized")
+  } else {
+    console.log("not authorized", user)
+  }
+
   return (
     <>
       <Layout>
