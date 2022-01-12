@@ -309,11 +309,6 @@ export default function Inventory() {
     })
   }
 
-  const { loadingUser, user } = useUser()
-  if (user && user.authorized === "true") {
-      
-  }
-
   return (
     <>
       <Layout>

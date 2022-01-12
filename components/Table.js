@@ -14,6 +14,7 @@ export default function Table(props) {
     const [sortBy, setSortBy] = useState("");
 
     if (!props.data || !data) {
+        console.log("no category data fetched")
         return null
     }
 
