@@ -4,6 +4,8 @@ import firebase from 'firebase/app';
 import Select from 'react-select';
 import {useReducer} from 'react';
 
+export const server = process.env.VERCEL_URL ? process.env.VERCEL_URL : "http://localhost:3000"
+
 /* category checkboxes, used in add/edit item modal */
 class CheckboxGrid extends React.Component {
     constructor(props) {
@@ -54,7 +56,7 @@ class CheckboxGrid extends React.Component {
 /* Add/Edit item modal used on the authenticated version of the inventory page */
 export default function InventoryModal(props) {
     const fetcher = (url) => fetch(url).then((res) => res.json());
-    const { data, error } = useSWR("/api/categories/ListCategories", fetcher);
+    const { data, error } = useSWR(`${server}/api/categories/ListCategories`, fetcher);
     if (error) return <div>Failed to load Modal</div>
     if (!data) return <div>Loading...</div>
 

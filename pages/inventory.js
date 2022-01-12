@@ -9,6 +9,8 @@ import cookie from 'js-cookie';
 import firebase from 'firebase';
 import { useUser } from '../context/userContext'
 
+export const server = process.env.VERCEL_URL ? process.env.VERCEL_URL : "http://localhost:3000"
+
 export default function Inventory() {
   const token = cookie.get("firebaseToken")
 
@@ -144,7 +146,7 @@ export default function Inventory() {
 
   // When a barcode is scanned in the edit-item-lookup modal, look up this barcode in Firebase.
   function handleLookupEdit(barcode) {
-    fetch(`/api/inventory/GetItem/${barcode}`)
+    fetch(`${server}/api/inventory/GetItem/${barcode}`)
     .then((result) => {
       result.json().then((data) => {
         if (data.error) {
@@ -183,7 +185,7 @@ export default function Inventory() {
       return;
     }
 
-    fetch(`/api/inventory/GetItem/${barcode}`)
+    fetch(`${server}/api/inventory/GetItem/${barcode}`)
     .then((result) => {
         result.json().then((data) => {
           
@@ -217,7 +219,7 @@ export default function Inventory() {
       "lowStock": lowStock,
       "categoryName": categories
     });
-    fetch('/api/inventory/UpdateItem', { method: 'POST', 
+    fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST', 
       body: payload,
       headers: {'Content-Type': "application/json", 'Authorization': token}})
     .then((response) => response.json())
@@ -267,7 +269,7 @@ export default function Inventory() {
 
     console.log("fetching API for payload:", payload)
 
-    fetch('/api/inventory/AddItem', { method: 'POST', 
+    fetch(`${server}/api/inventory/AddItem`, { method: 'POST', 
       body: payload,
       headers: {'Content-Type': "application/json", 'Authorization': token}})
     .then((response) => {
