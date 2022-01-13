@@ -137,15 +137,15 @@ export default function Inventory() {
   }
 
   /* do this once, after dataState is set */
-  if (Object.keys(dataState).length > 0) {
-    ref.once("child_changed", snapshot => {
-      let barcode = snapshot.val().barcode
-      changeData({
-        ...dataState,
-        [barcode]: snapshot.val()
-      });
-    });
-  }
+  // if (Object.keys(dataState).length > 0) {
+  //   ref.once("child_changed", snapshot => {
+  //     let barcode = snapshot.val().barcode
+  //     changeData({
+  //       ...dataState,
+  //       [barcode]: snapshot.val()
+  //     });
+  //   });
+  // }
 
   // When a barcode is scanned in the edit-item-lookup modal, look up this barcode in Firebase.
   function handleLookupEdit(barcode) {
