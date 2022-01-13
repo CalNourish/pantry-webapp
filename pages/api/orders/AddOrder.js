@@ -20,13 +20,13 @@ function requireParams(body, res) {
     if (!body.firstName || !body.lastName || !body.address ||
         !body.emailAddress || !body.calID || !body.items || !body.deliveryDate) {
           res.json({error: "missing firstName||lastName||EmailAddress||Address||calID||items||deliveryDate\
-             in request"}); //orderTimeStamp is part of order, but not something the user cares about
+             in request"}); 
             res.status(400);
             return false;
         }
     //require order items object with at least one entry (order array)
     if (body.items.length <= 0) {
-        res.json({error: "missing order item"}); //this line could be more clear
+        res.json({error: "missing order item"}); 
         res.status(400);
         return false;
     } 
@@ -41,9 +41,8 @@ function updateInventory(items) { //updates firebase
       value.json().then((inventoryJson) => {
          const inventoryUpdates = {}
          for (let item in items) {
-           console.log(inventoryJson[item]);
   
-           if (inventoryJson[item]['count'] >= items[item]) { //if how much we have in inventory >= how much user wants
+           if (inventoryJson[item]['count'] >= items[item]) { //if we have enough in inventory for order
             inventoryUpdates['/inventory/' + item + "/count"] = firebase.database.ServerValue.increment(-1 * items[item]);
            }
            else {
@@ -51,7 +50,6 @@ function updateInventory(items) { //updates firebase
              return reject("Quantity exceeded"); 
            }
          }
-         //return firebase.database().ref().update(inventoryUpdates);  should i put a return here? 
          firebase.database().ref().update(inventoryUpdates).then(() => {
            return resolve("Inventory updated");
          })
@@ -73,13 +71,11 @@ function addOrder(firstName, lastName, address, emailAddress, calID, items, deli
       (process.env.GOOGLE_SHEETS_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
       target
     );
-    // console.log(process.env.GOOGLE_SHEETS_CLIENT_EMAIL, process.env.GOOGLE_SHEETS_PRIVATE_KEY, "email, key");
     const sheets = google.sheets({ version: 'v4', auth: jwt });
     const request = {
       spreadsheetId: process.env.SPREADSHEET_ID,
       range: "Sheet1!A:H",
-      valueInputOption: "USER_ENTERED", //as opposed to RAW
-      //includeValuesInResponse: true, //this was for values.update()
+      valueInputOption: "USER_ENTERED", 
       insertDataOption: "INSERT_ROWS",
       resource: {
           range: "Sheet1!A:H",
@@ -103,9 +99,8 @@ export default async function(req,res) {
         return Promise.reject();
     } 
     const {body} = req //this line unpacks the request object 
-    console.log("req: ", body);
+    //console.log("req: ", body);
     
-    // verify parameters, this part is causing a weird error, so i will remove it for now
     let ok = requireParams(body, res); 
     if (!ok) {
       return Promise.reject();
@@ -113,7 +108,6 @@ export default async function(req,res) {
     firebase.auth().signInAnonymously()
     .then(() => {
       updateInventory(body.items).then((success) => {
-        console.log("success", success);
         addOrder(body.firstName, body.lastName, body.address, body.emailAddress, 
           body.calID, body.items, body.deliveryDate).then(() => {
             console.log("Added to google sheets");
