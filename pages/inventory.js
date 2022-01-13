@@ -106,6 +106,7 @@ export default function Inventory() {
   const [errors, setErrors] = useState(emptyErrors);
   const [status, setStatus] = useState(emptyStatus);
   const [dataState, changeData] = useState({});
+  const [categoryState, setCategories] = useState({});
 
   const setBarcodeError = (errorMsg) => setErrors({...errors, barcode: errorMsg})
   const setNameError = (errorMsg) => setErrors({...errors, itemName: errorMsg})
@@ -147,6 +148,17 @@ export default function Inventory() {
   //     });
   //   });
   // }
+
+  if (Object.keys(categoryState).length == 0) {
+    fetch(`${server}/api/categories/ListCategories`)
+    .then((result) => {
+      result.json().then((data) => {
+        setCategories(data);
+      })
+    })
+  } else {
+    console.log("categories:", categoryState);
+  }
 
   // When a barcode is scanned in the edit-item-lookup modal, look up this barcode in Firebase.
   function handleLookupEdit(barcode) {
@@ -365,9 +377,9 @@ export default function Inventory() {
               </div>
           }
           <div className="py-4 px-8">
-            {/* {status.success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded relative mb-3">{status.success}</div>} */}
+            {status.success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded relative mb-3">{status.success}</div>}
             {Object.keys(dataState).length > 0
-              ? <Table className="table-auto my-1" data={dataState}></Table>
+              ? <Table className="table-auto my-1" data={dataState} categories={categoryState}></Table>
               : "Loading inventory..."}
           </div>
         </div>
