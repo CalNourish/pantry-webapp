@@ -20,6 +20,7 @@ export default function Table(props) {
         return null
     } else {
         console.log("category data successfully fetched from", `${server}/api/categories/ListCategories`)
+        return <div>"a table!"</div>
     }
 
     function inFilter(barcode) {
