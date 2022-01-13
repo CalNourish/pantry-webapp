@@ -5,8 +5,6 @@ import Select from 'react-select';
 import {useReducer} from 'react';
 import { server } from "../pages/_app.js"
 
-// export const server = process.env.VERCEL_URL ? process.env.VERCEL_URL : "http://localhost:3000"
-
 /* category checkboxes, used in add/edit item modal */
 class CheckboxGrid extends React.Component {
     constructor(props) {

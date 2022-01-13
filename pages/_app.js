@@ -25,12 +25,14 @@ MyApp.getInitialProps = async (appContext) => {
   const { firebaseToken } = cookies(ctx);
 
   // If token exists run Firebase validation on server side before rendering.
+  console.log("outside of try/catch in _app.js; token = ", firebaseToken);
   if (firebaseToken) {
     try {
       const headers = {
         'Context-Type': 'application/json',
         Authorization: JSON.stringify({ "token": firebaseToken }),
       };
+      console.log("trying validate?");
       const result = await fetch(`${server}/api/validate`, { headers }).then((res) => res.json());
       return { ...result, ...appProps };
     } catch (e) {

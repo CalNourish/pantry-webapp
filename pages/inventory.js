@@ -131,8 +131,7 @@ export default function Inventory() {
   if (Object.keys(dataState).length == 0) {
     ref.once("value", snapshot => {
       let res = snapshot.val();
-        console.log("completed loading data")
-        console.log(res);
+        console.log("completed loading data:", res);
         changeData(res);
     })
   }
