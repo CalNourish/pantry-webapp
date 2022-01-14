@@ -16,20 +16,17 @@ class CheckboxGrid extends React.Component {
     markCategory(idx) {
         let toggleCategory = this.options[idx];
         let itemCategories = this.props.parentState.categoryName;
-        console.log("toggle", toggleCategory.displayName);
         if (toggleCategory.id in itemCategories) {
             delete this.props.parentState.categoryName[toggleCategory.id];
         } else {
             itemCategories[toggleCategory.id] = toggleCategory.id;
         }
         this.dispatch({type: "editCategories", value: this.props.parentState.categoryName})
-        console.log("new checked object:", this.props.parentState.categoryName)
     }
 
     render() {
         let opt = this.options;
         let categories = this.props.parentState.categoryName;
-        console.log("categories:", categories);
 
         return (
             <div className="mb-4">

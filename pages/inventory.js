@@ -10,12 +10,8 @@ import firebase from 'firebase';
 import { useUser } from '../context/userContext'
 import { server } from './_app.js'
 
-// const server = process.env.VERCEL_URL ? process.env.VERCEL_URL : "http://localhost:3000"
-
 export default function Inventory() {
   const token = cookie.get("firebaseToken")
-
-  console.log("server:", server);
 
   const emptyItem =  {
     itemName: "",
@@ -133,21 +129,20 @@ export default function Inventory() {
     ref.once("value")
     .then(function(resp) {
       let res = resp.val();
-      console.log("completed loading data:", res);
       changeData(res);
     })
   }
 
   /* do this once, after dataState is set */
-  // if (Object.keys(dataState).length > 0) {
-  //   ref.once("child_changed", snapshot => {
-  //     let barcode = snapshot.val().barcode
-  //     changeData({
-  //       ...dataState,
-  //       [barcode]: snapshot.val()
-  //     });
-  //   });
-  // }
+  if (Object.keys(dataState).length > 0) {
+    ref.once("child_changed", snapshot => {
+      let barcode = snapshot.val().barcode
+      changeData({
+        ...dataState,
+        [barcode]: snapshot.val()
+      });
+    });
+  }
 
   if (Object.keys(categoryState).length == 0) {
     fetch(`${server}/api/categories/ListCategories`)
@@ -156,9 +151,8 @@ export default function Inventory() {
         setCategories(data);
       })
     })
-  } else {
-    console.log("categories:", categoryState);
   }
+
 
   // When a barcode is scanned in the edit-item-lookup modal, look up this barcode in Firebase.
   function handleLookupEdit(barcode) {
@@ -186,9 +180,7 @@ export default function Inventory() {
           packSize: data.packSize,
           lowStock: data.lowStock,
           categoryName: categories
-          // todo: categories
         };
-        console.log("item lookup:", payload)
         dispatch({type:'itemLookup', value: payload});
       })
     })
@@ -235,7 +227,7 @@ export default function Inventory() {
       "lowStock": lowStock,
       "categoryName": categories
     });
-    fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST', 
+    fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
       body: payload,
       headers: {'Content-Type': "application/json", 'Authorization': token}})
     .then((response) => response.json())
@@ -283,8 +275,6 @@ export default function Inventory() {
       /* created by? */
     });
 
-    console.log("fetching API for payload:", payload)
-
     fetch(`${server}/api/inventory/AddItem`, { method: 'POST', 
       body: payload,
       headers: {'Content-Type': "application/json", 'Authorization': token}})
@@ -294,7 +284,6 @@ export default function Inventory() {
       }
       response.json()
       .then(json => {
-        console.log("json success:", json)
         if (json.error) {
           setStatusError(json.error) 
         } else {
@@ -325,11 +314,6 @@ export default function Inventory() {
   }
 
   const { loadingUser, user } = useUser();
-  if (user && user.authorized === "true") {
-    console.log(user, "authorized")
-  } else {
-    console.log("not authorized", user)
-  }
 
   return (
     <>

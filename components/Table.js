@@ -3,8 +3,6 @@ import useSWR from 'swr';
 import React, { useState } from 'react';
 import { server } from "../pages/_app.js"
 
-// const server = process.env.VERCEL_URL ? process.env.VERCEL_URL : "http://localhost:3000"
-
 /* Table used in the inventory page. */
 export default function Table(props) {
     // get category lookup info
@@ -15,12 +13,7 @@ export default function Table(props) {
     const [sortBy, setSortBy] = useState("");
 
     if (!props.data || !data) {
-        console.log("no category data fetched from", `${server}/api/categories/ListCategories`)
-        console.log(error)
         return null
-    } else {
-        console.log("category data successfully fetched from", `${server}/api/categories/ListCategories`);
-        console.log("category data (0):", data.categories);
     }
 
     function inFilter(barcode) {
