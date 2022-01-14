@@ -1,18 +1,15 @@
 import TableRow from "./TableRow"
-import useSWR from 'swr';
 import React, { useState } from 'react';
-import { server } from "../pages/_app.js"
 
 /* Table used in the inventory page. */
 export default function Table(props) {
     // get category lookup info
-    const fetcher = (url) => fetch(url).then((res) => res.json());
-    const { data, error } = useSWR(`${server}/api/categories/ListCategories`, fetcher);
+    let categoryData = props.categories;
     const [categoryFilter, setCategoryFilter] = useState("");
     const [searchFilter, setSearchFilter] = useState("");
     const [sortBy, setSortBy] = useState("");
 
-    if (!props.data || !data) {
+    if (!props.data || !categoryData) {
         return null
     }
 
@@ -118,8 +115,8 @@ export default function Table(props) {
                             <select className="appearance-none h-full rounded-l border block w-full bg-white border-gray-400 text-gray-700 py-2 px-4 pr-8 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                                     onChange={(e) => {setCategoryFilter(e.target.value)}}>
                                 <option value="">All categories</option>
-                                {Object.keys(data.categories).map((key) => {
-                                    let cat = data.categories[key];
+                                {Object.keys(categoryData.categories).map((key) => {
+                                    let cat = categoryData.categories[key];
                                     return <option value={cat.id}>{cat.displayName}</option>
                                 })}
                             </select>
@@ -182,7 +179,7 @@ export default function Table(props) {
                         <tbody>
                             { itemData.map((item, idx) => {
                                 return <TableRow key={idx} barcode={item.barcode} itemName={item.itemName} itemCount={item.count} itemCategories={item.categoryName} 
-                                                 itemLowStock={item.lowStock} showBarcodes={true} categoryData={data} />
+                                                 itemLowStock={item.lowStock} showBarcodes={true} categoryData={categoryData} />
                             }) 
                             }
                         </tbody>
