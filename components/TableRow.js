@@ -5,20 +5,22 @@ export default function TableRow({barcode, itemName, itemCount, itemCategories, 
     }
     let categoryLookup = []
     if (categoryData) {
-        categoryLookup = categoryData.categories.reduce(categoryReducer, []) 
-    } 
+        categoryLookup = categoryData.categories.reduce(categoryReducer, [])
+        console.log("category data:", categoryLookup);
+    }
 
     function categoryDisplay(itemCategories) {
         const toDisplay = []
-        for (const element of itemCategories) {
-            toDisplay.push(
-                <span className="relative inline-block p-1 px-3 py-1 font-semibold text-gray-900 leading-tight">
-                    <span aria-hidden
-                        className="absolute inset-0 bg-gray-400 opacity-50 rounded-full mx-1"></span>
-                    <span className="relative">{categoryLookup[element]}</span>
-                </span>
-            )
-          }
+        console.log(itemName, itemCategories);
+        // for (const element of itemCategories) {
+        //     toDisplay.push(
+        //         <span className="relative inline-block p-1 px-3 py-1 font-semibold text-gray-900 leading-tight">
+        //             <span aria-hidden
+        //                 className="absolute inset-0 bg-gray-400 opacity-50 rounded-full mx-1"></span>
+        //             <span className="relative">{categoryLookup[element]}</span>
+        //         </span>
+        //     )
+        //   }
         return toDisplay
     }
 
