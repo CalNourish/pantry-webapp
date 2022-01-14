@@ -1,17 +1,21 @@
 import TableRow from "./TableRow"
 import React, { useState } from 'react';
+import useSWR from 'swr';
+import { server } from "../pages/_app.js"
 
 /* Table used in the inventory page. */
 export default function Table(props) {
     // get category lookup info
-    let categoryData = props.categories;
+    const fetcher = (url) => fetch(url).then((res) => res.json());
+    const { data, error } = useSWR(`${server}/api/categories/ListCategories`, fetcher);
     const [categoryFilter, setCategoryFilter] = useState("");
     const [searchFilter, setSearchFilter] = useState("");
     const [sortBy, setSortBy] = useState("");
 
-    if (!props.data || !categoryData) {
+    if (!props.data || !data) {
         return null
     }
+    let categoryData = data;
 
     function inFilter(barcode) {
         var success = true;
