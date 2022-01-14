@@ -13,16 +13,15 @@ export default function TableRow({barcode, itemName, itemCount, itemCategories, 
 
     function categoryDisplay(itemCategories) {
         const toDisplay = []
-        console.log(itemName, itemCategories);
-        // for (const element of itemCategories) {
-        //     toDisplay.push(
-        //         <span className="relative inline-block p-1 px-3 py-1 font-semibold text-gray-900 leading-tight">
-        //             <span aria-hidden
-        //                 className="absolute inset-0 bg-gray-400 opacity-50 rounded-full mx-1"></span>
-        //             <span className="relative">{categoryLookup[element]}</span>
-        //         </span>
-        //     )
-        //   }
+        for (const key in itemCategories) {
+            toDisplay.push(
+                <span className="relative inline-block p-1 px-3 py-1 font-semibold text-gray-900 leading-tight">
+                    <span aria-hidden
+                        className="absolute inset-0 bg-gray-400 opacity-50 rounded-full mx-1"></span>
+                    <span className="relative">{categoryLookup[itemCategories[key]]}</span>
+                </span>
+            )
+          }
         return toDisplay
     }
 

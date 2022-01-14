@@ -20,7 +20,7 @@ export default function Table(props) {
         return null
     } else {
         console.log("category data successfully fetched from", `${server}/api/categories/ListCategories`);
-        console.log("category data (0):", data);
+        console.log("category data (0):", data.categories);
     }
 
     function inFilter(barcode) {
