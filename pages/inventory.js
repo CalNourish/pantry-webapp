@@ -8,6 +8,7 @@ import React, { useState, useReducer, useEffect } from 'react';
 import cookie from 'js-cookie';
 import firebase from 'firebase';
 import { useUser } from '../context/userContext'
+import { server } from './_app.js'
 
 export default function Inventory() {
   const token = cookie.get("firebaseToken")
@@ -101,6 +102,7 @@ export default function Inventory() {
   const [errors, setErrors] = useState(emptyErrors);
   const [status, setStatus] = useState(emptyStatus);
   const [dataState, changeData] = useState({});
+  const [categoryState, setCategories] = useState({});
 
   const setBarcodeError = (errorMsg) => setErrors({...errors, barcode: errorMsg})
   const setNameError = (errorMsg) => setErrors({...errors, itemName: errorMsg})
@@ -124,10 +126,10 @@ export default function Inventory() {
   /* initialize dataState value */
   const ref = firebase.database().ref('/inventory')
   if (Object.keys(dataState).length == 0) {
-    ref.once("value", snapshot => {
-      let res = snapshot.val();
-        console.log("completed loading data")
-        changeData(res);
+    ref.once("value")
+    .then(function(resp) {
+      let res = resp.val();
+      changeData(res);
     })
   }
 
@@ -142,9 +144,19 @@ export default function Inventory() {
     });
   }
 
+  if (Object.keys(categoryState).length == 0) {
+    fetch(`${server}/api/categories/ListCategories`)
+    .then((result) => {
+      result.json().then((data) => {
+        setCategories(data);
+      })
+    })
+  }
+
+
   // When a barcode is scanned in the edit-item-lookup modal, look up this barcode in Firebase.
   function handleLookupEdit(barcode) {
-    fetch(`/api/inventory/GetItem/${barcode}`)
+    fetch(`${server}/api/inventory/GetItem/${barcode}`)
     .then((result) => {
       result.json().then((data) => {
         if (data.error) {
@@ -168,9 +180,7 @@ export default function Inventory() {
           packSize: data.packSize,
           lowStock: data.lowStock,
           categoryName: categories
-          // todo: categories
         };
-        console.log("item lookup:", payload)
         dispatch({type:'itemLookup', value: payload});
       })
     })
@@ -183,7 +193,7 @@ export default function Inventory() {
       return;
     }
 
-    fetch(`/api/inventory/GetItem/${barcode}`)
+    fetch(`${server}/api/inventory/GetItem/${barcode}`)
     .then((result) => {
         result.json().then((data) => {
           
@@ -217,7 +227,7 @@ export default function Inventory() {
       "lowStock": lowStock,
       "categoryName": categories
     });
-    fetch('/api/inventory/UpdateItem', { method: 'POST', 
+    fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
       body: payload,
       headers: {'Content-Type': "application/json", 'Authorization': token}})
     .then((response) => response.json())
@@ -265,9 +275,7 @@ export default function Inventory() {
       /* created by? */
     });
 
-    console.log("fetching API for payload:", payload)
-
-    fetch('/api/inventory/AddItem', { method: 'POST', 
+    fetch(`${server}/api/inventory/AddItem`, { method: 'POST', 
       body: payload,
       headers: {'Content-Type': "application/json", 'Authorization': token}})
     .then((response) => {
@@ -276,7 +284,6 @@ export default function Inventory() {
       }
       response.json()
       .then(json => {
-        console.log("json success:", json)
         if (json.error) {
           setStatusError(json.error) 
         } else {
@@ -306,10 +313,7 @@ export default function Inventory() {
     })
   }
 
-  const { loadingUser, user } = useUser()
-  if (user && user.authorized === "true") {
-      
-  }
+  const { loadingUser, user } = useUser();
 
   return (
     <>
@@ -358,7 +362,8 @@ export default function Inventory() {
           }
           <div className="py-4 px-8">
             {status.success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded relative mb-3">{status.success}</div>}
-            {Object.keys(dataState).length > 0 ? <Table className="table-auto my-1" data={dataState}></Table>
+            {Object.keys(dataState).length > 0
+              ? <Table className="table-auto my-1" data={dataState} categories={categoryState}></Table>
               : "Loading inventory..."}
           </div>
         </div>

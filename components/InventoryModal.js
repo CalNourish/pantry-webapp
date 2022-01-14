@@ -3,6 +3,7 @@ import useSWR from 'swr';
 import firebase from 'firebase/app';
 import Select from 'react-select';
 import {useReducer} from 'react';
+import { server } from "../pages/_app.js"
 
 /* category checkboxes, used in add/edit item modal */
 class CheckboxGrid extends React.Component {
@@ -15,20 +16,17 @@ class CheckboxGrid extends React.Component {
     markCategory(idx) {
         let toggleCategory = this.options[idx];
         let itemCategories = this.props.parentState.categoryName;
-        console.log("toggle", toggleCategory.displayName);
         if (toggleCategory.id in itemCategories) {
             delete this.props.parentState.categoryName[toggleCategory.id];
         } else {
             itemCategories[toggleCategory.id] = toggleCategory.id;
         }
         this.dispatch({type: "editCategories", value: this.props.parentState.categoryName})
-        console.log("new checked object:", this.props.parentState.categoryName)
     }
 
     render() {
         let opt = this.options;
         let categories = this.props.parentState.categoryName;
-        console.log("categories:", categories);
 
         return (
             <div className="mb-4">
@@ -54,7 +52,7 @@ class CheckboxGrid extends React.Component {
 /* Add/Edit item modal used on the authenticated version of the inventory page */
 export default function InventoryModal(props) {
     const fetcher = (url) => fetch(url).then((res) => res.json());
-    const { data, error } = useSWR("/api/categories/ListCategories", fetcher);
+    const { data, error } = useSWR(`${server}/api/categories/ListCategories`, fetcher);
     if (error) return <div>Failed to load Modal</div>
     if (!data) return <div>Loading...</div>
 
