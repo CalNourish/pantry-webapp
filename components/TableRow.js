@@ -6,7 +6,9 @@ export default function TableRow({barcode, itemName, itemCount, itemCategories, 
     let categoryLookup = []
     if (categoryData) {
         categoryLookup = categoryData.categories.reduce(categoryReducer, [])
-        console.log("category data:", categoryLookup);
+        if (barcode == "041570068274") { // just to print once
+            console.log("category data:", categoryLookup);
+        }
     }
 
     function categoryDisplay(itemCategories) {

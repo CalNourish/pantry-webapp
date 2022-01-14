@@ -8,10 +8,8 @@ import { server } from "../pages/_app.js"
 /* Table used in the inventory page. */
 export default function Table(props) {
     // get category lookup info
-    // const fetcher = (url) => fetch(url).then((res) => res.json());
-    // const { data, error } = useSWR(`${server}/api/categories/ListCategories`, fetcher);
-    let data = props.categories;
-    console.log("categories props:", data);
+    const fetcher = (url) => fetch(url).then((res) => res.json());
+    const { data, error } = useSWR(`${server}/api/categories/ListCategories`, fetcher);
     const [categoryFilter, setCategoryFilter] = useState("");
     const [searchFilter, setSearchFilter] = useState("");
     const [sortBy, setSortBy] = useState("");
@@ -20,6 +18,9 @@ export default function Table(props) {
         console.log("no category data fetched from", `${server}/api/categories/ListCategories`)
         console.log(error)
         return null
+    } else {
+        console.log("category data successfully fetched from", `${server}/api/categories/ListCategories`);
+        console.log("category data (0):", data);
     }
 
     function inFilter(barcode) {
@@ -119,7 +120,7 @@ export default function Table(props) {
             <div className="mr-0">
                 <div className="font-semibold">Filter:</div>
                 <div className="my-2 flex sm:flex-row flex-col">
-                    <div className="flex flex-row mb-1 sm:mb-0">
+                    {/* <div className="flex flex-row mb-1 sm:mb-0">
                         <div className="relative">
                             <select className="appearance-none h-full rounded-l border block w-full bg-white border-gray-400 text-gray-700 py-2 px-4 pr-8 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                                     onChange={(e) => {setCategoryFilter(e.target.value)}}>
@@ -135,7 +136,7 @@ export default function Table(props) {
                                 </svg>
                             </div>
                         </div>
-                    </div>
+                    </div> */}
                     <div className="block relative">
                         <span className="h-full absolute inset-y-0 left-0 flex items-center pl-2">
                             <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current text-gray-500">
