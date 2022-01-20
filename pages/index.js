@@ -95,7 +95,7 @@ export default function Home() {
                   "emailAddress": "sakejon@berkeley.edu",
                   "calID": "100",
                   "items" : {
-                    9797: 100, 1111:1 //barcode:count
+                    9797: 1, 1111:1 //barcode:count
                   },
                   "deliveryDate":"12/10",
           }),
