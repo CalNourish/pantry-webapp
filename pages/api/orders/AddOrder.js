@@ -1,7 +1,6 @@
-import {validateFunc} from '../validate'
-import { google } from 'googleapis';
-//mport { firebase as fb} from 'googleapis/build/src/apis/firebase';
-//import firebase from '../../../firebase/clientApp';    
+import {validateFunc} from '../validate';
+import { google } from 'googleapis'; //npm install googleapis
+import updateGoogleSheets from './UpdateGoogleSheets';
 import firebase from "firebase/app";
 import useSWR from 'swr';
 import { resolveHref } from 'next/dist/next-server/lib/router/router';
@@ -108,7 +107,7 @@ export default async function(req,res) {
     firebase.auth().signInAnonymously()
     .then(() => {
       updateInventory(body.items).then((success) => {
-        addOrder(body.firstName, body.lastName, body.address, body.emailAddress, 
+        updateGoogleSheets(body.firstName, body.lastName, body.address, body.emailAddress, 
           body.calID, body.items, body.deliveryDate).then(() => {
             console.log("Added to google sheets");
           })
