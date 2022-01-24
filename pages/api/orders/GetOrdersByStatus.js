@@ -50,7 +50,7 @@ export default async function(req,res) {
         return firebase.auth().signInAnonymously()
             .then(() => {
                 var ref = firebase.database().ref("/order");                
-                ref.orderByChild("status").equalTo(ORDER_STATUS_OPEN).once("value", snapshot => {
+                ref.orderByChild("status").equalTo(query["status"]).once("value", snapshot => {
                     const orders = snapshot.toJSON();
                     res.status(200).json(orders);
                     return;
