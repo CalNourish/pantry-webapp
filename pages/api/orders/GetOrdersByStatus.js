@@ -1,6 +1,8 @@
 import firebase from '../../../firebase/clientApp'    
 import {validateFunc} from '../validate'
 
+import {ORDER_STATUS_OPEN, ORDER_STATUS_PROCESSING, ORDER_STATUS_COMPLETE} from "../../../utils/orderStatuses"
+
 
 /*
 * /api/inventory/GetOrdersByStatus
@@ -16,9 +18,6 @@ export const config = {
     }
 };
 
-export const ORDER_STATUS_OPEN = "open";
-export const ORDER_STATUS_PROCESSING = "processing";
-export const ORDER_STATUS_COMPLETE = "complete";
 
 function requireParams(query, res) {
     var {status} = query;
@@ -51,8 +50,7 @@ export default async function(req,res) {
             .then(() => {
                 var ref = firebase.database().ref("/order");                
                 ref.orderByChild("status").equalTo(query["status"]).once("value", snapshot => {
-                    const orders = snapshot.toJSON();
-                    res.status(200).json(orders);
+                    res.status(200).json(snapshot.toJSON());
                     return;
                 })
             })
