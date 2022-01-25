@@ -1,6 +1,5 @@
 import {validateFunc} from '../validate';
-import { google } from 'googleapis'; //npm install googleapis
-import updateGoogleSheets from './UpdateGoogleSheets';
+import { google } from 'googleapis'; 
 import firebase from "firebase/app";
 import useSWR from 'swr';
 import { resolveHref } from 'next/dist/next-server/lib/router/router';
@@ -10,7 +9,6 @@ export const config = { // https://nextjs.org/docs/api-routes/api-middlewares
   },
 } 
 
-// when you call addorder.js, it returns a promise 
 function requireParams(body, res) {
     /* require elements: First name, last name, email address, address, calID, 
     delivery_date, order_timestamp, items in the order (orderschema as of now)
@@ -35,7 +33,7 @@ function requireParams(body, res) {
 
 function updateInventory(items) { //updates firebase
   return new Promise((resolve, reject) => {
-    let inventory = fetch(process.env.GET_ALL_ITEMS);//returns inventory as object 
+    let inventory = fetch(process.env.GET_ALL_ITEMS);
     inventory.then((value) => {
       value.json().then((inventoryJson) => {
          const inventoryUpdates = {}
@@ -62,7 +60,8 @@ function updateInventory(items) { //updates firebase
 }
 
 function addOrder(firstName, lastName, address, emailAddress, calID, items, deliveryDate) {
-      //add order data to google sheets
+    //add order data to google sheets
+    // I used this resource as a guide: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace
     const target = ['https://www.googleapis.com/auth/spreadsheets'];
     const jwt = new google.auth.JWT(
       process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
@@ -80,7 +79,7 @@ function addOrder(firstName, lastName, address, emailAddress, calID, items, deli
           range: "Sheet1!A:H",
           "majorDimension": "ROWS",
           "values": [
-          [firstName, lastName, address, emailAddress, calID, JSON.stringify(items), deliveryDate, Date()] //each inner array is a row if we specify ROWS as majorDim
+          [firstName, lastName, address, emailAddress, calID, JSON.stringify(items), deliveryDate, Date()] 
           ] 
         } 
     }
@@ -97,8 +96,7 @@ export default async function(req,res) {
         res.json({error: "you are not authenticated to perform this action"})
         return Promise.reject();
     } 
-    const {body} = req //this line unpacks the request object 
-    //console.log("req: ", body);
+    const {body} = req //unpacks the request object 
     
     let ok = requireParams(body, res); 
     if (!ok) {
@@ -107,7 +105,7 @@ export default async function(req,res) {
     firebase.auth().signInAnonymously()
     .then(() => {
       updateInventory(body.items).then((success) => {
-        updateGoogleSheets(body.firstName, body.lastName, body.address, body.emailAddress, 
+        addOrder(body.firstName, body.lastName, body.address, body.emailAddress, 
           body.calID, body.items, body.deliveryDate).then(() => {
             console.log("Added to google sheets");
           })
