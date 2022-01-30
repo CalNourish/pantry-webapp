@@ -6,17 +6,8 @@ import {ORDER_STATUS_OPEN, ORDER_STATUS_PROCESSING, ORDER_STATUS_COMPLETE} from 
 
 /*
 * /api/orders/SetOrderStatus
-* req.body = { string orderId, string status = ["open"/"processing"/"complete"] }
+* req.body = { string orderId, string status = "open" || "processing" || "complete" }
 */
-
-// something to do with not using the next js body parsing...?
-// may need to disable this in production environments
-// export const config = {
-//     api: {
-//         bodyParser: true,
-//     }
-// };
-
 
 function requireParams(body, res) {
     var {orderId, status} = body;
@@ -77,7 +68,7 @@ export default async function(req, res) {
                     return resolve();
                 }
                 
-                // otherwise the item exists and we can update it
+                // otherwise the orderId exists and we can update the status
                 orderRef.update({"status": newStatus})
                 .catch(function(error) {
                     res.status(500);
