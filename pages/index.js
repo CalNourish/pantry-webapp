@@ -87,6 +87,24 @@ export default function Home() {
 
       <tr><td>
         <button onClick={() => {
+          fetch('/api/orders/AddOrder', { method: 'POST',
+          body: JSON.stringify({
+                  "firstName": "Jake",
+                  "lastName": "Son",
+                  "address": "1021 Berkeley Way",
+                  "emailAddress": "sakejon@berkeley.edu",
+                  "calID": "100",
+                  "items" : {
+                    9797: 1, 1111:1 //barcode:count
+                  },
+                  "deliveryDate":"12/10",
+          }),
+                headers: {'Content-Type': "application/json", 'Authorization': token}}) 
+        }}> AddOrder Button </button>
+      </td></tr>
+
+      <tr><td>
+        <button onClick={() => {
           fetch('/api/categories/AddCategory', { method: 'POST', 
                 body: JSON.stringify({
                   "displayName": "NewCat",
