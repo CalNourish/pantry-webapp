@@ -43,13 +43,11 @@ export default async function(req, res) {
 
     let orderId = req.body.orderId.toString();
     let newStatus = req.body.status.toString();
-    console.log("Setting order status of", orderId, "as", newStatus);
 
     return new Promise((resolve, reject) => {
         firebase.auth().signInAnonymously()
         .then(() => {
             var orderRef = firebase.database().ref("/order/" + orderId);
-            console.log("ref:", "/order/" + orderId)
             
             orderRef.once('value')
             .catch(function(error) {
