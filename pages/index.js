@@ -137,6 +137,13 @@ export default function Home() {
           fixCounts();
         }}> fix count field </button>
       </td></tr>
+
+      <tr><td>
+        <button onClick={() => {
+          fetch('/api/orders/GetOrder/sam_test_order', { method: 'GET',
+                headers: {'Content-Type': "application/json", 'Authorization': token}})
+        }}> Get Order by ID </button>
+      </td></tr>
     </table>
     </Layout>
   </>
