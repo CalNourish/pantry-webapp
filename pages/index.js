@@ -137,6 +137,19 @@ export default function Home() {
           fixCounts();
         }}> fix count field </button>
       </td></tr>
+
+      <tr><td>
+        <button onClick={() => {
+          fetch('/api/orders/SetOrderItemStatus', { method: 'POST', 
+                body: JSON.stringify({
+                  "orderId": "sam_test_order",
+                  "itemId": "1111",
+                  "isPacked": true
+                }),
+                headers: {'Content-Type': "application/json", 'Authorization': token}})
+        }}> SetOrderItemStatus Button </button>
+      </td></tr>
+
     </table>
     </Layout>
   </>
