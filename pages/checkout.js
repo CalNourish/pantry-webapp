@@ -210,8 +210,8 @@ class Cart extends React.Component {
           <div className="flex h-full">
             {/* Left-hand column (Barcode and Quantity form) */}
             <div className="flex-none w-64">
-              <Sidebar className="py-4">
-              <form className="m-2" id="checkout-item-form" onSubmit={(e) => this.itemFormSubmit(e)}>
+              <Sidebar className="py-5">
+              <form className="m-1" id="checkout-item-form" onSubmit={(e) => this.itemFormSubmit(e)}>
                   <h1 className="text-3xl font-semibold mb-2">Checkout Item</h1>
                   <p className="mb-5">Please enter the amount, then scan the item to add it to the cart. Click "Check Out" to submit the cart.</p>
                   <div className="form-group" id="barcode-and-quantity">
