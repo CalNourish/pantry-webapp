@@ -217,7 +217,7 @@ class Cart extends React.Component {
                   <div className="form-group" id="barcode-and-quantity">
                     <div className="col-xs-7 mb-4">
                       <h1 className="text-2xl font-medium mb-2" autoFocus>Barcode</h1>
-                      <input className="border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="barcode" autoComplete="off"></input>
+                      <input className="border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="barcode" autoComplete="off" placeholder="scan item barcode"></input>
                     </div>
                     <div className="col-xs-8 mb-4">
                       <h1 className="text-2xl font-medium mb-2">Quantity</h1>
