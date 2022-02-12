@@ -314,11 +314,12 @@ export default function Inventory() {
   }
 
   const { loadingUser, user } = useUser();
+  let authToken = (user && user.authorized === "true") ? token : null;
 
   return (
     <>
       <Layout>
-        {!(user && user.authorized === "true") ? "" :
+        {!authToken ? "" :
           <>
             {/* Add Item Modal */}
             <Modal id="add-item-modal" isOpen={showAddItem} onRequestClose={closeAddItem}>
@@ -363,7 +364,7 @@ export default function Inventory() {
           <div className="py-4 px-8">
             {status.success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded relative mb-3">{status.success}</div>}
             {Object.keys(dataState).length > 0
-              ? <Table className="table-auto my-1" data={dataState} categories={categoryState}></Table>
+              ? <Table className="table-auto my-1" data={dataState} categories={categoryState} authToken={authToken}></Table>
               : "Loading inventory..."}
           </div>
         </div>

@@ -106,6 +106,8 @@ export default function Table(props) {
         }
     }
     sortRows(itemData);
+
+    console.log(itemData);
     
     return (
     <div className="antialiased font-sans">
@@ -183,7 +185,7 @@ export default function Table(props) {
                         <tbody>
                             { itemData.map((item, idx) => {
                                 return <TableRow key={idx} barcode={item.barcode} itemName={item.itemName} itemCount={item.count} itemCategories={item.categoryName} 
-                                                 itemLowStock={item.lowStock} showBarcodes={true} categoryData={categoryData} />
+                                                 itemLowStock={item.lowStock} showBarcodes={true} categoryData={categoryData} authToken={props.authToken}/>
                             }) 
                             }
                         </tbody>

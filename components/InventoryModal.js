@@ -60,7 +60,8 @@ export default function InventoryModal(props) {
     const categoryOptions = data.categories;
 
     return (
-        <div className="modal-wrapper m-5">
+        <div className="modal-wrapper p-3">
+            <div id="modalExit" className="text-4xl absolute top-0 right-0 cursor-pointer hover:text-gray-600" onClick={props.onCloseHandler}>&times; &nbsp;</div>
             <div className="modal-header text-3xl font-bold">
                 {props.isAdd ? "Add Item" : "Edit Item"}
             </div>
@@ -144,6 +145,6 @@ export default function InventoryModal(props) {
                     </form>
                 </div>
             </div>
-            </div>
+        </div>
     )
   }
