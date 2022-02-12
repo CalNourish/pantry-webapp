@@ -33,7 +33,7 @@ class CheckboxGrid extends React.Component {
                 <label className="block text-gray-700 text-sm font-bold mb-2">
                     Categories
                 </label>
-                <div className={"grid grid-cols-4 gap-4 p-2" + (this.props.error ? " rounded-md border border-red-500" : "")}>
+                <div className={"grid grid-cols-5 gap-4 p-2" + (this.props.error ? " rounded-md border border-red-500" : "")}>
                     { Object.keys(opt).map((idx) => {
                         return (
                             <div className="" onClick={() => {this.markCategory(idx)}}>
@@ -64,7 +64,7 @@ export default function InventoryModal(props) {
             <div className="modal-header text-3xl font-bold">
                 {props.isAdd ? "Add Item" : "Edit Item"}
             </div>
-            <div className="modal-content pt-6">
+            <div className="modal-content pt-3">
                 {props.status.loading && <div className="bg-yellow-200 border border-yellow-400 text-yellow-700 px-4 py-2 rounded relative mb-3">submitting...</div>}
                 {props.status.error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded relative mb-3">
                     Error: <span className="font-mono font-bold">{props.status.error}</span></div>}                
