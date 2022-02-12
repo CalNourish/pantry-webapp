@@ -140,9 +140,12 @@ export default function Home() {
 
       <tr><td>
         <button onClick={() => {
-          fetch('/api/orders/GetOrder/sam_test_order', { method: 'GET',
+          fetch('/api/orders/DeleteOrder', { method: 'POST', 
+                body: JSON.stringify({
+                  "orderId": "deleteME"
+                }),
                 headers: {'Content-Type': "application/json", 'Authorization': token}})
-        }}> Get Order by ID </button>
+        }}> DeleteOrder Button </button>
       </td></tr>
     </table>
     </Layout>
