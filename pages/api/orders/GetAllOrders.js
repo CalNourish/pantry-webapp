@@ -1,8 +1,8 @@
 import firebase from '../../../../firebase/clientApp'    
-import {validateFunc} from '../../validate'
+import {validateFunc} from '../validate'
 
 /*
-* /api/orders/GetOrder/<id>
+* /api/orders/GetAllOrders
 */
 
 // something to do with not using the next js body parsing...?
