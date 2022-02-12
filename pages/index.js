@@ -138,15 +138,29 @@ export default function Home() {
         }}> fix count field </button>
       </td></tr>
 
+    <h2 className='font-bold mt-5'>bag-packing stuff</h2>
+    <div className='ml-5'>
+      <tr><td>
+        <button onClick={() => {
+          fetch('/api/orders/SetPantryNote', { method: 'POST', 
+                body: JSON.stringify({
+                  "orderId": "sam_test_order",
+                  "message": "",
+                }),
+                headers: {'Content-Type': "application/json", 'Authorization': token}})
+        }}> SetPantryNote Button </button>
+      </td></tr>
       <tr><td>
         <button onClick={() => {
           fetch('/api/orders/DeleteOrder', { method: 'POST', 
                 body: JSON.stringify({
-                  "orderId": "deleteME"
+                  "orderId": "deleteME",
                 }),
                 headers: {'Content-Type': "application/json", 'Authorization': token}})
         }}> DeleteOrder Button </button>
       </td></tr>
+    </div>
+
     </table>
     </Layout>
   </>
