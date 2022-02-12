@@ -209,7 +209,7 @@ class Cart extends React.Component {
         <Layout>
           <div className="flex h-full">
             {/* Left-hand column (Barcode and Quantity form) */}
-            <div className="w-1/4">
+            <div className="flex-none w-64">
               <Sidebar className="py-4">
               <form className="m-2" id="checkout-item-form" onSubmit={(e) => this.itemFormSubmit(e)}>
                   <h1 className="text-3xl font-semibold mb-2">Checkout Item</h1>
@@ -224,13 +224,13 @@ class Cart extends React.Component {
                       <input className="border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="quantity" autoComplete="off" placeholder="default: 1"></input>
                     </div>
                   </div>
-                  <button className="btn-pantry-blue py-2 px-4 mr-3 rounded-md" type="submit">Add Item</button>
+                  <button className="my-1 btn btn-pantry-blue w-full" type="submit">Add Item</button>
                 </form>
               </Sidebar>
             </div>
 
             {/* Main body (Cart and Checkout) */}
-            <div className="w-3/4 p-5">
+            <div className="grow p-5">
               {this.state.error && errorBanner}
               {this.state.success && successBanner}
               <h1 className="text-3xl font-medium mb-2">Cart</h1>
@@ -251,7 +251,7 @@ class Cart extends React.Component {
                   </tr>
                 </tbody>
               </table>
-              <button className="btn-pantry-blue py-2 px-4 mr-3 rounded-md" onClick={(e) => this.submitCart(e)}>Checkout</button>
+              <button className="btn my-1 btn-pantry-blue w-40 font-semibold" onClick={(e) => this.submitCart(e)}>Checkout</button>
             </div>
           </div>
         </Layout>
