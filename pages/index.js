@@ -93,9 +93,9 @@ export default function Home() {
                   "lastName": "Son",
                   "address": "1021 Berkeley Way",
                   "emailAddress": "sakejon@berkeley.edu",
-                  "calID": "100",
+                  "calID": "30333333333",
                   "items" : {
-                    9797: 1, 1111:1 //barcode:count
+                    9797: 0, 1111:0 //barcode:count
                   },
                   "deliveryDate":"12/10",
           }),
