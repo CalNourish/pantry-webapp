@@ -144,7 +144,7 @@ export default function Home() {
                 body: JSON.stringify({
                   "orderId": "sam_test_order",
                   "itemId": "1111",
-                  "isPacked": true
+                  "isPacked": "false"
                 }),
                 headers: {'Content-Type': "application/json", 'Authorization': token}})
         }}> SetOrderItemStatus Button </button>
