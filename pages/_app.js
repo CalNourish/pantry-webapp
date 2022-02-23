@@ -1,4 +1,5 @@
 import UserProvider from '../context/userContext'
+import CartProvider from '../context/cartContext'
 import "../styles/index.css"
 import App from 'next/app'
 import cookies from 'next-cookies'
@@ -9,7 +10,9 @@ export const server = process.env.NEXT_PUBLIC_VERCEL_URL ? ("https://" + process
 export default function MyApp({ Component, pageProps }) {
   return (
     <UserProvider>
-      <Component {...pageProps} />
+      <CartProvider>
+        <Component {...pageProps} />
+      </CartProvider>
     </UserProvider>
   )
 }
