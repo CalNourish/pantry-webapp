@@ -1,9 +1,9 @@
 export default function PersonInfo() {
   return (
     <>
-      <h2 className="text-lg mb-4">Information</h2>
+      <h2 className="text-lg mb-4 block tracking-wide text-gray-700 font-bold">Information</h2>
       <div className="form-group flex mb-2">
-        <div className="mr-8">
+        <div className="flex-grow mr-8">
           <label 
             className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" 
             for="first-name"
@@ -17,7 +17,7 @@ export default function PersonInfo() {
             placeholder="Oski"
           />
         </div>
-        <div>
+        <div className="flex-grow">
           <label 
             className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="last-name">
             Last Name
@@ -42,6 +42,34 @@ export default function PersonInfo() {
           className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
           placeholder="12345678"
           id="cal-id"
+          />
+      </div>
+      <div className="form-group mb-2">
+        <label 
+          className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+          for="email"
+        >
+          Email
+        </label>
+        <input 
+          type="email" 
+          className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+          placeholder="oski@berkely.edu"
+          id="email"
+          />
+      </div>
+      <div className="form-group mb-2">
+        <label 
+          className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+          for="confirm-email"
+        >
+          Confirm Email
+        </label>
+        <input 
+          type="email" 
+          className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+          placeholder="oski@berkely.edu"
+          id="confirm-email"
           />
       </div>
       <div className="form-group mb-2">

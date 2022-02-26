@@ -8,13 +8,13 @@ export default function Order() {
   const [formStep, setFormStep] = useState(0);
   return (
     <Layout>
-      <div className="sm:container mx-auto my-4">
-        <h1 className="text-xl text-center">Food Resource Delivery Request</h1>
+      <div className="sm:container mx-auto mt-8 mb-16">
+        <h1 className="text-2xl text-center font-bold">Food Resource Delivery Request</h1>
         <div className="flex justify-center m-8">
-          <div className="py-8 px-16 shadow rounded">
+          <div className="py-8 px-16 w-1/2 max-w-2xl shadow rounded">
             <div id="form-header">
             </div>
-            <div className="mb-4">
+            <div className="mb-8">
               { formStep == 0 &&
                 <PersonInfo />
               }

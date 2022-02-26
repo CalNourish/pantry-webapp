@@ -35,7 +35,7 @@ export default function OrderDetails() {
 
   return (
     <>
-      <h2 className="text-lg mb-4">Order Details</h2>
+      <h2 className="text-lg mb-4 block tracking-wide text-gray-700 font-bold">Order Details</h2>
       <div className="form-group mb-2">
         {orderInputs}
       </div>
