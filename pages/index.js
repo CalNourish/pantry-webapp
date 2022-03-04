@@ -137,9 +137,19 @@ export default function Home() {
           fixCounts();
         }}> fix count field </button>
       </td></tr>
-
     <h2 className='font-bold mt-5'>bag-packing stuff</h2>
     <div className='ml-5'>
+      <tr><td>
+        <button onClick={() => {
+          fetch('/api/orders/SetOrderItemStatus', { method: 'POST', 
+                body: JSON.stringify({
+                  "orderId": "sam_test_order",
+                  "itemId": "1111",
+                  "isPacked": "false"
+                }),
+                headers: {'Content-Type': "application/json", 'Authorization': token}})
+        }}> SetOrderItemStatus Button </button>
+      </td></tr>
       <tr><td>
         <button onClick={() => {
           fetch('/api/orders/SetPantryNote', { method: 'POST', 
@@ -160,7 +170,6 @@ export default function Home() {
         }}> DeleteOrder Button </button>
       </td></tr>
     </div>
-
     </table>
     </Layout>
   </>
