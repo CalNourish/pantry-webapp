@@ -12,7 +12,9 @@ export const StateCartContext = createContext();
 export const ACTIONS = {
   UPDATE_CART: "UPDATE_CART",
   REMOTE_ITEM: "REMOTE_ITEM",
-  CLEAR_CART: "CLEAR_CART"
+  CLEAR_CART: "CLEAR_CART",
+  UPDATE_PERSONAL: "UPDATE_PERSONAL",
+  UPDATE_DELIVERY: "UPDATE_DELIVERY"
 };
 
 /**
@@ -22,9 +24,29 @@ export const ACTIONS = {
  *     ...item,
  *     quantity: integer
  *   }
+ * },
+ * 
+ * personal: {
+ *   first:
+ *   last:
+ *   calID:
+ *   email:
+ *   status:
+ * },
+ * 
+ * delivery: {
+ *   streetAddress:
+ *   apartmentSuite:
+ *   city:
+ *   zip:
+ *   withinCA:
+ *   phone:
+ *   deliveryNotes:
  * }
  */ 
 const initialState = {
+  personal: {},
+  delivery: {},
   cart: {}
 };
 
@@ -60,6 +82,16 @@ const clearCart = (state) => {
   return { ...state, cart: {} }
 }
 
+const updatePersonal = (info, state) => {
+  const updatedPersonal = { ...state.personal, ...info}
+  return {...state, personal: updatedPersonal}
+}
+
+const updateDelivery = (info, state) => {
+  const updatedDelivery = { ...state.delivery, ...info}
+  return {...state, delivery: updatedDelivery}
+}
+
 const reducer = (state, action) => {
   switch (action.type) {
     case ACTIONS.UPDATE_CART:
@@ -68,6 +100,10 @@ const reducer = (state, action) => {
       return removeItemFromCart(action.payload.item, state)
     case ACTIONS.CLEAR_CART:
       return clearCart(state)
+    case ACTIONS.UPDATE_PERSONAL:
+      return updatePersonal(action.payload, state)
+    case ACTIONS.UPDATE_DELIVERY:
+      return updateDelivery(action.payload, state)
     default:
       throw new Error(`Unhandled action type: ${action.type}`)
   }

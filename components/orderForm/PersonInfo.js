@@ -1,7 +1,14 @@
+import { useContext } from 'react';
+import { DispatchCartContext, StateCartContext } from '../../context/cartContext'
+
 export default function PersonInfo() {
+  const cartDispatch = useContext(DispatchCartContext)
+  const { personal } = useContext(StateCartContext)
+
   return (
     <>
       <h2 className="text-lg mb-4 block tracking-wide text-gray-700 font-bold">Information</h2>
+      <button onClick={() => console.log(personal)}> TODO: delete me </button>
       <div className="form-group flex mb-2">
         <div className="flex-grow mr-8">
           <label 
@@ -15,6 +22,9 @@ export default function PersonInfo() {
             id="first-name" 
             type="text" 
             placeholder="Oski"
+            onChange={(e) => {
+              cartDispatch({ type: 'UPDATE_PERSONAL', payload: {first: e.target.value} })
+            }}
           />
         </div>
         <div className="flex-grow">
@@ -27,6 +37,9 @@ export default function PersonInfo() {
             id="last-name" 
             type="text" 
             placeholder="The Bear"
+            onChange={(e) => {
+              cartDispatch({ type: 'UPDATE_PERSONAL', payload: {last: e.target.value} })
+            }}
           />
         </div>
       </div>
@@ -38,10 +51,13 @@ export default function PersonInfo() {
           Cal ID
         </label>
         <input 
-          type="number" 
+          type="text" 
           className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
           placeholder="12345678"
           id="cal-id"
+          onChange={(e) => {
+            cartDispatch({ type: 'UPDATE_PERSONAL', payload: {calID: e.target.value} })
+          }}
           />
       </div>
       <div className="form-group mb-2">
@@ -56,6 +72,9 @@ export default function PersonInfo() {
           className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
           placeholder="oski@berkely.edu"
           id="email"
+          onChange={(e) => {
+            cartDispatch({ type: 'UPDATE_PERSONAL', payload: {email: e.target.value} })
+          }}
           />
       </div>
       <div className="form-group mb-2">
@@ -83,6 +102,9 @@ export default function PersonInfo() {
           <select
             className="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
             id="status"
+            onChange={(e) => {
+              cartDispatch({ type: 'UPDATE_PERSONAL', payload: {status: e.target.value} })
+            }}
           >
             <option value="" disabled selected>Select status</option>
             <option>Undergraduate Student</option>

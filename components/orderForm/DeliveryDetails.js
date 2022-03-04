@@ -1,4 +1,9 @@
+import { useContext } from 'react';
+import { DispatchCartContext } from '../../context/cartContext'
+
 export default function DeliveryDetails() {
+  const cartDispatch = useContext(DispatchCartContext)
+  
   return (
     <>
       <h2 className="text-lg mb-4 block tracking-wide text-gray-700 font-bold">Delivery Details</h2>
@@ -15,6 +20,9 @@ export default function DeliveryDetails() {
             id="street-address" 
             type="text" 
             placeholder="123 Oski Blvd"
+            onChange={(e) => {
+              cartDispatch({ type: 'UPDATE_DELIVERY', payload: {streetAddress: e.target.value} })
+            }}
           />
         </div>
         <div>
@@ -27,6 +35,9 @@ export default function DeliveryDetails() {
             id="address-two" 
             type="text" 
             placeholder="Apt. A"
+            onChange={(e) => {
+              cartDispatch({ type: 'UPDATE_DELIVERY', payload: {apartmentSuite: e.target.value} })
+            }}
           />
         </div>
       </div>
@@ -43,6 +54,9 @@ export default function DeliveryDetails() {
             id="city" 
             type="text" 
             placeholder="Berkeley"
+            onChange={(e) => {
+              cartDispatch({ type: 'UPDATE_DELIVERY', payload: {city: e.target.value} })
+            }}
           />
         </div>
         <div>
@@ -55,12 +69,19 @@ export default function DeliveryDetails() {
             id="zip" 
             type="number" 
             placeholder="94701"
+            onChange={(e) => {
+              cartDispatch({ type: 'UPDATE_DELIVERY', payload: {zip: e.target.value} })
+            }}
           />
         </div>
       </div>
       <div className="form-group mb-4">
-        <label for="doordash-confirmation" className="block tracking-wide text-gray-700 text-xs font-bold">
-          <input id="doordash-confirmation" className="mr-2 leading-tight" type="checkbox"/>
+        <label for="in-CA-confirmation" className="block tracking-wide text-gray-700 text-xs font-bold">
+          <input id="in-CA-confirmation" className="mr-2 leading-tight" type="checkbox" 
+            onChange={(e) => {
+              cartDispatch({ type: 'UPDATE_DELIVERY', payload: {withinCA: e.target.value} })
+            }}
+          />
           <span class="text-sm">
             Deliver within CA
           </span>
@@ -82,6 +103,9 @@ export default function DeliveryDetails() {
           placeholder="510-555-5555"
           pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
           id="phone"
+          onChange={(e) => {
+            cartDispatch({ type: 'UPDATE_DELIVERY', payload: {phone: e.target.value} })
+          }}
           />
       </div>
       <div className="form-group mb-4">
@@ -99,6 +123,9 @@ export default function DeliveryDetails() {
           id="delivery-notes" 
           type="text" 
           placeholder="Leave at door"
+          onChange={(e) => {
+            cartDispatch({ type: 'UPDATE_DELIVERY', payload: {deliveryNotes: e.target.value} })
+          }}
         />
       </div>
       <div className="form-group mb-4">
