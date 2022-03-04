@@ -6,6 +6,22 @@ import { useState } from 'react';
 
 export default function Order() {
   const [formStep, setFormStep] = useState(0);
+
+  if (formStep == 2) {
+    return (
+      <Layout>
+        <div class="container mx-auto px-4 mt-8 mb-16">
+          <div class="mb-4">
+            <button  onClick={() => setFormStep(formStep - 1)} className="hover:text-blue-500 text-blue-700">
+              Back
+            </button>
+          </div>
+          <OrderDetails />
+        </div>
+      </Layout>
+    )
+  }
+
   return (
     <Layout>
       <div className="sm:container mx-auto mt-8 mb-16">
@@ -20,9 +36,6 @@ export default function Order() {
               }
               { formStep == 1 &&
                 <DeliveryDetails />
-              } 
-              { formStep == 2 &&
-                <OrderDetails />
               } 
             </div>
             <div className="flex justify-between" id="form-footer">
