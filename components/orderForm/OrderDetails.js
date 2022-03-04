@@ -37,7 +37,6 @@ export default function OrderDetails() {
   return (
     <>
       <h2 className="text-lg mb-4 block tracking-wide text-gray-700 font-bold">Order Details</h2>
-      <button onClick={() => console.log(cartState)}> print context button </button>
       <div className="form-group mb-2">
         {orderInputs}
       </div>
