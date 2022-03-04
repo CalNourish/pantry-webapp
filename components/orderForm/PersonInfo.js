@@ -8,7 +8,6 @@ export default function PersonInfo() {
   return (
     <>
       <h2 className="text-lg mb-4 block tracking-wide text-gray-700 font-bold">Information</h2>
-      <button onClick={() => console.log(personal)}> TODO: delete me </button>
       <div className="form-group flex mb-2">
         <div className="flex-grow mr-8">
           <label 
@@ -22,6 +21,7 @@ export default function PersonInfo() {
             id="first-name" 
             type="text" 
             placeholder="Oski"
+            value={personal.first}
             onChange={(e) => {
               cartDispatch({ type: 'UPDATE_PERSONAL', payload: {first: e.target.value} })
             }}
@@ -37,6 +37,7 @@ export default function PersonInfo() {
             id="last-name" 
             type="text" 
             placeholder="The Bear"
+            value={personal.last}
             onChange={(e) => {
               cartDispatch({ type: 'UPDATE_PERSONAL', payload: {last: e.target.value} })
             }}
@@ -55,6 +56,7 @@ export default function PersonInfo() {
           className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
           placeholder="12345678"
           id="cal-id"
+          value={personal.calID}
           onChange={(e) => {
             cartDispatch({ type: 'UPDATE_PERSONAL', payload: {calID: e.target.value} })
           }}
@@ -72,6 +74,7 @@ export default function PersonInfo() {
           className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
           placeholder="oski@berkely.edu"
           id="email"
+          value={personal.email}
           onChange={(e) => {
             cartDispatch({ type: 'UPDATE_PERSONAL', payload: {email: e.target.value} })
           }}
@@ -89,6 +92,10 @@ export default function PersonInfo() {
           className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
           placeholder="oski@berkely.edu"
           id="confirm-email"
+          value={personal.emailConf}
+          onChange={(e) => {
+            cartDispatch({ type: 'UPDATE_PERSONAL', payload: {emailConf: e.target.value} })
+          }}
           />
       </div>
       <div className="form-group mb-2">
@@ -102,6 +109,7 @@ export default function PersonInfo() {
           <select
             className="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
             id="status"
+            value={personal.status}
             onChange={(e) => {
               cartDispatch({ type: 'UPDATE_PERSONAL', payload: {status: e.target.value} })
             }}

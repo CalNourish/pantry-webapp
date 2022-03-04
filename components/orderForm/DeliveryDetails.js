@@ -1,8 +1,9 @@
 import { useContext } from 'react';
-import { DispatchCartContext } from '../../context/cartContext'
+import { DispatchCartContext, StateCartContext } from '../../context/cartContext'
 
 export default function DeliveryDetails() {
   const cartDispatch = useContext(DispatchCartContext)
+  const { delivery } = useContext(StateCartContext)
   
   return (
     <>
@@ -20,6 +21,7 @@ export default function DeliveryDetails() {
             id="street-address" 
             type="text" 
             placeholder="123 Oski Blvd"
+            value={delivery.streetAddress}
             onChange={(e) => {
               cartDispatch({ type: 'UPDATE_DELIVERY', payload: {streetAddress: e.target.value} })
             }}
@@ -35,8 +37,9 @@ export default function DeliveryDetails() {
             id="address-two" 
             type="text" 
             placeholder="Apt. A"
+            value={delivery.address2}
             onChange={(e) => {
-              cartDispatch({ type: 'UPDATE_DELIVERY', payload: {apartmentSuite: e.target.value} })
+              cartDispatch({ type: 'UPDATE_DELIVERY', payload: {address2: e.target.value} })
             }}
           />
         </div>
@@ -54,6 +57,7 @@ export default function DeliveryDetails() {
             id="city" 
             type="text" 
             placeholder="Berkeley"
+            value={delivery.city}
             onChange={(e) => {
               cartDispatch({ type: 'UPDATE_DELIVERY', payload: {city: e.target.value} })
             }}
@@ -69,6 +73,7 @@ export default function DeliveryDetails() {
             id="zip" 
             type="number" 
             placeholder="94701"
+            value={delivery.zip}
             onChange={(e) => {
               cartDispatch({ type: 'UPDATE_DELIVERY', payload: {zip: e.target.value} })
             }}
@@ -78,8 +83,9 @@ export default function DeliveryDetails() {
       <div className="form-group mb-4">
         <label for="in-CA-confirmation" className="block tracking-wide text-gray-700 text-xs font-bold">
           <input id="in-CA-confirmation" className="mr-2 leading-tight" type="checkbox" 
+            checked={delivery.withinCA}
             onChange={(e) => {
-              cartDispatch({ type: 'UPDATE_DELIVERY', payload: {withinCA: e.target.value} })
+              cartDispatch({ type: 'UPDATE_DELIVERY', payload: {withinCA: e.target.checked} })
             }}
           />
           <span class="text-sm">
@@ -103,6 +109,7 @@ export default function DeliveryDetails() {
           placeholder="510-555-5555"
           pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
           id="phone"
+          value={delivery.phone}
           onChange={(e) => {
             cartDispatch({ type: 'UPDATE_DELIVERY', payload: {phone: e.target.value} })
           }}
@@ -123,14 +130,16 @@ export default function DeliveryDetails() {
           id="delivery-notes" 
           type="text" 
           placeholder="Leave at door"
-          onChange={(e) => {
-            cartDispatch({ type: 'UPDATE_DELIVERY', payload: {deliveryNotes: e.target.value} })
-          }}
+          value={delivery.notes}
+          onChange={(e) => cartDispatch({ type: 'UPDATE_DELIVERY', payload: {notes: e.target.value}})}
         />
       </div>
       <div className="form-group mb-4">
         <label for="doordash-confirmation" className="block tracking-wide text-gray-700 text-xs font-bold">
-          <input id="doordash-confirmation" className="mr-2 leading-tight" type="checkbox"/>
+          <input id="doordash-confirmation" className="mr-2 leading-tight" type="checkbox"
+            checked={delivery.doordashConf}
+            onChange={(e) => cartDispatch({ type: 'UPDATE_DELIVERY', payload: {doordashConf: e.target.checked}})}
+          />
           <span class="text-sm">
             Please confirm that we may share your information with DoorDash
           </span>
