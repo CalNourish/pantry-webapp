@@ -15,8 +15,8 @@ export default function OrderDetails() {
 
   // Generate inputs
   const orderInputs = Object.keys(data).map((key, _value) => {
-    const maxQuantity = data[key].maxOrderSize
-    var invalid_quantity = cart[key] && cart[key].quantity > maxQuantity
+    const maxQuantity = data[key].maxOrderSize ? data[key].maxOrderSize : 100;
+    var invalid_quantity = cart[key] && cart[key].quantity > maxQuantity;
 
     return (
       <div key={key} className="mb-4">
