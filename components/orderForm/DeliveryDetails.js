@@ -1,9 +1,17 @@
 import { useContext } from 'react';
 import { DispatchCartContext, StateCartContext } from '../../context/cartContext'
+import Select from 'react-select'
 
 export default function DeliveryDetails() {
   const cartDispatch = useContext(DispatchCartContext)
   const { delivery } = useContext(StateCartContext)
+
+  /* TODO: ask natalia if we should store these times somewhere... maybe firebase? would need some way to change it for admin. */
+  /* If this becomes a lot more than 2 options, find a way to organize by date? */
+  const deliveryTimes = [
+    { value: 'tues2-4', label: 'Tuesday 2-4 PM' },
+    { value: 'wed2-4', label: 'Wednesday 2-4 PM' },
+  ]
   
   return (
     <>
@@ -12,7 +20,7 @@ export default function DeliveryDetails() {
         <div className="mr-8 w-2/3">
           <label 
             className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" 
-            for="street-address"
+            htmlFor="street-address"
           >
             Street Address
           </label>
@@ -29,7 +37,7 @@ export default function DeliveryDetails() {
         </div>
         <div>
           <label 
-            className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="address-two">
+            className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="address-two">
             Apartment, suite, etc.
           </label>
           <input
@@ -48,7 +56,7 @@ export default function DeliveryDetails() {
         <div className="mr-8 w-2/3">
           <label 
             className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" 
-            for="city"
+            htmlFor="city"
           >
             City
           </label>
@@ -65,7 +73,7 @@ export default function DeliveryDetails() {
         </div>
         <div>
           <label 
-            className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="zip">
+            className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="zip">
             Zip Code
           </label>
           <input
@@ -81,15 +89,18 @@ export default function DeliveryDetails() {
         </div>
       </div>
       <div className="form-group mb-4">
-        <label for="in-CA-confirmation" className="block tracking-wide text-gray-700 text-xs font-bold">
+        <label htmlFor="in-CA-confirmation" className="block tracking-wide text-gray-700 text-xs font-bold">
+          <p class="text-gray-600 text-xs italic tracking-normal font-normal mb-2">
+            In order to make a delivery, you must live within a 15 mile radius of our pantry (which is located on UC Berkeley's campus).
+          </p>
           <input id="in-CA-confirmation" className="mr-2 leading-tight" type="checkbox" 
             checked={delivery.withinCA}
             onChange={(e) => {
               cartDispatch({ type: 'UPDATE_DELIVERY', payload: {withinCA: e.target.checked} })
             }}
           />
-          <span class="text-sm">
-            Deliver within CA
+          <span class="tracking-wide text-gray-700 text-sm font-bold">
+            I confirm that I am within the 15 mile radius
           </span>
         </label>
       </div>
@@ -97,7 +108,7 @@ export default function DeliveryDetails() {
         <div className="mb-2">
           <label 
             className="block uppercase tracking-wide text-gray-700 text-xs font-bold" 
-            for="phone"
+            htmlFor="phone"
           >
             Phone
           </label>
@@ -115,11 +126,33 @@ export default function DeliveryDetails() {
           }}
           />
       </div>
+
       <div className="form-group mb-4">
         <div className="mb-2">
           <label 
             className="block uppercase tracking-wide text-gray-700 text-xs font-bold" 
-            for="deliver-notes"
+            htmlFor="deliveryTimes"
+          >
+            What times will you be available to accept a delivery this week?
+          </label>
+        <p class="text-gray-600 text-xs italic">Please select all that work, we will send an email for a final confirmation.</p>
+        </div>
+        {/* <input 
+          className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+          id="deliveryTimes"
+          value={delivery.deliveryTimes}
+          onChange={(e) => {
+            cartDispatch({ type: 'UPDATE_DELIVERY', payload: {deliveryTimes: e.target.value} })
+          }}
+          /> */}
+        <Select options={deliveryTimes} isMulti isClearable isSearchable/>
+      </div>
+      
+      <div className="form-group mb-4">
+        <div className="mb-2">
+          <label 
+            className="block uppercase tracking-wide text-gray-700 text-xs font-bold" 
+            htmlFor="deliver-notes"
           >
             Delivery notes: any other information we might need to know to do a no-contact drop off?
           </label>
@@ -135,7 +168,7 @@ export default function DeliveryDetails() {
         />
       </div>
       <div className="form-group mb-4">
-        <label for="doordash-confirmation" className="block tracking-wide text-gray-700 text-xs font-bold">
+        <label htmlFor="doordash-confirmation" className="block tracking-wide text-gray-700 text-xs font-bold">
           <input id="doordash-confirmation" className="mr-2 leading-tight" type="checkbox"
             checked={delivery.doordashConf}
             onChange={(e) => cartDispatch({ type: 'UPDATE_DELIVERY', payload: {doordashConf: e.target.checked}})}

@@ -1,6 +1,10 @@
 import { useContext } from 'react';
 import { DispatchCartContext, StateCartContext } from '../../context/cartContext'
 
+function isValidEmail(email) {
+  return /^\w+([\.-]?\w+)*@berkeley.edu$/.test(email)
+}
+
 export default function PersonInfo() {
   const cartDispatch = useContext(DispatchCartContext)
   const { personal } = useContext(StateCartContext)
@@ -12,7 +16,7 @@ export default function PersonInfo() {
         <div className="flex-grow mr-8">
           <label 
             className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" 
-            for="first-name"
+            htmlFor="first-name"
           >
             First Name
           </label>
@@ -29,7 +33,7 @@ export default function PersonInfo() {
         </div>
         <div className="flex-grow">
           <label 
-            className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="last-name">
+            className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="last-name">
             Last Name
           </label>
           <input
@@ -47,7 +51,7 @@ export default function PersonInfo() {
       <div className="form-group mb-2">
         <label 
           className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" 
-          for="cal-id"
+          htmlFor="cal-id"
         >
           Cal ID
         </label>
@@ -65,7 +69,7 @@ export default function PersonInfo() {
       <div className="form-group mb-2">
         <label 
           className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-          for="email"
+          htmlFor="email"
         >
           Email
         </label>
@@ -79,11 +83,12 @@ export default function PersonInfo() {
             cartDispatch({ type: 'UPDATE_PERSONAL', payload: {email: e.target.value} })
           }}
           />
+          {personal.email && !isValidEmail(personal.email) ? <div className='text-red-600'>Must be a valid @berkeley.edu email address</div> : ""}
       </div>
       <div className="form-group mb-2">
         <label 
           className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-          for="confirm-email"
+          htmlFor="confirm-email"
         >
           Confirm Email
         </label>
@@ -97,11 +102,12 @@ export default function PersonInfo() {
             cartDispatch({ type: 'UPDATE_PERSONAL', payload: {emailConf: e.target.value} })
           }}
           />
+          {isValidEmail(personal.email) && personal.emailConf && personal.emailConf !== personal.email ? <div className='text-red-600'>Emails must match</div> : ""}
       </div>
       <div className="form-group mb-2">
         <label 
           className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-          for="status"
+          htmlFor="status"
         >
           Status
         </label>
@@ -109,22 +115,45 @@ export default function PersonInfo() {
           <select
             className="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
             id="status"
-            value={personal.status}
+            value={personal.status || ""}
             onChange={(e) => {
               cartDispatch({ type: 'UPDATE_PERSONAL', payload: {status: e.target.value} })
             }}
           >
-            <option value="" disabled selected>Select status</option>
+            <option value="" disabled>Select status</option>
             <option>Undergraduate Student</option>
             <option>Graduate Student</option>
             <option>Staff</option>
             <option>Visiting Scholar</option>
             <option>Postdoc</option>
           </select>
-          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
           </div>
         </div>
+      </div>
+      <div className="form-group mb-2">
+        <div className="mb-2">
+          <label 
+            className="block uppercase tracking-wide text-gray-700 text-xs font-bold"
+            htmlFor="confirm-email"
+          >
+            Number of Dependents
+          </label>
+          <p class="text-gray-600 text-xs italic">
+            Include anyone in your household who depends on you for at least half of their meals
+          </p>
+        </div>
+        <input 
+          type="number" 
+          className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+          placeholder="0"
+          id="dependents"
+          value={personal.dependents}
+          onChange={(e) => {
+            cartDispatch({ type: 'UPDATE_PERSONAL', payload: {dependents: e.target.value} })
+          }}
+          />
       </div>
     </>
   )

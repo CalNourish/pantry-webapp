@@ -31,22 +31,28 @@ export const ACTIONS = {
  *   last:
  *   calID:
  *   email:
+ *   emailConf:
  *   status:
  * },
  * 
  * delivery: {
  *   streetAddress:
- *   apartmentSuite:
+ *   address2:
  *   city:
  *   zip:
  *   withinCA:
  *   phone:
  *   deliveryNotes:
+ *   doordashConf:
  * }
  */ 
 const initialState = {
-  personal: {},
-  delivery: {},
+  personal: {
+   first:"", last:"", calID:"", email:"", emailConf:"", status:""
+  },
+  delivery: {
+    streetAddress:"", address2:"", city:"", zip:"", withinCA:"", phone:"", deliveryNotes:"", doordashConf:""
+  },
   cart: {}
 };
 
