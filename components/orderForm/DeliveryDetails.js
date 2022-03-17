@@ -8,7 +8,7 @@ export default function DeliveryDetails() {
 
   /* TODO: ask natalia if we should store these times somewhere... maybe firebase? would need some way to change it for admin. */
   /* If this becomes a lot more than 2 options, find a way to organize by date? */
-  const deliveryTimes = [
+  const deliveryTimeOptions = [
     { value: 'tues2-4', label: 'Tuesday 2-4 PM' },
     { value: 'wed2-4', label: 'Wednesday 2-4 PM' },
   ]
@@ -137,15 +137,8 @@ export default function DeliveryDetails() {
           </label>
         <p class="text-gray-600 text-xs italic">Please select all that work, we will send an email for a final confirmation.</p>
         </div>
-        {/* <input 
-          className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-          id="deliveryTimes"
-          value={delivery.deliveryTimes}
-          onChange={(e) => {
-            cartDispatch({ type: 'UPDATE_DELIVERY', payload: {deliveryTimes: e.target.value} })
-          }}
-          /> */}
-        <Select options={deliveryTimes} isMulti isClearable isSearchable/>
+        <Select options={deliveryTimeOptions} isMulti isClearable isSearchable value={delivery.deliveryTimes}
+          onChange={(selections) => cartDispatch({ type: 'UPDATE_DELIVERY', payload: {deliveryTimes: selections} })}/>
       </div>
       
       <div className="form-group mb-4">
