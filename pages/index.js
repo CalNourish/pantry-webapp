@@ -37,9 +37,9 @@ export default function Home() {
       <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Rubik:wght@400;700&display=swap" rel="stylesheet"></link>
     </Head>
     <Layout>
+      <div className="h-full">
       <h1>Home</h1>
-      <table>
-
+      <table><tbody>
       <tr><td>
         <button onClick={() => {
           fetch('/api/inventory/UpdateItem', { method: 'POST', body: 
@@ -137,8 +137,10 @@ export default function Home() {
           fixCounts();
         }}> fix count field </button>
       </td></tr>
+      </tbody></table>
     <h2 className='font-bold mt-5'>bag-packing stuff</h2>
     <div className='ml-5'>
+      <table><tbody>
       <tr><td>
         <button onClick={() => {
           fetch('/api/orders/SetOrderItemStatus', { method: 'POST', 
@@ -169,8 +171,9 @@ export default function Home() {
                 headers: {'Content-Type': "application/json", 'Authorization': token}})
         }}> DeleteOrder Button </button>
       </td></tr>
+      </tbody></table>
     </div>
-    </table>
+    </div>
     </Layout>
   </>
 
