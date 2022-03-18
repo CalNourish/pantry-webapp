@@ -2,6 +2,8 @@
 import useSWR from 'swr'
 import { useContext } from 'react';
 import { DispatchCartContext } from '../../context/cartContext'
+import Layout from '../Layout';
+import Sidebar from '../Sidebar';
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
@@ -26,16 +28,38 @@ export default function OrderDetails() {
           <label className="text-gray-700 text-xs font-bold mb-2" for={key}>
               {items[key].itemName}
           </label>
-          <input 
-            id={key}
-            type="number" 
-            autoComplete="off"
-            className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-            onChange={(e) => {
-              cartDispatch({ type: 'UPDATE_CART', payload: {item: items[key], quantity: e.target.value } });
+          <div>
+          <div className="flex">
+            <button 
+              className="pl-4 pr-2 bg-gray-200 rounded-l-full focus:outline-none"
+              onClick={(e) => {
+                 let el = document.getElementById(`#${key}`)
+                 console.log(el)
+                 el.value -= 1
+                }
               }
-            }
-            />
+              >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+              </svg>
+            </button>
+            <input 
+              id={key}
+              type="number" 
+              autoComplete="off"
+              className="no-arrows-input text-center appearance-none block bg-gray-200 text-gray-700 border border-gray-200 w-12 py-2 px-2 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              onChange={(e) => {
+                cartDispatch({ type: 'UPDATE_CART', payload: {item: items[key], quantity: e.target.value } });
+                }
+              }
+              />
+            <button className="pr-4 pl-2 bg-gray-200 rounded-r-full focus:outline-none">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+              </svg>
+            </button>
+            </div>
+          </div>
         </div>
       )
       
@@ -78,7 +102,7 @@ export default function OrderDetails() {
           }
         </div>
         <div className="form-group pt-2">
-          <h3 className="uppercase sticky top-0 pt-2 font-bold tracking-wide text-gray-700 text-xs mb-4">Order</h3>
+          <h3 className="uppercase sticky top-0 pt-2 font-bold tracking-wide text-gray-700 text-xs mb-4">Order Summary</h3>
         </div>
       </div>
     </>
