@@ -5,12 +5,12 @@ export default function Footer() {
   return (
     <footer className="bg-gray-100 text-gray-500 text-sm pb-4 flex-shrink-0">
       <div className="p-4 mx-auto">
-        <ul className="flex items-center justify-center max-w-4xl p-2 mx-auto md:p-4">
-          <li className="mx-1">
+        <ul className="p-2 mx-auto max-w-4xl sm:flex sm:items-center sm:justify-center md:p-4">
+          <li className="mx-1 flex justify-center items-center text-center">Designed and built with ❤️ by CalNourish</li>
+          <li className="mx-1 flex justify-center items-center">•</li>
+          <li className="mx-1 flex justify-center items-center">
             <Link href="/"><a className="hover:underline">Privacy</a></Link>
           </li>
-          <li className="mx-1">•</li>
-          <li className="mx-1">Designed and built with ❤️ by CalNourish</li>
         </ul>
         <div className="relative h-8 p-2">
           <a aria-label="Powered by Vercel" href="https://vercel.com?utm_source=cal-nourish&utm_campaign=oss" title="Powered by Vercel">
