@@ -39,21 +39,24 @@ export default async function(req,res) {
             return reject();
         }
 
-        let inventoryUpdates = {}
-        for (let barcode in body) {
-            inventoryUpdates[barcode + '/count'] = firebase.database.ServerValue.increment(-1 * body[barcode]);
-        }
-
-        firebase.database().ref('/inventory/').update(inventoryUpdates)
-        .catch(error => {
-            res.status(500);
-            res.json({error: "Error when checking out items."});
-            return resolve();
-        })
+        firebase.auth().signInAnonymously()
         .then(() => {
-            res.status(200);
-            res.json({message: "success"});
-            return resolve();
-        });
+            let inventoryUpdates = {}
+            for (let barcode in body) {
+              inventoryUpdates[barcode + '/count'] = firebase.database.ServerValue.increment(-1 * body[barcode]);
+            }
+
+            firebase.database().ref('/inventory/').update(inventoryUpdates)
+            .catch(error => {
+                res.status(500);
+                res.json({error: "Error when checking out items."});
+                return resolve();
+            })
+            .then(() => {
+                res.status(200);
+                res.json({message: "success"});
+                return resolve();
+            });
+        })
     })
 }
