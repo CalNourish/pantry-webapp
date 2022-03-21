@@ -5,6 +5,13 @@ import React from 'react';
 
 import cookie from 'js-cookie';
 
+/* TODO:
+  * hotkeys
+  * make buttons look nicer
+  * make increment/decrement look nicer
+  * small screen spacings
+  * item search? esp for things with no barcodes
+*/
 
 const fetcher = async (...args) => {
   const res = await fetch(...args);
@@ -203,6 +210,25 @@ class Cart extends React.Component {
   render() {
     const errorBanner = <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-3">{this.state.error}</div>;
     const successBanner = <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-3">{this.state.success}</div>;
+
+    const submitFunc = this.submitCart;
+
+    document.onkeydown = function(e){
+      var barcode = document.getElementById("barcode");
+      var quantity = document.getElementById("quantity");
+
+      if (["ArrowUp", "q", "Q"].includes(e.key)) {
+        e.preventDefault();
+        barcode.focus();
+      }
+      else if (["ArrowDown", "w", "W"].includes(e.key)) {
+        e.preventDefault();
+        quantity.focus();
+      }
+      else if (e.shiftKey && e.key == "Enter") {
+        submitFunc(e);
+      }
+    }
 
     return (
       <>
