@@ -27,7 +27,8 @@ class Cart extends React.Component {
       items: new Map([]),   /* entries are {barcode: [itemStruct, quantity]} */
       itemsInCart: 0,
       error: null,
-      success: null
+      success: null,
+      showSearch: false,
     }
   }
 
@@ -70,7 +71,6 @@ class Cart extends React.Component {
       var itemData = items.get(barcode)
       itemData[1] += quantity
       items.set(barcode, itemData)
-      document.getElementById(barcode+"-quantity").value = itemData[1]; // update the input field
     } else { /* otherwise, create new row in table */
       items.set(newItem.barcode, [newItem, quantity])
     }
@@ -91,7 +91,6 @@ class Cart extends React.Component {
     itemData[1] += 1;
     items.set(barcode, itemData);
     this.setState({items: items, itemsInCart: this.state.itemsInCart + 1})
-    document.getElementById(barcode+"-quantity").value = itemData[1]; // update the input field
   }
 
   downItemQuantity(barcode) {
@@ -113,7 +112,6 @@ class Cart extends React.Component {
     itemData[1] -= 1;
     items.set(barcode, itemData);
     this.setState({items: items, itemsInCart: this.state.itemsInCart - 1})
-    document.getElementById(barcode+"-quantity").value = itemData[1]; // update the input field
   }
 
   updateItemQuantity(barcode, newQuantity) {
@@ -122,6 +120,14 @@ class Cart extends React.Component {
     if (!itemData) {
       this.showError("Data corruption: please retry or refresh page", 20000)
       return
+    }
+
+    if (newQuantity === "") {
+      let deltaQuantity = -itemData[1];
+      itemData[1] = 0;
+      items.set(barcode, itemData);
+      this.setState({items: items, itemsInCart: this.state.itemsInCart+deltaQuantity})
+      return;
     }
 
     newQuantity = parseInt(newQuantity)
@@ -134,7 +140,6 @@ class Cart extends React.Component {
   }
 
   deleteItem(barcode) {
-    console.log(`deleting ${barcode}`)
     let items = this.state.items;
     let itemData = items.get(barcode);
     if (!itemData) {
@@ -172,9 +177,6 @@ class Cart extends React.Component {
   submitCart = async (e) => {
     e.preventDefault();
     const token = cookie.get("firebaseToken")
-    // const allowed = await validateFunc(token)
-    // console.log(allowed)
-    // return;
 
     let reqbody = this.makeReq();
     this.showSuccess("Submitting cart...", 10000)
@@ -188,7 +190,6 @@ class Cart extends React.Component {
       body: reqbody,
       headers: {'Content-Type': "application/json", 'Authorization': token}
     })
-    // .then(() => {
     if (response.ok) {
       /* clear the cart on successful checkout */
       let items = this.state.items;
@@ -210,25 +211,23 @@ class Cart extends React.Component {
       <tr className="h-10" key={barcode}>
         <td className="text-left pr-10">{value[0].itemName}</td>
         <td className="">
-          {/* stepper */}
+          {/* number spinner [-| 1 |+] */}
           <div className="border border-solid border-gray-300 p-px w-32 h-8 flex flex-row float-left">
             {/* minus */}
-            <button className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.downItemQuantity(barcode)}>–</button>
-            {/* input */}
-            <input id={barcode + "-quantity"} className="w-6 flex-grow mx-1 text-center focus:outline-none" autoComplete="off"
-              defaultValue={value[1]} onChange={e => this.updateItemQuantity(barcode, e.target.value)}/>
+            <button className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.downItemQuantity(barcode)} tabIndex="-1">–</button>
+            {/* quantity input */}
+            <input id={barcode + "-quantity"} className="w-6 flex-grow mx-1 text-center focus:outline-none quantity-input" autoComplete="off"
+              value={value[1]} onChange={e => this.updateItemQuantity(barcode, e.target.value)}/>
             {/* plus */}
-            <button className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.upItemQuantity(barcode)}>+</button>
+            <button className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.upItemQuantity(barcode)} tabIndex="-1">+</button>
           </div>
           {/* Trash can symbol */}
-          <button className="float-right align-middle py-1">
+          <button className="float-right align-middle py-1" tabIndex="-1">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" onClick={() => this.deleteItem(barcode)}>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
             </svg>
           </button>
         </td>
-        {/* <td className="" onClick={() => this.deleteItem(barcode)}>          
-        </td> */}
       </tr>
     )
   }
@@ -237,24 +236,46 @@ class Cart extends React.Component {
     const errorBanner = <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-3">{this.state.error}</div>;
     const successBanner = <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-3">{this.state.success}</div>;
 
-    const cartSubmit = this.submitCart;
-    // const itemSubmit = this.itemFormSubmit;
+    /* Need to define these here, since can't use `this` inside the callback */
+    let self = this;
 
-    document.onkeydown = function(e){
+    document.onkeydown = (e) => {
       var barcode = document.getElementById("barcode");
       var quantity = document.getElementById("quantity");
+
+      if (document.activeElement.classList.contains("quantity-input")) {
+        let barcode = document.activeElement.id.split("-")[0]
+        if (e.key === "=" || e.key === "+") {
+          e.preventDefault();
+          this.upItemQuantity(barcode);
+        } else if (e.key === "-") {
+          e.preventDefault();
+          this.downItemQuantity(barcode);
+        } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+          e.preventDefault();
+          let inputs = document.getElementsByClassName("quantity-input")
+          let arr = Array.prototype.slice.call(inputs);
+          let index = arr.indexOf(document.activeElement)
+          if (e.key === "ArrowDown" && index < arr.length - 1) {
+            /* focus next quantity-input */
+            inputs[index+1].focus(); 
+          } else if (e.key === "ArrowUp" && index > 0) {
+            /* focus next quantity-input */
+            inputs[index-1].focus();
+          }
+          return
+        }
+      }
 
       if (["ArrowUp", "q", "Q"].includes(e.key)) {
         e.preventDefault();
         barcode.focus();
-      }
-      else if (["ArrowDown", "w", "W"].includes(e.key)) {
+      } else if (["ArrowDown", "w", "W"].includes(e.key)) {
         e.preventDefault();
         quantity.focus();
-      }
-      else if (e.key === "Enter" && e.shiftKey) {
+      } else if (e.key === "Enter" && e.shiftKey) {
         e.preventDefault();
-        cartSubmit(e);
+        this.submitCart(e);
       } else if (e.key === "Enter") {
         e.preventDefault();
         document.getElementById("add-item-btn").click();
@@ -268,10 +289,10 @@ class Cart extends React.Component {
           <div className="flex h-full">
             {/* Left-hand column (Barcode and Quantity form) */}
             <div className="flex-none w-64">
-              <Sidebar>
-              <form className="sticky top-0 py-4" id="checkout-item-form" onSubmit={(e) => this.itemFormSubmit(e)}>
+              <Sidebar className="py-4">
+              <form id="checkout-item-form" onSubmit={(e) => this.itemFormSubmit(e)}>
                   <h1 className="text-3xl font-semibold mb-2">Checkout Item</h1>
-                  <p className="mb-5">Please enter the amount, then scan the item to add it to the cart. Click "Check Out" to submit the cart.</p>
+                  <p className="mb-5 text-sm">Please enter the amount, then scan the item to add it to the cart. Click "Check Out" to submit the cart.</p>
                   <div className="form-group" id="barcode-and-quantity">
                     <div className="col-xs-7 mb-4">
                       <h1 className="text-2xl font-medium" autoFocus>Barcode</h1>
@@ -286,24 +307,28 @@ class Cart extends React.Component {
                       <input className="border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="quantity" autoComplete="off" placeholder="default: 1"></input>
                     </div>
                   </div>
-                  <button className="my-1 btn btn-pantry-blue w-full uppercase tracking-wide text-xs font-semibold" id="add-item-btn" type="submit">Add Item (Enter)</button>
+                  <button className="my-1 btn btn-pantry-blue w-full uppercase tracking-wide text-xs font-semibold" id="add-item-btn" type="submit">Add Item<span className="font-normal"> (Enter)</span></button>
                 </form>
+                <div>
+                  <button className="btn btn-outline w-full uppercase tracking-wide text-xs font-semibold">Search item by name</button>
+                </div>
               </Sidebar>
             </div>
 
             {/* Main body (Cart and Checkout Button) */}
-            <div className="p-5 container mx-auto">
+            <div className="p-4 container mx-auto">
               {this.state.error && errorBanner}
               {this.state.success && successBanner}
               <h1 className="text-3xl font-medium mb-2">Cart</h1>
               <table className="w-full my-5 table-fixed" id="mycart">
                 <thead>
                   <tr className="border-b-2">
-                    <th className="w-auto text-left">Item</th>
-                    <th className="text-left w-48">
-                      <div className="w-32 text-center">Quantity</div>
+                    <th className="w-auto text-left text-lg">Item</th>
+                    <th className="text-left w-48 text-lg">
+                      <div className="w-32 text-center">
+                        Quantity
+                      </div>
                     </th>
-                    {/* <th className="w-5 flex-grow-0"></th> */}
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -313,11 +338,10 @@ class Cart extends React.Component {
                     <td>
                       <div className="w-32 text-center font-medium">{this.state.itemsInCart}</div>
                     </td>
-                    {/* <td></td> */}
                   </tr>
                 </tbody>
               </table>
-              <button className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" onClick={(e) => this.submitCart(e)}>Checkout (Shift+Enter)</button>
+              <button className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" onClick={(e) => this.submitCart(e)}>Checkout<span className="font-normal"> (Shift+Enter)</span></button>
             </div>
           </div>
         </Layout>
