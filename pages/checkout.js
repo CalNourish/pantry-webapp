@@ -2,14 +2,15 @@ import Layout from '../components/Layout'
 import Sidebar from '../components/Sidebar'
 import useSWR from 'swr';
 import React from 'react';
-
+import Modal from 'react-modal'
+import SearchModal from '../components/SearchModal'
 import cookie from 'js-cookie';
 
 /* TODO:
   x hotkeys
   x make buttons look nicer
   x make increment/decrement look nicer
-  o item search? esp for things with no barcodes
+  x item search? esp for things with no barcodes
   o small screen spacings
 */
 
@@ -32,7 +33,7 @@ class Cart extends React.Component {
     }
   }
 
-  makeReq() {
+  makeReq = () => {
     let reqbody = {};
     this.state.items.forEach((value, key) => {
         reqbody[key] = value[1];
@@ -40,7 +41,7 @@ class Cart extends React.Component {
     return JSON.stringify(reqbody);
   }
 
-  showError(errorText, t) {
+  showError = (errorText, t) => {
     /* show error banner with error text for 5 seconds, or custom time */
     this.setState({
       error: errorText,
@@ -52,7 +53,7 @@ class Cart extends React.Component {
     this.errorTimer = setTimeout(() => this.setState({error: null}), t);
   }
 
-  showSuccess(msg, t) {
+  showSuccess = (msg, t) => {
     /* show error banner with error text for 5 seconds, or custom time */
     this.setState({
       error: null,
@@ -64,9 +65,16 @@ class Cart extends React.Component {
     this.successTimer = setTimeout(() => this.setState({success: null}), t);
   }
 
-  addItem(newItem, quantity) {
+  addItem = (newItem, _quantity) => {
     let items = this.state.items;
     let barcode = newItem.barcode;
+
+    /* default quantity is 1 if no quantity, or quantity is not a number */
+    let quantity = parseInt(_quantity)
+    if (isNaN(quantity)) {
+        quantity = 1;
+    }
+
     if (items.has(barcode)) { /* if item already in table, just increment count */
       var itemData = items.get(barcode)
       itemData[1] += quantity
@@ -81,7 +89,7 @@ class Cart extends React.Component {
     });
   }
 
-  upItemQuantity(barcode) {
+  upItemQuantity = (barcode) => {
     let items = this.state.items;
     let itemData = items.get(barcode);
     if (!itemData) {
@@ -93,7 +101,7 @@ class Cart extends React.Component {
     this.setState({items: items, itemsInCart: this.state.itemsInCart + 1})
   }
 
-  downItemQuantity(barcode) {
+  downItemQuantity = (barcode) => {
     let items = this.state.items;
     let itemData = items.get(barcode);
     if (!itemData) {
@@ -114,7 +122,7 @@ class Cart extends React.Component {
     this.setState({items: items, itemsInCart: this.state.itemsInCart - 1})
   }
 
-  updateItemQuantity(barcode, newQuantity) {
+  updateItemQuantity = (barcode, newQuantity) => {
     let items = this.state.items;
     let itemData = items.get(barcode);
     if (!itemData) {
@@ -139,7 +147,7 @@ class Cart extends React.Component {
     }
   }
 
-  deleteItem(barcode) {
+  deleteItem = (barcode) => {
     let items = this.state.items;
     let itemData = items.get(barcode);
     if (!itemData) {
@@ -153,14 +161,9 @@ class Cart extends React.Component {
   itemFormSubmit = (e) => {
     e.preventDefault();
     let barcode = e.target.barcode.value.trim()
-    let quantity = parseInt(e.target.quantity.value)
-    if (isNaN(quantity)) {
-        /* default 1, if no quantity, or quantity is not a number */
-        quantity = 1;
-    }
     let item = this.data[barcode]
     if (item && item.barcode) {
-      this.addItem(item, quantity)
+      this.addItem(item, e.target.quantity.value)
       this.setState({error: null, success: null})
       
       e.target.barcode.value = null;
@@ -172,6 +175,10 @@ class Cart extends React.Component {
         this.showError(`Not a valid barcode (${barcode})`, 10000)
       }
     }
+  }
+
+  toggleShowSearch = () => {
+    this.setState({showSearch: !this.state.showSearch})
   }
 
   submitCart = async (e) => {
@@ -206,7 +213,7 @@ class Cart extends React.Component {
     }
   }
 
-  displayCartRow(barcode, value) {
+  displayCartRow = (barcode, value) => {
     return (
       <tr className="h-10" key={barcode}>
         <td className="text-left pr-10">{value[0].itemName}</td>
@@ -216,7 +223,7 @@ class Cart extends React.Component {
             {/* minus */}
             <button className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.downItemQuantity(barcode)} tabIndex="-1">–</button>
             {/* quantity input */}
-            <input id={barcode + "-quantity"} className="w-6 flex-grow mx-1 text-center focus:outline-none quantity-input" autoComplete="off"
+            <input id={barcode + "-quantity"} className="quantity-input w-6 flex-grow mx-1 text-center focus:outline-none" autoComplete="off"
               value={value[1]} onChange={e => this.updateItemQuantity(barcode, e.target.value)}/>
             {/* plus */}
             <button className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.upItemQuantity(barcode)} tabIndex="-1">+</button>
@@ -233,29 +240,53 @@ class Cart extends React.Component {
   }
 
   render() {
-    const errorBanner = <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-3">{this.state.error}</div>;
-    const successBanner = <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-3">{this.state.success}</div>;
 
-    /* Need to define these here, since can't use `this` inside the callback */
-    let self = this;
-
+    /* Hotkeys*/
     document.onkeydown = (e) => {
       var barcode = document.getElementById("barcode");
       var quantity = document.getElementById("quantity");
 
+      /* if modal is open, can navigate with arrow keys and tab */
+      if (this.state.showSearch) {
+        /* structure:
+          search-quantity
+                v
+          search-input
+                v
+          search-option(s)
+        */
+        let activeId = document.activeElement.id
+
+        let inputs = document.getElementsByClassName("search-option")
+        let arr = Array.prototype.slice.call(inputs);
+        let index = arr.indexOf(document.activeElement)
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          if (activeId === "search-quantity") document.getElementById("search-input").focus();
+          else if (index < arr.length-1) inputs[index+1].focus();
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault();
+          if (index > 0) inputs[index-1].focus();
+          else if (index === 0) document.getElementById("search-input").focus();
+          else if (activeId === "search-input") document.getElementById("search-quantity").focus();
+        }
+        return
+      }
+
+      /* if focused on cart table*/
       if (document.activeElement.classList.contains("quantity-input")) {
         let barcode = document.activeElement.id.split("-")[0]
-        if (e.key === "=" || e.key === "+") {
+        if (e.key === "=" || e.key === "+") { // increment/decrement using plus and minus keys
           e.preventDefault();
           this.upItemQuantity(barcode);
-        } else if (e.key === "-") {
+        } else if (e.key === "-" || e.key === "_") {
           e.preventDefault();
           this.downItemQuantity(barcode);
-        } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+        } else if (e.key === "ArrowUp" || e.key === "ArrowDown") { // navigate through quantities with arrow keys 
           e.preventDefault();
           let inputs = document.getElementsByClassName("quantity-input")
           let arr = Array.prototype.slice.call(inputs);
-          let index = arr.indexOf(document.activeElement)
+          let index = arr.indexOf(document.activeElement);
           if (e.key === "ArrowDown" && index < arr.length - 1) {
             /* focus next quantity-input */
             inputs[index+1].focus(); 
@@ -267,6 +298,7 @@ class Cart extends React.Component {
         }
       }
 
+      /* hotkeys for item form (left tab) */
       if (["ArrowUp", "q", "Q"].includes(e.key)) {
         e.preventDefault();
         barcode.focus();
@@ -278,19 +310,31 @@ class Cart extends React.Component {
         this.submitCart(e);
       } else if (e.key === "Enter") {
         e.preventDefault();
-        document.getElementById("add-item-btn").click();
-        // is there a better way to do this...
+        document.getElementById("add-item-btn").click(); // is there a better way to do this...
+      } else if (["f", "F"].includes(e.key)) {
+        e.preventDefault();
+        this.toggleShowSearch();
       }
     }
+
+    /* feedback banners */
+    const errorBanner = <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-3">{this.state.error}</div>;
+    const successBanner = <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-3">{this.state.success}</div>;
 
     return (
       <>
         <Layout>
+          <Modal id="search-modal" isOpen={this.state.showSearch} ariaHideApp={false} onRequestClose={() => {this.setState({showSearch: false})}} className="">
+            <SearchModal items={this.data} addItemFunc={this.addItem} onCloseHandler={() => this.setState({showSearch: false})}/>
+          </Modal>
+
           <div className="flex h-full">
-            {/* Left-hand column (Barcode and Quantity form) */}
+            {/* Left-hand column */}
             <div className="flex-none w-64">
               <Sidebar className="py-4">
-              <form id="checkout-item-form" onSubmit={(e) => this.itemFormSubmit(e)}>
+              
+                {/* Barcode & Quantity Form */}
+                <form id="checkout-item-form" onSubmit={(e) => this.itemFormSubmit(e)}>
                   <h1 className="text-3xl font-semibold mb-2">Checkout Item</h1>
                   <p className="mb-5 text-sm">Please enter the amount, then scan the item to add it to the cart. Click "Check Out" to submit the cart.</p>
                   <div className="form-group" id="barcode-and-quantity">
@@ -299,18 +343,26 @@ class Cart extends React.Component {
                       <p className="text-gray-600 text-xs tracking-normal font-normal mb-2">
                         (hotkey: Q)
                       </p>
-                      <input className="border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="barcode" autoComplete="off" placeholder=""></input>
+                      <input className="border rounded w-full py-2 px-3 text-gray-700 leading-tight" id="barcode" autoComplete="off" placeholder=""></input>
                     </div>
                     <div className="col-xs-8 mb-4">
                       <h1 className="text-2xl font-medium">Quantity</h1>
                       <p className="text-gray-600 text-xs tracking-normal font-normal mb-2">(hotkey: W)</p>
-                      <input className="border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="quantity" autoComplete="off" placeholder="default: 1"></input>
+                      <input className="border rounded w-full py-2 px-3 text-gray-700 leading-tight" id="quantity" autoComplete="off" placeholder="default: 1"></input>
                     </div>
                   </div>
-                  <button className="my-1 btn btn-pantry-blue w-full uppercase tracking-wide text-xs font-semibold" id="add-item-btn" type="submit">Add Item<span className="font-normal"> (Enter)</span></button>
+
+                  {/* Add Item Button */}
+                  <button className="my-1 btn btn-pantry-blue w-full uppercase tracking-wide text-xs font-semibold focus:shadow-none" id="add-item-btn" type="submit">
+                    Add Item<span className="font-normal"> (Enter)</span>
+                  </button>
                 </form>
+
+                {/* Search Item Button */}
                 <div>
-                  <button className="btn btn-outline w-full uppercase tracking-wide text-xs font-semibold">Search item by name</button>
+                  <button className="btn btn-outline w-full uppercase tracking-wide text-xs font-semibold focus:shadow-none" onClick={this.toggleShowSearch}>
+                    Search item by name <span className="font-normal">(F)</span>
+                  </button>
                 </div>
               </Sidebar>
             </div>
