@@ -6,14 +6,6 @@ import Modal from 'react-modal'
 import SearchModal from '../components/SearchModal'
 import cookie from 'js-cookie';
 
-/* TODO:
-  x hotkeys
-  x make buttons look nicer
-  x make increment/decrement look nicer
-  x item search? esp for things with no barcodes
-  o small screen spacings
-*/
-
 const fetcher = async (...args) => {
   const res = await fetch(...args);
   return res.json();
@@ -217,7 +209,7 @@ class Cart extends React.Component {
     return (
       <tr className="h-10" key={barcode}>
         <td className="text-left pr-10">{value[0].itemName}</td>
-        <td className="">
+        <td>
           {/* number spinner [-| 1 |+] */}
           <div className="border border-solid border-gray-300 p-px w-32 h-8 flex flex-row float-left">
             {/* minus */}
@@ -276,10 +268,10 @@ class Cart extends React.Component {
       /* if focused on cart table*/
       if (document.activeElement.classList.contains("quantity-input")) {
         let barcode = document.activeElement.id.split("-")[0]
-        if (e.key === "=" || e.key === "+") { // increment/decrement using plus and minus keys
+        if (e.key === "=" || e.key === "+") { // increment using plus key
           e.preventDefault();
           this.upItemQuantity(barcode);
-        } else if (e.key === "-" || e.key === "_") {
+        } else if (e.key === "-" || e.key === "_") { // decrement using minus key
           e.preventDefault();
           this.downItemQuantity(barcode);
         } else if (e.key === "ArrowUp" || e.key === "ArrowDown") { // navigate through quantities with arrow keys 
@@ -291,7 +283,7 @@ class Cart extends React.Component {
             /* focus next quantity-input */
             inputs[index+1].focus(); 
           } else if (e.key === "ArrowUp" && index > 0) {
-            /* focus next quantity-input */
+            /* focus prev quantity-input */
             inputs[index-1].focus();
           }
           return
@@ -310,7 +302,7 @@ class Cart extends React.Component {
         this.submitCart(e);
       } else if (e.key === "Enter") {
         e.preventDefault();
-        document.getElementById("add-item-btn").click(); // is there a better way to do this...
+        document.getElementById("checkout-item-form").requestSubmit();
       } else if (["f", "F"].includes(e.key)) {
         e.preventDefault();
         this.toggleShowSearch();
@@ -324,7 +316,7 @@ class Cart extends React.Component {
     return (
       <>
         <Layout>
-          <Modal id="search-modal" isOpen={this.state.showSearch} ariaHideApp={false} onRequestClose={() => {this.setState({showSearch: false})}} className="">
+          <Modal id="search-modal" isOpen={this.state.showSearch} ariaHideApp={false} onRequestClose={() => {this.setState({showSearch: false})}}>
             <SearchModal items={this.data} addItemFunc={this.addItem} onCloseHandler={() => this.setState({showSearch: false})}/>
           </Modal>
 
@@ -340,28 +332,28 @@ class Cart extends React.Component {
                   <div className="form-group" id="barcode-and-quantity">
                     <div className="col-xs-7 mb-4">
                       <h1 className="text-2xl font-medium" autoFocus>Barcode</h1>
-                      <p className="text-gray-600 text-xs tracking-normal font-normal mb-2">
+                      <p className="text-gray-600 text-xs tracking-normal font-normal mb-2 hidden sm:block">
                         (hotkey: Q)
                       </p>
-                      <input className="border rounded w-full py-2 px-3 text-gray-700 leading-tight" id="barcode" autoComplete="off" placeholder=""></input>
+                      <input className="border rounded w-full py-2 px-3 text-gray-700 leading-tight" id="barcode" autoComplete="off"></input>
                     </div>
                     <div className="col-xs-8 mb-4">
                       <h1 className="text-2xl font-medium">Quantity</h1>
-                      <p className="text-gray-600 text-xs tracking-normal font-normal mb-2">(hotkey: W)</p>
+                      <p className="text-gray-600 text-xs tracking-normal font-normal mb-2 hidden sm:block">(hotkey: W)</p>
                       <input className="border rounded w-full py-2 px-3 text-gray-700 leading-tight" id="quantity" autoComplete="off" placeholder="default: 1"></input>
                     </div>
                   </div>
 
                   {/* Add Item Button */}
                   <button className="my-1 btn btn-pantry-blue w-full uppercase tracking-wide text-xs font-semibold focus:shadow-none" id="add-item-btn" type="submit">
-                    Add Item<span className="font-normal"> (Enter)</span>
+                    Add Item<span className="font-normal hidden sm:inline-block"> (Enter)</span>
                   </button>
                 </form>
 
                 {/* Search Item Button */}
                 <div>
                   <button className="btn btn-outline w-full uppercase tracking-wide text-xs font-semibold focus:shadow-none" onClick={this.toggleShowSearch}>
-                    Search item by name <span className="font-normal">(F)</span>
+                    Search item by name <span className="font-normal hidden sm:inline-block">(F)</span>
                   </button>
                 </div>
               </Sidebar>
@@ -393,7 +385,10 @@ class Cart extends React.Component {
                   </tr>
                 </tbody>
               </table>
-              <button className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" onClick={(e) => this.submitCart(e)}>Checkout<span className="font-normal"> (Shift+Enter)</span></button>
+              <button className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" onClick={(e) => this.submitCart(e)}>
+                Checkout
+                <span className="font-normal hidden sm:inline-block"> (Shift+Enter)</span>
+              </button>
             </div>
           </div>
         </Layout>

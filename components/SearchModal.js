@@ -31,9 +31,14 @@ export default function SearchModal(props) {
 
       {/* Quantity Input */}
       <div className="mb-5">
-        <input className={"appearance-none rounded border border-gray-400 block px-3 py-2 w-full text-sm placeholder-gray-500 text-gray-700"
-            + " focus:bg-white focus:placeholder-gray-600 focus:text-gray-700 focus:outline-none"} id="search-quantity"
-            onChange={(e) => setQuantity(e.target.value)} placeholder="Item quantity (default: 1)" value={quantity} autoFocus/>
+        <input className="appearance-none rounded border border-gray-400 block px-3 py-2 w-full text-sm placeholder-gray-500 text-gray-700 
+                        focus:bg-white focus:placeholder-gray-600 focus:text-gray-700 focus:outline-none"
+            id="search-quantity"
+            onChange={(e) => setQuantity(e.target.value)}
+            placeholder="Item quantity (default: 1)"
+            value={quantity}
+            autocomplete="off"
+            autoFocus/>
       </div>
 
       {/* Search Bar */}
@@ -41,9 +46,13 @@ export default function SearchModal(props) {
         <span className="h-full absolute inset-y-0 left-0 flex items-center pl-2">
           <img className="h-4 w-4 fill-current text-gray-500" src="/images/magnifying-glass.svg"></img>
         </span>
-        <input placeholder="Search item name" onChange={(e) => setSearchFilter(e.target.value)} value={searchFilter} id="search-input"
-          className={"appearance-none rounded-t border border-gray-400 block pl-8 pr-6 py-2 w-full bg-white text-sm placeholder-gray-500 text-gray-700"
-            + " focus:placeholder-gray-600 focus:text-gray-700 focus:outline-none"}/>
+        <input className="appearance-none rounded-t border border-gray-400 block pl-8 pr-6 py-2 w-full bg-white text-sm placeholder-gray-500 text-gray-700 
+                        focus:placeholder-gray-600 focus:text-gray-700 focus:outline-none"
+          id="search-input"
+          onChange={(e) => setSearchFilter(e.target.value)}
+          placeholder="Search item name"
+          value={searchFilter} 
+          autocomplete="off"/>
       </div>
 
       {/* Item Select */}
