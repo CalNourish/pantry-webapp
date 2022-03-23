@@ -1,7 +1,7 @@
 import Layout from '../components/Layout'
 import Sidebar from '../components/Sidebar'
 import useSWR from 'swr';
-import React from 'react';
+import {React, } from 'react';
 import Modal from 'react-modal'
 import SearchModal from '../components/SearchModal'
 import cookie from 'js-cookie';
