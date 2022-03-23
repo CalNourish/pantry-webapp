@@ -44,7 +44,7 @@ export default function SearchModal(props) {
       {/* Search Bar */}
       <div className="block relative">
         <span className="h-full absolute inset-y-0 left-0 flex items-center pl-2">
-          <img className="h-4 w-4 fill-current text-gray-500" src="/images/magnifying-glass.svg"></img>
+          <img className="h-4 w-4" src="/images/magnifying-glass.svg"></img>
         </span>
         <input className="appearance-none rounded-t border border-gray-400 block pl-8 pr-6 py-2 w-full bg-white text-sm placeholder-gray-500 text-gray-700 
                         focus:placeholder-gray-600 focus:text-gray-700 focus:outline-none"
