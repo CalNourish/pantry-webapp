@@ -328,9 +328,9 @@ class Cart extends React.Component {
             <SearchModal items={this.data} addItemFunc={this.addItem} onCloseHandler={() => this.setState({showSearch: false})}/>
           </Modal>
 
-          <div className="flex h-full">
+          <div className="flex flex-col h-full sm:flex-row">
             {/* Left-hand column */}
-            <div className="flex-none w-64">
+            <div className="flex-none sm:w-64">
               <Sidebar className="py-4">
               
                 {/* Barcode & Quantity Form */}
