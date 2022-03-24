@@ -185,24 +185,29 @@ class Cart extends React.Component {
       return;
     }
 
-    const response = await fetch('/api/inventory/CheckoutItems', { method: 'POST',
+    fetch('/api/inventory/CheckoutItems', { method: 'POST',
       body: reqbody,
       headers: {'Content-Type': "application/json", 'Authorization': token}
     })
-    if (response.ok) {
-      /* clear the cart on successful checkout */
-      let items = this.state.items;
-      items.clear();
-      this.setState({
-          items: items,
-          itemsInCart: 0,
-          error: null,
-      })
-      this.showSuccess("Cart submitted successfully", 10000)
-    } else {
-      this.showError("Error submitting cart.");
-      return;
-    }
+    .then(resp => {
+      if (resp.ok) {
+        let items = this.state.items;
+        items.clear();
+        this.setState({
+            items: items,
+            itemsInCart: 0,
+            error: null,
+        })
+        this.showSuccess("Cart submitted successfully", 10000)
+      }
+      else if (resp.status == 401) {
+        this.showError(`You are not authorized to perform this action. Make sure you are logged in to an authorized account.`)
+      } else {
+        this.showError(`Error ${resp.status}`)
+      }
+      return resp.text()
+    })
+    .then(msg => console.log("checkout API:", msg))
   }
 
   displayCartRow = (barcode, value) => {
