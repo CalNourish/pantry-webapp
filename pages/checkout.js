@@ -232,13 +232,15 @@ class Cart extends React.Component {
   render() {
 
     /* Hotkeys*/
+    const quantityHotkey = "Q", barcodeHotkey = "B", searchHotkey = "F", searchSubmitHotkey = "F";
+
     document.onkeydown = (e) => {
       var barcode = document.getElementById("barcode");
       var quantity = document.getElementById("quantity");
 
       /* if modal is open, can navigate with arrow keys and tab */
       if (this.state.showSearch) {
-        if (e.key === "Enter" && document.activeElement.id !== "search-select") {
+        if (e.key.toLowerCase() === searchSubmitHotkey.toLowerCase()) {
           e.preventDefault();
           document.getElementById("search-submit").click();
         }
@@ -271,10 +273,10 @@ class Cart extends React.Component {
       }
 
       /* hotkeys for item form (left tab) */
-      if (["ArrowUp", "q", "Q"].includes(e.key)) {
+      if (["ArrowUp", barcodeHotkey.toLowerCase(), barcodeHotkey.toUpperCase()].includes(e.key)) {
         e.preventDefault();
         barcode.focus();
-      } else if (["ArrowDown", "w", "W"].includes(e.key)) {
+      } else if (["ArrowDown", quantityHotkey.toLowerCase(), quantityHotkey.toUpperCase()].includes(e.key)) {
         e.preventDefault();
         quantity.focus();
       } else if (e.key === "Enter" && e.shiftKey) {
@@ -283,7 +285,7 @@ class Cart extends React.Component {
       } else if (e.key === "Enter") {
         e.preventDefault();
         document.getElementById("checkout-item-form").requestSubmit();
-      } else if (["f", "F"].includes(e.key)) {
+      } else if (e.key.toLowerCase() === searchHotkey.toLowerCase()) {
         e.preventDefault();
         this.toggleShowSearch();
       }
@@ -297,7 +299,7 @@ class Cart extends React.Component {
       <>
         <Layout>
           <Modal id="search-modal" isOpen={this.state.showSearch} ariaHideApp={false} onRequestClose={() => {this.setState({showSearch: false})}}>
-            <SearchModal items={this.data} addItemFunc={this.addItem} onCloseHandler={() => this.setState({showSearch: false})}/>
+            <SearchModal items={this.data} addItemFunc={this.addItem} onCloseHandler={() => this.setState({showSearch: false})} submitHotkey={searchSubmitHotkey}/>
           </Modal>
 
           <div className="flex flex-col h-full sm:flex-row">
@@ -307,19 +309,19 @@ class Cart extends React.Component {
               
                 {/* Barcode & Quantity Form */}
                 <form id="checkout-item-form" onSubmit={(e) => this.itemFormSubmit(e)}>
-                  <h1 className="text-3xl font-semibold mb-2">Checkout Item</h1>
+                  <h1 className="text-3xl font-medium mb-2">Checkout Item</h1>
                   <p className="mb-5 text-sm">Please enter the amount, then scan the item to add it to the cart. Click "Check Out" to submit the cart.</p>
                   <div className="form-group" id="barcode-and-quantity">
                     <div className="col-xs-7 mb-4">
                       <h1 className="text-2xl font-medium" autoFocus>Barcode</h1>
                       <p className="text-gray-600 text-xs tracking-normal font-normal mb-2 hidden sm:block">
-                        (hotkey: Q)
+                        (hotkey: {barcodeHotkey})
                       </p>
-                      <input className="border rounded w-full py-2 px-3 text-gray-700 leading-tight" id="barcode" autoComplete="off"></input>
+                      <input className="border rounded w-full py-2 px-3 text-gray-700 leading-tight" id="barcode" autoComplete="off" autoFocus></input>
                     </div>
                     <div className="col-xs-8 mb-4">
                       <h1 className="text-2xl font-medium">Quantity</h1>
-                      <p className="text-gray-600 text-xs tracking-normal font-normal mb-2 hidden sm:block">(hotkey: W)</p>
+                      <p className="text-gray-600 text-xs tracking-normal font-normal mb-2 hidden sm:block">(hotkey: {quantityHotkey})</p>
                       <input className="border rounded w-full py-2 px-3 text-gray-700 leading-tight" id="quantity" autoComplete="off" placeholder="default: 1"></input>
                     </div>
                   </div>
@@ -333,7 +335,7 @@ class Cart extends React.Component {
                 {/* Search Item Button */}
                 <div>
                   <button className="btn btn-outline w-full uppercase tracking-wide text-xs font-semibold focus:shadow-none" onClick={this.toggleShowSearch}>
-                    Search item by name <span className="font-normal hidden sm:inline-block">(F)</span>
+                    Search item by name <span className="font-normal hidden sm:inline-block">({searchHotkey})</span>
                   </button>
                 </div>
               </Sidebar>
@@ -366,7 +368,7 @@ class Cart extends React.Component {
                 </tbody>
               </table>
               <button className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" onClick={(e) => this.submitCart(e)}>
-                Checkout <span className="font-normal hidden sm:inline-block"> (Shift+Enter)</span>
+                Checkout <span className="font-normal hidden sm:inline-block">(Shift+Enter)</span>
               </button>
             </div>
           </div>

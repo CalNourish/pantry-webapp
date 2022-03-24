@@ -66,7 +66,7 @@ export default function SearchModal(props) {
 
       {/* Submit Button */}
       <button className="btn btn-pantry-blue uppercase tracking-wide text-xs font-semibold" onClick={submitItem} id="search-submit">
-        Add Item <span className="font-normal hidden sm:inline-block">(Enter)</span>
+        Add Item <span className="font-normal hidden sm:inline-block">({props.submitHotkey})</span>
       </button>
     </div>
   )
