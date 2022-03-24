@@ -37,7 +37,7 @@ export default function SearchModal(props) {
             onChange={(e) => setQuantity(e.target.value)}
             placeholder="Item quantity (default: 1)"
             value={quantity}
-            autocomplete="off"
+            autoComplete="off"
             autoFocus/>
       </div>
 
@@ -52,7 +52,7 @@ export default function SearchModal(props) {
           onChange={(e) => setSearchFilter(e.target.value)}
           placeholder="Search item name"
           value={searchFilter} 
-          autocomplete="off"/>
+          autoComplete="off"/>
       </div>
 
       {/* Item Select */}
