@@ -36,26 +36,54 @@ export default async function(req,res) {
         .then(() => {
             firebase.auth().signInAnonymously()
             .then(() => {
-                for (let barcode in body) {
-                    let ref = firebase.database().ref(`/inventory/${barcode}`)
-                    ref.once("value")
-                    .then(function(snapshot) {
-                        if (snapshot.exists()) {
-                            ref.update({"count": firebase.database.ServerValue.increment(-1 * body[barcode])})
-                            .catch(error => {
-                                res.status(500);
-                                res.json({error: `Error when checking out item (barcode ${barcode}): ${error}`});
-                                return reject();
-                            })
-                        } else {
-                            console.log(`possible data corruption: invalid barcode ${barcode}`)
-                        }
-                    });
-                }
                 
-                res.status(200);
-                res.json({message: "success"});
-                return resolve();
+                Promise.all(
+                    Object.keys(body).map(barcode => {
+                        return new Promise((resolve) => {
+                            let ref = firebase.database().ref(`/inventory/${barcode}`)
+                            ref.once("value")
+                            .then(snapshot => {
+                                if (snapshot.exists()) {
+                                    ref.update({"count": firebase.database.ServerValue.increment(-1 * body[barcode])})
+                                    .then(() => {
+                                        return resolve();
+                                    })
+                                    .catch(error => {
+                                        res.status(500);
+                                        res.json({error: `Error when checking out item (barcode ${barcode}): ${error}`});
+                                        return reject();
+                                    })
+                                } else {
+                                    console.log(`possible data corruption: invalid barcode ${barcode}`)
+                                }
+                            });
+                        })
+                    })
+                ).then(() => {
+                    console.log("checkout done")
+                    res.status(200);
+                    res.json({message: "success"});
+                    return resolve();
+                })
+                .catch(() => {
+                    console.log(`possible data corruption`)
+                })
+                // for (let barcode in body) {
+                //     let ref = firebase.database().ref(`/inventory/${barcode}`)
+                //     ref.once("value")
+                //     .then(function(snapshot) {
+                //         if (snapshot.exists()) {
+                //             ref.update({"count": firebase.database.ServerValue.increment(-1 * body[barcode])})
+                //             .catch(error => {
+                //                 res.status(500);
+                //                 res.json({error: `Error when checking out item (barcode ${barcode}): ${error}`});
+                //                 return reject();
+                //             })
+                //         } else {
+                //             console.log(`possible data corruption: invalid barcode ${barcode}`)
+                //         }
+                //     });
+                // }
             }).catch((err) => {
                 console.log("CheckoutItems signInAnonymously error:", err)
                 res.status(500);
