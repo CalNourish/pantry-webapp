@@ -202,12 +202,15 @@ class Cart extends React.Component {
       }
       else if (resp.status == 401) {
         this.showError(`You are not authorized to perform this action. Make sure you are logged in to an authorized account.`)
+        return resp.text()
       } else {
         this.showError(`Error ${resp.status}`)
+        return resp.text()
       }
-      return resp.text()
     })
-    .then(msg => console.log("checkout API:", msg))
+    .then(msg => {
+      if (msg) console.log("checkout API error:", msg)
+    });
   }
 
   displayCartRow = (barcode, value) => {

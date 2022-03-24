@@ -29,37 +29,41 @@ export default async function(req,res) {
         // verify parameters
         let ok = requireParams(body, res);
         if (!ok) {
-            console.log("not good params")
             return reject();
         }
 
         validateFunc(token)
         .then(() => {
-            console.log("validated")
-
             firebase.auth().signInAnonymously()
             .then(() => {
-                console.log("signed in anonymously")
-                let inventoryUpdates = {}
                 for (let barcode in body) {
-                    inventoryUpdates[barcode + '/count'] = firebase.database.ServerValue.increment(-1 * body[barcode]);
+                    let ref = firebase.database().ref(`/inventory/${barcode}`)
+                    ref.once("value")
+                    .then(function(snapshot) {
+                        if (snapshot.exists()) {
+                            ref.update({"count": firebase.database.ServerValue.increment(-1 * body[barcode])})
+                            .catch(error => {
+                                res.status(500);
+                                res.json({error: `Error when checking out item (barcode ${barcode}): ${error}`});
+                                return reject();
+                            })
+                        } else {
+                            console.log(`possible data corruption: invalid barcode ${barcode}`)
+                        }
+                    });
                 }
-
-                firebase.database().ref('/inventory/').update(inventoryUpdates)
-                .catch(error => {
-                    res.status(500);
-                    res.json({error: `Error when checking out: ${error}`});
-                    return resolve();
-                })
-                .then(() => {
-                    console.log("updating")
-                    res.status(200);
-                    res.json({message: "success"});
-                    return resolve();
-                });
+                
+                res.status(200);
+                res.json({message: "success"});
+                return resolve();
+            }).catch((err) => {
+                console.log("CheckoutItems signInAnonymously error:", err)
+                res.status(500);
+                res.json({message: "error signing in to firebase"});
+                return resolve();
             })
         }).catch(() => {
-            console.log("not validated")
+            console.log("Checkout: user not authenticated")
             res.status(401);
             res.json({error: "you are not authenticated to perform this action"})
             return resolve();
