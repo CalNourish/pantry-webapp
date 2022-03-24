@@ -238,27 +238,9 @@ class Cart extends React.Component {
 
       /* if modal is open, can navigate with arrow keys and tab */
       if (this.state.showSearch) {
-        /* structure:
-          search-quantity
-                v
-          search-input
-                v
-          search-option(s)
-        */
-        let activeId = document.activeElement.id
-
-        let inputs = document.getElementsByClassName("search-option")
-        let arr = Array.prototype.slice.call(inputs);
-        let index = arr.indexOf(document.activeElement)
-        if (e.key === "ArrowDown") {
+        if (e.key === "Enter" && document.activeElement.id !== "search-select") {
           e.preventDefault();
-          if (activeId === "search-quantity") document.getElementById("search-input").focus();
-          else if (index < arr.length-1) inputs[index+1].focus();
-        } else if (e.key === "ArrowUp") {
-          e.preventDefault();
-          if (index > 0) inputs[index-1].focus();
-          else if (index === 0) document.getElementById("search-input").focus();
-          else if (activeId === "search-input") document.getElementById("search-quantity").focus();
+          document.getElementById("search-submit").click();
         }
         return
       }
@@ -344,7 +326,7 @@ class Cart extends React.Component {
 
                   {/* Add Item Button */}
                   <button className="my-1 btn btn-pantry-blue w-full uppercase tracking-wide text-xs font-semibold focus:shadow-none" id="add-item-btn" type="submit">
-                    Add Item<span className="font-normal hidden sm:inline-block"> (Enter)</span>
+                    Add Item <span className="font-normal hidden sm:inline-block">(Enter)</span>
                   </button>
                 </form>
 
@@ -384,8 +366,7 @@ class Cart extends React.Component {
                 </tbody>
               </table>
               <button className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" onClick={(e) => this.submitCart(e)}>
-                Checkout
-                <span className="font-normal hidden sm:inline-block"> (Shift+Enter)</span>
+                Checkout <span className="font-normal hidden sm:inline-block"> (Shift+Enter)</span>
               </button>
             </div>
           </div>

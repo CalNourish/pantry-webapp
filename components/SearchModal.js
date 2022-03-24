@@ -1,32 +1,56 @@
 import React, { useState } from 'react';
+import Select from 'react-select'
 
 /* Search modal used for looking up item by name on Checkout Page */
 export default function SearchModal(props) {
   let items = props.items;
-  const [searchFilter, setSearchFilter] = useState("");
   const [quantity, setQuantity] = useState("");
-  
-  let checkFilter = (itemData) => {
-    let name = itemData.itemName.toLowerCase();
-    let filterLower = searchFilter.toLowerCase().split(" ").filter(el => el);
-    for (let idx in filterLower) {
-      if (name.indexOf(filterLower[idx]) == -1) {
-        if (itemData.itemName === "Orange Rice") console.log(name, filterLower[idx])
-        return false;
-      }
-    }
-    return true;
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  let selectItem = (barcode) => {
+    setSelectedItem(items[barcode]);
   }
 
-  let submitItem = (itemInfo, quantity) => {
-    props.addItemFunc(itemInfo, quantity);
-    props.onCloseHandler(itemInfo.barcode);
+  let submitItem = () => {
+    if (selectedItem) {
+      props.addItemFunc(selectedItem, quantity);
+      props.onCloseHandler(selectedItem.barcode);
+    }
   }
+
+  // Need to hardcode style for react-select because tailwind classes aren't supported
+  const selectStyle = {
+    option: (provided) => ({
+      ...provided,
+    }),
+    control: (provided) => ({
+      ...provided,
+      borderColor: "#cbd5e0 !important",
+      boxShadow: "none",
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      color: "#4a5568"
+    })
+  }
+
+  const options = Object.keys(items).map((key) => {
+    return {value: items[key].barcode, label: items[key].itemName}
+  })
 
   return (
     <div className="modal-wrapper p-5 h-full flex flex-col">
       <div className="modal-header text-3xl font-bold mb-5">
         Add Item By Name
+      </div>
+
+      {/* Item Search Select */}
+      <div className="mb-5">
+        <Select options={options} id="search-select"
+          placeholder={<span className="text-sm text-gray-500">Search item name</span>}
+          styles={selectStyle}
+          onChange={(e) => selectItem(e.value)}
+          autoFocus/>
       </div>
 
       {/* Quantity Input */}
@@ -37,36 +61,13 @@ export default function SearchModal(props) {
             onChange={(e) => setQuantity(e.target.value)}
             placeholder="Item quantity (default: 1)"
             value={quantity}
-            autoComplete="off"
-            autoFocus/>
+            autoComplete="off"/>
       </div>
 
-      {/* Search Bar */}
-      <div className="block relative">
-        <span className="h-full absolute inset-y-0 left-0 flex items-center pl-2">
-          <img className="h-4 w-4" src="/images/magnifying-glass.svg"></img>
-        </span>
-        <input className="appearance-none rounded-t border border-gray-400 block pl-8 pr-6 py-2 w-full bg-white text-sm placeholder-gray-500 text-gray-700 
-                        focus:placeholder-gray-600 focus:text-gray-700 focus:outline-none"
-          id="search-input"
-          onChange={(e) => setSearchFilter(e.target.value)}
-          placeholder="Search item name"
-          value={searchFilter} 
-          autoComplete="off"/>
-      </div>
-
-      {/* Item Select */}
-      <div className="modal-content overflow-y-scroll border border-t-0 border-gray-400 rounded-b pt-1">
-        {
-          Object.keys(items).map((key) => {
-            let itemInfo = items[key];
-            if (checkFilter(itemInfo)) {
-              return <button key={key} onClick={() => submitItem(itemInfo, quantity)} tabIndex="-1" id={key + "-search"}
-                          className="search-option px-3 py-1 cursor-pointer block w-full text-left hover:bg-gray-300 focus:bg-gray-300 focus:outline-none">{itemInfo.itemName}</button>
-            }
-          }) 
-        }
-      </div>
+      {/* Submit Button */}
+      <button className="btn btn-pantry-blue uppercase tracking-wide text-xs font-semibold" onClick={submitItem} id="search-submit">
+        Add Item <span className="font-normal hidden sm:inline-block">(Enter)</span>
+      </button>
     </div>
   )
 }
