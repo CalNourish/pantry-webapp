@@ -46,7 +46,7 @@ export default function OrderDetails() {
                 )
                 }
               }
-              tabindex='-1'
+              tabIndex='-1'
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
@@ -104,7 +104,10 @@ export default function OrderDetails() {
               {
                 Object.keys(categories).map((key, _value) => {
                   return (
-                    <div id={categories[key].id} key={key} className="hover:text-gray-500 text-gray-700 text-sm cursor-pointer pb-2">{categories[key].displayName}</div>
+                    <div id={categories[key].id} key={key} className="hover:text-gray-500 text-gray-700 text-sm cursor-pointer pb-2"
+                      onClick={() => document.getElementById("anchor-"+key).scrollIntoView()}>
+                      {categories[key].displayName}
+                    </div>
                   )
                 })
               }
@@ -116,7 +119,11 @@ export default function OrderDetails() {
             Object.keys(categories).map((key, _value) => {
               return (
                 <div>
-                  <h3 className="uppercase sticky py-2 bg-white top-0 font-bold tracking-wide text-gray-700 text-xs mb-4">{categories[key].displayName}</h3>
+                  {/* Anchor for scrolling to specific category. Can't scroll to h3 element because it's sticky, so not always located at top of section. */}
+                  <a id={"anchor-"+key}></a>
+                  <h3 className="uppercase sticky py-2 bg-white top-0 font-bold tracking-wide text-gray-700 text-xs mb-4" id={"category-"+key}>
+                    {categories[key].displayName}
+                  </h3>
                   <div className='divide-y'>
                     { 
                       itemsByCategory[categories[key].id].map(item => item)
