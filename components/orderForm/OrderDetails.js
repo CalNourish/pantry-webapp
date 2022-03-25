@@ -16,6 +16,19 @@ export default function OrderDetails() {
   if (itemError || categoryError) return <div>failed to load</div>
   if (!items || !categories) return <div>loading...</div>
 
+  // Current Cart
+  const cartState = useContext(StateCartContext)
+  const cartItems = Object.keys(cartState.cart).map((key, _value) => {
+      return (
+          <tr>
+              <td class="px-5">
+                  <button class="font-bold">x</button>
+                  {cartState.cart[key].itemName} {cartState.cart[key].quantity}
+              </td>
+          </tr>
+      )
+  })
+
   // Reassign because destructuring wasn't working when fetching the data...
   categories = categories.categories
 
@@ -128,7 +141,10 @@ export default function OrderDetails() {
           }
         </div>
         <div className="form-group pt-2">
-          <h3 className="uppercase sticky top-0 pt-2 font-bold tracking-wide text-gray-700 text-xs mb-4">Order Summary</h3>
+          <h3 className="uppercase sticky top-0 pt-2 font-bold tracking-wide text-gray-700 text-xs mb-4">Cart</h3>
+          <table>
+          {cartItems}
+          </table>
         </div>
       </div>
     </>
