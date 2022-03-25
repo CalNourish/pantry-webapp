@@ -248,7 +248,8 @@ class Cart extends React.Component {
 
       /* if modal is open, can navigate with arrow keys and tab */
       if (this.state.showSearch) {
-        if (e.key.toLowerCase() === searchSubmitHotkey.toLowerCase()) {
+        if (e.key.toLowerCase() === searchSubmitHotkey.toLowerCase() &&
+            !document.activeElement.id.startsWith("react-select")) {
           e.preventDefault();
           document.getElementById("search-submit").click();
         }
