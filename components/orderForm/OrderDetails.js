@@ -58,7 +58,7 @@ export default function OrderDetails() {
               autoComplete="off"
               min="0"
               step="1"
-              className={"no-arrows-input appearance-none block w-full bg-gray-200 text-gray-700 border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+              className={"no-arrows-input appearance-none w-16 block text-center bg-gray-200 text-gray-700 border-gray-200 py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                             + (invalid_quantity ? " border-red-600 focus:border-red-600 border-2" : " border")}
               value={cart[key] ? cart[key].quantity : ""}
               onChange={(e) => {
