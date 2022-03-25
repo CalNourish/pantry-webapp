@@ -9,7 +9,7 @@ const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export default function OrderDetails() {
   const cartDispatch = useContext(DispatchCartContext)
-  const { cart } = useContext(StateCartContext)
+  let { cart } = useContext(StateCartContext)
   let { data: items, error: itemError } = useSWR('/api/inventory/GetAllItems', fetcher)
   let { data: categories, error: categoryError } = useSWR('/api/categories/ListCategories', fetcher)
   
@@ -42,7 +42,7 @@ export default function OrderDetails() {
     let invalid_quantity = cart[key] && cart[key].quantity > maxQuantity
     let inputId = `item-${items[key].barcode}`
     let itemInput = (
-      <div className="py-4 flex items-center justify-between" key={items[key].barcode}>
+      <div className={`itemrow-${items[key].barcode} py-4 flex items-center justify-between`} key={items[key].barcode}>
         <div className="text-left">{items[key].itemName}</div>
         <div>
           {/* number spinner [-| 1 |+] */}
@@ -51,15 +51,11 @@ export default function OrderDetails() {
             <button 
               className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" 
               onClick={() => {
-                let els = document.querySelectorAll(`input#item-${key}`)
-                els.forEach(item => { 
-                  let val = parseInt(item.value) || 0
-                  val > 0 ? (item.value = val - 1) : null
-                  }
-                )
+                let newAmt = cart[key] && cart[key].quantity > 0 ? cart[key].quantity - 1 : 0;
+                cartDispatch({ type: 'UPDATE_CART', payload: {item: items[key], quantity:newAmt}})
                 }
               }
-              tabindex='-1'
+              tabIndex='-1'
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
@@ -82,14 +78,9 @@ export default function OrderDetails() {
             <button 
               className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" 
               onClick={() => {
-                let els = document.querySelectorAll(`input#item-${key}`)
-                els.forEach(item => {
-                  let val = parseInt(item.value) || 0
-                  val < maxQuantity ? item.value = val + 1 : null
-                  }
-                )
-                }
-              }
+                let newAmt = cart[key] ? cart[key].quantity + 1 : 1;
+                cartDispatch({ type: 'UPDATE_CART', payload: {item: items[key], quantity:newAmt}})
+              }}
               tabIndex="-1"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto" viewBox="0 0 20 20" fill="currentColor">
@@ -117,7 +108,10 @@ export default function OrderDetails() {
               {
                 Object.keys(categories).map((key, _value) => {
                   return (
-                    <div id={categories[key].id} key={key} className="hover:text-gray-500 text-gray-700 text-sm cursor-pointer pb-2">{categories[key].displayName}</div>
+                    <div id={categories[key].id} key={key} className="hover:text-gray-500 text-gray-700 text-sm cursor-pointer pb-2"
+                      onClick={() => document.getElementById("anchor-"+key).scrollIntoView()}>
+                      {categories[key].displayName}
+                    </div>
                   )
                 })
               }
@@ -129,7 +123,11 @@ export default function OrderDetails() {
             Object.keys(categories).map((key, _value) => {
               return (
                 <div>
-                  <h3 className="uppercase sticky py-2 bg-white top-0 font-bold tracking-wide text-gray-700 text-xs mb-4">{categories[key].displayName}</h3>
+                  {/* Anchor for scrolling to specific category. Can't scroll to h3 element because it's sticky, so not always located at top of section. */}
+                  <a id={"anchor-"+key}></a>
+                  <h3 className="uppercase sticky py-2 bg-white top-0 font-bold tracking-wide text-gray-700 text-xs mt-4" id={"category-"+key}>
+                    {categories[key].displayName}
+                  </h3>
                   <div className='divide-y'>
                     { 
                       itemsByCategory[categories[key].id].map(item => item)
@@ -140,11 +138,57 @@ export default function OrderDetails() {
             })
           }
         </div>
-        <div className="form-group pt-2">
-          <h3 className="uppercase sticky top-0 pt-2 font-bold tracking-wide text-gray-700 text-xs mb-4">Cart</h3>
-          <table>
-          {cartItems}
-          </table>
+        <div className="form-group flex-grow">
+          <div className="sticky top-0"> {/* <- this is here to make the whole summary sticky */}
+            <h3 className="uppercase pt-2 font-bold tracking-wide text-gray-700 text-xs mb-4">Order Summary</h3>
+            {/* TODO: current ordering is by barcode, would it be easier for user if it was in order of addition? might need restructuring cart a bit... not worth? */}
+            <table className="w-full">
+              <thead className="border-b-2">
+                <tr>
+                  <th className="font-semibold text-left">Item Name</th>
+                  <th className="font-semibold text-right">Quantity</th>
+                  <th className="font-semibold text-right"></th>
+                </tr>
+              </thead>
+              <tbody className="">
+              {
+                Object.keys(cart).map((barcode) => {
+                  return (
+                    <tr className="mb-2 cursor-pointer">
+                      <td 
+                        onClick={() => {
+                          document.getElementsByClassName(`itemrow-${barcode}`)[0].scrollIntoView();
+                          window.scrollBy(0, -35); // compensating for the sticky title covering the top of the page
+                        }}
+                        className="text-left"
+                      >
+                        {cart[barcode].itemName}
+                      </td>
+                      <td 
+                        onClick={() => {
+                          document.getElementsByClassName(`itemrow-${barcode}`)[0].scrollIntoView();
+                          window.scrollBy(0, -35); // compensating for the sticky title covering the top of the page
+                        }}
+                        className="text-right"
+                      >
+                        {cart[barcode].quantity}
+                      </td>
+                      <td 
+                        onClick={() => {
+                          cartDispatch({ type: 'REMOVE_ITEM', payload: {item: items[barcode]}})
+                        }}
+                        className="text-center px-4 py-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 hover:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                      </td>
+                    </tr>
+                  )
+                })
+              }
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </>

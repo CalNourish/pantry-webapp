@@ -140,7 +140,7 @@ export default function PersonInfo() {
           >
             Number of Dependents
           </label>
-          <p class="text-gray-600 text-xs italic">
+          <p className="text-gray-600 text-xs italic">
             Include anyone in your household who depends on you for at least half of their meals
           </p>
         </div>

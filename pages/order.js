@@ -10,8 +10,8 @@ export default function Order() {
   if (formStep == 2) {
     return (
       <Layout>
-        <div class="container mx-auto px-4 mt-8 mb-16">
-          <div class="mb-4">
+        <div className="container mx-auto px-4 mt-8 mb-16">
+          <div className="mb-4">
             <button  onClick={() => setFormStep(formStep - 1)} className="hover:text-blue-500 text-blue-700">
               Back
             </button>

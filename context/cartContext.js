@@ -11,7 +11,7 @@ export const StateCartContext = createContext();
  */ 
 export const ACTIONS = {
   UPDATE_CART: "UPDATE_CART",
-  REMOTE_ITEM: "REMOTE_ITEM",
+  REMOVE_ITEM: "REMOVE_ITEM",
   CLEAR_CART: "CLEAR_CART",
   UPDATE_PERSONAL: "UPDATE_PERSONAL",
   UPDATE_DELIVERY: "UPDATE_DELIVERY"
@@ -59,7 +59,7 @@ const initialState = {
 // Updates the quantity of an item in the cart
 const updateCart = (item, quantity, state) => {
   const updatedCart = { ...state.cart };
-  quantity = parseInt(quantity)
+  quantity = isNaN(quantity) ? 0 : parseInt(quantity) // default 0 if not parse-able
   if (!(item.barcode in updatedCart) && quantity > 0) {
     // If item is not in cart and quantity is greater than 0
     // add to cart
@@ -77,7 +77,7 @@ const updateCart = (item, quantity, state) => {
 // Removes item from cart
 const removeItemFromCart = (item, state) => {
   const updatedCart = { ...state.cart };
-  if (!(item.barcode in updatedCart)) {
+  if (item.barcode in updatedCart) {
     delete updatedCart[item.barcode]
   }
   return { ...state, cart: updatedCart };
@@ -102,7 +102,7 @@ const reducer = (state, action) => {
   switch (action.type) {
     case ACTIONS.UPDATE_CART:
       return updateCart(action.payload.item, action.payload.quantity, state)
-    case ACTIONS.REMOTE_ITEM:
+    case ACTIONS.REMOVE_ITEM:
       return removeItemFromCart(action.payload.item, state)
     case ACTIONS.CLEAR_CART:
       return clearCart(state)
