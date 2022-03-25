@@ -107,14 +107,16 @@ export default function OrderDetails() {
             </div>
           </div>
         </div>
+
+        {/* Names and links to categories */}
         <div className="relative form-group mr-8">
           {
             Object.keys(categories).map((key, _value) => {
               return (
-                <div>
+                <div key={categories[key].displayName}>
                   {/* Anchor for scrolling to specific category. Can't scroll to h3 element because it's sticky, so not always located at top of section. */}
                   <a id={"anchor-"+key}></a>
-                  <h3 className="uppercase sticky py-2 bg-white top-0 font-bold tracking-wide text-gray-700 text-xs mt-4" id={"category-"+key}>
+                  <h3 className="uppercase sticky py-2 bg-white top-0 font-bold tracking-wide text-gray-700 text-xs mt-4" id={"category-"+key} key={key}>
                     {categories[key].displayName}
                   </h3>
                   <div className='divide-y'>
@@ -142,7 +144,7 @@ export default function OrderDetails() {
               {
                 Object.keys(cart).map((barcode) => {
                   return (
-                    <tr className="mb-2 cursor-pointer" 
+                    <tr className="mb-2 cursor-pointer"  key={barcode}
                       onClick={() => {
                         document.getElementsByClassName(`itemrow-${barcode}`)[0].scrollIntoView();
                         window.scrollBy(0, -35); // compensating for the sticky title covering the top of the page
