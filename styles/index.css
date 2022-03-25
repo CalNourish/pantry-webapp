@@ -1,7 +1,17 @@
 @tailwind base;
 
 /* Write your own custom base styles here */
+/* Chrome, Safari, Edge, Opera */
+.no-arrows-input::-webkit-outer-spin-button,
+.no-arrows-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 
+/* Firefox */
+.no-arrows-input[type=number] {
+  -moz-appearance: textfield;
+}
 /* Start purging... */
 @tailwind components;
 /* Stop purging. */
@@ -61,6 +71,5 @@
   .btn-pantry-green {
     @apply text-white bg-pantry-green-500 border border-transparent;
   }
-
 
 }
