@@ -27,17 +27,16 @@ export default function OrderDetails() {
     // if not max order size, set to infinity
     const maxQuantity = parseInt(items[key].maxOrderSize) || Number.POSITIVE_INFINITY
     let invalid_quantity = cart[key] && cart[key].quantity > maxQuantity
-    let itemWrapperId = `item-wrapper-${items[key].barcode}`
     let inputId = `item-${items[key].barcode}`
     let itemInput = (
-      <div id={itemWrapperId} key={key} className="mb-4">
-        <label className="text-gray-700 text-xs font-bold mb-2" for={key}>
-            {items[key].itemName}
-        </label>
+      <div className="py-4 flex items-center justify-between" key={items[key].barcode}>
+        <div className="text-left">{items[key].itemName}</div>
         <div>
-          <div className="flex">
+          {/* number spinner [-| 1 |+] */}
+          <div className="border border-solid border-gray-300 p-px w-32 h-8 flex flex-row float-left">
+            {/* minus */}
             <button 
-              className="pl-4 pr-2 bg-gray-200 rounded-l-full focus:outline-none"
+              className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" 
               onClick={() => {
                 let els = document.querySelectorAll(`input#item-${key}`)
                 els.forEach(item => { 
@@ -47,28 +46,28 @@ export default function OrderDetails() {
                 )
                 }
               }
-              >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              tabindex='-1'
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
               </svg>
             </button>
+            {/* quantity input */}
             <input 
               id={inputId}
-              type="number" 
+              className="no-arrows-input appearance-none quantity-input w-6 flex-grow mx-1 text-center focus:outline-none" 
               autoComplete="off"
+              type="number"
               min="0"
               step="1"
-              className={"no-arrows-input appearance-none w-16 block text-center bg-gray-200 text-gray-700 border-gray-200 py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                            + (invalid_quantity ? " border-red-600 focus:border-red-600 border-2" : " border")}
               value={cart[key] ? cart[key].quantity : ""}
               onChange={(e) => {
                 cartDispatch({ type: 'UPDATE_CART', payload: {item: items[key], quantity: e.target.value } });
-                }
-              }
-              />
-            {invalid_quantity ? <div className='text-red-600'>Quantity must be less than {maxQuantity}</div> : ""}
+              }}
+            />
+            {/* plus */}
             <button 
-              className="pr-4 pl-2 bg-gray-200 rounded-r-full focus:outline-none"
+              className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" 
               onClick={() => {
                 let els = document.querySelectorAll(`input#item-${key}`)
                 els.forEach(item => {
@@ -78,12 +77,14 @@ export default function OrderDetails() {
                 )
                 }
               }
+              tabIndex="-1"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
               </svg>
             </button>
           </div>
+          {invalid_quantity ? <div className='text-red-600'>Quantity must be less than {maxQuantity}</div> : ""}
         </div>
       </div>
     )
@@ -116,7 +117,7 @@ export default function OrderDetails() {
               return (
                 <div>
                   <h3 className="uppercase sticky py-2 bg-white top-0 font-bold tracking-wide text-gray-700 text-xs mb-4">{categories[key].displayName}</h3>
-                  <div>
+                  <div className='divide-y'>
                     { 
                       itemsByCategory[categories[key].id].map(item => item)
                     }
