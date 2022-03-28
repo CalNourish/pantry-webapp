@@ -23,13 +23,14 @@ export default async function(req,res) {
     
     const token = req.headers.authorization
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const {body} = req
     
         // verify parameters
         let ok = requireParams(body, res);
         if (!ok) {
-            return reject();
+            res.status(400).json({message: "bad request parameters"});
+            return resolve();
         }
 
         validateFunc(token)
@@ -51,7 +52,7 @@ export default async function(req,res) {
                                     .catch(error => {
                                         res.status(500);
                                         res.json({error: `Error when checking out item (barcode ${barcode}): ${error}`});
-                                        return reject();
+                                        return resolve();
                                     })
                                 } else {
                                     console.log(`possible data corruption: invalid barcode ${barcode}`)
@@ -68,22 +69,6 @@ export default async function(req,res) {
                 .catch(() => {
                     console.log(`possible data corruption`)
                 })
-                // for (let barcode in body) {
-                //     let ref = firebase.database().ref(`/inventory/${barcode}`)
-                //     ref.once("value")
-                //     .then(function(snapshot) {
-                //         if (snapshot.exists()) {
-                //             ref.update({"count": firebase.database.ServerValue.increment(-1 * body[barcode])})
-                //             .catch(error => {
-                //                 res.status(500);
-                //                 res.json({error: `Error when checking out item (barcode ${barcode}): ${error}`});
-                //                 return reject();
-                //             })
-                //         } else {
-                //             console.log(`possible data corruption: invalid barcode ${barcode}`)
-                //         }
-                //     });
-                // }
             }).catch((err) => {
                 console.log("CheckoutItems signInAnonymously error:", err)
                 res.status(500);
