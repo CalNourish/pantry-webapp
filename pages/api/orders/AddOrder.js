@@ -14,7 +14,7 @@ function requireParams(body, res) {
     items are represented as an object with barcode as key and quantity (count) as value*/
 
     if (!body.firstName || !body.lastName || !body.address || !body.frequency ||
-        !body.dependents || !body.dietaryRestrictions || !body.additionalRequests || 
+        isNaN(parseInt(body.dependents)) || !body.dietaryRestrictions || !body.additionalRequests || 
         !body.calID || !body.items || !body.deliveryDate || !body.deliveryWindow) {
           res.json({error: "missing firstName||lastName||frequency||Address||dependents||calID||items||deliveryDate\
              in request"}); 
@@ -33,7 +33,8 @@ function requireParams(body, res) {
 
 function updateInventory(items) { //updates inventory in firebase
   return new Promise((resolve, reject) => {
-    let inventory = fetch(process.env.GET_ALL_ITEMS);
+    let inventory = fetch(process.env.GET_ALL_ITEMS); //to be changed possibly
+   // let inventory = firebase.database.ref(). 
     inventory.then((value) => {
       value.json().then((inventoryJson) => {
          const inventoryUpdates = {}
@@ -66,32 +67,33 @@ function addOrder(firstName, lastName, address, frequency, dependents, dietaryRe
   return new Promise((resolve, reject) => {
     const target = ['https://www.googleapis.com/auth/spreadsheets'];
     var jwt = new google.auth.JWT(
-      //process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
-      process.env.GOOGLE_SHEETS_CLIENT_EMAIL_TEST,
+      process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
+      //process.env.GOOGLE_SHEETS_CLIENT_EMAIL_TEST,
       null,
-      //(process.env.GOOGLE_SHEETS_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-      (process.env.GOOGLE_SHEETS_PRIVATE_KEY_TEST || '').replace(/\\n/g, '\n'),
+      (process.env.GOOGLE_SHEETS_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+      //(process.env.GOOGLE_SHEETS_PRIVATE_KEY_TEST || '').replace(/\\n/g, '\n'),
       target
     );
     const sheets = google.sheets({ version: 'v4', auth: jwt });
 
     //generate orderID: random six digit value. We check later to make sure that the item doesn't exist
     const orderID = Math.random().toString().slice(2, 8);
+    console.log("orderID", orderID);
 
     let d = new Date();
     const currentDate = d.getDate();
     //Food pantry master data sheet for tracking calIDs 
     //current schema is [current date, CalID (encrypted), unique order id]
     const request1 = {
-      spreadsheetId: process.env.SPREADSHEET_ID_TEST,//PANTRY_DATA_SPREADSHEET_ID, 
-      //spreadsheetId: process.env.PANTRY_DATA_SPREADSHEET_ID,
-      range: "Sheet1!A:C", 
-      //range: "Tech Testing!A:C",
+      //spreadsheetId: process.env.SPREADSHEET_ID_TEST,//PANTRY_DATA_SPREADSHEET_ID, 
+      spreadsheetId: process.env.PANTRY_DATA_SPREADSHEET_ID,
+      //range: "Sheet1!A:C", 
+      range: "Tech Testing!A:C",
       valueInputOption: "USER_ENTERED", 
       insertDataOption: "INSERT_ROWS",
       resource: {
-          "range": "Sheet1!A:C",
-          // "range": "Tech Testing!A:C",
+          //"range": "Sheet1!A:C",
+          "range": "Tech Testing!A:C",
           "majorDimension": "ROWS",
           "values": [
           [currentDate, calID, orderID] //each inner array is a row if we specify ROWS as majorDim
@@ -101,29 +103,33 @@ function addOrder(firstName, lastName, address, frequency, dependents, dietaryRe
     sheets.spreadsheets.values.append(request1)
     .catch((error) => {
       return reject("error writing to Pantry data sheet: ", error);
-    });
+    }); 
+   // return Promise.resolve("appended to first sheet");
 
     //determine approximate # of bags by # of items
     var totalItems = 0;
     for (let item in items) {
       totalItems += items[item];
     }
-    const numberOfBags = Math.ceil(totalItems / 10);
+    let numberOfBags = Math.ceil(totalItems / 10);
+    if (numberOfBags > 3) {
+      numberOfBags = 3;
+    }
 
 
     /*bag packing sheet with [confirmed date (delivery date), first name + last initial, delivery window, # of bags, frequency, # of dependents, dietary restrictions,
    additional requests, order id, items] 
     frequency: one-time or recurring (once a week or every two weeks for now) */
     const request2 = {
-      spreadsheetId: process.env.SPREADSHEET_ID_TEST,//BAG_PACKING_SPREADSHEET_ID,
-      //spreadsheetId: process.env.BAG_PACKING_SPREADSHEET_ID,
-      range: "Sheet1!A:J",
-      //range: "[Testing] Spring Delivery Packing Info!A:J",
+      //spreadsheetId: process.env.SPREADSHEET_ID_TEST,//BAG_PACKING_SPREADSHEET_ID,
+      spreadsheetId: process.env.BAG_PACKING_SPREADSHEET_ID,
+      //range: "Sheet1!A:J",
+      range: "[Testing] Spring Delivery Packing Info!A:J",
       valueInputOption: "USER_ENTERED", 
       insertDataOption: "INSERT_ROWS",
       resource: {
-          range: "Sheet1!A:J",
-          //"range": "[Testing] Spring Delivery Packing Info!A:J",
+          //range: "Sheet1!A:J",
+          "range": "[Testing] Spring Delivery Packing Info!A:J",
           "majorDimension": "ROWS",
           "values": [
             [deliveryDate, firstName + " " + lastName.slice(0,1), deliveryWindow, numberOfBags, frequency, 
@@ -138,16 +144,18 @@ function addOrder(firstName, lastName, address, frequency, dependents, dietaryRe
 
     //door dash sheet with [deliveryDate, delivery window start/end, first name, last NAME, address, item code (always F), # of bags (must be <= 3) ]
     const request3 = {
-      spreadsheetId: process.env.SPREADSHEET_ID_TEST,//DOORDASH_SPREADSHEET_ID,
-      //spreadSheetId: process.env.DOORDASH_SPREADSHEET_ID,
-      range: "Sheet1!A:H",
+      //spreadsheetId: process.env.SPREADSHEET_ID_TEST,//DOORDASH_SPREADSHEET_ID,
+      spreadSheetId: process.env.DOORDASH_SPREADSHEET_ID,
+      //range: "Sheet1!A:H",
+      range: "Customer Information!A:H",
       valueInputOption: "USER_ENTERED", 
       insertDataOption: "INSERT_ROWS",
       resource: {
-          range: "Sheet1!A:H",
+          //range: "Sheet1!A:H",
+          "range": "Customer Information!A:H",
           "majorDimension": "ROWS",
           "values": [
-          ["VENTURA-01", deliveryDate, deliveryWindow, firstName, lastName, address, "F", totalItems] 
+          ["VENTURA-01", deliveryDate, deliveryWindow, firstName, lastName, address, "F", numberOfBags] 
           ] 
         } 
     }
@@ -166,6 +174,7 @@ function addOrder(firstName, lastName, address, frequency, dependents, dietaryRe
     //newOrder["type"] = "Delivery";
     newOrder["deliveryDate"] = deliveryDate;
     newOrder["deliveryWindow"] = deliveryWindow;
+    newOrder["items"] = items;
     newOrder["notes from guest"] = "I'm, like, allergic to peanuts :( ";
     newOrder["firstName"] = firstName;
     newOrder["lastInitial"] = lastName.slice(0, 1);
@@ -217,7 +226,9 @@ export default async function(req, res) {
         return Promise.reject();
     } 
     const {body} = req //unpacks the request object 
-    
+    if (!body.frequency) {
+      body.frequency = "one-time";
+    }
     let ok = requireParams(body, res); 
     if (!ok) {
       return Promise.reject();
@@ -239,6 +250,6 @@ export default async function(req, res) {
       }
       , rejection => {
         console.log("order didn't go through: ", rejection);
-      })
+      }) 
     }
   )}
