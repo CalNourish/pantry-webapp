@@ -99,9 +99,9 @@ export default function OrderDetails() {
 
   return (
     <>
-      <h2 className="text-lg mb-2 block tracking-wide text-gray-700 font-bold">Order Details</h2>
       <div className='flex'>
         <div className="relative mr-8 w-1/5">
+          <h2 className="h-10 text-lg mb-2 block tracking-wide text-gray-700 font-bold">Order Details</h2>
           <div className="sticky top-0">
             <div className="pt-2">
               <h3 className="uppercase block font-bold tracking-wide text-gray-700 text-xs mb-4">Categories</h3>
@@ -119,13 +119,29 @@ export default function OrderDetails() {
           </div>
         </div>
         <div className="relative form-group mr-8">
+          <div className='sticky top-0'>
+            <div className="block">
+                <span className="h-full absolute inset-y-0 left-0 flex items-center pl-2">
+                    <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current text-gray-500">
+                        <path
+                            d="M10 4a6 6 0 100 12 6 6 0 000-12zm-8 6a8 8 0 1114.32 4.906l5.387 5.387a1 1 0 01-1.414 1.414l-5.387-5.387A8 8 0 012 10z">
+                        </path>
+                    </svg>
+                </span>
+                <input placeholder="Search for item" 
+                    className="appearance-none rounded border border-gray-400 border-b block pl-8 pr-6 py-2 w-full bg-white text-sm placeholder-gray-400 text-gray-700 focus:bg-white focus:placeholder-gray-600 focus:text-gray-700 focus:outline-none" />
+            </div>
+            <div className="my-auto ml-3 cursor-pointer text-gray-600 hover:text-gray-500">
+                {/* {categoryFilter || searchFilter || sortBy ? "clear filters" : ""} */}
+            </div>
+          </div>
           {
             Object.keys(categories).map((key, _value) => {
               return (
                 <div>
                   {/* Anchor for scrolling to specific category. Can't scroll to h3 element because it's sticky, so not always located at top of section. */}
                   <a id={"anchor-"+key}></a>
-                  <h3 className="uppercase sticky py-2 bg-white top-0 font-bold tracking-wide text-gray-700 text-xs mt-4" id={"category-"+key}>
+                  <h3 className="uppercase sticky py-2 bg-white top-{40} font-bold tracking-wide text-gray-700 text-xs mt-4" id={"category-"+key}>
                     {categories[key].displayName}
                   </h3>
                   <div className='divide-y'>
@@ -140,17 +156,23 @@ export default function OrderDetails() {
         </div>
         <div className="form-group flex-grow">
           <div className="sticky top-0"> {/* <- this is here to make the whole summary sticky */}
-            <h3 className="uppercase pt-2 font-bold tracking-wide text-gray-700 text-xs mb-4">Order Summary</h3>
+            <h3 className="h-10 uppercase pt-2 font-bold tracking-wide text-gray-700 text-xs mb-4">Cart</h3>
             {/* TODO: current ordering is by barcode, would it be easier for user if it was in order of addition? might need restructuring cart a bit... not worth? */}
-            <table className="w-full">
+            <table className="w-full mb-12">
               <thead className="border-b-2">
                 <tr>
-                  <th className="font-semibold text-left">Item Name</th>
-                  <th className="font-semibold text-right">Quantity</th>
-                  <th className="font-semibold text-right"></th>
+                  <th className="font-semibold text-left px-4">Item</th>
+                  <th className="font-semibold text-right px-4">Quantity</th>
+                  <th className="font-semibold text-right">
+                    <div className='invisible px-4'>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 hover:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </div>
+                  </th>
                 </tr>
               </thead>
-              <tbody className="">
+              <tbody>
               {
                 Object.keys(cart).map((barcode) => {
                   return (
@@ -160,7 +182,7 @@ export default function OrderDetails() {
                           document.getElementsByClassName(`itemrow-${barcode}`)[0].scrollIntoView();
                           window.scrollBy(0, -35); // compensating for the sticky title covering the top of the page
                         }}
-                        className="text-left"
+                        className="text-left px-4"
                       >
                         {cart[barcode].itemName}
                       </td>
@@ -169,7 +191,7 @@ export default function OrderDetails() {
                           document.getElementsByClassName(`itemrow-${barcode}`)[0].scrollIntoView();
                           window.scrollBy(0, -35); // compensating for the sticky title covering the top of the page
                         }}
-                        className="text-right"
+                        className="text-right px-4"
                       >
                         {cart[barcode].quantity}
                       </td>
@@ -188,6 +210,14 @@ export default function OrderDetails() {
               }
               </tbody>
             </table>
+            <div>
+              <button 
+                className=
+                  {"w-full text-white font-bold py-2 px-4 rounded border border-transparent bg-blue-500 " + (Object.keys(cart).length > 0 ?  "bg-blue-500 hover:bg-blue-700" : "cursor-not-allowed opacity-50")}
+                >
+                Review Order
+              </button>
+            </div>
           </div>
         </div>
       </div>
