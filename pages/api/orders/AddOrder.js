@@ -1,6 +1,7 @@
 import {validateFunc} from '../validate';
 import { google } from 'googleapis'; 
 import firebase from "firebase/app";
+import { server } from '../../_app.js'
 import { resolveHref } from 'next/dist/next-server/lib/router/router';
 export const config = { // https://nextjs.org/docs/api-routes/api-middlewares
   api: {
@@ -33,8 +34,8 @@ function requireParams(body, res) {
 
 function updateInventory(items) { //updates inventory in firebase
   return new Promise((resolve, reject) => {
-    let inventory = fetch(process.env.GET_ALL_ITEMS); //to be changed possibly
-   // let inventory = firebase.database.ref(). 
+    let inventory = fetch(`${server}/api/inventory/GetAllItems`); 
+    //let inventory = fetch(process.env.GET_ALL_ITEMS); //twe can get rid of this 
     inventory.then((value) => {
       value.json().then((inventoryJson) => {
          const inventoryUpdates = {}
@@ -67,11 +68,11 @@ function addOrder(firstName, lastName, address, frequency, dependents, dietaryRe
   return new Promise((resolve, reject) => {
     const target = ['https://www.googleapis.com/auth/spreadsheets'];
     var jwt = new google.auth.JWT(
-      process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
-      //process.env.GOOGLE_SHEETS_CLIENT_EMAIL_TEST,
+      //process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
+      process.env.GOOGLE_SHEETS_CLIENT_EMAIL_TEST,
       null,
-      (process.env.GOOGLE_SHEETS_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-      //(process.env.GOOGLE_SHEETS_PRIVATE_KEY_TEST || '').replace(/\\n/g, '\n'),
+      //(process.env.GOOGLE_SHEETS_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+      (process.env.GOOGLE_SHEETS_PRIVATE_KEY_TEST || '').replace(/\\n/g, '\n'),
       target
     );
     const sheets = google.sheets({ version: 'v4', auth: jwt });
@@ -85,15 +86,15 @@ function addOrder(firstName, lastName, address, frequency, dependents, dietaryRe
     //Food pantry master data sheet for tracking calIDs 
     //current schema is [current date, CalID (encrypted), unique order id]
     const request1 = {
-      //spreadsheetId: process.env.SPREADSHEET_ID_TEST,//PANTRY_DATA_SPREADSHEET_ID, 
-      spreadsheetId: process.env.PANTRY_DATA_SPREADSHEET_ID,
-      //range: "Sheet1!A:C", 
-      range: "Tech Testing!A:C",
+      spreadsheetId: process.env.SPREADSHEET_ID_TEST,//PANTRY_DATA_SPREADSHEET_ID, 
+      //spreadsheetId: process.env.PANTRY_DATA_SPREADSHEET_ID,
+      range: "Sheet1!A:C", 
+      //range: "Tech Testing!A:C",
       valueInputOption: "USER_ENTERED", 
       insertDataOption: "INSERT_ROWS",
       resource: {
-          //"range": "Sheet1!A:C",
-          "range": "Tech Testing!A:C",
+          "range": "Sheet1!A:C",
+          //"range": "Tech Testing!A:C",
           "majorDimension": "ROWS",
           "values": [
           [currentDate, calID, orderID] //each inner array is a row if we specify ROWS as majorDim
