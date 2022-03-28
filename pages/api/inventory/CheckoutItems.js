@@ -22,13 +22,6 @@ function requireParams(body, res) {
 export default async function(req,res) {  
     
     const token = req.headers.authorization
-    const allowed = await validateFunc(token)
-
-    if (!allowed) {
-        res.status(401);
-        res.json({error: "you are not authenticated to perform this action"})
-        return Promise.reject();
-    }
 
     return new Promise((resolve, reject) => {
         const {body} = req
@@ -39,24 +32,69 @@ export default async function(req,res) {
             return reject();
         }
 
-        firebase.auth().signInAnonymously()
+        validateFunc(token)
         .then(() => {
-            let inventoryUpdates = {}
-            for (let barcode in body) {
-              inventoryUpdates[barcode + '/count'] = firebase.database.ServerValue.increment(-1 * body[barcode]);
-            }
-
-            firebase.database().ref('/inventory/').update(inventoryUpdates)
-            .catch(error => {
+            firebase.auth().signInAnonymously()
+            .then(() => {
+                
+                Promise.all(
+                    Object.keys(body).map(barcode => {
+                        return new Promise((resolve) => {
+                            let ref = firebase.database().ref(`/inventory/${barcode}`)
+                            ref.once("value")
+                            .then(snapshot => {
+                                if (snapshot.exists()) {
+                                    ref.update({"count": firebase.database.ServerValue.increment(-1 * body[barcode])})
+                                    .then(() => {
+                                        return resolve();
+                                    })
+                                    .catch(error => {
+                                        res.status(500);
+                                        res.json({error: `Error when checking out item (barcode ${barcode}): ${error}`});
+                                        return reject();
+                                    })
+                                } else {
+                                    console.log(`possible data corruption: invalid barcode ${barcode}`)
+                                }
+                            });
+                        })
+                    })
+                ).then(() => {
+                    console.log("checkout done")
+                    res.status(200);
+                    res.json({message: "success"});
+                    return resolve();
+                })
+                .catch(() => {
+                    console.log(`possible data corruption`)
+                })
+                // for (let barcode in body) {
+                //     let ref = firebase.database().ref(`/inventory/${barcode}`)
+                //     ref.once("value")
+                //     .then(function(snapshot) {
+                //         if (snapshot.exists()) {
+                //             ref.update({"count": firebase.database.ServerValue.increment(-1 * body[barcode])})
+                //             .catch(error => {
+                //                 res.status(500);
+                //                 res.json({error: `Error when checking out item (barcode ${barcode}): ${error}`});
+                //                 return reject();
+                //             })
+                //         } else {
+                //             console.log(`possible data corruption: invalid barcode ${barcode}`)
+                //         }
+                //     });
+                // }
+            }).catch((err) => {
+                console.log("CheckoutItems signInAnonymously error:", err)
                 res.status(500);
-                res.json({error: "Error when checking out items."});
+                res.json({message: "error signing in to firebase"});
                 return resolve();
             })
-            .then(() => {
-                res.status(200);
-                res.json({message: "success"});
-                return resolve();
-            });
+        }).catch(() => {
+            console.log("Checkout: user not authenticated")
+            res.status(401);
+            res.json({error: "you are not authenticated to perform this action"})
+            return resolve();
         })
     })
 }
