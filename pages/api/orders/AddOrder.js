@@ -68,11 +68,11 @@ function addOrder(firstName, lastName, address, frequency, dependents, dietaryRe
   return new Promise((resolve, reject) => {
     const target = ['https://www.googleapis.com/auth/spreadsheets'];
     var jwt = new google.auth.JWT(
-      //process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
-      process.env.GOOGLE_SHEETS_CLIENT_EMAIL_TEST,
+      process.env.GOOGLE_SHEETS_CLIENT_EMAIL,
+      //process.env.GOOGLE_SHEETS_CLIENT_EMAIL_TEST,
       null,
-      //(process.env.GOOGLE_SHEETS_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-      (process.env.GOOGLE_SHEETS_PRIVATE_KEY_TEST || '').replace(/\\n/g, '\n'),
+      (process.env.GOOGLE_SHEETS_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+      //(process.env.GOOGLE_SHEETS_PRIVATE_KEY_TEST || '').replace(/\\n/g, '\n'),
       target
     );
     const sheets = google.sheets({ version: 'v4', auth: jwt });
@@ -82,7 +82,7 @@ function addOrder(firstName, lastName, address, frequency, dependents, dietaryRe
     console.log("orderID", orderID);
 
     let d = new Date();
-    const currentDate = d.getDate();
+    const currentDate = (d.getMonth() + 1) + "/" + d.getDate();
     //Food pantry master data sheet for tracking calIDs 
     //current schema is [current date, CalID (encrypted), unique order id]
     const request1 = {
