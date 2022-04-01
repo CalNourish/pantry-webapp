@@ -141,7 +141,7 @@ export default function OrderDetails() {
                 <div>
                   {/* Anchor for scrolling to specific category. Can't scroll to h3 element because it's sticky, so not always located at top of section. */}
                   <a id={"anchor-"+key}></a>
-                  <h3 className="uppercase sticky py-2 bg-white top-{40} font-bold tracking-wide text-gray-700 text-xs mt-4" id={"category-"+key}>
+                  <h3 className="uppercase sticky py-2 bg-white top-0 m-{40px} font-bold tracking-wide text-gray-700 text-xs mt-4" id={"category-"+key}>
                     {categories[key].displayName}
                   </h3>
                   <div className='divide-y'>
