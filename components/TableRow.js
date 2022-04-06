@@ -65,7 +65,7 @@ export default function TableRow({barcode, itemName, itemCount, itemCategories, 
           if (e.key=="Enter") finishEditing(e.target.value);
           if (e.key=="Escape") setEditing(null);
         }}
-        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight" autoFocus
+        className="shadow appearance-none border rounded w-full text-gray-700 leading-tight" autoFocus
         onBlur={() => setEditing(null)}
       ></input>
     )
@@ -85,7 +85,8 @@ export default function TableRow({barcode, itemName, itemCount, itemCategories, 
         <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
             <p className="text-gray-900 whitespace-no-wrap">{categoryDisplay(itemCategories)}</p>
         </td>
-        <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm" onDoubleClick={() => authToken ? setEditing("count") : null}>
+        <td className="px-3 py-3 border-b border-gray-200 bg-white text-sm text-center"
+            onDoubleClick={() => authToken ? setEditing("count") : null}>
             <p className="text-gray-900 whitespace-no-wrap font-bold">
                 {editing=="count" ? editCountInput : count}
             </p>

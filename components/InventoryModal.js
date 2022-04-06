@@ -76,10 +76,12 @@ export default function InventoryModal(props) {
                             <label className="block text-gray-700 text-sm font-bold mb-2">
                                 Item Barcode
                             </label>
-                            <input type="text" id="barcode" autoComplete="off"
+                            <input type="text" id="barcode" autoComplete="off" autoFocus
                                 className={"shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" + (props.errors.barcode && " border-2 border-red-500")}
                                 placeholder="scan or type item barcode" onBlur={props.barcodeLookup ? (e) => props.barcodeLookup(e.target.value) : null}
-                                value={props.parentState.barcode} onChange={(e) => {props.dispatch({type: 'editItemBarcode', value: e.currentTarget.value})}}/>
+                                value={props.parentState.barcode} onChange={(e) => {
+                                    props.dispatch({type: 'editItemBarcode', value: e.currentTarget.value})
+                                }}/>
                             {props.errors.barcode && <div className="mt-2 text-sm text-red-600">{props.errors.barcode}</div>}
                         </div>
 
