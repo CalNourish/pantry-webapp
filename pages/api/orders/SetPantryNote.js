@@ -64,7 +64,7 @@ export default async function(req, res) {
                 }
                 
                 // otherwise the orderId exists and we can update the status
-                orderRef.update({"pantryNote": message})
+                orderRef.update({"pantry_note": message})
                 .catch(function(error) {
                     res.status(500);
                     res.json({error: "error updating order pantryNote" + orderId, errorstack: error});
