@@ -28,7 +28,8 @@ const AUTH_SIGNEDIN_ROUTES = [
   { title: "Checkout", route: "/checkout"},
   { title: "Send Notification", route: "/notification"},
   { title: "Sign out", route: "/signout"},
-  { title: "Donate", route: "/donate" }
+  { title: "Donate", route: "/donate" },
+  { title: "Orders", route: "/orders"}
 ]
 
 
