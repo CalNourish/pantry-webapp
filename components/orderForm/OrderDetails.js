@@ -1,8 +1,6 @@
 
 import useSWR from 'swr'
-import { useContext } from 'react';
-import Layout from '../Layout';
-import Sidebar from '../Sidebar';
+import { useContext, useState } from 'react';
 import { DispatchCartContext, StateCartContext } from '../../context/cartContext'
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
@@ -10,6 +8,7 @@ const fetcher = (url) => fetch(url).then((res) => res.json());
 export default function OrderDetails() {
   const cartDispatch = useContext(DispatchCartContext)
   let { cart } = useContext(StateCartContext)
+  const [searchFilter, setSearchFilter] = useState("");
   let { data: items, error: itemError } = useSWR('/api/inventory/GetAllItems', fetcher)
   let { data: categories, error: categoryError } = useSWR('/api/categories/ListCategories', fetcher)
   
@@ -36,14 +35,20 @@ export default function OrderDetails() {
   Object.keys(categories).forEach((key, _value) => itemsByCategory[categories[key].id] = [])
 
   // Generate order inputs
+  let itemFilter = !!searchFilter ? searchFilter.toLowerCase() : null
   Object.keys(items).forEach((key, _value) => {
+    let name = !!items[key].itemName ? items[key].itemName.toLowerCase() : null
+    if (!!itemFilter && !!name && !name.includes(itemFilter)) {
+      // Skip to next item if not part of filter
+      return
+    }
     // if not max order size, set to infinity
     const maxQuantity = parseInt(items[key].maxOrderSize) || Number.POSITIVE_INFINITY
     let invalid_quantity = cart[key] && cart[key].quantity > maxQuantity
     let inputId = `item-${items[key].barcode}`
     let itemInput = (
       <div className={`itemrow-${items[key].barcode} py-4 flex items-center justify-between`} key={items[key].barcode}>
-        <div className="text-left">{items[key].itemName}</div>
+        <div className="text-left mr-4">{items[key].itemName}</div>
         <div>
           {/* number spinner [-| 1 |+] */}
           <div className="border border-solid border-gray-300 p-px w-32 h-8 flex flex-row float-left">
@@ -99,9 +104,9 @@ export default function OrderDetails() {
 
   return (
     <>
+      <h2 className="h-10 text-lg mb-2 block tracking-wide text-gray-700 font-bold">Order Details</h2>
       <div className='flex'>
         <div className="relative mr-8 w-1/5">
-          <h2 className="h-10 text-lg mb-2 block tracking-wide text-gray-700 font-bold">Order Details</h2>
           <div className="sticky top-0">
             <div className="pt-2">
               <h3 className="uppercase block font-bold tracking-wide text-gray-700 text-xs mb-4">Categories</h3>
@@ -119,8 +124,11 @@ export default function OrderDetails() {
           </div>
         </div>
         <div className="relative form-group mr-8">
-          <div className='sticky top-0'>
-            <div className="block">
+          <div className='pt-2'>
+            <h3 className="uppercase block font-bold tracking-wide text-gray-700 text-xs mb-4">Items</h3>
+          </div>
+          <div className='sticky py-4 z-10 bg-white top-0 flex'>
+            <div className="block w-full">
                 <span className="h-full absolute inset-y-0 left-0 flex items-center pl-2">
                     <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current text-gray-500">
                         <path
@@ -128,11 +136,18 @@ export default function OrderDetails() {
                         </path>
                     </svg>
                 </span>
-                <input placeholder="Search for item" 
-                    className="appearance-none rounded border border-gray-400 border-b block pl-8 pr-6 py-2 w-full bg-white text-sm placeholder-gray-400 text-gray-700 focus:bg-white focus:placeholder-gray-600 focus:text-gray-700 focus:outline-none" />
-            </div>
-            <div className="my-auto ml-3 cursor-pointer text-gray-600 hover:text-gray-500">
-                {/* {categoryFilter || searchFilter || sortBy ? "clear filters" : ""} */}
+                <input 
+                  placeholder="Search for item" 
+                  className={"appearance-none rounded border border-gray-400 border-b block pl-8 pr-6 py-2 w-full bg-white text-sm placeholder-gray-400 text-gray-700 focus:bg-white focus:placeholder-gray-600 focus:text-gray-700 focus:outline-none " + (searchFilter ? "pr-8" : "")}
+                  onChange={(e) => {setSearchFilter(e.target.value)}} 
+                  value={searchFilter}
+                />
+                <div 
+                  className={searchFilter ?  "absolute flex items-center inset-y-0 right-0 h-full cursor-pointer text-gray-600 hover:text-gray-500" : "hidden" }
+                  onClick={() => {setSearchFilter("");}}
+                >
+                    <div className='px-4'>{ searchFilter ? "clear" : ""}</div>
+                </div>
             </div>
           </div>
           {
@@ -141,12 +156,12 @@ export default function OrderDetails() {
                 <div>
                   {/* Anchor for scrolling to specific category. Can't scroll to h3 element because it's sticky, so not always located at top of section. */}
                   <a id={"anchor-"+key}></a>
-                  <h3 className="uppercase sticky py-2 bg-white top-0 m-{40px} font-bold tracking-wide text-gray-700 text-xs mt-4" id={"category-"+key}>
+                  <h3  style={{top: '70px'}} className="uppercase sticky py-2 bg-white top-0 m-{110px} font-bold tracking-wide text-gray-700 text-xs mt-4" id={"category-"+key}>
                     {categories[key].displayName}
                   </h3>
                   <div className='divide-y'>
                     { 
-                      itemsByCategory[categories[key].id].map(item => item)
+                     itemsByCategory[categories[key].id].length > 0 ? itemsByCategory[categories[key].id].map(item => item) : <div className='text-gray-500'>No items</div>
                     }
                   </div>
                 </div>
