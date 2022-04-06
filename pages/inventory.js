@@ -1,10 +1,9 @@
-import useSWR from 'swr';
 import Layout from '../components/Layout'
 import Sidebar from '../components/Sidebar'
 import Table from '../components/Table'
 import InventoryModal from '../components/InventoryModal'
 import Modal from 'react-modal'
-import React, { useState, useReducer, useEffect } from 'react';
+import React, { useState, useReducer } from 'react';
 import cookie from 'js-cookie';
 import firebase from 'firebase';
 import { useUser } from '../context/userContext'
@@ -153,6 +152,28 @@ export default function Inventory() {
     })
   }
 
+  // opens modal with barcode & fields already completed. used by shortcut edit button.
+  function editItem(barcode) {
+    setShowEditItem(true);
+    dispatch({type: "editItemBarcode", value: barcode});
+    handleLookupEdit(barcode);
+  }
+
+  function deleteItem(barcode) {
+    if (confirm(`Deleting item with barcode ${barcode}. Are you sure?`)){
+      fetch(`${server}/api/inventory/DeleteItem`, { method: 'POST',
+        body: JSON.stringify({barcode: barcode}),
+        headers: {'Content-Type': "application/json", 'Authorization': authToken}})
+      .then(() => {
+        // remove something from dataState
+        let { [barcode]: deletedItem, ...newDataState } = dataState
+        changeData(newDataState)
+        setStatusSuccess(`successfully deleted: ${deletedItem.itemName} (${deletedItem.barcode})`)
+      })
+    } else {
+      console.log("canceled delete")
+    }
+  }
 
   // When a barcode is scanned in the edit-item-lookup modal, look up this barcode in Firebase.
   function handleLookupEdit(barcode) {
@@ -265,7 +286,7 @@ export default function Inventory() {
       return
     }
 
-    const payload = JSON.stringify({
+    const payload = {
       "barcode": barcode,
       "itemName": itemName,
       "packSize": packSize,
@@ -273,10 +294,10 @@ export default function Inventory() {
       "categoryName": categories,
       "lowStock": lowStock
       /* created by? */
-    });
+    };
 
     fetch(`${server}/api/inventory/AddItem`, { method: 'POST', 
-      body: payload,
+      body: JSON.stringify(payload),
       headers: {'Content-Type': "application/json", 'Authorization': token}})
     .then((response) => {
       if (response.status == 500) {
@@ -291,6 +312,12 @@ export default function Inventory() {
           setErrors(emptyErrors);
           closeAddItem();
           setStatusSuccess(`successfully added: ${itemName} (${barcode})`);
+          
+          // modify dataState to contain the new item
+          changeData({
+            ...dataState,
+            [barcode]: payload
+          })
         }
       })
     })
@@ -304,6 +331,7 @@ export default function Inventory() {
       ...status, loading: false, error: ""
     })
   }
+
   function closeUpdateItem() {
     setShowEditItem(false); 
     setErrors(emptyErrors);
@@ -364,7 +392,8 @@ export default function Inventory() {
           <div className="py-4 px-8">
             {status.success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded relative mb-3">{status.success}</div>}
             {Object.keys(dataState).length > 0
-              ? <Table className="table-auto my-1" data={dataState} categories={categoryState} authToken={authToken}></Table>
+              ? <Table className="table-auto my-1" data={dataState} categories={categoryState} authToken={authToken}
+                       editItemFunc={editItem} deleteItemFunc={deleteItem}></Table>
               : "Loading inventory..."}
           </div>
         </div>

@@ -7,15 +7,14 @@ import { server } from "../pages/_app.js"
 export default function Table(props) {
     // get category lookup info
     const fetcher = (url) => fetch(url).then((res) => res.json());
-    const { data, error } = useSWR(`${server}/api/categories/ListCategories`, fetcher);
+    const { data: categoryData, error } = useSWR(`${server}/api/categories/ListCategories`, fetcher);
     const [categoryFilter, setCategoryFilter] = useState("");
     const [searchFilter, setSearchFilter] = useState("");
     const [sortBy, setSortBy] = useState("");
 
-    if (!props.data || !data) {
+    if (!props.data || !categoryData) {
         return null
     }
-    let categoryData = data;
 
     function inFilter(barcode) {
         var success = true;
@@ -106,8 +105,6 @@ export default function Table(props) {
         }
     }
     sortRows(itemData);
-
-    console.log(itemData);
     
     return (
     <div className="antialiased font-sans">
@@ -123,7 +120,7 @@ export default function Table(props) {
                                 <option value="">All categories</option>
                                 {Object.keys(categoryData.categories).map((key) => {
                                     let cat = categoryData.categories[key];
-                                    return <option value={cat.id}>{cat.displayName}</option>
+                                    return <option key={`categoryOption-${key}`} value={cat.id}>{cat.displayName}</option>
                                 })}
                             </select>
                             <div
@@ -180,12 +177,15 @@ export default function Table(props) {
                                         <div className="ml-auto">{sortBy == "status" ? "\u25BC" : sortBy == "-status" ? "\u25B2" : ""}</div>
                                     </div>
                                 </th>
+                                { props.authToken ?
+                                    <th className="px-3 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"></th> : null}
                             </tr>
                         </thead>
                         <tbody>
                             { itemData.map((item, idx) => {
                                 return <TableRow key={idx} barcode={item.barcode} itemName={item.itemName} itemCount={item.count} itemCategories={item.categoryName} 
-                                                 itemLowStock={item.lowStock} showBarcodes={true} categoryData={categoryData} authToken={props.authToken}/>
+                                                 itemLowStock={item.lowStock} categoryData={categoryData} authToken={props.authToken}
+                                                 editItemFunc={props.editItemFunc} deleteItemFunc={props.deleteItemFunc}/>
                             }) 
                             }
                         </tbody>
