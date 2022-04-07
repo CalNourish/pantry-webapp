@@ -36,8 +36,8 @@ class CheckboxGrid extends React.Component {
                 <div className={"grid grid-cols-5 gap-4 p-2" + (this.props.error ? " rounded-md border border-red-500" : "")}>
                     { Object.keys(opt).map((idx) => {
                         return (
-                            <div className="" onClick={() => {this.markCategory(idx)}}>
-                                <input type="checkbox" key={`category-${idx}`} className="w-4 h-4 mr-3" checked={categories && opt[idx].id in categories}/>
+                            <div className="" onClick={() => {this.markCategory(idx)}} key={`category-${idx}`}>
+                                <input type="checkbox" onChange={() => {/* handled by parent div */}} className="w-4 h-4 mr-3" checked={categories && opt[idx].id in categories}/>
                                 <label>{opt[idx].displayName}</label>
                             </div>
                         )

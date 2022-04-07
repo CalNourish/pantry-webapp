@@ -156,7 +156,7 @@ export default function Inventory() {
   function editItem(barcode) {
     setShowEditItem(true);
     dispatch({type: "editItemBarcode", value: barcode});
-    handleLookupEdit(barcode);
+    handleBarcodeEdit(barcode);
   }
 
   function deleteItem(barcode) {
@@ -176,55 +176,59 @@ export default function Inventory() {
   }
 
   // When a barcode is scanned in the edit-item-lookup modal, look up this barcode in Firebase.
-  function handleLookupEdit(barcode) {
+  function handleBarcodeEdit(barcode) {
+    if (barcode === "") {
+      setBarcodeError('missing item barcode');
+      return;
+    }
     fetch(`${server}/api/inventory/GetItem/${barcode}`)
-    .then((result) => {
-      result.json().then((data) => {
-        if (data.error) {
-          /* reset everything except for the barcode */
-          setBarcodeError("no existing item with this barcode");
-          dispatch({type: "reset"})
-          dispatch({type: "editItemBarcode", value: barcode})
-          return;
-        }
-
-        setBarcodeError('');
-        let categories = {};
-        for (let idx in data.categoryName) {
-          let categoryId = data.categoryName[idx];
-          categories[categoryId] = categoryId;
-        }
-
-        const payload = {
-          itemName: data.itemName,
-          count: data.count,
-          packSize: data.packSize,
-          lowStock: data.lowStock,
-          categoryName: categories
-        };
-        dispatch({type:'itemLookup', value: payload});
-      })
+    .then((response) => {
+      if (response.ok) {
+        return response.json()
+      }
+      throw new Error("Cannot find existing item with this barcode.")
     })
-    return 
+    .then((data) => {
+      setBarcodeError('');
+      let categories = {};
+      for (let idx in data.categoryName) {
+        let categoryId = data.categoryName[idx];
+        categories[categoryId] = categoryId;
+      }
+
+      const payload = {
+        itemName: data.itemName,
+        count: data.count,
+        packSize: data.packSize,
+        lowStock: data.lowStock,
+        categoryName: categories
+      };
+      dispatch({type:'itemLookup', value: payload});
+    })
+    .catch((err) => {
+      /* reset everything except for the barcode */
+      console.log(err)
+      setBarcodeError("cannot find existing item with this barcode");
+      dispatch({type: "reset"})
+      dispatch({type: "editItemBarcode", value: barcode})
+    })
   }
 
-  function handleLookupAdd(barcode) {
-    if (!barcode) {
+  // When a barcode is scanned in the add-item-lookup modal, look up this barcode in Firebase.
+  function handleBarcodeAdd(barcode) {
+    if (barcode === "") {
       setBarcodeError("missing item barcode");
       return;
     }
 
     fetch(`${server}/api/inventory/GetItem/${barcode}`)
     .then((result) => {
-        result.json().then((data) => {
-          
-          if (!data.error) {
-            /* item already exists! */
-            setBarcodeError("item already exists with this barcode");
-            return;
-          }
-          setBarcodeError("");
-        })
+      if (result.ok) {
+        /* item already exists! */
+        setBarcodeError("item already exists with this barcode");
+      } else {
+        setBarcodeError("");
+      }
     })
   }
 
@@ -350,27 +354,27 @@ export default function Inventory() {
         {!authToken ? "" :
           <>
             {/* Add Item Modal */}
-            <Modal id="add-item-modal" isOpen={showAddItem} onRequestClose={closeAddItem}>
+            <Modal id="add-item-modal" isOpen={showAddItem} onRequestClose={closeAddItem} ariaHideApp={false}>
               <InventoryModal
                   onSubmitHandler={handleAddSubmit} 
                   onCloseHandler={closeAddItem}
                   dispatch={dispatch}
                   parentState={state}
                   isAdd={true}
-                  barcodeLookup={handleLookupAdd}
+                  barcodeLookup={handleBarcodeAdd}
                   errors={errors}
                   status={status}/>
             </Modal>
             
             {/*  Edit Item Modal  */}
-            <Modal id="edit-item-modal" isOpen={showEditItem} onRequestClose={closeUpdateItem}>
+            <Modal id="edit-item-modal" isOpen={showEditItem} onRequestClose={closeUpdateItem} ariaHideApp={false}>
               <InventoryModal
                   onSubmitHandler={handleUpdateSubmit} 
                   onCloseHandler={closeUpdateItem}
                   dispatch={dispatch}
                   parentState={state}
                   isAdd={false}
-                  barcodeLookup={handleLookupEdit}
+                  barcodeLookup={handleBarcodeEdit}
                   errors={errors}
                   status={status}/>
             </Modal>
