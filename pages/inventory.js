@@ -390,6 +390,7 @@ export default function Inventory() {
                     <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowAddItem(true)}>Add new item</button>
                     <button className="my-1 btn-outline w-56 rounded-md p-1" onClick={() => setShowEditItem(true)}>Edit existing item</button>
                   </div>
+                  <p className="mb-5 text-sm italic text-gray-700">You can double-click on an item name or count to change the value quickly!</p>
                 </Sidebar>
               </div>
           }
