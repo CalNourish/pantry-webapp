@@ -170,8 +170,6 @@ export default function Inventory() {
         changeData(newDataState)
         setStatusSuccess(`successfully deleted: ${deletedItem.itemName} (${deletedItem.barcode})`)
       })
-    } else {
-      console.log("canceled delete")
     }
   }
 
@@ -207,7 +205,6 @@ export default function Inventory() {
     })
     .catch((err) => {
       /* reset everything except for the barcode */
-      console.log(err)
       setBarcodeError("cannot find existing item with this barcode");
       dispatch({type: "reset"})
       dispatch({type: "editItemBarcode", value: barcode})

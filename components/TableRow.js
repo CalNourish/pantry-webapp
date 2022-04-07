@@ -36,8 +36,6 @@ export default function TableRow(props) {
     else if (props.itemName != name) setName(props.itemName);
 
     function finishEditing(newValue) {
-      console.log(`setting ${editing} to ${newValue}`)
-
       if (editing == "count") setCount(newValue);
       else setName(newValue);
 
