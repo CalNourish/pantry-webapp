@@ -5,7 +5,7 @@ import OrderDetails from '../components/orderForm/OrderDetails'
 import { useState } from 'react';
 
 export default function Order() {
-  const [formStep, setFormStep] = useState(2);
+  const [formStep, setFormStep] = useState(1);
 
   if (formStep == 2) {
     return (

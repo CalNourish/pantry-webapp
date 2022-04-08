@@ -1,6 +1,9 @@
 import { useContext } from 'react';
 import { DispatchCartContext, StateCartContext } from '../../context/cartContext'
+import useSWR from 'swr'
 import Select from 'react-select'
+
+const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export default function DeliveryDetails() {
   const cartDispatch = useContext(DispatchCartContext)
@@ -8,10 +11,13 @@ export default function DeliveryDetails() {
 
   /* TODO: ask natalia if we should store these times somewhere... maybe firebase? would need some way to change it for admin. */
   /* If this becomes a lot more than 2 options, find a way to organize by date? */
-  const deliveryTimeOptions = [
-    { value: 'tues2-4', label: 'Tuesday 2-4 PM' },
-    { value: 'wed2-4', label: 'Wednesday 2-4 PM' },
-  ]
+  let deliveryTimeOptions = []
+
+  let { data: deliveryTimes } = useSWR('/api/orders/GetDeliveryTimes', fetcher)
+
+  if (deliveryTimes) {
+    deliveryTimeOptions = Object.keys(deliveryTimes).map((id) => { return {value: id, label: deliveryTimes[id]} })
+  }
   
   return (
     <>
