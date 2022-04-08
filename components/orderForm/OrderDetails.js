@@ -110,7 +110,7 @@ export default function OrderDetails({children}) {
             </div>
           </div>
         </div>
-        <div className="relative form-group mr-8">
+        <div className="relative flex-grow form-group mr-8">
           <div className='pt-2'>
             <h3 className="uppercase block font-bold tracking-wide text-gray-700 text-xs mb-4">Items</h3>
           </div>
