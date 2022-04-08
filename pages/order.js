@@ -8,7 +8,7 @@ import { StateCartContext } from '../context/cartContext';
 
 export default function Order() {
   let { cart } = useContext(StateCartContext)
-  const [formStep, setFormStep] = useState(2);
+  const [formStep, setFormStep] = useState(0);
 
   if ([2,3].includes(formStep)) {
     return (
