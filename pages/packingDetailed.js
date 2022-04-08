@@ -2,7 +2,7 @@ import Layout from "../components/Layout";
 import Head from "next/head";
 import useSWR from "swr";
 import cookie from "js-cookie";
-import { useRouter } from 'next/router'
+import { useRouter } from "next/router";
 import {
   ORDER_STATUS_COMPLETE,
   ORDER_STATUS_OPEN,
@@ -168,11 +168,13 @@ class PackingOrder extends React.Component {
 
   displayChangeOrderStatus() {
     var textForButton = "";
+    const blueButtonClass = "float-right bg-blue-700 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+
     if (this.state.status == ORDER_STATUS_COMPLETE) {
       textForButton = "Mark as incomplete";
       return (
         <button
-          className="float-right btn-pantry-blue hover:btn-pantry-blue text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          className="float-right btn-pantry-blue hover:btn-pantry-bluetext-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           onClick={() => this.changeOrderStatus()}
         >
           {textForButton}
@@ -182,7 +184,7 @@ class PackingOrder extends React.Component {
       textForButton = "Mark as processing";
       return (
         <button
-          className="float-right bg-blue-700 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          className={blueButtonClass}
           onClick={() => this.changeOrderStatus()}
         >
           {textForButton}
@@ -192,7 +194,7 @@ class PackingOrder extends React.Component {
       textForButton = "Mark as complete";
       return (
         <button
-          className="float-right bg-blue-700 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          className={blueButtonClass}
           onClick={() => this.changeOrderStatus()}
         >
           {textForButton}
@@ -201,12 +203,32 @@ class PackingOrder extends React.Component {
     }
     return (
       <button
-        className="float-right bg-blue-700 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-        onClick={() => this.changeOrderStatus()}
+          className={blueButtonClass}
+          onClick={() => this.changeOrderStatus()}
       >
         {textForButton}
       </button>
     );
+  }
+
+  displayNoItemTable() {
+    return <h1 className="text-xl">No items placed in order :(</h1>;
+  }
+
+  displayItemTable() {
+    if (Object.entries(this.state.items).length > 0) {
+      return (
+        <tbody className="divide-y">
+          {Object.entries(this.state.items).map(([barcode, value]) =>
+            this.state.items[barcode].isPacked
+              ? this.displayPackedItemRow(barcode, value)
+              : this.displayUnpackedItemRow(barcode, value)
+          )}
+        </tbody>
+      );
+    } else {
+      this.displayNoItemTable();
+    }
   }
 
   render() {
@@ -280,13 +302,9 @@ class PackingOrder extends React.Component {
                     <th className="w-5"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y">
-                  {Object.entries(this.state.items).map(([barcode, value]) =>
-                    this.state.items[barcode].isPacked
-                      ? this.displayPackedItemRow(barcode, value)
-                      : this.displayUnpackedItemRow(barcode, value)
-                  )}
-                </tbody>
+                {this.state.items != null
+                  ? this.displayItemTable()
+                  : this.displayNoItemTable()}
               </table>
             </div>
           </div>
@@ -297,36 +315,46 @@ class PackingOrder extends React.Component {
 }
 
 export default function PackingDetailed() {
-  const router = useRouter()
-  var orderId = router.query.orderid
-  if(orderId == null) {
-    return <>
-    <Head>
-        <title>Pantry</title>
-        <link rel="icon" href="/favicon.ico" />
-        <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Rubik:wght@400;700&display=swap" rel="stylesheet"></link>
-    </Head>
-    <Layout>
-    <div>No Order Id provided</div>
-    </Layout>
-   </>; 
+  const router = useRouter();
+  var orderId = router.query.orderid;
+  if (orderId == null) {
+    return (
+      <>
+        <Head>
+          <title>Pantry</title>
+          <link rel="icon" href="/favicon.ico" />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Roboto&family=Rubik:wght@400;700&display=swap"
+            rel="stylesheet"
+          ></link>
+        </Head>
+        <Layout>
+          <div>No Order Id provided</div>
+        </Layout>
+      </>
+    );
   }
   const { data } = useSWR(
     ["/api/orders/GetOrder/" + orderId, "/api/inventory/GetAllItems"],
     fetcher
   );
   if (!data) {
-    return <>
-    <Head>
-        <title>Pantry</title>
-        <link rel="icon" href="/favicon.ico" />
-        <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Rubik:wght@400;700&display=swap" rel="stylesheet"></link>
-    </Head>
-    <Layout>
-    <div>Loading...</div>
-    </Layout>
-  </>;
-  }  else {
+    return (
+      <>
+        <Head>
+          <title>Pantry</title>
+          <link rel="icon" href="/favicon.ico" />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Roboto&family=Rubik:wght@400;700&display=swap"
+            rel="stylesheet"
+          ></link>
+        </Head>
+        <Layout>
+          <div>Loading...</div>
+        </Layout>
+      </>
+    );
+  } else {
     return <PackingOrder data={data}></PackingOrder>;
   }
 }
