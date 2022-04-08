@@ -17,21 +17,19 @@ class PackingOrders extends React.Component {
 
     // Permanently deletes order
     deleteOrder(orderId) {
-      fetch("/api/orders/DeleteOrder", {
-        method: "POST",
-        body: JSON.stringify({
-          orderId: orderId,
-        }),
-        headers: { "Content-Type": "application/json", Authorization: token },
-      }).then(() => {
-        for (var i = 0; i < this.state.orders.length; i++) {
-          if (this.state.orders[i].id == orderId) {
-            this.state.orders.splice(i, 1) // remove order from array
-            this.setState({orders: this.state.orders})
-            break
-          }
-        }
-      });
+      if (window.confirm("Delete this order?")) {
+        fetch("/api/orders/DeleteOrder", {
+          method: "POST",
+          body: JSON.stringify({
+            orderId: orderId,
+          }),
+          headers: { "Content-Type": "application/json", Authorization: token },
+        }).then(() => {
+          this.setState({orders: this.state.orders.filter(function(order) { 
+            return order.id !== orderId
+          })});
+        });
+      }
     }
 
     displayOrderRow(order) {
@@ -43,8 +41,9 @@ class PackingOrders extends React.Component {
       <td className="w-auto">{order.deliveryWindow}</td>
       <td className="w-auto">{order.status}</td>
       <td className="w-auto">
-      <button className="font-bold text-xl" onClick={() => this.deleteOrder(order.id)}>
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      <button className="font-bold text-xl w-5 h-5" onClick={() => this.deleteOrder(order.id)}>
+      <img src="/images/trash-can.svg"></img>
+      {/* <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> */}
       </button>
       </td>
       </tr>
