@@ -22,7 +22,7 @@ const AUTH_SIGNEDIN_ROUTES = [
   { title: "Hours", route: "/hours" },
   { title: "Order", route: "/order"},
   { title: "Checkout", route: "/checkout"},
-  { title: "Orders", route: "/orders"}
+  { title: "Bag Packing", route: "/orders"}
 ]
 
 
