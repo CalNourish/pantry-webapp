@@ -86,26 +86,28 @@ function addOrder(firstName, lastName, address, frequency, dependents, dietaryRe
     //Food pantry master data sheet for tracking calIDs 
     //current schema is [current date, CalID (encrypted), unique order id]
     const request1 = {
-      spreadsheetId: process.env.SPREADSHEET_ID_TEST,//PANTRY_DATA_SPREADSHEET_ID, 
-      //spreadsheetId: process.env.PANTRY_DATA_SPREADSHEET_ID,
-      range: "Sheet1!A:C", 
-      //range: "Tech Testing!A:C",
+      //spreadsheetId: process.env.SPREADSHEET_ID_TEST,//PANTRY_DATA_SPREADSHEET_ID, 
+      spreadsheetId: process.env.PANTRY_DATA_SPREADSHEET_ID,
+      //range: "Sheet1!A:C", 
+      range: "'TechTesting'!A:C",
       valueInputOption: "USER_ENTERED", 
       insertDataOption: "INSERT_ROWS",
       resource: {
-          "range": "Sheet1!A:C",
-          //"range": "Tech Testing!A:C",
+          //"range": "Sheet1!A:C",
+          "range": "'TechTesting'!A:C",
           "majorDimension": "ROWS",
           "values": [
           [currentDate, calID, orderID] //each inner array is a row if we specify ROWS as majorDim
           ] 
-        } 
+        } ,
+      auth: jwt
     }
+
+    
     sheets.spreadsheets.values.append(request1)
     .catch((error) => {
       return reject("error writing to Pantry data sheet: ", error);
-    }); 
-   // return Promise.resolve("appended to first sheet");
+    });  
 
     //determine approximate # of bags by # of items
     var totalItems = 0;
