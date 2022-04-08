@@ -76,7 +76,7 @@ class PackingOrder extends React.Component {
       method: "POST",
       body: JSON.stringify({
         orderId: this.state.orderId,
-        status: this.state.status,
+        status: newStatus,
       }),
       headers: { "Content-Type": "application/json", Authorization: token },
     }).then(() => {
