@@ -5,7 +5,7 @@ import { DispatchCartContext, StateCartContext } from '../../context/cartContext
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
-export default function OrderDetails() {
+export default function OrderDetails({children}) {
   const cartDispatch = useContext(DispatchCartContext)
   let { cart } = useContext(StateCartContext)
   const [searchFilter, setSearchFilter] = useState("");
@@ -14,19 +14,6 @@ export default function OrderDetails() {
   
   if (itemError || categoryError) return <div>failed to load</div>
   if (!items || !categories) return <div>loading...</div>
-
-  // Current Cart
-  const cartState = useContext(StateCartContext)
-  const cartItems = Object.keys(cartState.cart).map((key, _value) => {
-      return (
-          <tr>
-              <td class="px-5">
-                  <button class="font-bold">x</button>
-                  {cartState.cart[key].itemName} {cartState.cart[key].quantity}
-              </td>
-          </tr>
-      )
-  })
 
   // Reassign because destructuring wasn't working when fetching the data...
   categories = categories.categories
@@ -169,7 +156,7 @@ export default function OrderDetails() {
             })
           }
         </div>
-        <div className="form-group flex-grow">
+        <div className="form-group w-2/3 sm:w-1/3">
           <div className="sticky top-0"> {/* <- this is here to make the whole summary sticky */}
             <h3 className="h-10 uppercase pt-2 font-bold tracking-wide text-gray-700 text-xs mb-4">Cart</h3>
             {/* TODO: current ordering is by barcode, would it be easier for user if it was in order of addition? might need restructuring cart a bit... not worth? */}
@@ -226,12 +213,7 @@ export default function OrderDetails() {
               </tbody>
             </table>
             <div>
-              <button 
-                className=
-                  {"w-full text-white font-bold py-2 px-4 rounded border border-transparent bg-blue-500 " + (Object.keys(cart).length > 0 ?  "bg-blue-500 hover:bg-blue-700" : "cursor-not-allowed opacity-50")}
-                >
-                Review Order
-              </button>
+              { children }
             </div>
           </div>
         </div>

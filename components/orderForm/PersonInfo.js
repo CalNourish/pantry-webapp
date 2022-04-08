@@ -12,8 +12,8 @@ export default function PersonInfo() {
   return (
     <>
       <h2 className="text-lg mb-4 block tracking-wide text-gray-700 font-bold">Information</h2>
-      <div className="form-group flex mb-2">
-        <div className="flex-grow mr-8">
+      <div className="form-group flex flex-col md:flex-row mb-2">
+        <div className="flex-grow mr-0 md:mr-8">
           <label 
             className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" 
             htmlFor="first-name"
@@ -21,7 +21,7 @@ export default function PersonInfo() {
             First Name
           </label>
           <input
-            className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
+            className="appearance-none block w-full mb-2 md:mb-0 bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
             id="first-name" 
             type="text" 
             placeholder="Oski"

@@ -51,7 +51,7 @@ const initialState = {
    first:"", last:"", calID:"", email:"", emailConf:"", status:""
   },
   delivery: {
-    streetAddress:"", address2:"", city:"", zip:"", withinCA:"", phone:"", deliveryNotes:"", doordashConf:""
+    streetAddress:"", address2:"", city:"", zip:"", withinCA:"", phone:"", notes:"", doordashConf:""
   },
   cart: {}
 };

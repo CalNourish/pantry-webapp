@@ -16,8 +16,8 @@ export default function DeliveryDetails() {
   return (
     <>
       <h2 className="text-lg mb-4 block tracking-wide text-gray-700 font-bold">Delivery Details</h2>
-      <div className="form-group flex mb-2">
-        <div className="mr-8 w-2/3">
+      <div className="form-group flex flex-col md:flex-row mb-2">
+        <div className="mr-0 md:mr-8 flex-grow">
           <label 
             className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" 
             htmlFor="street-address"
@@ -25,7 +25,7 @@ export default function DeliveryDetails() {
             Street Address
           </label>
           <input
-            className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
+            className="appearance-none block w-full mb-2 md:mb-0 bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
             id="street-address" 
             type="text" 
             placeholder="123 Oski Blvd"
@@ -38,7 +38,7 @@ export default function DeliveryDetails() {
         <div>
           <label 
             className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="address-two">
-            Apartment, suite, etc.
+            Apt, ste, etc.
           </label>
           <input
             className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
@@ -52,8 +52,8 @@ export default function DeliveryDetails() {
           />
         </div>
       </div>
-      <div className="form-group flex mb-2">
-        <div className="mr-8 w-2/3">
+      <div className="form-group flex flex-col md:flex-row mb-2">
+        <div className="mr-0 md:mr-8 flex-grow">
           <label 
             className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" 
             htmlFor="city"
@@ -61,7 +61,7 @@ export default function DeliveryDetails() {
             City
           </label>
           <input
-            className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
+            className="appearance-none block w-full mb-2 md:mb-0 bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
             id="city" 
             type="text" 
             placeholder="Berkeley"
