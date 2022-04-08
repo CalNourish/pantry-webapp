@@ -71,8 +71,7 @@ class PackingOrder extends React.Component {
     } else {
       newStatus = ORDER_STATUS_PROCESSING;
     }
-    this.state.status = newStatus;
-    this.setState({ status: this.state.status });
+    this.setState({ status: newStatus });
     fetch("/api/orders/SetOrderStatus", {
       method: "POST",
       body: JSON.stringify({
@@ -101,7 +100,7 @@ class PackingOrder extends React.Component {
   }
 
   displayUnpackedItemRow(barcode, value) {
-    var itemName = this.state.itemMap[barcode].itemName;
+    var itemName = this.state.itemMap[barcode]?.itemName;
     return (
       <tr className="h-10" key={barcode}>
         <td className="">
@@ -122,7 +121,7 @@ class PackingOrder extends React.Component {
   }
 
   displayPackedItemRow(barcode, value) {
-    var itemName = this.state.itemMap[barcode].itemName;
+    var itemName = this.state.itemMap[barcode]?.itemName;
     return (
       <tr className="h-10" key={barcode}>
         <td className="">
@@ -173,7 +172,7 @@ class PackingOrder extends React.Component {
       textForButton = "Mark as incomplete";
       return (
         <button
-          className="float-right bg-blue-300 hover:bg-blue-300 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          className="float-right btn-pantry-blue hover:btn-pantry-blue text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           onClick={() => this.changeOrderStatus()}
         >
           {textForButton}
