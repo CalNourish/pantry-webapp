@@ -296,7 +296,7 @@ class PackingOrder extends React.Component {
   }
 }
 
-export default function Checkout() {
+export default function PackingDetailed() {
   const router = useRouter()
   var orderId = router.query.orderid
   if(orderId == null) {
