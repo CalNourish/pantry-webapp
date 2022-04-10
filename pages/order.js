@@ -15,7 +15,7 @@ export default function Order() {
       <Layout>
         <div className="container mx-auto px-4 mt-8 mb-16">
           <div className="mb-4">
-            <button onClick={() => setFormStep(formStep - 1)} className="hover:text-blue-500 text-blue-700">
+            <button onClick={() => setFormStep(formStep - 1)} className="btn btn-outline">
               Back
             </button>
           </div>
@@ -24,7 +24,7 @@ export default function Order() {
               <OrderDetails> 
                 <button 
                 className=
-                  {"w-full text-white font-bold py-2 px-4 rounded border border-transparent bg-blue-500 " + (Object.keys(cart).length > 0 ?  "bg-blue-500 hover:bg-blue-700" : "cursor-not-allowed opacity-50")}
+                  {"w-full text-white font-bold py-2 px-4 btn btn-pantry-blue " + (Object.keys(cart).length > 0 ?  "" : "cursor-not-allowed opacity-50")}
                   onClick={
                     () => {
                       if (Object.keys(cart).length > 0) {
@@ -88,14 +88,14 @@ export default function Order() {
             <div className="flex justify-between" id="form-footer">
               <div>
                 { formStep > 0 &&
-                  <button  onClick={() => setFormStep(formStep - 1)} className="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded">
+                  <button  onClick={() => setFormStep(formStep - 1)} className="btn btn-outline py-2 px-4">
                   Back
                   </button>
                 }
               </div>
               <div>
                 { formStep < 2 &&
-                  <button onClick={() => setFormStep(formStep + 1)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded border border-transparent">
+                  <button onClick={() => setFormStep(formStep + 1)} className="btn btn-pantry-blue py-2 px-4">
                     Next
                   </button>
                 }

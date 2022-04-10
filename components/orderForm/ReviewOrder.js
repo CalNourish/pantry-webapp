@@ -67,7 +67,7 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
             </tbody>
           </table>
           <button 
-            className="w-full text-white font-bold py-2 px-4 rounded border border-transparent bg-blue-500 hover:bg-blue-700"
+            className="btn btn-pantry-blue font-bold px-4 w-full"
             >
             Place Order
             </button>
