@@ -92,12 +92,16 @@ export default function Home() {
                   "firstName": "Jake",
                   "lastName": "Son",
                   "address": "1021 Berkeley Way",
-                  "emailAddress": "sakejon@berkeley.edu",
-                  "calID": "100",
+                  "frequency": "one-time",
+                  "dependents": 0,
+                  "dietaryRestrictions": "i hate the texture of mochi",
+                  "additionalRequests": "I will not eat anything with apple sauce or bok choy",
+                  "calID": "30333333333",
                   "items" : {
-                    9797: 1, 1111:1 //barcode:count
+                    9797: 0, 1111:0 //barcode:count
                   },
-                  "deliveryDate":"12/10",
+                  "deliveryDate":"4/1",
+                  "deliveryWindow": "12PM-2pm"
           }),
                 headers: {'Content-Type': "application/json", 'Authorization': token}}) 
         }}> AddOrder Button </button>
