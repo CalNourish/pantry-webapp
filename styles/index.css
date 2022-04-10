@@ -29,7 +29,8 @@
   }
 
   .btn:focus {
-    @apply outline-none shadow-outline
+    outline-width: 1px,
+    @apply outline-black shadow-none;
   }
 
   .btn-outline {
@@ -60,7 +61,7 @@
     @apply bg-transparent text-pantry-blue-500  border border-pantry-blue-500;
   }
 
-  .btn-outlein-pantry-blue:hover {
+  .btn-outline-pantry-blue:hover {
     @apply text-white  bg-pantry-blue-500 border border-transparent;
   }
 
