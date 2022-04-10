@@ -140,7 +140,7 @@ export default function OrderDetails({children}) {
           {
             Object.keys(categories).map((key, _value) => {
               return (
-                <div>
+                <div key={categories[key].displayName}>
                   {/* Anchor for scrolling to specific category. Can't scroll to h3 element because it's sticky, so not always located at top of section. */}
                   <a id={"anchor-"+key}></a>
                   <h3  style={{top: '70px'}} className="uppercase sticky py-2 bg-white top-0 m-{110px} font-bold tracking-wide text-gray-700 text-xs mt-4" id={"category-"+key}>

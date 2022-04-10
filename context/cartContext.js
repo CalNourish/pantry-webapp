@@ -44,6 +44,7 @@ export const ACTIONS = {
  *   phone:
  *   deliveryNotes:
  *   doordashConf:
+ *   deliveryTime:
  * }
  */ 
 const initialState = {
@@ -59,7 +60,7 @@ const initialState = {
 // Updates the quantity of an item in the cart
 const updateCart = (item, quantity, state) => {
   const updatedCart = { ...state.cart };
-  quantity = isNaN(quantity) ? 0 : parseInt(quantity) // default 0 if not parse-able
+  quantity = isNaN(parseInt(quantity)) ? 0 : parseInt(quantity) // default 0 if not parse-able
   if (!(item.barcode in updatedCart) && quantity > 0) {
     // If item is not in cart and quantity is greater than 0
     // add to cart
