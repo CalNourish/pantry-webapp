@@ -7,7 +7,7 @@ const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export default function OrderDetails({children}) {
   const cartDispatch = useContext(DispatchCartContext)
-  let { cart } = useContext(StateCartContext)
+  let { cart, personal } = useContext(StateCartContext)
   const [searchFilter, setSearchFilter] = useState("");
   let { data: items, error: itemError } = useSWR('/api/inventory/GetAllItems', fetcher)
   let { data: categories, error: categoryError } = useSWR('/api/categories/ListCategories', fetcher)
@@ -92,6 +92,19 @@ export default function OrderDetails({children}) {
   return (
     <>
       <h2 className="h-10 text-lg mb-2 block tracking-wide text-gray-700 font-bold">Order Details</h2>
+
+      {/*  */}
+      <div className='mb-3'>
+        <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-1" htmlFor="special-requests">Special Requests</label>
+        <textarea
+          className="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-100 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
+          id="special-requests" 
+          type="text" 
+          placeholder="i.e. dietary restrictions, bag packing instructions"
+          value={personal.requests}
+          onChange={(e) => cartDispatch({ type: 'UPDATE_PERSONAL', payload: {requests: e.target.value}})}
+        />
+      </div>
       <div className='flex'>
         <div className="relative mr-8 w-1/5">
           <div className="sticky top-0">
@@ -178,7 +191,7 @@ export default function OrderDetails({children}) {
               {
                 Object.keys(cart).map((barcode) => {
                   return (
-                    <tr className="mb-2 cursor-pointer">
+                    <tr className="mb-2 cursor-pointer" key={barcode}>
                       <td 
                         onClick={() => {
                           document.getElementsByClassName(`itemrow-${barcode}`)[0].scrollIntoView();

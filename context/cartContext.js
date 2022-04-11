@@ -18,7 +18,7 @@ export const ACTIONS = {
 };
 
 /**
- * Example state
+ * Example state (! = required)
  * cart: {
  *   itemId: {
  *     ...item,
@@ -27,29 +27,31 @@ export const ACTIONS = {
  * },
  * 
  * personal: {
- *   first:
- *   last:
- *   calID:
- *   email:
- *   emailConf:
- *   status:
+ *   first: !
+ *   last: !
+ *   calID: !
+ *   email: !
+ *   emailConf: !
+ *   status: !
+ *   dependents: (0)
+ *   requests:
  * },
  * 
  * delivery: {
- *   streetAddress:
+ *   streetAddress: !
  *   address2:
- *   city:
- *   zip:
- *   withinCA:
- *   phone:
- *   deliveryNotes:
- *   doordashConf:
- *   deliveryTime:
+ *   city: !
+ *   zip: !
+ *   withinCA: ! True
+ *   phone: ?
+ *   notes:
+ *   doordashConf: ! True
+ *   deliveryTime: !
  * }
  */ 
 const initialState = {
   personal: {
-   first:"", last:"", calID:"", email:"", emailConf:"", status:""
+   first:"", last:"", calID:"", email:"", emailConf:"", status:"", dependents:"", pantryNote:""
   },
   delivery: {
     streetAddress:"", address2:"", city:"", zip:"", withinCA:"", phone:"", notes:"", doordashConf:""

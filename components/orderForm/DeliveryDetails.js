@@ -149,7 +149,7 @@ export default function DeliveryDetails() {
         <div className="mb-2">
           <label 
             className="block uppercase tracking-wide text-gray-700 text-xs font-bold" 
-            htmlFor="deliver-notes"
+            htmlFor="delivery-notes"
           >
             Delivery notes: any other information we might need to know to do a no-contact drop off?
           </label>

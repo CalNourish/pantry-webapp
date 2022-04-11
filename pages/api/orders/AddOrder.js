@@ -171,35 +171,35 @@ function addOrder(firstName, lastName, address, frequency, dependents, dietaryRe
     newOrder["lastInitial"] = lastName.slice(0, 1);
 
     firebase.auth().signInAnonymously()
-            .then(() => {
-              console.log("orderID", orderID);
-              let itemRef = firebase.database().ref('/order/' + orderID);
-              itemRef.once('value')
-              .catch(function(error){
-                console.log("Not ok5")
-                res.status(500).json({error: "server error getting reference to that item from the database", errorstack: error});
-                return resolve();
-            })
-            .then(function(resp){
-              // the version of the item in the database
-              var dbItem = resp.val();
-              // this item already exists
-              if (dbItem != null) {
-                  console.log("Not ok6")
-                  return resolve();
-              }
-              // otherwise the item doesn't exist and we can create it
-              itemRef.update(newOrder)
-              .catch(function(error) {
-                  console.log("Not ok7: ", error)
-                  return resolve();
-              })
-              .then(() => {
-                  console.log("OK")
-                  return resolve();
-              });
-          });
-            });
+    .then(() => {
+      console.log("orderID", orderID);
+      let itemRef = firebase.database().ref('/order/' + orderID);
+      itemRef.once('value')
+      .catch(function(error){
+        console.log("Not ok5")
+        res.status(500).json({error: "server error getting reference to that item from the database", errorstack: error});
+        return resolve();
+      })
+      .then(function(resp){
+        // the version of the item in the database
+        var dbItem = resp.val();
+        // this item already exists
+        if (dbItem != null) {
+            console.log("Not ok6")
+            return resolve();
+        }
+        // otherwise the item doesn't exist and we can create it
+        itemRef.update(newOrder)
+        .catch(function(error) {
+            console.log("Not ok7: ", error)
+            return resolve();
+        })
+        .then(() => {
+            console.log("OK")
+            return resolve();
+        });
+      });
+    });
 
     return resolve();
 
