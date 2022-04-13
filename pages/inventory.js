@@ -350,7 +350,7 @@ export default function Inventory() {
         
         <div className="flex">
           {!(user && user.authorized === "true") ? "" :
-              <div className="w-64 bg-gray-200 items-center">
+              <div className="w-64 items-center">
                 <Sidebar className="py-4">
                   <h1 className="text-3xl font-semibold mb-2">Inventory</h1>
                   <div className="my-4">

@@ -368,7 +368,7 @@ class Cart extends React.Component {
                 </thead>
                 <tbody className="divide-y">
                   {Array.from( this.state.items ).map(([barcode, value]) => (this.displayCartRow(barcode, value)))}
-                  <tr className="bg-gray-200 h-10 m-3" key="totals">
+                  <tr className="bg-gray-100 h-10 m-3" key="totals">
                     <td className="text-lg font-medium text-right pr-10">Total Items</td>
                     <td>
                       <div className="w-32 text-center font-medium">{this.state.itemsInCart}</div>
