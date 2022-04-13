@@ -97,6 +97,10 @@ class PackingOrders extends React.Component {
 const createOrderObjects = (results) => {
   var orderObjects = [];
 
+  if (results == null) {
+    return orderObjects
+  }
+
   Object.entries(results).forEach((entry) => {
     const orderObj = new Object()
     const [key, value] = entry
@@ -125,10 +129,6 @@ const createOrderObjects = (results) => {
 export default function PackingOverview() {
   const { data } = useSWR(["/api/orders/GetAllOrders/", token], fetcher);
 
-  if (!data) {
-      return (<div>loading...</div>)
-    } else {
-        var orderObjects = createOrderObjects(data)
-        return (<PackingOrders data={orderObjects}></PackingOrders>)
- }
+  var orderObjects = createOrderObjects(data)
+  return (<PackingOrders data={orderObjects}></PackingOrders>)
 }
