@@ -15,10 +15,6 @@ class PackingOrders extends React.Component {
         }
     }
 
-    setOrders(o) {
-      this.setState({orders: o})
-    }
-
     // Permanently deletes order
     deleteOrder(orderId) {
       if (window.confirm("Delete this order?")) {
@@ -137,7 +133,7 @@ export default function PackingOverview() {
     return <PackingOrders data={[]} key="emptyTable"/>
 
   } else {
-    var orderObjects = createOrderObjects(data)
+    const orderObjects = createOrderObjects(data)
     return <PackingOrders data={orderObjects} key="nonemptyTable"/>
   }
 }
