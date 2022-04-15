@@ -16,7 +16,7 @@ export const config = { // https://nextjs.org/docs/api-routes/api-middlewares
   api: {
     bodyParser: true,
   },
-} 
+}
 
 function requireParams(body, res) {
     /* require elements: First name, last name, frequency, address, calID, 
@@ -25,7 +25,7 @@ function requireParams(body, res) {
 
     if (!body.firstName || !body.lastName || !body.address || !body.frequency ||
         isNaN(parseInt(body.dependents)) || !body.dietaryRestrictions || !body.additionalRequests || 
-        !body.calID || !body.items || !body.deliveryDate || !body.deliveryWindow) {
+        !body.calID || !body.items || !body.deliveryDate || !body.deliveryWindow || !body.email || !body.phone) {
           res.json({error: "missing firstName||lastName||frequency||Address||dependents||calID||items||deliveryDate\
              in request"}); 
             res.status(400);
@@ -70,6 +70,7 @@ function updateInventory(items) { //updates inventory in firebase
 
 
 function addOrder(body) {
+
   let { firstName, lastName, address, frequency, dependents,
         dietaryRestrictions, additionalRequests, calID, items,
         deliveryDate, deliveryWindow, email, phone } =  body;
@@ -116,9 +117,6 @@ function addOrder(body) {
     }
 
     sheets.spreadsheets.values.append(request1)
-    .then(()=> {
-      console.log("wrote successfully to pantry data sheet")
-    })
     .catch((error) => {
       return reject("error writing to Pantry data sheet: ", error);
     });
@@ -156,9 +154,6 @@ function addOrder(body) {
     }
 
     sheets.spreadsheets.values.append(request2)
-    .then(()=> {
-      console.log("wrote successfully to bag packing sheet")
-    })
     .catch((error) => {
       return reject("error writing to bag-packing data sheet: ", error);
     });
@@ -166,7 +161,7 @@ function addOrder(body) {
     /* Sheet 3: DoorDash information */
     /* [deliveryDate, delivery window start/end, first name, last NAME, address, item code (always F), # of bags (must be <= 3) ] */
     const request3 = {
-      spreadSheetId: doordash_sheet,
+      spreadsheetId: doordash_sheet,
       range: "Customer Information!A:H",
       valueInputOption: "USER_ENTERED",
       insertDataOption: "INSERT_ROWS",
@@ -180,9 +175,6 @@ function addOrder(body) {
     }
     
     sheets.spreadsheets.values.append(request3)
-    .then(()=> {
-      console.log("wrote successfully to doordash sheet")
-    })
     .catch((error) => {
       return reject("error writing to Doordash data sheet: ", error);
     });
@@ -229,7 +221,7 @@ function addOrder(body) {
             console.log("OK")
             return resolve();
         });
-    });
+      });
     });
 
     return resolve();
@@ -246,8 +238,8 @@ export default async function(req, res) {
     if (!allowed) {
         res.status(401)
         res.json({error: "you are not authenticated to perform this action"})
-        return Promise.resolve();
-    } 
+        return Promise.reject();
+    }
 
     const {body} = req //unpacks the request object 
     if (!body.frequency) {
@@ -255,10 +247,8 @@ export default async function(req, res) {
     }
     let ok = requireParams(body, res); 
     if (!ok) {
-      res.status(401)
-      res.json({error: "you are not authenticated to perform this action"})
-      return Promise.resolve();
-    } 
+      return Promise.reject();
+    }
 
     firebase.auth().signInAnonymously()
     .then(() => {
