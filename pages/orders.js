@@ -1,6 +1,6 @@
 import Layout from '../components/Layout'
 import useSWR from 'swr'
-import cookie from 'js-cookie';
+import cookie from 'js-cookie'
 
 const fetcher = (url,token) => fetch(url,{headers: {'Content-Type': "application/json", 'Authorization': token}}).then((res) => res.json())
 
@@ -8,7 +8,7 @@ const token = cookie.get("firebaseToken")
 
 class PackingOrders extends React.Component {
     constructor(props) {
-        super(props);
+        super(props)
 
         this.state = {
           orders: props.data      
@@ -27,8 +27,8 @@ class PackingOrders extends React.Component {
         }).then(() => {
           this.setState({orders: this.state.orders.filter(function(order) { 
             return order.id !== orderId
-          })});
-        });
+          })})
+        })
       }
     }
 
@@ -72,6 +72,7 @@ class PackingOrders extends React.Component {
       this.displayOrderRow(order))}
       </tbody>
       </table>
+      <br></br>
       <h1 className="text-3xl font-medium mb-2">Pick-up</h1>
       <table className="w-full items-stretch" id="orders">
       <thead>
@@ -95,7 +96,11 @@ class PackingOrders extends React.Component {
 }
 
 const createOrderObjects = (results) => {
-  var orderObjects = [];
+  var orderObjects = []
+
+  if (results == null) {
+    return orderObjects
+  }
 
   Object.entries(results).forEach((entry) => {
     const orderObj = new Object()
@@ -114,21 +119,21 @@ const createOrderObjects = (results) => {
     orderObj.deliveryDate = value.deliveryDate ? value.deliveryDate : "N/A"
     orderObj.deliveryWindow = value.deliveryWindow ? value.deliveryWindow : "N/A"
     orderObj.numBags = value.num_bags ? value.num_bags : 1
-    orderObj.status = value.status ? value.status : "No status available";
+    orderObj.status = value.status ? value.status : "No status available"
     orderObj.url = "/packingDetailed?orderid=" + key
     orderObjects.push(orderObj)
-  });
+  })
 
   return orderObjects
 }
 
 export default function PackingOverview() {
-  const { data } = useSWR(["/api/orders/GetAllOrders/", token], fetcher);
-
+  const { data } = useSWR(["/api/orders/GetAllOrders/", token], fetcher)
   if (!data) {
-      return (<div>loading...</div>)
-    } else {
-        var orderObjects = createOrderObjects(data)
-        return (<PackingOrders data={orderObjects}></PackingOrders>)
- }
+    return <PackingOrders data={[]} key="emptyTable"/>
+
+  } else {
+    const orderObjects = createOrderObjects(data)
+    return <PackingOrders data={orderObjects} key="nonemptyTable"/>
+  }
 }
