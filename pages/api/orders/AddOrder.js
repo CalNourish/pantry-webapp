@@ -71,9 +71,10 @@ function updateInventory(items) { //updates inventory in firebase
 
 function addOrder(body) {
 
-  let { firstName, lastName, address, frequency, dependents,
-        dietaryRestrictions, additionalRequests, calID, items,
-        deliveryDate, deliveryWindow, email, phone } =  body;
+  let { firstName, lastName, address, address2, city, zip,
+        frequency, dependents, dietaryRestrictions, additionalRequests,
+        calID, items, deliveryDate, deliveryWindow, email, phone,
+        dropoffInstructions } =  body;
 
   // I used this: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace
   
@@ -160,16 +161,23 @@ function addOrder(body) {
   
     /* Sheet 3: DoorDash information */
     /* [deliveryDate, delivery window start/end, first name, last NAME, address, item code (always F), # of bags (must be <= 3) ] */
+    let deliveryWindowStart = deliveryWindow.split("-")[0]
+    let deliveryWindowEnd = deliveryWindow.split("-")[1]
+
     const request3 = {
       spreadsheetId: doordash_sheet,
-      range: "Customer Information!A:H",
+      range: "Customer Information!A:U",
       valueInputOption: "USER_ENTERED",
       insertDataOption: "INSERT_ROWS",
       resource: {
-          "range": "Customer Information!A:H",
+          "range": "Customer Information!A:U",
           "majorDimension": "ROWS",
           "values": [
-          ["VENTURA-01", deliveryDate, deliveryWindow, firstName, lastName, address, "F", numberOfBags] 
+            [
+              "UCB BNC Food Pantry", "VENTURA-01", "F", deliveryDate, deliveryWindowStart, deliveryWindowEnd,
+              "US/Pacific", firstName, lastName, address, address2, city, "CA", zip, phone, numberOfBags,
+              dropoffInstructions, "UCB BNC Food Pantry"
+            ] 
           ] 
         } 
     }

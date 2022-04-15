@@ -93,6 +93,8 @@ export default function Home() {
                   "lastName": "Son",
                   "address": "1021 Berkeley Way",
                   "address2": "apt 400",
+                  "city": "Berkeley",
+                  "zip": "94103",
                   "frequency": "one-time",
                   "dependents": 0,
                   "dietaryRestrictions": "i hate the texture of mochi",
@@ -102,9 +104,10 @@ export default function Home() {
                     9797: 0, 1111:0 //barcode:count
                   },
                   "deliveryDate":"4/1",
-                  "deliveryWindow": "12PM-2pm",
+                  "deliveryWindow": "12PM-2PM",
                   "phone": "1234567890",
-                  "email": "oski@berkeley.edu"
+                  "email": "oski@berkeley.edu",
+                  "dropoffInstructions": ""
           }),
                 headers: {'Content-Type': "application/json", 'Authorization': token}}) 
         }}> AddOrder Button </button>
