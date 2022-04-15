@@ -34,7 +34,7 @@ export const ACTIONS = {
  *   emailConf: !
  *   status: !
  *   dependents: (0)
- *   requests:
+ *   dietaryRestrictions:
  * },
  * 
  * delivery: {
@@ -51,7 +51,8 @@ export const ACTIONS = {
  */ 
 const initialState = {
   personal: {
-   first:"", last:"", calID:"", email:"", emailConf:"", status:"", dependents:"", pantryNote:""
+   first:"", last:"", calID:"", email:"", emailConf:"", status:"", dependents:"",
+   dietaryRestrictions: "", additionalRequests:""
   },
   delivery: {
     streetAddress:"", address2:"", city:"", zip:"", withinCA:"", phone:"", notes:"", doordashConf:""

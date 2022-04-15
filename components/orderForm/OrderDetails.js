@@ -93,19 +93,22 @@ export default function OrderDetails({children}) {
     <>
       <h2 className="h-10 text-lg mb-2 block tracking-wide text-gray-700 font-bold">Order Details</h2>
 
-      {/*  */}
+      {/* Dietary Restrictions */}
       <div className='mb-3'>
-        <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-1" htmlFor="special-requests">Special Requests</label>
+        <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-1" htmlFor="dietary-restrictions">Dietary Restrictions</label>
         <textarea
           className="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-100 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
-          id="special-requests" 
+          id="dietary-restrictions" 
           type="text" 
-          placeholder="i.e. dietary restrictions, bag packing instructions"
-          value={personal.requests}
-          onChange={(e) => cartDispatch({ type: 'UPDATE_PERSONAL', payload: {requests: e.target.value}})}
+          placeholder="e.g. allergies, vegetarian, gluten-free, other..."
+          value={personal.dietaryRestrictions}
+          onChange={(e) => cartDispatch({ type: 'UPDATE_PERSONAL', payload: {dietaryRestrictions: e.target.value}})}
         />
       </div>
+
       <div className='flex'>
+
+        {/* Category navigation */}
         <div className="relative mr-8 w-1/5">
           <div className="sticky top-0">
             <div className="pt-2">
@@ -123,6 +126,8 @@ export default function OrderDetails({children}) {
             </div>
           </div>
         </div>
+
+        {/* Item Selection */}
         <div className="relative flex-grow form-group mr-8">
           <div className='pt-2'>
             <h3 className="uppercase block font-bold tracking-wide text-gray-700 text-xs mb-4">Items</h3>
@@ -169,6 +174,8 @@ export default function OrderDetails({children}) {
             })
           }
         </div>
+
+        {/* Cart: items ordered */}
         <div className="form-group w-2/3 sm:w-1/3">
           <div className="sticky top-0"> {/* <- this is here to make the whole summary sticky */}
             <h3 className="h-10 uppercase pt-2 font-bold tracking-wide text-gray-700 text-xs mb-4">Cart</h3>

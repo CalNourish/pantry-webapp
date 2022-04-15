@@ -1,11 +1,11 @@
 import { useContext } from 'react';
 import { StateCartContext } from '../../context/cartContext'
+import cookie from 'js-cookie';
 
 export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, updateOrderDetails}) {
   const { cart, personal, delivery } = useContext(StateCartContext)
 
   const submitCart = (cart, personal, delivery) => {
-    const fullAddress = `${delivery.streetAddress}${delivery.address2 ? `, ${delivery.address2}` : ""}, ${delivery.city}, CA ${delivery.zip}`
     const items = {}
     for (const barcode in cart) {
       items[barcode] = cart[barcode].quantity
@@ -16,29 +16,36 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
     const orderBody = {
       firstName: personal.first,
       lastName: personal.last,
-      address: fullAddress,
+      address: delivery.streetAddress,
+      address2: delivery.address2,
+      city: delivery.city,
+      zip: delivery.zip,
       frequency: "one-time", // todo: add selection?
-      dependents: personal.dependents,
-      dietaryRestrictions: "", // todo: not in form ATM
-      additionalRequests: personal.requests,
+      dependents: personal.dependents || 0,
+      dietaryRestrictions: personal.dietaryRestrictions,
+      additionalRequests: personal.additionalRequests,
       calID: personal.calID,
       items: items,
-      deliveryDate: "",
+      deliveryDate: "some day",
       deliveryWindow: deliveryOptions, // todo: multiple options?
 
-      // BELOW: not included in API rn?
       email: personal.email,
-      phone: personal.phone
-      // todo: missing deliveryNotes?
+      phone: delivery.phone,
+      dropoffInstructions: delivery.notes
     }
 
+    const token = cookie.get("firebaseToken")
+
     console.log("order body:", orderBody)
-    // fetch('/api/orders/AddOrder',
-    //         { method: 'POST',
-    //           body: JSON.stringify(orderBody),
-    //           headers: {'Content-Type': "application/json", 'Authorization': token}
-    //         }
-    //       )
+    fetch('/api/orders/AddOrder',
+      { method: 'POST',
+        body: JSON.stringify(orderBody),
+        headers: {'Content-Type': "application/json", 'Authorization': token}
+      }
+    ).then(resp => resp.json())
+    .then((json) => {
+      console.log("status:", json.error)
+    })
   }
 
   return (
@@ -80,8 +87,8 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
               {delivery.notes}
             </div>
             <div className='mt-1'>
-              <span className='font-semibold tracking-wide text-gray-700'>Special Requests: </span>
-              {personal.requests}
+              <span className='font-semibold tracking-wide text-gray-700'>Dietary Restrictions: </span>
+              {personal.dietaryRestrictions}
             </div>
           </div>
         </div>

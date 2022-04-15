@@ -23,64 +23,82 @@ function requireParams(body, res) {
     delivery_date, order_timestamp, items in the order (orderschema as of now)
     items are represented as an object with barcode as key and quantity (count) as value*/
 
-    if (!body.firstName || !body.lastName || !body.address || !body.frequency ||
-        isNaN(parseInt(body.dependents)) || !body.dietaryRestrictions || !body.additionalRequests || 
-        !body.calID || !body.items || !body.deliveryDate || !body.deliveryWindow || !body.email || !body.phone) {
-          res.json({error: "missing firstName||lastName||frequency||Address||dependents||calID||items||deliveryDate\
-             in request"}); 
-            res.status(400);
-            return false;
-        }
-    //require order items object with at least one entry (order array)
-    if (body.items.length <= 0) {
-        res.json({error: "missing order item"}); 
-        res.status(400);
-        return false;
+    if (!body.firstName || !body.lastName || !body.calID) {
+      res.status(400).json({error: "missing name/ID in request"});
+      return false;
     } 
+    
+    if (!body.address || !body.city) {
+      res.status(400).json({error: "missing address/city in request"});
+      return false;
+    }
+
+    if (isNaN(parseInt(body.dependents))) {
+      res.status(400).json({error: "num dependents not a valid number"});
+      return false;
+    }
+
+    if (!body.email || !body.phone) {
+      res.status(400).json({error: "missing contact info"});
+      return false;
+    }
+    
+    if (!body.frequency || !body.deliveryDate || !body.deliveryWindow) {
+      res.status(400).json({error: "missing delivery time/frequency in request"});
+      return false;
+    }
+
+    //require order items object with at least one entry (order array)
+    if (!body.items || body.items.length <= 0) {
+      res.status(400).json({error: "missing order items"});
+      return false;
+    }
+
     return true;
 }
 
+/* decrement inventory amounts in firebase */
+// TODO: also convert barcodes to item names for bag packing sheet?
+function updateInventory(items) {
+  let itemNames = {};
 
-function updateInventory(items) { //updates inventory in firebase
   return new Promise((resolve, reject) => {
     fetch(`${server}/api/inventory/GetAllItems`)
     .then((value) => {
       value.json().then((inventoryJson) => {
-         const inventoryUpdates = {}
-         for (let item in items) {
-           if (inventoryJson[item]['count'] >= items[item]) { //if we have enough in inventory for order
+        const inventoryUpdates = {}
+        for (let item in items) {
+          if (inventoryJson[item]['count'] >= items[item]) { // make sure we have enough in inventory for order
             inventoryUpdates['/inventory/' + item + "/count"] = firebase.database.ServerValue.increment(-1 * items[item]);
-           }
-           else {
-             console.log("Sorry, requested count for " + inventoryJson[item]["itemName"] + " exceeds inventory");
-             return reject("Quantity exceeded"); 
-           }
-         }
-         firebase.database().ref().update(inventoryUpdates).then(() => {
-           return resolve("Inventory updated");
-         })
-         .catch((error) => {
-           console.log("error updating to firebase: ", error);
-           return reject();
-         }) 
-      })  
-    }) 
+            itemNames[inventoryJson[item]['itemName']] = items[item];
+          }
+          else {
+            console.log("Sorry, requested count for " + inventoryJson[item]["itemName"] + " exceeds inventory");
+            return reject("Quantity exceeded");
+          }
+        }
+
+        firebase.database().ref().update(inventoryUpdates).then(() => {
+          return resolve(itemNames);
+        })
+        .catch((error) => {
+          console.log("error updating to firebase: ", error);
+          return reject();
+        })
+      })
+    })
   })
 }
 
-
-function addOrder(body) {
+/* Write order to three google sheets (pantry, bag-packing, doordash), and add order to firebase. */
+function addOrder(body, itemNames) {
 
   let { firstName, lastName, address, address2, city, zip,
         frequency, dependents, dietaryRestrictions, additionalRequests,
         calID, items, deliveryDate, deliveryWindow, email, phone,
         dropoffInstructions } =  body;
 
-  // I used this: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace
-  
-  // add order data to three google sheets (pantry, bag-packing, doordash) and add order to firebase
   return new Promise((resolve, reject) => {
-
     const target = ['https://www.googleapis.com/auth/spreadsheets'];
     var sheets_auth = new google.auth.JWT(
       client_email,
@@ -122,7 +140,7 @@ function addOrder(body) {
       return reject("error writing to Pantry data sheet: ", error);
     });
 
-    //determine approximate # of bags by # of items
+    // determine approximate # of bags by # of items
     var totalItems = 0;
     for (let item in items) {
       totalItems += items[item];
@@ -149,7 +167,7 @@ function addOrder(body) {
           "majorDimension": "ROWS",
           "values": [
             [deliveryDate, firstName + " " + lastName.slice(0,1), deliveryWindow, numberOfBags, frequency, 
-             dependents, dietaryRestrictions, additionalRequests, orderID, JSON.stringify(items)]
+             dependents, dietaryRestrictions, additionalRequests, orderID, JSON.stringify(itemNames)]
           ] 
         }
     }
@@ -238,41 +256,48 @@ function addOrder(body) {
 } 
   
 export default async function(req, res) {   
-    // verify this request is legit
-    const token = req.headers.authorization
-    console.log("TOKEN: ", token)
+  // verify this request is legit
+  const token = req.headers.authorization
+  console.log("TOKEN: ", token)
 
-    const allowed = await validateFunc(token)
-    if (!allowed) {
-        res.status(401)
-        res.json({error: "you are not authenticated to perform this action"})
-        return Promise.reject();
-    }
+  // const allowed = await validateFunc(token)
+  // if (!allowed) {
+  //     res.status(401)
+  //     res.json({error: "you are not authenticated to perform this action"})
+  //     return Promise.reject();
+  // }
 
+  return new Promise((resolve, reject) => {
     const {body} = req //unpacks the request object 
     if (!body.frequency) {
       body.frequency = "one-time";
     }
     let ok = requireParams(body, res); 
     if (!ok) {
-      return Promise.reject();
+      return resolve();
     }
 
+    console.log("ok:", ok)
     firebase.auth().signInAnonymously()
     .then(() => {
-      updateInventory(body.items).then((success) => {
-        addOrder(body).then(() => {
+      updateInventory(body.items).then((itemNames) => {
+        addOrder(body, itemNames).then(() => {
             console.log("Added to google sheets");
+            return resolve();
           })
           .catch((error) => {
             console.log("error:", error)
+            return resolve();
           })
           ,(errorObject) => {
             console.log('The read failed: ' + errorObject);
+            return resolve();
           }
       }
       , rejection => {
         console.log("order didn't go through: ", rejection);
-      }) 
-    }
-  )}
+        return resolve();
+      })
+    })
+  })
+}
