@@ -1,10 +1,9 @@
-import useSWR from 'swr';
 import Layout from '../components/Layout'
 import Sidebar from '../components/Sidebar'
 import Table from '../components/Table'
 import InventoryModal from '../components/InventoryModal'
 import Modal from 'react-modal'
-import React, { useState, useReducer, useEffect } from 'react';
+import React, { useState, useReducer } from 'react';
 import cookie from 'js-cookie';
 import firebase from 'firebase';
 import { useUser } from '../context/userContext'
@@ -153,57 +152,80 @@ export default function Inventory() {
     })
   }
 
-
-  // When a barcode is scanned in the edit-item-lookup modal, look up this barcode in Firebase.
-  function handleLookupEdit(barcode) {
-    fetch(`${server}/api/inventory/GetItem/${barcode}`)
-    .then((result) => {
-      result.json().then((data) => {
-        if (data.error) {
-          /* reset everything except for the barcode */
-          setBarcodeError("no existing item with this barcode");
-          dispatch({type: "reset"})
-          dispatch({type: "editItemBarcode", value: barcode})
-          return;
-        }
-
-        setBarcodeError('');
-        let categories = {};
-        for (let idx in data.categoryName) {
-          let categoryId = data.categoryName[idx];
-          categories[categoryId] = categoryId;
-        }
-
-        const payload = {
-          itemName: data.itemName,
-          count: data.count,
-          packSize: data.packSize,
-          lowStock: data.lowStock,
-          categoryName: categories
-        };
-        dispatch({type:'itemLookup', value: payload});
-      })
-    })
-    return 
+  // opens modal with barcode & fields already completed. used by shortcut edit button.
+  function editItem(barcode) {
+    setShowEditItem(true);
+    dispatch({type: "editItemBarcode", value: barcode});
+    handleBarcodeEdit(barcode);
   }
 
-  function handleLookupAdd(barcode) {
-    if (!barcode) {
+  function deleteItem(barcode) {
+    if (confirm(`Deleting item with barcode ${barcode}. Are you sure?`)){
+      fetch(`${server}/api/inventory/DeleteItem`, { method: 'POST',
+        body: JSON.stringify({barcode: barcode}),
+        headers: {'Content-Type': "application/json", 'Authorization': authToken}})
+      .then(() => {
+        // remove something from dataState
+        let { [barcode]: deletedItem, ...newDataState } = dataState
+        changeData(newDataState)
+        setStatusSuccess(`successfully deleted: ${deletedItem.itemName} (${deletedItem.barcode})`)
+      })
+    }
+  }
+
+  // When a barcode is scanned in the edit-item-lookup modal, look up this barcode in Firebase.
+  function handleBarcodeEdit(barcode) {
+    if (barcode === "") {
+      setBarcodeError('missing item barcode');
+      return;
+    }
+    fetch(`${server}/api/inventory/GetItem/${barcode}`)
+    .then((response) => {
+      if (response.ok) {
+        return response.json()
+      }
+      throw new Error("Cannot find existing item with this barcode.")
+    })
+    .then((data) => {
+      setBarcodeError('');
+      let categories = {};
+      for (let idx in data.categoryName) {
+        let categoryId = data.categoryName[idx];
+        categories[categoryId] = categoryId;
+      }
+
+      const payload = {
+        itemName: data.itemName,
+        count: data.count,
+        packSize: data.packSize,
+        lowStock: data.lowStock,
+        categoryName: categories
+      };
+      dispatch({type:'itemLookup', value: payload});
+    })
+    .catch((err) => {
+      /* reset everything except for the barcode */
+      setBarcodeError("cannot find existing item with this barcode");
+      dispatch({type: "reset"})
+      dispatch({type: "editItemBarcode", value: barcode})
+    })
+  }
+
+  // When a barcode is scanned in the add-item-lookup modal, look up this barcode in Firebase.
+  function handleBarcodeAdd(barcode) {
+    if (barcode === "") {
       setBarcodeError("missing item barcode");
       return;
     }
 
     fetch(`${server}/api/inventory/GetItem/${barcode}`)
     .then((result) => {
-        result.json().then((data) => {
-          
-          if (!data.error) {
-            /* item already exists! */
-            setBarcodeError("item already exists with this barcode");
-            return;
-          }
-          setBarcodeError("");
-        })
+      if (result.ok) {
+        /* item already exists! */
+        setBarcodeError("item already exists with this barcode");
+      } else {
+        setBarcodeError("");
+      }
     })
   }
 
@@ -217,7 +239,7 @@ export default function Inventory() {
     const packSize = state.packSize ? state.packSize : 1;                                                   // defaults to 1
     const quantity = state.count * (document.getElementById("packOption").value == "packs" ? packSize : 1)  // required
     const lowStock = state.lowStock ? state.lowStock : -1;                                                  // defaults to -1
-    const categories = state.categoryName;
+    const categories = Object.keys(state.categoryName).length ? state.categoryName : undefined;             // defaults to "no change"
 
     const payload = JSON.stringify({
       "barcode": barcode,
@@ -265,7 +287,7 @@ export default function Inventory() {
       return
     }
 
-    const payload = JSON.stringify({
+    const payload = {
       "barcode": barcode,
       "itemName": itemName,
       "packSize": packSize,
@@ -273,10 +295,10 @@ export default function Inventory() {
       "categoryName": categories,
       "lowStock": lowStock
       /* created by? */
-    });
+    };
 
     fetch(`${server}/api/inventory/AddItem`, { method: 'POST', 
-      body: payload,
+      body: JSON.stringify(payload),
       headers: {'Content-Type': "application/json", 'Authorization': token}})
     .then((response) => {
       if (response.status == 500) {
@@ -291,6 +313,12 @@ export default function Inventory() {
           setErrors(emptyErrors);
           closeAddItem();
           setStatusSuccess(`successfully added: ${itemName} (${barcode})`);
+          
+          // modify dataState to contain the new item
+          changeData({
+            ...dataState,
+            [barcode]: payload
+          })
         }
       })
     })
@@ -304,6 +332,7 @@ export default function Inventory() {
       ...status, loading: false, error: ""
     })
   }
+
   function closeUpdateItem() {
     setShowEditItem(false); 
     setErrors(emptyErrors);
@@ -314,34 +343,35 @@ export default function Inventory() {
   }
 
   const { loadingUser, user } = useUser();
+  let authToken = (user && user.authorized === "true") ? token : null;
 
   return (
     <>
       <Layout>
-        {!(user && user.authorized === "true") ? "" :
+        {!authToken ? "" :
           <>
             {/* Add Item Modal */}
-            <Modal id="add-item-modal" isOpen={showAddItem} onRequestClose={closeAddItem}>
+            <Modal id="add-item-modal" isOpen={showAddItem} onRequestClose={closeAddItem} ariaHideApp={false}>
               <InventoryModal
                   onSubmitHandler={handleAddSubmit} 
                   onCloseHandler={closeAddItem}
                   dispatch={dispatch}
                   parentState={state}
                   isAdd={true}
-                  barcodeLookup={handleLookupAdd}
+                  barcodeLookup={handleBarcodeAdd}
                   errors={errors}
                   status={status}/>
             </Modal>
             
             {/*  Edit Item Modal  */}
-            <Modal id="edit-item-modal" isOpen={showEditItem} onRequestClose={closeUpdateItem}>
+            <Modal id="edit-item-modal" isOpen={showEditItem} onRequestClose={closeUpdateItem} ariaHideApp={false}>
               <InventoryModal
                   onSubmitHandler={handleUpdateSubmit} 
                   onCloseHandler={closeUpdateItem}
                   dispatch={dispatch}
                   parentState={state}
                   isAdd={false}
-                  barcodeLookup={handleLookupEdit}
+                  barcodeLookup={handleBarcodeEdit}
                   errors={errors}
                   status={status}/>
             </Modal>
@@ -357,13 +387,15 @@ export default function Inventory() {
                     <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowAddItem(true)}>Add new item</button>
                     <button className="my-1 btn-outline w-56 rounded-md p-1" onClick={() => setShowEditItem(true)}>Edit existing item</button>
                   </div>
+                  <p className="mb-5 text-sm italic text-gray-700">You can double-click on an item name or count to change the value quickly!</p>
                 </Sidebar>
               </div>
           }
           <div className="py-4 px-8">
             {status.success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded relative mb-3">{status.success}</div>}
             {Object.keys(dataState).length > 0
-              ? <Table className="table-auto my-1" data={dataState} categories={categoryState}></Table>
+              ? <Table className="table-auto my-1" data={dataState} categories={categoryState} authToken={authToken}
+                       editItemFunc={editItem} deleteItemFunc={deleteItem}></Table>
               : "Loading inventory..."}
           </div>
         </div>
