@@ -93,6 +93,10 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
               <span className='font-semibold tracking-wide text-gray-700'>Dietary Restrictions: </span>
               {personal.dietaryRestrictions}
             </div>
+            <div className='mt-1'>
+              <span className='font-semibold tracking-wide text-gray-700'>Additional Requests: </span>
+              {personal.additionalRequests}
+            </div>
           </div>
         </div>
         <div className='mr-16 flex-grow'>
