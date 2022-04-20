@@ -1,9 +1,10 @@
-import { useContext } from 'react';
+import { useState, useContext } from 'react';
 import { StateCartContext } from '../../context/cartContext'
 import cookie from 'js-cookie';
 
 export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, updateOrderDetails}) {
   const { cart, personal, delivery } = useContext(StateCartContext)
+  const [submitStatus, setSubmitStatus] = useState({})
 
   const submitCart = (cart, personal, delivery) => {
     const items = {}
@@ -34,22 +35,24 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
       dropoffInstructions: delivery.notes
     }
 
-    const token = cookie.get("firebaseToken")
-
     console.log("order body:", orderBody)
     fetch('/api/orders/AddOrder',
       { method: 'POST',
         body: JSON.stringify(orderBody),
-        headers: {'Content-Type': "application/json", 'Authorization': token}
+        headers: {'Content-Type': "application/json"}
       }
     ).then(resp => resp.json())
     .then((json) => {
-      console.log("status:", json.error)
+      console.log("status:", json)
+      setSubmitStatus(json)
     })
   }
 
   return (
     <>
+      {submitStatus.success ? <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-3">{submitStatus.success}</div> :
+        submitStatus.error ? <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-3">{submitStatus.error}</div> : ""
+      }
       <h2 className="h-10 text-lg mb-2 block tracking-wide text-gray-700 font-bold">Review Order</h2>
       <div className="flex">
         <div className="mr-16 flex-grow">
@@ -59,10 +62,10 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
               {updatePersonalInfo}
             </div>
             <div className='text-gray-700'>
-              <div>{ personal.first } {personal.last}</div>
-              <div>{ personal.email }</div>
-              <div>{ personal.calID }</div>
-              <div>{ personal.status }</div>
+              <div><span className='font-bold'>Name:</span> { personal.first } {personal.last}</div>
+              <div><span className='font-bold'>Email:</span> { personal.email }</div>
+              <div><span className='font-bold'>Cal ID:</span> { personal.calID }</div>
+              <div><span className='font-bold'>Dependents:</span> { personal.dependents }</div>
             </div>
           </div>
           <div className='mt-4 border-b-2'>
@@ -121,12 +124,12 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
           </table>
         </div>
       </div>
-      <button 
+      {submitStatus.success ? "" : <button 
         className="btn btn-pantry-blue font-bold px-4 w-full mt-10"
         onClick={() => submitCart(cart, personal, delivery)}
         >
         Place Order
-      </button>
+      </button>}
     </>
   )
 }

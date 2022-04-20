@@ -93,21 +93,37 @@ export default function OrderDetails({children}) {
     <>
       <h2 className="h-10 text-lg mb-2 block tracking-wide text-gray-700 font-bold">Order Details</h2>
 
-      {/* Dietary Restrictions */}
-      <div className='mb-3'>
-        <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-1" htmlFor="dietary-restrictions">Dietary Restrictions</label>
-        <textarea
-          className="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-100 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
-          id="dietary-restrictions" 
-          type="text" 
-          placeholder="e.g. allergies, vegetarian, gluten-free, other..."
-          value={personal.dietaryRestrictions}
-          onChange={(e) => cartDispatch({ type: 'UPDATE_PERSONAL', payload: {dietaryRestrictions: e.target.value}})}
-        />
+      {/* Notes */}
+      <div className='flex flex-row mb-3'>
+        {/* Dietary Restrictions */}
+        <div className='flex-grow mr-5'>
+          <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-1" htmlFor="dietary-restrictions">Dietary Restrictions</label>
+          <textarea
+            className="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-100 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
+            id="dietary-restrictions" 
+            type="text" 
+            placeholder="e.g. allergies, vegetarian, gluten-free, other..."
+            value={personal.dietaryRestrictions}
+            onChange={(e) => cartDispatch({ type: 'UPDATE_PERSONAL', payload: {dietaryRestrictions: e.target.value}})}
+          />
+        </div>
+
+        {/* Other Requests */}
+        <div className='flex-grow ml-5'>
+          <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-1" htmlFor="additional-requests">Other Requests</label>
+          <textarea
+            className="appearance-none block w-full bg-gray-100 text-gray-700 border border-gray-100 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
+            id="additional-requests" 
+            type="text" 
+            placeholder="Request other items not listed below (e.g. masks, hygiene products).
+Or leave other notes for pantry staff."
+            value={personal.additionalRequests}
+            onChange={(e) => cartDispatch({ type: 'UPDATE_PERSONAL', payload: {additionalRequests: e.target.value}})}
+          />
+        </div>
       </div>
 
       <div className='flex'>
-
         {/* Category navigation */}
         <div className="relative mr-8 w-1/5">
           <div className="sticky top-0">
@@ -117,7 +133,10 @@ export default function OrderDetails({children}) {
                 Object.keys(categories).map((key, _value) => {
                   return (
                     <div id={categories[key].id} key={key} className="hover:text-gray-500 text-gray-700 text-sm cursor-pointer pb-2"
-                      onClick={() => document.getElementById("anchor-"+key).scrollIntoView()}>
+                      onClick={() => {
+                        document.getElementById("anchor-"+key).scrollIntoView();
+                        window.scrollBy(0, -60);
+                      }}>
                       {categories[key].displayName}
                     </div>
                   )
@@ -127,11 +146,8 @@ export default function OrderDetails({children}) {
           </div>
         </div>
 
-        {/* Item Selection */}
-        <div className="relative flex-grow form-group mr-8">
-          <div className='pt-2'>
-            <h3 className="uppercase block font-bold tracking-wide text-gray-700 text-xs mb-4">Items</h3>
-          </div>
+        <div className=' mr-8'>
+          {/* Items search bar */}
           <div className='sticky py-4 z-10 bg-white top-0 flex'>
             <div className="block w-full">
                 <span className="h-full absolute inset-y-0 left-0 flex items-center pl-2">
@@ -155,24 +171,28 @@ export default function OrderDetails({children}) {
                 </div>
             </div>
           </div>
-          {
-            Object.keys(categories).map((key, _value) => {
-              return (
-                <div key={categories[key].displayName}>
-                  {/* Anchor for scrolling to specific category. Can't scroll to h3 element because it's sticky, so not always located at top of section. */}
-                  <a id={"anchor-"+key}></a>
-                  <h3  style={{top: '70px'}} className="uppercase sticky py-2 bg-white top-0 m-{110px} font-bold tracking-wide text-gray-700 text-xs mt-4" id={"category-"+key}>
-                    {categories[key].displayName}
-                  </h3>
-                  <div className='divide-y'>
-                    { 
-                     itemsByCategory[categories[key].id].length > 0 ? itemsByCategory[categories[key].id].map(item => item) : <div className='text-gray-500'>No items</div>
-                    }
+
+          {/* Item Selection */}
+          <div className="relative flex-grow form-group">
+            {
+              Object.keys(categories).map((key, _value) => {
+                return (
+                  <div key={categories[key].displayName}>
+                    {/* Anchor for scrolling to specific category. Can't scroll to h3 element because it's sticky, so not always located at top of section. */}
+                    <a id={"anchor-"+key}></a>
+                    <h3  style={{top: '70px'}} className="uppercase sticky py-2 bg-white top-0 m-{110px} font-bold tracking-wide text-gray-700 text-xs mt-4" id={"category-"+key}>
+                      {categories[key].displayName}
+                    </h3>
+                    <div className='divide-y'>
+                      { 
+                      itemsByCategory[categories[key].id].length > 0 ? itemsByCategory[categories[key].id].map(item => item) : <div className='text-gray-500'>No items</div>
+                      }
+                    </div>
                   </div>
-                </div>
-              )
-            })
-          }
+                )
+              })
+            }
+          </div>
         </div>
 
         {/* Cart: items ordered */}
@@ -202,7 +222,7 @@ export default function OrderDetails({children}) {
                       <td 
                         onClick={() => {
                           document.getElementsByClassName(`itemrow-${barcode}`)[0].scrollIntoView();
-                          window.scrollBy(0, -35); // compensating for the sticky title covering the top of the page
+                          window.scrollBy(0, -60); // compensating for sticky title and search bar covering the top of the page
                         }}
                         className="text-left px-4"
                       >
@@ -211,7 +231,7 @@ export default function OrderDetails({children}) {
                       <td 
                         onClick={() => {
                           document.getElementsByClassName(`itemrow-${barcode}`)[0].scrollIntoView();
-                          window.scrollBy(0, -35); // compensating for the sticky title covering the top of the page
+                          window.scrollBy(0, -60); // compensating for sticky title and search bar covering the top of the page
                         }}
                         className="text-right px-4"
                       >

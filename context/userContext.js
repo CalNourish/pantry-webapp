@@ -52,7 +52,7 @@ const UserProvider = ({ children }) => {
           })
           .then(result => {
             return result.data;
-        })).authorized; 
+        }))?.authorized; 
 
         setUser({"displayName": user.displayName, "photoURL": user.photoURL, "authorized": authorized});
         

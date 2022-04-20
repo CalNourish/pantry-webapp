@@ -35,6 +35,7 @@ export const ACTIONS = {
  *   status: !
  *   dependents: (0)
  *   dietaryRestrictions:
+ *   additionalRequests:
  * },
  * 
  * delivery: {
@@ -44,9 +45,9 @@ export const ACTIONS = {
  *   zip: !
  *   withinCA: ! True
  *   phone: ?
- *   notes:
  *   doordashConf: ! True
  *   deliveryTime: !
+ *   notes:
  * }
  */ 
 const initialState = {
@@ -55,7 +56,7 @@ const initialState = {
    dietaryRestrictions: "", additionalRequests:""
   },
   delivery: {
-    streetAddress:"", address2:"", city:"", zip:"", withinCA:"", phone:"", notes:"", doordashConf:""
+    streetAddress:"", address2:"", city:"", zip:"", withinCA:"", phone:"", doordashConf:"", notes:""
   },
   cart: {}
 };

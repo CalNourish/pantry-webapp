@@ -24,33 +24,33 @@ function requireParams(body, res) {
     items are represented as an object with barcode as key and quantity (count) as value*/
 
     if (!body.firstName || !body.lastName || !body.calID) {
-      res.status(400).json({error: "missing name/ID in request"});
+      res.status(400).json({error: "Missing name or CalID in request."});
       return false;
     } 
     
     if (!body.address || !body.city) {
-      res.status(400).json({error: "missing address/city in request"});
+      res.status(400).json({error: "Missing part of delivery address in request."});
       return false;
     }
 
     if (isNaN(parseInt(body.dependents))) {
-      res.status(400).json({error: "num dependents not a valid number"});
+      res.status(400).json({error: "Number of dependents is not a valid number."});
       return false;
     }
 
     if (!body.email || !body.phone) {
-      res.status(400).json({error: "missing contact info"});
+      res.status(400).json({error: "Missing contact email or phone number."});
       return false;
     }
     
     if (!body.frequency || !body.deliveryDate || !body.deliveryWindow) {
-      res.status(400).json({error: "missing delivery time/frequency in request"});
+      res.status(400).json({error: "Missing delivery date or time in request."});
       return false;
     }
 
     //require order items object with at least one entry (order array)
     if (!body.items || body.items.length <= 0) {
-      res.status(400).json({error: "missing order items"});
+      res.status(400).json({error: "There are no items in this order."});
       return false;
     }
 
@@ -235,37 +235,28 @@ function addOrder(body, itemNames) {
         // this item already exists
         if (dbItem != null) {
             console.log("Not ok6")
-            return resolve();
+            return reject(`${orderID} already exists`);
         }
         // otherwise the item doesn't exist and we can create it
         itemRef.update(newOrder)
         .catch(function(error) {
             console.log("Not ok7: ", error)
-            return resolve();
+            return reject("Error writing to firebase");
         })
         .then(() => {
             console.log("OK")
-            return resolve();
+            return resolve(orderID);
         });
       });
     });
 
-    return resolve();
+    // return resolve(orderID);
 
   })
 } 
   
 export default async function(req, res) {   
   // verify this request is legit
-  const token = req.headers.authorization
-  console.log("TOKEN: ", token)
-
-  // const allowed = await validateFunc(token)
-  // if (!allowed) {
-  //     res.status(401)
-  //     res.json({error: "you are not authenticated to perform this action"})
-  //     return Promise.reject();
-  // }
 
   return new Promise((resolve, reject) => {
     const {body} = req //unpacks the request object 
@@ -281,21 +272,18 @@ export default async function(req, res) {
     firebase.auth().signInAnonymously()
     .then(() => {
       updateInventory(body.items).then((itemNames) => {
-        addOrder(body, itemNames).then(() => {
-            console.log("Added to google sheets");
-            return resolve();
-          })
-          .catch((error) => {
-            console.log("error:", error)
-            return resolve();
-          })
-          ,(errorObject) => {
-            console.log('The read failed: ' + errorObject);
-            return resolve();
-          }
+        addOrder(body, itemNames).then((orderID) => {
+          res.status(200).json({success: `Successfully added order! Order ID: ${orderID}`});
+          return resolve();
+        })
+        .catch((error) => {
+          res.status(400).json({error:`Error adding order: ${error}`});
+          return resolve();
+        })
       }
       , rejection => {
-        console.log("order didn't go through: ", rejection);
+        console.log("Can't update inventory:", rejection);
+        res.status(400).json({error: rejection});
         return resolve();
       })
     })
