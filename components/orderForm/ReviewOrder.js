@@ -1,6 +1,5 @@
 import { useState, useContext } from 'react';
 import { StateCartContext } from '../../context/cartContext'
-import cookie from 'js-cookie';
 
 export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, updateOrderDetails}) {
   const { cart, personal, delivery } = useContext(StateCartContext)
@@ -62,10 +61,10 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
               {updatePersonalInfo}
             </div>
             <div className='text-gray-700'>
-              <div><span className='font-bold'>Name:</span> { personal.first } {personal.last}</div>
-              <div><span className='font-bold'>Email:</span> { personal.email }</div>
-              <div><span className='font-bold'>Cal ID:</span> { personal.calID }</div>
-              <div><span className='font-bold'>Dependents:</span> { personal.dependents }</div>
+              <div className='mb-2'><span className='font-bold'>Name:</span> { personal.first } {personal.last}</div>
+              <div className='mb-2'><span className='font-bold'>Email:</span> { personal.email }</div>
+              <div className='mb-2'><span className='font-bold'>Cal ID:</span> { personal.calID }</div>
+              <div className='mb-2'><span className='font-bold'>Dependents:</span> { personal.dependents }</div>
             </div>
           </div>
           <div className='mt-4 border-b-2'>
@@ -75,11 +74,18 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
             </div>
             <div className='mb-4 text-gray-700'>
               <div className='mb-2'>
-                <div>{ delivery.streetAddress }{delivery.address2 && delivery.address2.length > 0 ? `, ${delivery.address2}` : ''}</div>
+                <div className='font-bold'>Address:</div>
+                <div> { delivery.streetAddress }{delivery.address2 && delivery.address2.length > 0 ? `, ${delivery.address2}` : ''}</div>
                 <div>{ delivery.city }{ delivery.city && delivery.city.length > 0 ? ", CA" : "" } { delivery.zip}</div>
               </div>
               <div className='mb-2'>
-                <div>{delivery.phone}</div>
+                <div><span className='font-bold'>Phone:</span> {delivery.phone}</div>
+              </div>
+              <div className='mb-2'>
+                <div className='font-bold'>Delivery Time(s):</div>
+                <div className='list-disc'>
+                  {delivery.deliveryTimes?.map((element) => <li className='pl-2' key={element.value}>{element.label}</li>)}
+                </div>
               </div>
             </div>
           </div>
