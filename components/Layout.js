@@ -3,9 +3,10 @@ import Footer from './Footer'
 
 export default function Layout(props) {
   return (
-    <div className="flex flex-col min-h-screen h-0">
+    // <div>
+    <div className="h-screen flex flex-col">
       <Navbar />
-      <main className="flex-grow w-full">
+      <main className="flex-grow flex-auto flex-shrink-0">
         {props.children}
       </main>
       <Footer />
