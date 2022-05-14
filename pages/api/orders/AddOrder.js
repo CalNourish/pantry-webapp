@@ -73,8 +73,7 @@ function updateInventory(items) {
             itemNames[inventoryJson[item]['itemName']] = items[item];
           }
           else {
-            console.log("Sorry, requested count for " + inventoryJson[item]["itemName"] + " exceeds inventory");
-            return reject("Quantity exceeded");
+            return reject(`Requested count for "${inventoryJson[item]["itemName"]}" exceeds current stock (${inventoryJson[item]['count']})`);
           }
         }
 
@@ -82,7 +81,6 @@ function updateInventory(items) {
           return resolve(itemNames);
         })
         .catch((error) => {
-          console.log("error updating to firebase: ", error);
           return reject();
         })
       })
@@ -114,7 +112,6 @@ function addOrder(body, itemNames) {
     // Generate orderID: random six digit value.
     // We check later to make sure that the ID isn't in use already.
     const orderID = Math.random().toString().slice(2, 8);
-    console.log("orderID", orderID);
 
     let d = new Date();
     const currentDate = (d.getMonth() + 1) + "/" + d.getDate();
@@ -192,7 +189,7 @@ function addOrder(body, itemNames) {
           "majorDimension": "ROWS",
           "values": [
             [
-              "UCB BNC Food Pantry", "VENTURA-01", "F", deliveryDate, deliveryWindowStart, deliveryWindowEnd,
+              "UCB BNC Food Pantry", "VENTURA-01", "F", "", "", "",
               "US/Pacific", firstName, lastName, address, address2, city, "CA", zip, phone, numberOfBags,
               dropoffInstructions, "UCB BNC Food Pantry"
             ] 
@@ -210,55 +207,50 @@ function addOrder(body, itemNames) {
     let newOrder = {};
     newOrder["orderID"] = orderID;
     newOrder["status"] = "Not started";
-    //newOrder["type"] = "Delivery";
-    newOrder["deliveryDate"] = deliveryDate;
-    newOrder["deliveryWindow"] = deliveryWindow;
+
+    // TODO: need to somehow handle the multiple delivery options
+    newOrder["deliveryDate"] = "TBD";
+    newOrder["deliveryWindow"] = "TBD";
+
     newOrder["items"] = items;
-    newOrder["notes from guest"] = "I'm, like, allergic to peanuts :( ";
+    newOrder["guestNote"] = additionalRequests;
+    newOrder["dietaryRestriction"] = dietaryRestrictions;
     newOrder["firstName"] = firstName;
     newOrder["lastInitial"] = lastName.slice(0, 1);
 
     firebase.auth().signInAnonymously()
     .then(() => {
-      console.log("orderID", orderID);
+      console.log("Adding orderID:", orderID);
       let itemRef = firebase.database().ref('/order/' + orderID);
 
       itemRef.once('value')
       .catch(function(error){
-        console.log("Not ok5")
-        res.status(500).json({error: "server error getting reference to  from the database", errorstack: error});
-        return resolve();
+        return reject("Unable to access database");
       })
       .then(function(resp){
         // the version of the item in the database
         var dbItem = resp.val();
         // this item already exists
         if (dbItem != null) {
-            console.log("Not ok6")
             return reject(`${orderID} already exists`);
         }
         // otherwise the item doesn't exist and we can create it
         itemRef.update(newOrder)
         .catch(function(error) {
-            console.log("Not ok7: ", error)
             return reject("Error writing to firebase");
         })
         .then(() => {
-            console.log("OK")
             return resolve(orderID);
         });
       });
     });
-
-    // return resolve(orderID);
-
   })
 } 
   
 export default async function(req, res) {   
   // verify this request is legit
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const {body} = req //unpacks the request object 
     if (!body.frequency) {
       body.frequency = "one-time";
@@ -268,7 +260,6 @@ export default async function(req, res) {
       return resolve();
     }
 
-    console.log("ok:", ok)
     firebase.auth().signInAnonymously()
     .then(() => {
       updateInventory(body.items).then((itemNames) => {
@@ -282,7 +273,6 @@ export default async function(req, res) {
         })
       }
       , rejection => {
-        console.log("Can't update inventory:", rejection);
         res.status(400).json({error: rejection});
         return resolve();
       })

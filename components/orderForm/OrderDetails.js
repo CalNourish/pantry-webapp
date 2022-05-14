@@ -1,3 +1,4 @@
+// TODO: add upper limit for counts
 
 import useSWR from 'swr'
 import { useContext, useState } from 'react';
