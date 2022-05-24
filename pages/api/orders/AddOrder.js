@@ -93,8 +93,8 @@ function addOrder(body, itemNames) {
 
   let { firstName, lastName, address, address2, city, zip,
         frequency, dependents, dietaryRestrictions, additionalRequests,
-        calID, items, deliveryDate, deliveryWindow, email, phone,
-        dropoffInstructions } =  body;
+        calID, items, deliveryDate, deliveryWindow, altDelivery,
+        email, phone, dropoffInstructions } =  body;
 
   return new Promise((resolve, reject) => {
     const target = ['https://www.googleapis.com/auth/spreadsheets'];
@@ -113,20 +113,32 @@ function addOrder(body, itemNames) {
     // We check later to make sure that the ID isn't in use already.
     const orderID = Math.random().toString().slice(2, 8);
 
+    let now = new Date();
+    const currentDate = (now.getMonth() + 1) + "/" + now.getDate() + "/" + now.getFullYear();
+
+    const days = {"Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, "Saturday": 6}
+    const dayOfWeekIdx = days[deliveryDate]
+
     let d = new Date();
-    const currentDate = (d.getMonth() + 1) + "/" + d.getDate();
+    let deliveryMMDD = new Date(
+      d.setDate(
+        d.getDate() + (((dayOfWeekIdx + 7 - d.getDay()) % 7) || 7)
+      )
+    );
+    deliveryMMDD = (deliveryMMDD.getMonth() + 1) + "/" + deliveryMMDD.getDate()
+    console.log("MM/DD/YYYY:", deliveryMMDD) // the next week's day
     
     // Schema is [current date, CalID (encrypted), unique order id, email]
     const request1 = {
       spreadsheetId: pantry_sheet,
-      range: "'TechTesting'!A:D",
+      range: "'TechTesting'!A:F",
       valueInputOption: "USER_ENTERED", 
       insertDataOption: "INSERT_ROWS",
       resource: {
-          "range": "'TechTesting'!A:D",
+          "range": "'TechTesting'!A:F",
           "majorDimension": "ROWS",
           "values": [
-            [currentDate, calID, orderID, email] //each inner array is a row if we specify ROWS as majorDim
+            [currentDate, calID, orderID, email, `${deliveryDate} ${deliveryWindow}`, altDelivery] //each inner array is a row if we specify ROWS as majorDim
           ] 
         } ,
       auth: sheets_auth
@@ -163,7 +175,7 @@ function addOrder(body, itemNames) {
           "range": "[Testing] Spring Delivery Packing Info!A:J",
           "majorDimension": "ROWS",
           "values": [
-            [deliveryDate, firstName + " " + lastName.slice(0,1), deliveryWindow, numberOfBags, frequency, 
+            [deliveryMMDD, firstName + " " + lastName.slice(0,1), deliveryWindow, numberOfBags, frequency, 
              dependents, dietaryRestrictions, additionalRequests, orderID, JSON.stringify(itemNames)]
           ] 
         }
@@ -189,7 +201,7 @@ function addOrder(body, itemNames) {
           "majorDimension": "ROWS",
           "values": [
             [
-              "UCB BNC Food Pantry", "VENTURA-01", "F", "", "", "",
+              "UCB BNC Food Pantry", "VENTURA-01", "F", deliveryMMDD, deliveryWindowStart, deliveryWindowEnd,
               "US/Pacific", firstName, lastName, address, address2, city, "CA", zip, phone, numberOfBags,
               dropoffInstructions, "UCB BNC Food Pantry"
             ] 

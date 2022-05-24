@@ -11,7 +11,7 @@ export default function PersonInfo() {
 
   return (
     <>
-      <h2 className="text-lg mb-4 block tracking-wide text-gray-700 font-bold">Information</h2>
+      <h2 className="text-lg mb-4 block tracking-wide text-gray-700 font-bold">Personal Information</h2>
       <div className="form-group flex flex-col md:flex-row mb-2">
         <div className="flex-grow mr-0 md:mr-8">
           <label 
@@ -76,7 +76,7 @@ export default function PersonInfo() {
         <input 
           type="email" 
           className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-          placeholder="oski@berkely.edu"
+          placeholder="oski@berkeley.edu"
           id="email"
           value={personal.email}
           onChange={(e) => {
@@ -94,15 +94,16 @@ export default function PersonInfo() {
         </label>
         <input 
           type="email" 
-          className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-          placeholder="oski@berkely.edu"
+          className={"appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+            + ((isValidEmail(personal.email) && personal.emailConf && personal.emailConf !== personal.email) ? " border-red-600 border-2" : "")}
+          placeholder="oski@berkeley.edu"
           id="confirm-email"
           value={personal.emailConf}
           onChange={(e) => {
             cartDispatch({ type: 'UPDATE_PERSONAL', payload: {emailConf: e.target.value} })
           }}
           />
-          {isValidEmail(personal.email) && personal.emailConf && personal.emailConf !== personal.email ? <div className='text-red-600'>Emails must match</div> : ""}
+          {(isValidEmail(personal.email) && personal.emailConf && personal.emailConf !== personal.email) && <div className='text-red-600'>Emails must match</div>}
       </div>
       <div className="form-group mb-2">
         <label 

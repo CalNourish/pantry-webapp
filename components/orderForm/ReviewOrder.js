@@ -11,7 +11,14 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
       items[barcode] = cart[barcode].quantity
     }
 
-    const deliveryOptions = delivery.deliveryTimes?.map((element) => element.label).join(", ")
+    let altDelivery = delivery.deliveryTimes?.slice(1).map((element) => element.label)
+    
+    let topDate = "", topTime = "";
+    if (delivery.deliveryTimes.length > 0) {
+      const topOption = delivery.deliveryTimes[0].label.split(/ (.*)/s)
+      topDate = topOption[0]
+      topTime = topOption[1]
+    }
 
     const orderBody = {
       firstName: personal.first,
@@ -26,8 +33,9 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
       additionalRequests: personal.additionalRequests,
       calID: personal.calID,
       items: items,
-      deliveryDate: "some day",
-      deliveryWindow: deliveryOptions, // todo: multiple options?
+      deliveryDate: topDate,
+      deliveryWindow: topTime,
+      altDelivery: altDelivery.join(","), // list all delivery choices
 
       email: personal.email,
       phone: delivery.phone,
@@ -45,6 +53,9 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
       console.log("status:", json)
       setSubmitStatus(json)
     })
+    .catch(() => {
+      console.log("unknown error")
+    })
   }
 
   return (
@@ -58,7 +69,7 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
           <div className='border-b-2 pb-4'>
             <div className='flex mb-1'>
               <h3 className='font-bold mr-2'>Personal Info</h3>
-              {updatePersonalInfo}
+              {submitStatus.success ? "" : updatePersonalInfo}
             </div>
             <div className='text-gray-700'>
               <div className='mb-2'><span className='font-bold'>Name:</span> { personal.first } {personal.last}</div>
@@ -70,7 +81,7 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
           <div className='mt-4 border-b-2'>
             <div className='flex mb-1'>
               <h3 className='font-bold mr-2'>Delivery Details</h3>
-              {updateDeliveryDetails}
+              {submitStatus.success ? "" : updateDeliveryDetails}
             </div>
             <div className='mb-4 text-gray-700'>
               <div className='mb-2'>
@@ -108,7 +119,7 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
         <div className='mr-16 flex-grow'>
           <div className='flex'>
             <h3 className='font-bold mr-2'>Items</h3>
-            {updateOrderDetails}
+            {submitStatus.success ? "" : updateOrderDetails}
           </div>
           <table className="mb-12 w-full">
             <tbody>
@@ -136,7 +147,7 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
       </div>
       {submitStatus.success ? "" : <button 
         className="btn btn-pantry-blue font-bold px-4 w-full mt-10"
-        onClick={() => submitCart(cart, personal, delivery)}
+        onClick={(e) => {e.preventDefault(); submitCart(cart, personal, delivery)}}
         >
         Place Order
       </button>}

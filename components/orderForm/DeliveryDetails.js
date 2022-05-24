@@ -93,22 +93,6 @@ export default function DeliveryDetails() {
         </div>
       </div>
       <div className="form-group mb-4">
-        <label htmlFor="in-CA-confirmation" className="block tracking-wide text-gray-700 text-xs font-bold">
-          <p className="text-gray-600 text-xs italic tracking-normal font-normal mb-2">
-            In order to make a delivery, you must live within a 15 mile radius of our pantry (which is located on UC Berkeley's campus).
-          </p>
-          <input id="in-CA-confirmation" className="mr-2 leading-tight" type="checkbox" 
-            checked={delivery.withinCA}
-            onChange={(e) => {
-              cartDispatch({ type: 'UPDATE_DELIVERY', payload: {withinCA: e.target.checked} })
-            }}
-          />
-          <span className="tracking-wide text-gray-700 text-sm font-bold">
-            I confirm that I am within the 15 mile radius
-          </span>
-        </label>
-      </div>
-      <div className="form-group mb-4">
         <div className="mb-2">
           <label 
             className="block uppercase tracking-wide text-gray-700 text-xs font-bold" 
@@ -163,18 +147,6 @@ export default function DeliveryDetails() {
           value={delivery.notes}
           onChange={(e) => cartDispatch({ type: 'UPDATE_DELIVERY', payload: {notes: e.target.value}})}
         />
-      </div>
-      <div className="form-group mb-4">
-        <label htmlFor="doordash-confirmation" className="block tracking-wide text-gray-700 text-xs font-bold">
-          <input id="doordash-confirmation" className="mr-2 leading-tight" type="checkbox"
-            checked={delivery.doordashConf}
-            onChange={(e) => cartDispatch({ type: 'UPDATE_DELIVERY', payload: {doordashConf: e.target.checked}})}
-          />
-          <span className="text-sm">
-            Please confirm that we may share your information with DoorDash
-          </span>
-        </label>
-        <p className="text-gray-600 text-xs italic">By clicking this, you are permitting us to share your information with DoorDash so that they can deliver to you. The information provided includes your name, address, phone number, and delivery notes.</p>
       </div>
     </>
   )

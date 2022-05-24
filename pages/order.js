@@ -4,11 +4,16 @@ import DeliveryDetails from '../components/orderForm/DeliveryDetails'
 import OrderDetails from '../components/orderForm/OrderDetails'
 import { useState, useContext } from 'react';
 import ReviewOrder from '../components/orderForm/ReviewOrder';
-import { StateCartContext } from '../context/cartContext';
+import { StateCartContext, DispatchCartContext } from '../context/cartContext';
 
 export default function Order() {
   let { cart } = useContext(StateCartContext)
+  let { delivery } = useContext(StateCartContext)
+
+  const cartDispatch = useContext(DispatchCartContext)
   const [formStep, setFormStep] = useState(0);
+
+  console.log("Form Step:", formStep)
 
   if ([2,3].includes(formStep)) {
     return (
@@ -69,11 +74,40 @@ export default function Order() {
     )
   }
 
+  let TODO = <div className='py-8 px-16 xl:w-1/2 max-w-2xl rounded'>
+    <h2 className="text-lg mb-4 block tracking-wide font-bold">Info About the Delivery Program</h2>
+    <div className="mb-4">
+      The food pantry offers deliveries through a partnership with DoorDash.
+      something something something...
+    </div>
+    <div className="mb-4">
+      To be eligible for delivery, you must:
+      <ul className='list-disc pl-4'>
+        <li>Be experiencing difficulty visiting the pantry in-person</li>
+        <li>Live within a 15-mile radius of the food pantry</li>
+        <li>Allow us to share the information that you provide with DoorDash</li>
+        <li>???</li>
+      </ul>
+    </div>
+    <div>
+      <label htmlFor="doordash-confirmation" className="block tracking-wide font-bold">
+          <input id="doordash-confirmation" className="mr-2 leading-tight" type="checkbox"
+            checked={delivery.eligibilityConf}
+            onChange={(e) => cartDispatch({ type: 'UPDATE_DELIVERY', payload: {eligibilityConf: e.target.checked}})}
+          />
+          <span className="text-base">
+            I confirm that I meet the above criteria.
+          </span>
+        </label>
+    </div>
+  </div>
+
   return (
     <Layout>
       <div className="sm:container mx-auto mt-8 mb-16">
         <h1 className="text-2xl text-center font-bold">Food Resource Delivery Request</h1>
-        <div className="flex justify-center m-8">
+        <div className="flex justify-center m-8 flex-col lg:flex-row">
+          { formStep<2 && TODO }
           <div className="py-8 px-16 w-7/8 sm:w-5/6 xl:w-1/2 max-w-2xl shadow rounded">
             <div id="form-header">
             </div>
