@@ -50,11 +50,10 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
       }
     ).then(resp => resp.json())
     .then((json) => {
-      console.log("status:", json)
       setSubmitStatus(json)
     })
-    .catch(() => {
-      console.log("unknown error")
+    .catch(err => {
+      console.log("unexpected error", err)
     })
   }
 
