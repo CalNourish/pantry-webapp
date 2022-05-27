@@ -221,8 +221,8 @@ function addOrder(body, itemNames) {
     newOrder["status"] = "Not started";
 
     // TODO: need to somehow handle the multiple delivery options
-    newOrder["deliveryDate"] = "TBD";
-    newOrder["deliveryWindow"] = "TBD";
+    newOrder["deliveryDate"] = deliveryMMDD;
+    newOrder["deliveryWindow"] = deliveryWindow;
 
     newOrder["items"] = items;
     newOrder["guestNote"] = additionalRequests;
