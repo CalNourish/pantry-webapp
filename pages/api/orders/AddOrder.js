@@ -43,7 +43,7 @@ function requireParams(body, res) {
       return false;
     }
     
-    if (!body.frequency || !body.deliveryDate || !body.deliveryWindow) {
+    if (!body.frequency || !body.deliveryDay || !body.deliveryWindowStart || !body.deliveryWindowEnd) {
       res.status(400).json({error: "Missing delivery date or time in request."});
       return false;
     }
@@ -93,7 +93,7 @@ function addOrder(body, itemNames) {
 
   let { firstName, lastName, address, address2, city, zip,
         frequency, dependents, dietaryRestrictions, additionalRequests,
-        calID, items, deliveryDate, deliveryWindow, altDelivery,
+        calID, items, deliveryDay, deliveryWindowStart, deliveryWindowEnd, altDelivery,
         email, phone, dropoffInstructions } =  body;
 
   return new Promise((resolve, reject) => {
@@ -117,7 +117,7 @@ function addOrder(body, itemNames) {
     const currentDate = (now.getMonth() + 1) + "/" + now.getDate() + "/" + now.getFullYear();
 
     const days = {"Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, "Saturday": 6}
-    const dayOfWeekIdx = days[deliveryDate]
+    const dayOfWeekIdx = days[deliveryDay]
 
     let d = new Date();
     let deliveryMMDD = new Date(
@@ -127,6 +127,8 @@ function addOrder(body, itemNames) {
     );
     deliveryMMDD = (deliveryMMDD.getMonth() + 1) + "/" + deliveryMMDD.getDate()
     console.log("MM/DD/YYYY:", deliveryMMDD) // the next week's day
+
+    let deliveryWindow = `${deliveryWindowStart} - ${deliveryWindowEnd}`
     
     // Schema is [current date, CalID (encrypted), unique order id, email]
     const request1 = {
@@ -138,7 +140,9 @@ function addOrder(body, itemNames) {
           "range": "'TechTesting'!A:F",
           "majorDimension": "ROWS",
           "values": [
-            [currentDate, calID, orderID, email, `${deliveryDate} ${deliveryWindow}`, altDelivery] //each inner array is a row if we specify ROWS as majorDim
+            [currentDate, calID, orderID, email,
+              `${deliveryDay} ${deliveryWindow}`,
+              altDelivery] //each inner array is a row if we specify ROWS as majorDim
           ] 
         } ,
       auth: sheets_auth
@@ -188,9 +192,6 @@ function addOrder(body, itemNames) {
   
     /* Sheet 3: DoorDash information */
     /* [deliveryDate, delivery window start/end, first name, last NAME, address, item code (always F), # of bags (must be <= 3) ] */
-    let deliveryWindowStart = deliveryWindow.split("-")[0]
-    let deliveryWindowEnd = deliveryWindow.split("-")[1]
-
     const request3 = {
       spreadsheetId: doordash_sheet,
       range: "Customer Information!A:U",

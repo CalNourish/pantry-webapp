@@ -13,11 +13,12 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
 
     let altDelivery = delivery.deliveryTimes?.slice(1).map((element) => element.label)
     
-    let topDate = "", topTime = "";
+    let deliveryDay = "", timeStart = "", timeEnd = "";
     if (delivery.deliveryTimes.length > 0) {
-      const topOption = delivery.deliveryTimes[0].label.split(/ (.*)/s)
-      topDate = topOption[0]
-      topTime = topOption[1]
+      let firstChoice = delivery.deliveryTimes[0]
+      deliveryDay = firstChoice.info.dayOfWeek
+      timeStart = firstChoice.info.startTime
+      timeEnd = firstChoice.info.endTime
     }
 
     const orderBody = {
@@ -33,8 +34,9 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
       additionalRequests: personal.additionalRequests,
       calID: personal.calID,
       items: items,
-      deliveryDate: topDate,
-      deliveryWindow: topTime,
+      deliveryDay: deliveryDay,
+      deliveryWindowStart: timeStart,
+      deliveryWindowEnd: timeEnd,
       altDelivery: altDelivery.join(","), // list all delivery choices
 
       email: personal.email,

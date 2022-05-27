@@ -14,7 +14,9 @@ export default function DeliveryDetails() {
   let { data: deliveryTimes } = useSWR('/api/orders/GetDeliveryTimes', fetcher)
 
   if (deliveryTimes) {
-    deliveryTimeOptions = Object.keys(deliveryTimes).map((id) => { return {value: id, label: deliveryTimes[id]} })
+    deliveryTimeOptions = Object.keys(deliveryTimes).map(
+      (id) => { return { value: id, label: deliveryTimes[id].display, info: deliveryTimes[id]} }
+    )
   }
   
   return (
