@@ -73,4 +73,15 @@
     @apply text-white bg-pantry-green-500 border border-transparent;
   }
 
+  /* marking required/optional fields in forms (order) */
+  label[data-required="T"]::after {
+    content: " *";
+    @apply text-red-600;
+  }
+
+  label[data-required="F"]::after {
+    content: " (optional)";
+    @apply text-gray-600 font-normal normal-case tracking-normal;
+  }
+
 }

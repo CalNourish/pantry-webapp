@@ -26,7 +26,7 @@ export default function DeliveryDetails() {
         <div className="mr-0 md:mr-8 flex-grow">
           <label 
             className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" 
-            htmlFor="street-address"
+            htmlFor="street-address" data-required="T"
           >
             Street Address
           </label>
@@ -43,7 +43,9 @@ export default function DeliveryDetails() {
         </div>
         <div>
           <label 
-            className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="address-two">
+            className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+            htmlFor="address-two" data-required="F"
+          >
             Apt, ste, etc.
           </label>
           <input
@@ -62,7 +64,7 @@ export default function DeliveryDetails() {
         <div className="mr-0 md:mr-8 flex-grow">
           <label 
             className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" 
-            htmlFor="city"
+            htmlFor="city" data-required="T"
           >
             City
           </label>
@@ -79,7 +81,9 @@ export default function DeliveryDetails() {
         </div>
         <div>
           <label 
-            className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="zip">
+            className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+            htmlFor="zip" data-required="T"
+          >
             Zip Code
           </label>
           <input
@@ -98,7 +102,7 @@ export default function DeliveryDetails() {
         <div className="mb-2">
           <label 
             className="block uppercase tracking-wide text-gray-700 text-xs font-bold" 
-            htmlFor="phone"
+            htmlFor="phone" data-required="T"
           >
             Phone
           </label>
@@ -121,7 +125,7 @@ export default function DeliveryDetails() {
         <div className="mb-2">
           <label 
             className="block uppercase tracking-wide text-gray-700 text-xs font-bold" 
-            htmlFor="deliveryTimes"
+            htmlFor="deliveryTimes" data-required="T"
           >
             What times will you be available to accept a delivery this week?
           </label>
@@ -135,7 +139,7 @@ export default function DeliveryDetails() {
         <div className="mb-2">
           <label 
             className="block uppercase tracking-wide text-gray-700 text-xs font-bold" 
-            htmlFor="delivery-notes"
+            htmlFor="delivery-notes" data-required="F"
           >
             Delivery notes: any other information we might need to know to do a no-contact drop off?
           </label>

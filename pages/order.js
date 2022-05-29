@@ -6,6 +6,9 @@ import { useState, useContext } from 'react';
 import ReviewOrder from '../components/orderForm/ReviewOrder';
 import { StateCartContext, DispatchCartContext } from '../context/cartContext';
 
+export const requiredField = <div className='inline text-red-600'> *</div>
+export const optionalField = <div className='inline text-gray-600 normal-case tracking-normal font-semibold'>(optional)</div>
+
 export default function Order() {
   let { cart } = useContext(StateCartContext)
   let { delivery } = useContext(StateCartContext)
@@ -84,27 +87,27 @@ export default function Order() {
   let deliveryEligibility = <div className='py-8 px-16 xl:w-1/2 max-w-2xl rounded'>
     <h2 className="text-lg mb-4 block tracking-wide font-bold">Info About the Delivery Program</h2>
     <div className="mb-4">
-      The food pantry offers deliveries through a partnership with DoorDash.
-      something something something...
+      The food pantry offers free delivery through a partnership with DoorDash. Currently, this service 
+      is reserved primarily for individuals who are unable to visit the pantry in person.
     </div>
-    <div className="mb-4">
-      To be eligible for delivery, you must:
-      <ul className='list-disc pl-4 space-y-2'>
-        <li>Live within a 15 mile radius of our pantry (located in UC Berkeley campus).</li>
-        <li>Be experiencing difficulty visiting the pantry to pick up</li>
+    <div className="mb-4 font-semibold">
+      Please only use this service if you:
+      <ul className='list-disc pl-4 space-y-2 font-normal'>
+        <li>Live within a 15 mile radius of our pantry (located in UC Berkeley campus)</li>
+        <li>Face a significant barrier to picking up in person (such as quarantining due to COVID-19)</li>
       </ul>
     </div>
     <div>
-      <label htmlFor="doordash-confirmation" className="block tracking-wide font-bold">
-        <input id="doordash-confirmation" className="mr-2 leading-tight" type="checkbox"
+      <label htmlFor="eligiblility-confirmation" className="block tracking-wide font-bold" data-required="T">
+        <input id="eligiblility-confirmation" className="mr-2 leading-tight" type="checkbox"
           checked={delivery.eligibilityConf}
           onChange={(e) => cartDispatch({ type: 'UPDATE_DELIVERY', payload: {eligibilityConf: e.target.checked}})}
         />
         <span className="text-base">
-          I confirm that I meet the above criteria, and I allow the food pantry to share my information with DoorDash.
+          I confirm that I meet the above conditions, and I allow the food pantry to share my information with DoorDash.
         </span>
       </label>
-      <p className="text-gray-600 text-xs italic">
+      <p className="mt-2 text-gray-600 text-xs italic">
         By clicking this, you are permitting us to share your information with DoorDash so that they can deliver to you.
         The information provided includes your name, address, phone number, and delivery notes.
       </p>

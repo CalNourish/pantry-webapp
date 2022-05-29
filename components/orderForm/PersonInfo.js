@@ -9,6 +9,7 @@ export default function PersonInfo() {
   const cartDispatch = useContext(DispatchCartContext)
   const { personal } = useContext(StateCartContext)
 
+  
   return (
     <>
       <h2 className="text-lg mb-4 block tracking-wide text-gray-700 font-bold">Personal Information</h2>
@@ -16,7 +17,7 @@ export default function PersonInfo() {
         <div className="flex-grow mr-0 md:mr-8">
           <label 
             className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" 
-            htmlFor="first-name"
+            htmlFor="first-name" data-required="T"
           >
             First Name
           </label>
@@ -32,7 +33,7 @@ export default function PersonInfo() {
           />
         </div>
         <div className="flex-grow">
-          <label 
+          <label data-required="T"
             className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="last-name">
             Last Name
           </label>
@@ -40,7 +41,7 @@ export default function PersonInfo() {
             className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
             id="last-name" 
             type="text" 
-            placeholder="The Bear"
+            placeholder="Bear"
             value={personal.last}
             onChange={(e) => {
               cartDispatch({ type: 'UPDATE_PERSONAL', payload: {last: e.target.value} })
@@ -49,7 +50,7 @@ export default function PersonInfo() {
         </div>
       </div>
       <div className="form-group mb-2">
-        <label 
+        <label data-required="T"
           className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" 
           htmlFor="cal-id"
         >
@@ -69,7 +70,7 @@ export default function PersonInfo() {
       <div className="form-group mb-2">
         <label 
           className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-          htmlFor="email"
+          htmlFor="email" data-required="T"
         >
           Email
         </label>
@@ -88,7 +89,7 @@ export default function PersonInfo() {
       <div className="form-group mb-2">
         <label 
           className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-          htmlFor="confirm-email"
+          htmlFor="confirm-email" data-required="T"
         >
           Confirm Email
         </label>
@@ -108,7 +109,7 @@ export default function PersonInfo() {
       <div className="form-group mb-2">
         <label 
           className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-          htmlFor="status"
+          htmlFor="status" data-required="T"
         >
           Status
         </label>
@@ -137,7 +138,7 @@ export default function PersonInfo() {
         <div className="mb-2">
           <label 
             className="block uppercase tracking-wide text-gray-700 text-xs font-bold"
-            htmlFor="confirm-email"
+            htmlFor="confirm-email" data-required="F"
           >
             Number of Dependents
           </label>
