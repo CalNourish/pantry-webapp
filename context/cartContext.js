@@ -18,44 +18,44 @@ export const ACTIONS = {
 };
 
 /**
- * Example state (! = required)
- * cart: {
- *   itemId: {
- *     ...item,
- *     quantity: integer
- *   }
- * },
- * 
- * personal: {
- *   first: !
- *   last: !
- *   calID: !
- *   email: !
- *   emailConf: !
- *   status: !
- *   dependents: (0)
- *   dietaryRestrictions:
- *   additionalRequests:
- * },
- * 
- * delivery: {
- *   streetAddress: !
- *   address2:
- *   city: !
- *   zip: !
- *   phone: ?
- *   eligibilityConf: ! True
- *   deliveryTime: !
- *   notes:
- * }
+  Example state (! = required)
+  cart: {
+    itemId: {
+      ...item,
+      quantity: integer
+    }
+  },
+  
+  personal: {
+    first: !
+    last: !
+    calID: !
+    email: !
+    emailConf: !
+    status: !
+    eligibilityConf: ! True
+    dependents: (0)
+    dietaryRestrictions:
+    additionalRequests:
+  },
+  
+  delivery: {
+    streetAddress: !
+    address2:
+    city: !
+    zip: !
+    phone: !
+    deliveryTime: !
+    notes:
+  }
  */ 
 const initialState = {
   personal: {
-   first:"", last:"", calID:"", email:"", emailConf:"", status:"", dependents:"",
-   dietaryRestrictions: "", additionalRequests:""
+   first:"", last:"", calID:"", email:"", emailConf:"", status:"", eligibilityConf:"",
+   dependents:"", dietaryRestrictions: "", additionalRequests:""
   },
   delivery: {
-    streetAddress:"", address2:"", city:"", zip:"", phone:"", eligibilityConf:"", notes:"", deliveryTimes:[]
+    streetAddress:"", address2:"", city:"", zip:"", phone:"", notes:"", deliveryTimes:[]
   },
   cart: {}
 };

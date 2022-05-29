@@ -5,7 +5,7 @@ import Select from 'react-select'
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
-export default function DeliveryDetails() {
+export default function DeliveryDetails(props) {
   const cartDispatch = useContext(DispatchCartContext)
   const { delivery } = useContext(StateCartContext)
 
@@ -18,6 +18,9 @@ export default function DeliveryDetails() {
       (id) => { return { value: id, label: deliveryTimes[id].display, info: deliveryTimes[id]} }
     )
   }
+
+  let inputAppearance = "appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+  let errorAppearance = " border-red-600 border-2 focus:border-red-500"
   
   return (
     <>
@@ -31,7 +34,7 @@ export default function DeliveryDetails() {
             Street Address
           </label>
           <input
-            className="appearance-none block w-full mb-2 md:mb-0 bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
+            className={inputAppearance + ((props.showMissing && !delivery.streetAddress) ? errorAppearance : "")}
             id="street-address" 
             type="text" 
             placeholder="123 Oski Blvd"
@@ -49,7 +52,7 @@ export default function DeliveryDetails() {
             Apt, ste, etc.
           </label>
           <input
-            className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
+            className={inputAppearance}
             id="address-two" 
             type="text" 
             placeholder="Apt. A"
@@ -69,7 +72,7 @@ export default function DeliveryDetails() {
             City
           </label>
           <input
-            className="appearance-none block w-full mb-2 md:mb-0 bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
+            className={inputAppearance + ((props.showMissing && !delivery.city) ? errorAppearance : "")}
             id="city" 
             type="text" 
             placeholder="Berkeley"
@@ -87,7 +90,7 @@ export default function DeliveryDetails() {
             Zip Code
           </label>
           <input
-            className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
+            className={inputAppearance + ((props.showMissing && !delivery.zip) ? errorAppearance : "")}
             id="zip" 
             type="text" 
             placeholder="94701"
@@ -110,7 +113,7 @@ export default function DeliveryDetails() {
         </div>
         <input 
           type="tel" 
-          className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+          className={inputAppearance + ((props.showMissing && !delivery.phone) ? errorAppearance : "")}
           placeholder="510-555-5555"
           pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
           id="phone"
@@ -132,7 +135,8 @@ export default function DeliveryDetails() {
         <p className="text-gray-600 text-xs italic">Please select all that work, we will send an email for a final confirmation.</p>
         </div>
         <Select options={deliveryTimeOptions} isMulti isClearable isSearchable value={delivery.deliveryTimes}
-          onChange={(selections) => cartDispatch({ type: 'UPDATE_DELIVERY', payload: {deliveryTimes: selections} })}/>
+          onChange={(selections) => cartDispatch({ type: 'UPDATE_DELIVERY', payload: {deliveryTimes: selections} })}
+          className={props.showMissing ? "border rounded" + errorAppearance : "border border-transparent" }/>
       </div>
       
       <div className="form-group mb-4">

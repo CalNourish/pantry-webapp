@@ -1,3 +1,4 @@
+import next from 'next';
 import { useContext } from 'react';
 import { DispatchCartContext, StateCartContext } from '../../context/cartContext'
 
@@ -5,11 +6,13 @@ function isValidEmail(email) {
   return /^\w+([\.-]?\w+)*@berkeley.edu$/.test(email)
 }
 
-export default function PersonInfo() {
+export default function PersonInfo(props) {
   const cartDispatch = useContext(DispatchCartContext)
   const { personal } = useContext(StateCartContext)
 
-  
+  let inputAppearance = "appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+  let errorAppearance = " border-red-600 border-2 focus:border-red-500"
+
   return (
     <>
       <h2 className="text-lg mb-4 block tracking-wide text-gray-700 font-bold">Personal Information</h2>
@@ -22,7 +25,7 @@ export default function PersonInfo() {
             First Name
           </label>
           <input
-            className="appearance-none block w-full mb-2 md:mb-0 bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
+            className={inputAppearance + ((props.showMissing && !personal.first) ? errorAppearance : "")}
             id="first-name" 
             type="text" 
             placeholder="Oski"
@@ -38,7 +41,7 @@ export default function PersonInfo() {
             Last Name
           </label>
           <input
-            className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
+            className={inputAppearance + ((props.showMissing && !personal.last) ? errorAppearance : "")}
             id="last-name" 
             type="text" 
             placeholder="Bear"
@@ -58,7 +61,7 @@ export default function PersonInfo() {
         </label>
         <input 
           type="text" 
-          className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+          className={inputAppearance + ((props.showMissing && !personal.calID) ? errorAppearance : "")}
           placeholder="12345678"
           id="cal-id"
           value={personal.calID}
@@ -76,7 +79,7 @@ export default function PersonInfo() {
         </label>
         <input 
           type="email" 
-          className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+          className={inputAppearance + ((props.showMissing && !personal.email) ? errorAppearance : "")}
           placeholder="oski@berkeley.edu"
           id="email"
           value={personal.email}
@@ -95,8 +98,8 @@ export default function PersonInfo() {
         </label>
         <input 
           type="email" 
-          className={"appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-            + ((isValidEmail(personal.email) && personal.emailConf && personal.emailConf !== personal.email) ? " border-red-600 border-2" : "")}
+          className={ inputAppearance + ((props.showMissing && !personal.emailConf) ? errorAppearance : "")
+            + ((isValidEmail(personal.email) && personal.emailConf && personal.emailConf !== personal.email) ? errorAppearance : "")}
           placeholder="oski@berkeley.edu"
           id="confirm-email"
           value={personal.emailConf}
@@ -115,7 +118,7 @@ export default function PersonInfo() {
         </label>
         <div className="relative">
           <select
-            className="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
+            className={inputAppearance + ((props.showMissing && !personal.status) ? errorAppearance : "")}
             id="status"
             value={personal.status || ""}
             onChange={(e) => {
