@@ -13,7 +13,7 @@ export default function Order() {
   let { cart, personal, delivery } = useContext(StateCartContext)
 
   const cartDispatch = useContext(DispatchCartContext)
-  const [formStep, setFormStep] = useState(2);     // page number
+  const [formStep, setFormStep] = useState(0);     // page number
   let [showMissing, setShowMissing] = useState(false);
 
   // Set bounds in case of weird behaviors.
