@@ -31,7 +31,7 @@ export default function OrderDetails({children}) {
       return
     }
     // if not max order size, set to infinity
-    const maxQuantity = parseInt(items[key].maxOrderSize) || Number.POSITIVE_INFINITY
+    const maxQuantity = parseInt(items[key].maxOrderSize) || items[key].count
     let invalid_quantity = cart[key] && cart[key].quantity > maxQuantity
     let inputId = `item-${items[key].barcode}`
     let itemInput = (
@@ -64,15 +64,22 @@ export default function OrderDetails({children}) {
               step="1"
               value={cart[key] ? cart[key].quantity : ""}
               onChange={(e) => {
-                cartDispatch({ type: 'UPDATE_CART', payload: {item: items[key], quantity: e.target.value } });
+                let newQuantity = e.target.value;
+                if (newQuantity > maxQuantity) {
+                  newQuantity = maxQuantity
+                }
+                cartDispatch({ type: 'UPDATE_CART', payload: {item: items[key], quantity: newQuantity } });
               }}
             />
             {/* plus */}
             <button 
               className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" 
               onClick={() => {
-                let newAmt = cart[key] ? cart[key].quantity + 1 : 1;
-                cartDispatch({ type: 'UPDATE_CART', payload: {item: items[key], quantity:newAmt}})
+                let newQuantity = cart[key] ? cart[key].quantity + 1 : 1;
+                if (newQuantity > maxQuantity) {
+                  newQuantity = maxQuantity
+                }
+                cartDispatch({ type: 'UPDATE_CART', payload: {item: items[key], quantity: newQuantity}})
               }}
               tabIndex="-1"
             >
@@ -81,8 +88,8 @@ export default function OrderDetails({children}) {
               </svg>
             </button>
           </div>
-          {invalid_quantity ? <div className='text-red-600'>Quantity must be less than {maxQuantity}</div> : ""}
         </div>
+        {/* {invalid_quantity ? <div className='text-red-600'>Quantity must be less than {maxQuantity}</div> : ""} */}
       </div>
     )
     

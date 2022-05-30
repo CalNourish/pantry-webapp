@@ -13,7 +13,7 @@ export default function Order() {
   let { cart, personal, delivery } = useContext(StateCartContext)
 
   const cartDispatch = useContext(DispatchCartContext)
-  const [formStep, setFormStep] = useState(0);     // page number
+  const [formStep, setFormStep] = useState(2);     // page number
   let [showMissing, setShowMissing] = useState(false);
 
   // Set bounds in case of weird behaviors.
@@ -24,7 +24,9 @@ export default function Order() {
   }
 
   useEffect(() => {
-    window.onbeforeunload = function() {return "Leave site? Changes will not be saved."};
+    if (formStep > 0) {
+      window.onbeforeunload = function() {return "Leave site? Changes will not be saved."};
+    }
   }, []);
 
   // function for checking all fields are filled
