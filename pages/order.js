@@ -2,7 +2,7 @@ import Layout from '../components/Layout';
 import PersonInfo from '../components/orderForm/PersonInfo';
 import DeliveryDetails from '../components/orderForm/DeliveryDetails'
 import OrderDetails from '../components/orderForm/OrderDetails'
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import ReviewOrder from '../components/orderForm/ReviewOrder';
 import { StateCartContext, DispatchCartContext } from '../context/cartContext';
 
@@ -23,11 +23,15 @@ export default function Order() {
     setFormStep(3)
   }
 
+  useEffect(() => {
+    window.onbeforeunload = function() {return "Leave site? Changes will not be saved."};
+  }, []);
+
   // function for checking all fields are filled
   let checkNextable = () => {
     let required, page;
     if (formStep == 0) { // personal info
-      required = ["first", "last", "calID", "email", "emailConf", "status", "eligibilityConf"]
+      required = ["first", "last", "calID", "email", "emailConf", "status"]
       page = personal;
     }
     else {
@@ -37,13 +41,24 @@ export default function Order() {
 
     for (let field of required) {
       console.log(field, page[field])
-      if (page[field] == "" || page[field] == false
-          || page[field]?.length == 0) {
+      if (!page[field] || page[field].length == 0) {
         console.log("missing field:", field)
         return false;
       }
     }
+    if (!personal.eligibilityConf) {
+      return false;
+    }
     return true;
+  }
+
+  let handleNext = () => {
+    if (checkNextable()) {
+      setFormStep(formStep + 1);
+      setShowMissing(false);
+    } else {
+      setShowMissing(true);
+    }
   }
 
   /* title and navigation bar for orders */
@@ -51,7 +66,7 @@ export default function Order() {
   let topBar = <div className='mb-4 flex flex-row'>
     <button onClick={() => setFormStep(formStep - 1)} className={"btn btn-outline" + (formStep == 0 ? " invisible" : "")}>Back</button>
     <h1 className="text-2xl text-center font-bold flex-grow">Food Resource Delivery Request</h1>
-    <button onClick={() => setFormStep(formStep + 1)} className={"btn btn-pantry-blue py-2 px-4" + (formStep >= 2 ? " invisible" : "")}>Next</button>
+    <button className={"btn btn-pantry-blue py-2 px-4" + (formStep >= 2 ? " invisible" : "")} onClick={handleNext}>Next</button>
   </div>
 
   /* Cart and Review pages */
@@ -59,7 +74,7 @@ export default function Order() {
     return (
       <Layout>
         <div className="container mx-auto px-4 mt-8 mb-16">
-          {topBar}
+          {formStep == 2 && topBar}
           {
             formStep == 2 ? 
               <OrderDetails> 
@@ -167,20 +182,13 @@ export default function Order() {
                   </button>
                 }
               </div>
-              {showMissing && <div className='flex-grow text-right mx-4 my-auto text-red-600 font-semibold'>Missing required fields!</div>}
+              {showMissing && !checkNextable() && <div className='flex-grow text-right mx-4 my-auto text-red-600 font-semibold'>Missing required fields!</div>}
+              {showMissing && checkNextable() &&
+                <div className='flex-grow text-right mx-4 my-auto text-2xl font-extrabold text-green-600'>✓</div>
+              }
               <div>
                 { formStep < 2 &&
-                  <button className="btn btn-pantry-blue py-2 px-4"
-                    onClick={() => {
-                      if (checkNextable()) {
-                        setFormStep(formStep + 1);
-                        setShowMissing(false);
-                      } else {
-                        setShowMissing(true);
-                      }
-                    }}>
-                    Next
-                  </button>
+                  <button className="btn btn-pantry-blue py-2 px-4" onClick={handleNext}>Next</button>
                 }
               </div>
             </div>
