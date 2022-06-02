@@ -2,19 +2,29 @@ import Layout from '../components/Layout';
 import PersonInfo from '../components/orderForm/PersonInfo';
 import DeliveryDetails from '../components/orderForm/DeliveryDetails'
 import OrderDetails from '../components/orderForm/OrderDetails'
-import { useState, useContext, useEffect } from 'react';
 import ReviewOrder from '../components/orderForm/ReviewOrder';
 import { StateCartContext, DispatchCartContext } from '../context/cartContext';
+import { server } from './_app.js'
+
+import { useState, useContext, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import useSWR from 'swr';
 
 export const requiredField = <div className='inline text-red-600'> *</div>
 export const optionalField = <div className='inline text-gray-600 normal-case tracking-normal font-semibold'>(optional)</div>
+
+const fetcher = async (...args) => {
+  const res = await fetch(...args);
+  return res.json();
+};
 
 export default function Order() {
   let { cart, personal, delivery } = useContext(StateCartContext)
 
   const cartDispatch = useContext(DispatchCartContext)
-  const [formStep, setFormStep] = useState(0);     // page number
+  let [formStep, setFormStep] = useState(0);     // page number
   let [showMissing, setShowMissing] = useState(false);
+  let [info, setInfo] = useState("loading...");
 
   // Set bounds in case of weird behaviors.
   if (formStep < 0) {
@@ -23,11 +33,13 @@ export default function Order() {
     setFormStep(3)
   }
 
+  // prevent accidentally leaving if past the first page 
   useEffect(() => {
-    if (formStep > 0) {
-      window.onbeforeunload = function() {return "Leave site? Changes will not be saved."};
-    }
-  }, []);
+    window.onbeforeunload = () => {
+      if (formStep > 0) return "Leave page? Changes will not be saved.";
+      else return false;
+    };
+  });
 
   // function for checking all fields are filled
   let checkNextable = () => {
@@ -54,6 +66,7 @@ export default function Order() {
     return true;
   }
 
+  // continue to next page if all required fields are filled.
   let handleNext = () => {
     if (checkNextable()) {
       setFormStep(formStep + 1);
@@ -66,7 +79,7 @@ export default function Order() {
   /* title and navigation bar for orders */
   // TODO: add progress indicator?
   let topBar = <div className='mb-4 flex flex-row'>
-    <button onClick={() => setFormStep(formStep - 1)} className={"btn btn-outline" + (formStep == 0 ? " invisible" : "")}>Back</button>
+    <button onClick={() => {setFormStep(formStep - 1); setShowMissing(false)}} className={"btn btn-outline" + (formStep == 0 ? " invisible" : "")}>Back</button>
     <h1 className="text-2xl text-center font-bold flex-grow">Food Resource Delivery Request</h1>
     <button className={"btn btn-pantry-blue py-2 px-4" + (formStep >= 2 ? " invisible" : "")} onClick={handleNext}>Next</button>
   </div>
@@ -127,44 +140,69 @@ export default function Order() {
     )
   }
 
-  let eligibilityInfo = <div className='py-8 px-16 xl:w-1/2 max-w-2xl rounded'>
-    <h2 className="text-lg mb-4 block tracking-wide font-bold">Info About the Delivery Program</h2>
-    <div className="mb-4">
-      The food pantry offers free delivery through a partnership with DoorDash. Currently, this service 
-      is reserved primarily for individuals who are unable to visit the pantry in person.
+  // let info = `
+  // #### Info About the Delivery Program
+
+  // The food pantry offers free delivery through a partnership with DoorDash.
+  // Currently, this service is reserved primarily for individuals who are unable to visit the pantry in person.
+  
+  // ###### Please only use this service if you:
+  
+  // * Live within a 15 mile radius of our pantry (located in UC Berkeley campus)
+  // * Face a significant barrier to picking up in person (such as quarantining due to COVID-19)
+  // `
+
+  if (info === "loading...") {
+    fetch(`${server}/api/orders/GetEligibilityInfo`)
+    .then((result) => {
+      console.log(result)
+      // result.json().then((data) => {
+      //   setInfo(data);
+      //   console.log(data)
+      // })
+    })
+  }
+
+  const markdownStyle = {
+    h1: ({node, ...props}) => <h1 className='text-4xl mb-4 block tracking-wide font-bold' {...props}/>,
+    h2: ({node, ...props}) => <h2 className='text-3xl mb-4 block tracking-wide font-bold' {...props}/>,
+    h3: ({node, ...props}) => <h3 className='text-2xl mb-4 block tracking-wide font-bold' {...props}/>,
+    h4: ({node, ...props}) => <h4 className='text-xl mb-2 font-bold' {...props}/>,
+    h5: ({node, ...props}) => <h5 className='text-lg mb-2 font-bold' {...props}/>,
+    h6: ({node, ...props}) => <h6 className='text-md mb-2 font-bold' {...props}></h6>,
+    p: ({node, ...props}) => <p className='mb-4' {...props}/>,
+    ul: ({node, ...props}) => <ul className='list-disc pl-4 space-y-2 font-normal' {...props}></ul>
+  }
+
+  let eligibilityDiv = (
+    <div className='py-8 px-16 xl:w-1/2 max-w-2xl rounded'>
+      <ReactMarkdown className="mb-4"components={markdownStyle} >{info}</ReactMarkdown>
+      <div>
+        <label htmlFor="eligiblility-confirmation" data-required="T"
+          className={"block tracking-wide font-bold p-1" + ((showMissing && !personal.eligibilityConf) ? " border-red-600 border rounded" : " border border-transparent")}
+        >
+          <input id="eligiblility-confirmation" className="mr-2 leading-tight" type="checkbox"
+            checked={personal.eligibilityConf}
+            onChange={(e) => cartDispatch({ type: 'UPDATE_PERSONAL', payload: {eligibilityConf: e.target.checked}})}
+          />
+          <span className="text-base">
+            I confirm that I meet these conditions, and I allow the food pantry to share my information with DoorDash.
+          </span>
+        </label>
+        <p className="mt-2 text-gray-600 text-xs italic">
+          By clicking this, you are permitting us to share your information with DoorDash so that they can deliver to you.
+          The information provided includes your name, address, phone number, and delivery notes.
+        </p>
+      </div>
     </div>
-    <div className="mb-4 font-semibold">
-      Please only use this service if you:
-      <ul className='list-disc pl-4 space-y-2 font-normal'>
-        <li>Live within a 15 mile radius of our pantry (located in UC Berkeley campus)</li>
-        <li>Face a significant barrier to picking up in person (such as quarantining due to COVID-19)</li>
-      </ul>
-    </div>
-    <div>
-      <label htmlFor="eligiblility-confirmation" data-required="T"
-        className={"block tracking-wide font-bold p-1" + ((showMissing && !personal.eligibilityConf) ? " border-red-600 border rounded" : " border border-transparent")}
-      >
-        <input id="eligiblility-confirmation" className="mr-2 leading-tight" type="checkbox"
-          checked={personal.eligibilityConf}
-          onChange={(e) => cartDispatch({ type: 'UPDATE_PERSONAL', payload: {eligibilityConf: e.target.checked}})}
-        />
-        <span className="text-base">
-          I confirm that I meet these conditions, and I allow the food pantry to share my information with DoorDash.
-        </span>
-      </label>
-      <p className="mt-2 text-gray-600 text-xs italic">
-        By clicking this, you are permitting us to share your information with DoorDash so that they can deliver to you.
-        The information provided includes your name, address, phone number, and delivery notes.
-      </p>
-    </div>
-  </div>
+  )
 
   return (
     <Layout>
       <div className="sm:container mx-auto mt-8 mb-16 px-4">
         { topBar }
         <div className="flex justify-center m-8 flex-col lg:flex-row">
-          { formStep < 2 && eligibilityInfo }
+          { formStep < 2 && eligibilityDiv }
           <div className="py-8 px-16 w-7/8 sm:w-5/6 xl:w-1/2 max-w-2xl shadow rounded">
             <div id="form-header">
             </div>

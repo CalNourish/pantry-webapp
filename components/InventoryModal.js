@@ -33,11 +33,11 @@ class CheckboxGrid extends React.Component {
                 <label className="block text-gray-700 text-sm font-bold mb-2">
                     Categories
                 </label>
-                <div className={"grid grid-cols-4 gap-4 p-2" + (this.props.error ? " rounded-md border border-red-500" : "")}>
+                <div className={"grid grid-cols-5 gap-4 p-2" + (this.props.error ? " rounded-md border border-red-500" : "")}>
                     { Object.keys(opt).map((idx) => {
                         return (
-                            <div className="" onClick={() => {this.markCategory(idx)}}>
-                                <input type="checkbox" key={`category-${idx}`} className="w-4 h-4 mr-3" checked={categories && opt[idx].id in categories}/>
+                            <div className="" onClick={() => {this.markCategory(idx)}} key={`category-${idx}`}>
+                                <input type="checkbox" onChange={() => {/* handled by parent div */}} className="w-4 h-4 mr-3" checked={categories && opt[idx].id in categories}/>
                                 <label>{opt[idx].displayName}</label>
                             </div>
                         )
@@ -60,11 +60,12 @@ export default function InventoryModal(props) {
     const categoryOptions = data.categories;
 
     return (
-        <div className="modal-wrapper m-5">
+        <div className="modal-wrapper p-3">
+            <div id="modalExit" className="text-4xl absolute top-0 right-0 cursor-pointer hover:text-gray-600" onClick={props.onCloseHandler}>&times; &nbsp;</div>
             <div className="modal-header text-3xl font-bold">
                 {props.isAdd ? "Add Item" : "Edit Item"}
             </div>
-            <div className="modal-content pt-6">
+            <div className="modal-content pt-3">
                 {props.status.loading && <div className="bg-yellow-200 border border-yellow-400 text-yellow-700 px-4 py-2 rounded relative mb-3">submitting...</div>}
                 {props.status.error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded relative mb-3">
                     Error: <span className="font-mono font-bold">{props.status.error}</span></div>}                
@@ -75,10 +76,12 @@ export default function InventoryModal(props) {
                             <label className="block text-gray-700 text-sm font-bold mb-2">
                                 Item Barcode
                             </label>
-                            <input type="text" id="barcode" autoComplete="off"
+                            <input type="text" id="barcode" autoComplete="off" autoFocus
                                 className={"shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" + (props.errors.barcode && " border-2 border-red-500")}
                                 placeholder="scan or type item barcode" onBlur={props.barcodeLookup ? (e) => props.barcodeLookup(e.target.value) : null}
-                                value={props.parentState.barcode} onChange={(e) => {props.dispatch({type: 'editItemBarcode', value: e.currentTarget.value})}}/>
+                                value={props.parentState.barcode} onChange={(e) => {
+                                    props.dispatch({type: 'editItemBarcode', value: e.currentTarget.value})
+                                }}/>
                             {props.errors.barcode && <div className="mt-2 text-sm text-red-600">{props.errors.barcode}</div>}
                         </div>
 
@@ -144,6 +147,6 @@ export default function InventoryModal(props) {
                     </form>
                 </div>
             </div>
-            </div>
+        </div>
     )
   }

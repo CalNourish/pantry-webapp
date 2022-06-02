@@ -7,15 +7,14 @@ import { server } from "../pages/_app.js"
 export default function Table(props) {
     // get category lookup info
     const fetcher = (url) => fetch(url).then((res) => res.json());
-    const { data, error } = useSWR(`${server}/api/categories/ListCategories`, fetcher);
+    const { data: categoryData, error } = useSWR(`${server}/api/categories/ListCategories`, fetcher);
     const [categoryFilter, setCategoryFilter] = useState("");
     const [searchFilter, setSearchFilter] = useState("");
     const [sortBy, setSortBy] = useState("");
 
-    if (!props.data || !data) {
+    if (!props.data || !categoryData) {
         return null
     }
-    let categoryData = data;
 
     function inFilter(barcode) {
         var success = true;
@@ -106,6 +105,8 @@ export default function Table(props) {
         }
     }
     sortRows(itemData);
+
+    let headerClass = "px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-xs font-semibold text-gray-600 uppercase tracking-wider text-left"
     
     return (
     <div className="antialiased font-sans">
@@ -117,11 +118,11 @@ export default function Table(props) {
                     <div className="flex flex-row mb-1 sm:mb-0">
                         <div className="relative">
                             <select className="appearance-none h-full rounded-l border block w-full bg-white border-gray-400 text-gray-700 py-2 px-4 pr-8 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                                    onChange={(e) => {setCategoryFilter(e.target.value)}}>
+                                    onChange={(e) => {setCategoryFilter(e.target.value)}} value={categoryFilter}>
                                 <option value="">All categories</option>
                                 {Object.keys(categoryData.categories).map((key) => {
                                     let cat = categoryData.categories[key];
-                                    return <option value={cat.id}>{cat.displayName}</option>
+                                    return <option key={`categoryOption-${key}`} value={cat.id}>{cat.displayName}</option>
                                 })}
                             </select>
                             <div
@@ -154,36 +155,39 @@ export default function Table(props) {
                         <thead>
                             <tr>
                                 <th onClick={() => {setSortBy(sortBy == "itemName" ? "-itemName" : "itemName")}}
-                                    className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer">
+                                    className={headerClass+ " cursor-pointer"}>
                                     <div className="flex">
                                         <div className="ml-3">Item Name</div>
                                         <div className="ml-auto">{sortBy == "itemName" ? "\u25BC" : sortBy == "-itemName" ? "\u25B2" : ""}</div>
                                     </div>
                                 </th>
                                 <th
-                                    className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                    className={headerClass}>
                                     Category
                                 </th>
                                 <th onClick={() => {setSortBy(sortBy == "count" ? "-count" : "count")}}
-                                    className="px-3 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer">
+                                    className={headerClass + " cursor-pointer"}>
                                     <div className="flex">
                                         <div className="mr-3">Count</div>
                                         <div className="ml-auto">{sortBy == "count" ? "\u25BC" : sortBy == "-count" ? "\u25B2" : ""}</div>
                                     </div>
                                 </th>
                                 <th onClick={() => {setSortBy(sortBy == "status" ? "-status" : "status")}}
-                                    className="px-3 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer">
+                                    className={headerClass + " cursor-pointer"}>
                                     <div className="flex">
                                         <div>Status</div>
                                         <div className="ml-auto">{sortBy == "status" ? "\u25BC" : sortBy == "-status" ? "\u25B2" : ""}</div>
                                     </div>
                                 </th>
+                                { props.authToken ?
+                                    <th className={headerClass}>Edit</th> : null}
                             </tr>
                         </thead>
                         <tbody>
                             { itemData.map((item, idx) => {
                                 return <TableRow key={idx} barcode={item.barcode} itemName={item.itemName} itemCount={item.count} itemCategories={item.categoryName} 
-                                                 itemLowStock={item.lowStock} showBarcodes={true} categoryData={categoryData} />
+                                                 itemLowStock={item.lowStock} categoryData={categoryData} authToken={props.authToken}
+                                                 editItemFunc={props.editItemFunc} deleteItemFunc={props.deleteItemFunc}/>
                             }) 
                             }
                         </tbody>
