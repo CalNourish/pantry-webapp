@@ -8,15 +8,10 @@ import { server } from './_app.js'
 
 import { useState, useContext, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import useSWR from 'swr';
+import cookie from 'js-cookie';
 
 export const requiredField = <div className='inline text-red-600'> *</div>
 export const optionalField = <div className='inline text-gray-600 normal-case tracking-normal font-semibold'>(optional)</div>
-
-const fetcher = async (...args) => {
-  const res = await fetch(...args);
-  return res.json();
-};
 
 export default function Order() {
   let { cart, personal, delivery } = useContext(StateCartContext)
@@ -24,7 +19,8 @@ export default function Order() {
   const cartDispatch = useContext(DispatchCartContext)
   let [formStep, setFormStep] = useState(0);     // page number
   let [showMissing, setShowMissing] = useState(false);
-  let [info, setInfo] = useState("loading...");
+  let [info, setInfo] = useState(false);
+  let [isEditing, setIsEditing] = useState(false);
 
   // Set bounds in case of weird behaviors.
   if (formStep < 0) {
@@ -140,26 +136,25 @@ export default function Order() {
     )
   }
 
-  // let info = `
-  // #### Info About the Delivery Program
+  const token = cookie.get("firebaseToken")
+  let oldInfo = `
+  #### Info About the Delivery Program
 
-  // The food pantry offers free delivery through a partnership with DoorDash.
-  // Currently, this service is reserved primarily for individuals who are unable to visit the pantry in person.
+  The food pantry offers free delivery through a partnership with DoorDash.
+  Currently, this service is reserved primarily for individuals who are unable to visit the pantry in person.
   
-  // ###### Please only use this service if you:
+  ###### Please only use this service if you:
   
-  // * Live within a 15 mile radius of our pantry (located in UC Berkeley campus)
-  // * Face a significant barrier to picking up in person (such as quarantining due to COVID-19)
-  // `
+  * Live within a 15 mile radius of our pantry (located in UC Berkeley campus)
+  * Face a significant barrier to picking up in person (such as quarantining due to COVID-19)
+  `
 
-  if (info === "loading...") {
+  if (info === false) {
     fetch(`${server}/api/orders/GetEligibilityInfo`)
     .then((result) => {
-      console.log(result)
-      // result.json().then((data) => {
-      //   setInfo(data);
-      //   console.log(data)
-      // })
+      result.json().then((data) => {
+        setInfo(data.markdown);
+      })
     })
   }
 
@@ -171,38 +166,56 @@ export default function Order() {
     h5: ({node, ...props}) => <h5 className='text-lg mb-2 font-bold' {...props}/>,
     h6: ({node, ...props}) => <h6 className='text-md mb-2 font-bold' {...props}></h6>,
     p: ({node, ...props}) => <p className='mb-4' {...props}/>,
-    ul: ({node, ...props}) => <ul className='list-disc pl-4 space-y-2 font-normal' {...props}></ul>
+    ul: ({node, ...props}) => {return <ul className='list-disc pl-4 space-y-2 font-normal' {...props} ordered="false"></ul>}
   }
 
-  let eligibilityDiv = (
-    <div className='py-8 px-16 xl:w-1/2 max-w-2xl rounded'>
-      <ReactMarkdown className="mb-4"components={markdownStyle} >{info}</ReactMarkdown>
-      <div>
-        <label htmlFor="eligiblility-confirmation" data-required="T"
-          className={"block tracking-wide font-bold p-1" + ((showMissing && !personal.eligibilityConf) ? " border-red-600 border rounded" : " border border-transparent")}
-        >
-          <input id="eligiblility-confirmation" className="mr-2 leading-tight" type="checkbox"
-            checked={personal.eligibilityConf}
-            onChange={(e) => cartDispatch({ type: 'UPDATE_PERSONAL', payload: {eligibilityConf: e.target.checked}})}
-          />
-          <span className="text-base">
-            I confirm that I meet these conditions, and I allow the food pantry to share my information with DoorDash.
-          </span>
-        </label>
-        <p className="mt-2 text-gray-600 text-xs italic">
-          By clicking this, you are permitting us to share your information with DoorDash so that they can deliver to you.
-          The information provided includes your name, address, phone number, and delivery notes.
-        </p>
-      </div>
+  let infoDiv = <div className='py-8 px-16 xl:w-1/2 max-w-2xl rounded'>
+    {/* Editing the information */}
+    {!isEditing && <button className='text-blue-700 hover:text-blue-500'
+      onClick={() => setIsEditing(true)}>
+      edit
+    </button>}
+    {isEditing && <button className='text-blue-700 hover:text-blue-500'
+      onClick={() => {
+        fetch('/api/orders/SetEligibilityInfo', { method: 'POST',
+          body: JSON.stringify({markdown: info}),
+          headers: {'Content-Type': "application/json", 'Authorization': token}
+        }).then((res) => {
+          setIsEditing(false);
+        })
+      }}>
+      save changes
+    </button>}
+
+    {/* Information (rendered markdown) */}
+    <ReactMarkdown className="mb-4"components={markdownStyle} >{info}</ReactMarkdown>
+
+    {/* Confirmation to share info checkbox */}
+    <div>
+      <label htmlFor="eligiblility-confirmation" data-required="T"
+        className={"block tracking-wide font-bold p-1" + ((showMissing && !personal.eligibilityConf) ? " border-red-600 border rounded" : " border border-transparent")}
+      >
+        <input id="eligiblility-confirmation" className="mr-2 leading-tight" type="checkbox"
+          checked={personal.eligibilityConf}
+          onChange={(e) => cartDispatch({ type: 'UPDATE_PERSONAL', payload: {eligibilityConf: e.target.checked}})}
+        />
+        <span className="text-base">
+          I confirm that I meet these conditions, and I allow the food pantry to share my information with DoorDash.
+        </span>
+      </label>
+      <p className="mt-2 text-gray-600 text-xs italic">
+        By clicking this, you are permitting us to share your information with DoorDash so that they can deliver to you.
+        The information provided includes your name, address, phone number, and delivery notes.
+      </p>
     </div>
-  )
+  </div>
 
   return (
     <Layout>
       <div className="sm:container mx-auto mt-8 mb-16 px-4">
         { topBar }
         <div className="flex justify-center m-8 flex-col lg:flex-row">
-          { formStep < 2 && eligibilityDiv }
+          { formStep < 2 && infoDiv }
           <div className="py-8 px-16 w-7/8 sm:w-5/6 xl:w-1/2 max-w-2xl shadow rounded">
             <div id="form-header">
             </div>
@@ -223,9 +236,7 @@ export default function Order() {
                 }
               </div>
               {showMissing && !checkNextable() && <div className='flex-grow text-right mx-4 my-auto text-red-600 font-semibold'>Missing required fields!</div>}
-              {showMissing && checkNextable() &&
-                <div className='flex-grow text-right mx-4 my-auto text-2xl font-extrabold text-green-600'>✓</div>
-              }
+              {showMissing && checkNextable() && <div className='flex-grow text-right mx-4 my-auto text-2xl font-extrabold text-green-600'>✓</div>}
               <div>
                 { formStep < 2 &&
                   <button className="btn btn-pantry-blue py-2 px-4" onClick={handleNext}>Next</button>

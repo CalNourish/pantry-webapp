@@ -18,7 +18,7 @@ export default async function(req,res) {
     })
     .then(function(resp){
       var markdown = resp.val();
-      res.status(200).json({data: markdown});
+      res.status(200).json({markdown: markdown});
       return resolve();
     });
   })
