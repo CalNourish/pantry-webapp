@@ -21,8 +21,8 @@ export default function Order() {
   let [formStep, setFormStep] = useState(0);     // page number
   let [showMissing, setShowMissing] = useState(false);
   let [info, setInfo] = useState(false);
-  let [isEditing, setIsEditing] = useState(false);
-  let [showPreview, setShowPreview] = useState(false);
+  let [isEditingInfo, setIsEditingInfo] = useState(false);
+  let [showPreviewInfo, setShowPreview] = useState(false);
 
   // Set bounds in case of weird behaviors.
   if (formStep < 0) {
@@ -31,13 +31,14 @@ export default function Order() {
     setFormStep(3)
   }
 
-  // prevent accidentally leaving if past the first page 
+  // prevent accidentally leaving if past the first page   
   useEffect(() => {
-    window.onbeforeunload = () => {
-      if (formStep > 0) return "Leave page? Changes will not be saved.";
-      else return false;
-    };
-  });
+    if (formStep > 0) {
+      window.onbeforeunload = () => {
+        return "Leave page? Changes will not be saved.";
+      };
+    }
+  }, []);
 
   // function for checking all fields are filled
   let checkNextable = () => {
@@ -138,17 +139,6 @@ export default function Order() {
   }
 
   const token = cookie.get("firebaseToken")
-  let oldInfo = `
-  #### Info About the Delivery Program
-
-  The food pantry offers free delivery through a partnership with DoorDash.
-  Currently, this service is reserved primarily for individuals who are unable to visit the pantry in person.
-  
-  ###### Please only use this service if you:
-  
-  * Live within a 15 mile radius of our pantry (located in UC Berkeley campus)
-  * Face a significant barrier to picking up in person (such as quarantining due to COVID-19)
-  `
 
   if (info === false) {
     fetch(`${server}/api/orders/GetEligibilityInfo`)
@@ -175,21 +165,21 @@ export default function Order() {
 
   let infoDiv = <div className='py-8 px-16 xl:w-1/2 max-w-2xl rounded'>
     {/* Editing the information */}
-    {!isEditing && authToken && <button className='text-blue-700 hover:text-blue-500'
-      onClick={() => setIsEditing(true)}>
+    {!isEditingInfo && authToken && <button className='text-blue-700 hover:text-blue-500'
+      onClick={() => setIsEditingInfo(true)}>
       edit
     </button>}
 
-    {isEditing && <button className='text-blue-700 hover:text-blue-500'
+    {isEditingInfo && <button className='text-blue-700 hover:text-blue-500'
       onClick={() => {
-        setIsEditing(false);
+        setIsEditingInfo(false);
       }}>
       cancel
     </button>}
 
-    {isEditing && <button className='ml-5 text-blue-700 hover:text-blue-500'
+    {isEditingInfo && <button className='ml-5 text-blue-700 hover:text-blue-500'
       onClick={() => {
-        setIsEditing(false);
+        setIsEditingInfo(false);
         fetch('/api/orders/SetEligibilityInfo', { method: 'POST',
           body: JSON.stringify({markdown: info}),
           headers: {'Content-Type': "application/json", 'Authorization': token}
@@ -200,15 +190,15 @@ export default function Order() {
       save
     </button>}
 
-    {isEditing && <button className='ml-5 text-blue-700 hover:text-blue-500'
+    {isEditingInfo && <button className='ml-5 text-blue-700 hover:text-blue-500'
       onClick={() => {
-        setShowPreview(!showPreview);
+        setShowPreview(!showPreviewInfo);
       }}>
-      {showPreview ? "hide" : "show"} preview
+      {showPreviewInfo ? "hide" : "show"} preview
     </button>}
 
     {/* Edit message box */}
-    {isEditing &&
+    {isEditingInfo &&
       <textarea className="form-control w-full h-64 block px-3 py-1 text-base font-normal text-gray-700 bg-white
         border border-solid border-gray-300 rounded mb-4
       focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" value={info}
@@ -218,7 +208,7 @@ export default function Order() {
       </textarea>}
 
     {/* Information (rendered markdown) */}
-    {(!isEditing || showPreview) && info && <ReactMarkdown className="mb-4" components={markdownStyle} children={info}></ReactMarkdown>}
+    {(!isEditingInfo || showPreviewInfo) && info && <ReactMarkdown className="mb-4" components={markdownStyle} children={info}></ReactMarkdown>}
 
     {/* Confirmation to share info checkbox */}
     <div>
