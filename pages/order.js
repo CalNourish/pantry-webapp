@@ -140,13 +140,17 @@ export default function Order() {
 
   const token = cookie.get("firebaseToken")
 
-  if (info === false) {
+  let getInfo = () => {
     fetch(`${server}/api/orders/GetEligibilityInfo`)
     .then((result) => {
       result.json().then((data) => {
         setInfo(data.markdown);
       })
     })
+  }
+
+  if (info === false) {
+    getInfo();
   }
 
   const markdownStyle = {
@@ -170,13 +174,16 @@ export default function Order() {
       edit
     </button>}
 
+    {/* cancel edit */}
     {isEditingInfo && <button className='text-blue-700 hover:text-blue-500'
       onClick={() => {
         setIsEditingInfo(false);
+        getInfo(); // reset to original
       }}>
       cancel
     </button>}
 
+    {/* save edit */}
     {isEditingInfo && <button className='ml-5 text-blue-700 hover:text-blue-500'
       onClick={() => {
         setIsEditingInfo(false);
@@ -190,6 +197,7 @@ export default function Order() {
       save
     </button>}
 
+    {/* show/hide preview */}
     {isEditingInfo && <button className='ml-5 text-blue-700 hover:text-blue-500'
       onClick={() => {
         setShowPreview(!showPreviewInfo);
