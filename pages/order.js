@@ -3,6 +3,7 @@ import PersonInfo from '../components/orderForm/PersonInfo';
 import DeliveryDetails from '../components/orderForm/DeliveryDetails'
 import OrderDetails from '../components/orderForm/OrderDetails'
 import ReviewOrder from '../components/orderForm/ReviewOrder';
+import { useUser } from '../context/userContext'
 import { StateCartContext, DispatchCartContext } from '../context/cartContext';
 import { server } from './_app.js'
 
@@ -21,6 +22,7 @@ export default function Order() {
   let [showMissing, setShowMissing] = useState(false);
   let [info, setInfo] = useState(false);
   let [isEditing, setIsEditing] = useState(false);
+  let [showPreview, setShowPreview] = useState(false);
 
   // Set bounds in case of weird behaviors.
   if (formStep < 0) {
@@ -50,9 +52,7 @@ export default function Order() {
     }
 
     for (let field of required) {
-      console.log(field, page[field])
       if (!page[field] || page[field].length == 0) {
-        console.log("missing field:", field)
         return false;
       }
     }
@@ -169,26 +169,53 @@ export default function Order() {
     ul: ({node, ...props}) => {return <ul className='list-disc pl-4 space-y-2 font-normal' {...props} ordered="false"></ul>}
   }
 
+  const { loadingUser, user } = useUser();
+  let authToken = (user && user.authorized === "true") ? token : null;
+
   let infoDiv = <div className='py-8 px-16 xl:w-1/2 max-w-2xl rounded'>
     {/* Editing the information */}
-    {!isEditing && <button className='text-blue-700 hover:text-blue-500'
+    {!isEditing && authToken && <button className='text-blue-700 hover:text-blue-500'
       onClick={() => setIsEditing(true)}>
       edit
     </button>}
+
     {isEditing && <button className='text-blue-700 hover:text-blue-500'
       onClick={() => {
+        setIsEditing(false);
+      }}>
+      cancel
+    </button>}
+
+    {isEditing && <button className='ml-5 text-blue-700 hover:text-blue-500'
+      onClick={() => {
+        setIsEditing(false);
         fetch('/api/orders/SetEligibilityInfo', { method: 'POST',
           body: JSON.stringify({markdown: info}),
           headers: {'Content-Type': "application/json", 'Authorization': token}
         }).then((res) => {
-          setIsEditing(false);
+          console.log(res)
         })
       }}>
-      save changes
+      save
+    </button>}
+
+    {isEditing && <button className='ml-5 text-blue-700 hover:text-blue-500'
+      onClick={() => {
+        setShowPreview(!showPreview);
+      }}>
+      {showPreview ? "hide" : "show"} preview
     </button>}
 
     {/* Information (rendered markdown) */}
-    <ReactMarkdown className="mb-4"components={markdownStyle} >{info}</ReactMarkdown>
+    {isEditing &&
+      <textarea className="form-control w-full h-64 block px-3 py-1 text-base font-normal text-gray-700 bg-white
+        border border-solid border-gray-300 rounded m-0
+      focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" value={info}
+        onChange={(e) => {
+          setInfo(e.target.value);
+        }}>
+      </textarea>}
+    {(!isEditing || showPreview) && info && <ReactMarkdown className="mb-4" components={markdownStyle} children={info}></ReactMarkdown>}
 
     {/* Confirmation to share info checkbox */}
     <div>
