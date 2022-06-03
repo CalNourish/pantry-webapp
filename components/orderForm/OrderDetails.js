@@ -140,7 +140,7 @@ Or leave other notes for pantry staff."
         <label htmlFor="toggle-oos" className='text-sm text-gray-700'>
           <input id="toggle-oos" type="checkbox" value={hideOOS} onChange={() => setHideOOS(!hideOOS)}
             className="mr-2"/>
-          <span>hide out of stock</span>
+          <span>{hideOOS ? "show" : "hide"} out of stock</span>
         </label>
           <div className="sticky top-0">
             <div className="pt-2">

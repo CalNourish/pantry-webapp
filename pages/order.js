@@ -18,7 +18,7 @@ export default function Order() {
   let { cart, personal, delivery } = useContext(StateCartContext)
 
   const cartDispatch = useContext(DispatchCartContext)
-  let [formStep, setFormStep] = useState(2);     // page number
+  let [formStep, setFormStep] = useState(0);     // page number
   let [showMissing, setShowMissing] = useState(false);
   let [info, setInfo] = useState(false);
   let [isEditing, setIsEditing] = useState(false);
