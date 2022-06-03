@@ -18,7 +18,7 @@ export default function Order() {
   let { cart, personal, delivery } = useContext(StateCartContext)
 
   const cartDispatch = useContext(DispatchCartContext)
-  let [formStep, setFormStep] = useState(0);     // page number
+  let [formStep, setFormStep] = useState(2);     // page number
   let [showMissing, setShowMissing] = useState(false);
   let [info, setInfo] = useState(false);
   let [isEditing, setIsEditing] = useState(false);
@@ -45,6 +45,7 @@ export default function Order() {
     if (formStep == 0) { // personal info
       required = ["first", "last", "calID", "email", "emailConf", "status"]
       page = personal;
+      if (personal["email"] != personal["emailConf"]) return false;
     }
     else {
       required = ["streetAddress", "city", "zip", "phone", "deliveryTimes"]
@@ -206,15 +207,17 @@ export default function Order() {
       {showPreview ? "hide" : "show"} preview
     </button>}
 
-    {/* Information (rendered markdown) */}
+    {/* Edit message box */}
     {isEditing &&
       <textarea className="form-control w-full h-64 block px-3 py-1 text-base font-normal text-gray-700 bg-white
-        border border-solid border-gray-300 rounded m-0
+        border border-solid border-gray-300 rounded mb-4
       focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" value={info}
         onChange={(e) => {
           setInfo(e.target.value);
         }}>
       </textarea>}
+
+    {/* Information (rendered markdown) */}
     {(!isEditing || showPreview) && info && <ReactMarkdown className="mb-4" components={markdownStyle} children={info}></ReactMarkdown>}
 
     {/* Confirmation to share info checkbox */}
@@ -243,7 +246,7 @@ export default function Order() {
         { topBar }
         <div className="flex justify-center m-8 flex-col lg:flex-row">
           { formStep < 2 && infoDiv }
-          <div className="py-8 px-16 w-7/8 sm:w-5/6 xl:w-1/2 max-w-2xl shadow rounded">
+          <div className="py-8 px-16 xl:w-1/2 max-w-2xl shadow rounded">
             <div id="form-header">
             </div>
             <div className="mb-8">

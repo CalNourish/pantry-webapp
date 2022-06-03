@@ -19,7 +19,6 @@ export default async function(req,res) {
 
   return new Promise((resolve, reject) => {
     const { body } = req
-    console.log(body.markdown)
 
     // verify parameters
     let ok = requireParams(body, res);
@@ -42,7 +41,7 @@ export default async function(req,res) {
           ref.update({orderEligibility: body.markdown})
         })
         .catch((err) => {
-          console.log(err)
+          console.log("error:", err)
           res.status(500).json({error: "server error", errorstack: err});
         });
       });

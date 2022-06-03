@@ -10,6 +10,7 @@ export default function OrderDetails({children}) {
   const cartDispatch = useContext(DispatchCartContext)
   let { cart, personal } = useContext(StateCartContext)
   const [searchFilter, setSearchFilter] = useState("");
+  const [hideOOS, setHideOOS] = useState(false); // whether to hide out-of-stock items
   let { data: items, error: itemError } = useSWR('/api/inventory/GetAllItems', fetcher)
   let { data: categories, error: categoryError } = useSWR('/api/categories/ListCategories', fetcher)
   
@@ -32,64 +33,66 @@ export default function OrderDetails({children}) {
     }
     // if not max order size, set to infinity
     const maxQuantity = parseInt(items[key].maxOrderSize) || items[key].count
-    let invalid_quantity = cart[key] && cart[key].quantity > maxQuantity
+    // let invalid_quantity = cart[key] && cart[key].quantity > maxQuantity
     let inputId = `item-${items[key].barcode}`
     let itemInput = (
-      <div className={`itemrow-${items[key].barcode} py-4 flex items-center justify-between`} key={items[key].barcode}>
-        <div className="text-left mr-4">{items[key].itemName}</div>
-        <div>
-          {/* number spinner [-| 1 |+] */}
-          <div className="border border-solid border-gray-300 p-px w-32 h-8 flex flex-row float-left">
-            {/* minus */}
-            <button 
-              className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" 
-              onClick={() => {
-                let newAmt = cart[key] && cart[key].quantity > 0 ? cart[key].quantity - 1 : 0;
-                cartDispatch({ type: 'UPDATE_CART', payload: {item: items[key], quantity:newAmt}})
+      <div className={`itemrow-${items[key].barcode} py-4 ${maxQuantity == 0 && hideOOS ? 'hidden' : ''}`} key={items[key].barcode}>
+        <div className='flex items-center justify-between'>
+          <div className="text-left mr-4">{items[key].itemName}</div>
+          <div>
+            {/* number spinner [-| 1 |+] */}
+            <div className="border border-solid border-gray-300 p-px w-32 h-8 flex flex-row float-left">
+              {/* minus */}
+              <button 
+                className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" 
+                onClick={() => {
+                  let newAmt = cart[key] && cart[key].quantity > 0 ? cart[key].quantity - 1 : 0;
+                  cartDispatch({ type: 'UPDATE_CART', payload: {item: items[key], quantity:newAmt}})
+                  }
                 }
-              }
-              tabIndex='-1'
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-              </svg>
-            </button>
-            {/* quantity input */}
-            <input 
-              id={inputId}
-              className="no-arrows-input appearance-none quantity-input w-6 flex-grow mx-1 text-center focus:outline-none" 
-              autoComplete="off"
-              type="number"
-              min="0"
-              step="1"
-              value={cart[key] ? cart[key].quantity : ""}
-              onChange={(e) => {
-                let newQuantity = e.target.value;
-                if (newQuantity > maxQuantity) {
-                  newQuantity = maxQuantity
-                }
-                cartDispatch({ type: 'UPDATE_CART', payload: {item: items[key], quantity: newQuantity } });
-              }}
-            />
-            {/* plus */}
-            <button 
-              className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" 
-              onClick={() => {
-                let newQuantity = cart[key] ? cart[key].quantity + 1 : 1;
-                if (newQuantity > maxQuantity) {
-                  newQuantity = maxQuantity
-                }
-                cartDispatch({ type: 'UPDATE_CART', payload: {item: items[key], quantity: newQuantity}})
-              }}
-              tabIndex="-1"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-              </svg>
-            </button>
+                tabIndex='-1'
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                </svg>
+              </button>
+              {/* quantity input */}
+              <input 
+                id={inputId}
+                className="no-arrows-input appearance-none quantity-input w-6 flex-grow mx-1 text-center focus:outline-none" 
+                autoComplete="off"
+                type="number"
+                min="0"
+                step="1"
+                value={cart[key] ? cart[key].quantity : ""}
+                onChange={(e) => {
+                  let newQuantity = e.target.value;
+                  if (newQuantity > maxQuantity) {
+                    newQuantity = maxQuantity
+                  }
+                  cartDispatch({ type: 'UPDATE_CART', payload: {item: items[key], quantity: newQuantity } });
+                }}
+              />
+              {/* plus */}
+              <button 
+                className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" 
+                onClick={() => {
+                  let newQuantity = cart[key] ? cart[key].quantity + 1 : 1;
+                  if (newQuantity > maxQuantity) {
+                    newQuantity = maxQuantity
+                  }
+                  cartDispatch({ type: 'UPDATE_CART', payload: {item: items[key], quantity: newQuantity}})
+                }}
+                tabIndex="-1"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mx-auto" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
-        {/* {invalid_quantity ? <div className='text-red-600'>Quantity must be less than {maxQuantity}</div> : ""} */}
+        {maxQuantity === 0 && <div className='text-red-600 w-full text-right'>Out of stock</div>}
       </div>
     )
     
@@ -134,6 +137,11 @@ Or leave other notes for pantry staff."
       <div className='flex'>
         {/* Category navigation */}
         <div className="relative mr-8 w-1/5">
+        <label htmlFor="toggle-oos" className='text-sm text-gray-700'>
+          <input id="toggle-oos" type="checkbox" value={hideOOS} onChange={() => setHideOOS(!hideOOS)}
+            className="mr-2"/>
+          <span>hide out of stock</span>
+        </label>
           <div className="sticky top-0">
             <div className="pt-2">
               <h3 className="uppercase block font-bold tracking-wide text-gray-700 text-xs mb-4">Categories</h3>
