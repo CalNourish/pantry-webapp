@@ -41,6 +41,7 @@ export default async function(req,res) {
     let updatedFields = {};
     // make sure barcode is a string
     let barcode = body.barcode.toString();
+    
     // convert count to integer
     if (body["count"]) {
       body["count"] = parseInt(body["count"]);
@@ -52,6 +53,10 @@ export default async function(req,res) {
 
     if (body["categoryName"]) {
       body["categoryName"] = Object.keys(body["categoryName"])
+      if (body["categoryName"].length == 0) {
+        res.status(400).json({error: "must have at least one category"});
+        return resolve();
+      }
     }
 
     FIELDS.forEach(field => {

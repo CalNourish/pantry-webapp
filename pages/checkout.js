@@ -248,8 +248,7 @@ class Cart extends React.Component {
 
       /* if modal is open, can navigate with arrow keys and tab */
       if (this.state.showSearch) {
-        if (e.key.toLowerCase() === searchSubmitHotkey.toLowerCase() &&
-            !document.activeElement.id.startsWith("react-select")) {
+        if (e.key === "Enter" && e.shiftKey) {
           e.preventDefault();
           document.getElementById("search-submit").click();
         }
@@ -351,7 +350,7 @@ class Cart extends React.Component {
             </div>
 
             {/* Main body (Cart and Checkout Button) */}
-            <div className="p-4 container mx-auto">
+            <div className="p-4 container mx-3">
               {this.state.error && errorBanner}
               {this.state.success && successBanner}
               <h1 className="text-3xl font-medium mb-2">Cart</h1>
