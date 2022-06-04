@@ -24,33 +24,33 @@ function requireParams(body, res) {
     items are represented as an object with barcode as key and quantity (count) as value*/
 
     if (!body.firstName || !body.lastName || !body.calID) {
-      res.status(400).json({error: "missing name/ID in request"});
+      res.status(400).json({error: "Missing name or CalID in request."});
       return false;
     } 
     
     if (!body.address || !body.city) {
-      res.status(400).json({error: "missing address/city in request"});
+      res.status(400).json({error: "Missing part of delivery address in request."});
       return false;
     }
 
     if (isNaN(parseInt(body.dependents))) {
-      res.status(400).json({error: "num dependents not a valid number"});
+      res.status(400).json({error: "Number of dependents is not a valid number."});
       return false;
     }
 
     if (!body.email || !body.phone) {
-      res.status(400).json({error: "missing contact info"});
+      res.status(400).json({error: "Missing contact email or phone number."});
       return false;
     }
     
-    if (!body.frequency || !body.deliveryDate || !body.deliveryWindow) {
-      res.status(400).json({error: "missing delivery time/frequency in request"});
+    if (!body.frequency || !body.deliveryDay || !body.deliveryWindowStart || !body.deliveryWindowEnd) {
+      res.status(400).json({error: "Missing delivery date or time in request."});
       return false;
     }
 
     //require order items object with at least one entry (order array)
     if (!body.items || body.items.length <= 0) {
-      res.status(400).json({error: "missing order items"});
+      res.status(400).json({error: "There are no items in this order."});
       return false;
     }
 
@@ -73,8 +73,7 @@ function updateInventory(items) {
             itemNames[inventoryJson[item]['itemName']] = items[item];
           }
           else {
-            console.log("Sorry, requested count for " + inventoryJson[item]["itemName"] + " exceeds inventory");
-            return reject("Quantity exceeded");
+            return reject(`Requested count for "${inventoryJson[item]["itemName"]}" exceeds current stock (${inventoryJson[item]['count']})`);
           }
         }
 
@@ -82,7 +81,6 @@ function updateInventory(items) {
           return resolve(itemNames);
         })
         .catch((error) => {
-          console.log("error updating to firebase: ", error);
           return reject();
         })
       })
@@ -95,8 +93,8 @@ function addOrder(body, itemNames) {
 
   let { firstName, lastName, address, address2, city, zip,
         frequency, dependents, dietaryRestrictions, additionalRequests,
-        calID, items, deliveryDate, deliveryWindow, email, phone,
-        dropoffInstructions } =  body;
+        calID, items, deliveryDay, deliveryWindowStart, deliveryWindowEnd, altDelivery,
+        email, phone, dropoffInstructions } =  body;
 
   return new Promise((resolve, reject) => {
     const target = ['https://www.googleapis.com/auth/spreadsheets'];
@@ -114,22 +112,37 @@ function addOrder(body, itemNames) {
     // Generate orderID: random six digit value.
     // We check later to make sure that the ID isn't in use already.
     const orderID = Math.random().toString().slice(2, 8);
-    console.log("orderID", orderID);
+
+    let now = new Date();
+    const currentDate = (now.getMonth() + 1) + "/" + now.getDate() + "/" + now.getFullYear();
+
+    const days = {"Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, "Saturday": 6}
+    const dayOfWeekIdx = days[deliveryDay]
 
     let d = new Date();
-    const currentDate = (d.getMonth() + 1) + "/" + d.getDate();
+    let deliveryMMDD = new Date(
+      d.setDate(
+        d.getDate() + (((dayOfWeekIdx + 7 - d.getDay()) % 7) || 7)
+      )
+    );
+    deliveryMMDD = (deliveryMMDD.getMonth() + 1) + "/" + deliveryMMDD.getDate()
+    console.log("MM/DD/YYYY:", deliveryMMDD) // the next week's day
+
+    let deliveryWindow = `${deliveryWindowStart} - ${deliveryWindowEnd}`
     
     // Schema is [current date, CalID (encrypted), unique order id, email]
     const request1 = {
       spreadsheetId: pantry_sheet,
-      range: "'TechTesting'!A:D",
+      range: "'TechTesting'!A:F",
       valueInputOption: "USER_ENTERED", 
       insertDataOption: "INSERT_ROWS",
       resource: {
-          "range": "'TechTesting'!A:D",
+          "range": "'TechTesting'!A:F",
           "majorDimension": "ROWS",
           "values": [
-            [currentDate, calID, orderID, email] //each inner array is a row if we specify ROWS as majorDim
+            [currentDate, calID, orderID, email,
+              `${deliveryDay} ${deliveryWindow}`,
+              altDelivery] //each inner array is a row if we specify ROWS as majorDim
           ] 
         } ,
       auth: sheets_auth
@@ -166,7 +179,7 @@ function addOrder(body, itemNames) {
           "range": "[Testing] Spring Delivery Packing Info!A:J",
           "majorDimension": "ROWS",
           "values": [
-            [deliveryDate, firstName + " " + lastName.slice(0,1), deliveryWindow, numberOfBags, frequency, 
+            [deliveryMMDD, firstName + " " + lastName.slice(0,1), deliveryWindow, numberOfBags, frequency, 
              dependents, dietaryRestrictions, additionalRequests, orderID, JSON.stringify(itemNames)]
           ] 
         }
@@ -179,9 +192,6 @@ function addOrder(body, itemNames) {
   
     /* Sheet 3: DoorDash information */
     /* [deliveryDate, delivery window start/end, first name, last NAME, address, item code (always F), # of bags (must be <= 3) ] */
-    let deliveryWindowStart = deliveryWindow.split("-")[0]
-    let deliveryWindowEnd = deliveryWindow.split("-")[1]
-
     const request3 = {
       spreadsheetId: doordash_sheet,
       range: "Customer Information!A:U",
@@ -192,7 +202,7 @@ function addOrder(body, itemNames) {
           "majorDimension": "ROWS",
           "values": [
             [
-              "UCB BNC Food Pantry", "VENTURA-01", "F", deliveryDate, deliveryWindowStart, deliveryWindowEnd,
+              "UCB BNC Food Pantry", "VENTURA-01", "F", deliveryMMDD, deliveryWindowStart, deliveryWindowEnd,
               "US/Pacific", firstName, lastName, address, address2, city, "CA", zip, phone, numberOfBags,
               dropoffInstructions, "UCB BNC Food Pantry"
             ] 
@@ -210,64 +220,50 @@ function addOrder(body, itemNames) {
     let newOrder = {};
     newOrder["orderID"] = orderID;
     newOrder["status"] = "Not started";
-    //newOrder["type"] = "Delivery";
-    newOrder["deliveryDate"] = deliveryDate;
+
+    // TODO: need to somehow handle the multiple delivery options
+    newOrder["deliveryDate"] = deliveryMMDD;
     newOrder["deliveryWindow"] = deliveryWindow;
+
     newOrder["items"] = items;
-    newOrder["notes from guest"] = "I'm, like, allergic to peanuts :( ";
+    newOrder["guestNote"] = additionalRequests;
+    newOrder["dietaryRestriction"] = dietaryRestrictions;
     newOrder["firstName"] = firstName;
     newOrder["lastInitial"] = lastName.slice(0, 1);
 
     firebase.auth().signInAnonymously()
     .then(() => {
-      console.log("orderID", orderID);
+      console.log("Adding orderID:", orderID);
       let itemRef = firebase.database().ref('/order/' + orderID);
 
       itemRef.once('value')
       .catch(function(error){
-        console.log("Not ok5")
-        res.status(500).json({error: "server error getting reference to  from the database", errorstack: error});
-        return resolve();
+        return reject("Unable to access database");
       })
       .then(function(resp){
         // the version of the item in the database
         var dbItem = resp.val();
         // this item already exists
         if (dbItem != null) {
-            console.log("Not ok6")
-            return resolve();
+            return reject(`${orderID} already exists`);
         }
         // otherwise the item doesn't exist and we can create it
         itemRef.update(newOrder)
         .catch(function(error) {
-            console.log("Not ok7: ", error)
-            return resolve();
+            return reject("Error writing to firebase");
         })
         .then(() => {
-            console.log("OK")
-            return resolve();
+            return resolve(orderID);
         });
       });
     });
-
-    return resolve();
-
   })
 } 
   
 export default async function(req, res) {   
   // verify this request is legit
-  const token = req.headers.authorization
-  console.log("TOKEN: ", token)
 
-  // const allowed = await validateFunc(token)
-  // if (!allowed) {
-  //     res.status(401)
-  //     res.json({error: "you are not authenticated to perform this action"})
-  //     return Promise.reject();
-  // }
-
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const {body} = req //unpacks the request object 
     if (!body.frequency) {
       body.frequency = "one-time";
@@ -277,25 +273,20 @@ export default async function(req, res) {
       return resolve();
     }
 
-    console.log("ok:", ok)
     firebase.auth().signInAnonymously()
     .then(() => {
       updateInventory(body.items).then((itemNames) => {
-        addOrder(body, itemNames).then(() => {
-            console.log("Added to google sheets");
-            return resolve();
-          })
-          .catch((error) => {
-            console.log("error:", error)
-            return resolve();
-          })
-          ,(errorObject) => {
-            console.log('The read failed: ' + errorObject);
-            return resolve();
-          }
+        addOrder(body, itemNames).then((orderID) => {
+          res.status(200).json({success: `Successfully added order! Order ID: ${orderID}`});
+          return resolve();
+        })
+        .catch((error) => {
+          res.status(400).json({error:`Error adding order: ${error}`});
+          return resolve();
+        })
       }
       , rejection => {
-        console.log("order didn't go through: ", rejection);
+        res.status(400).json({error: rejection});
         return resolve();
       })
     })
