@@ -1,7 +1,17 @@
 @tailwind base;
 
 /* Write your own custom base styles here */
+/* Chrome, Safari, Edge, Opera */
+.no-arrows-input::-webkit-outer-spin-button,
+.no-arrows-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 
+/* Firefox */
+.no-arrows-input[type=number] {
+  -moz-appearance: textfield;
+}
 /* Start purging... */
 @tailwind components;
 /* Stop purging. */
@@ -63,5 +73,15 @@
     @apply text-white bg-pantry-green-500 border border-transparent;
   }
 
+  /* marking required/optional fields in forms (order) */
+  label[data-required="T"]::after {
+    content: " *";
+    @apply text-red-600;
+  }
+
+  label[data-required="F"]::after {
+    content: " (optional)";
+    @apply text-gray-600 font-normal normal-case tracking-normal;
+  }
 
 }
