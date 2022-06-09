@@ -23,7 +23,7 @@ export default async function(req,res) {
     
     const token = req.headers.authorization
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         const {body} = req
     
         // verify parameters
