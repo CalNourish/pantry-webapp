@@ -3,13 +3,15 @@ import firebase from '../../../firebase/clientApp';
 import { server } from '../../_app.js'
 import {ORDER_STATUS_OPEN} from "../../../utils/orderStatuses"
 
-const test = true;
-const client_email = test ? process.env.GOOGLE_SHEETS_CLIENT_EMAIL_TEST : process.env.GOOGLE_SHEETS_CLIENT_EMAIL;
-const private_key = test? process.env.GOOGLE_SHEETS_PRIVATE_KEY_TEST : process.env.GOOGLE_SHEETS_PRIVATE_KEY;
+const test = process.env.NEXT_PUBLIC_VERCEL_ENV == undefined;
+const client_email = process.env.GOOGLE_SHEETS_CLIENT_EMAIL;
+const private_key = process.env.GOOGLE_SHEETS_PRIVATE_KEY;
 
-const pantry_sheet = test ? process.env.SPREADSHEET_ID_TEST : process.env.PANTRY_DATA_SPREADSHEET_ID;
-const doordash_sheet = test ? process.env.SPREADSHEET_ID_TEST : process.env.DOORDASH_SPREADSHEET_ID;
-const bag_packing_sheet = test ? process.env.SPREADSHEET_ID_TEST : process.env.BAG_PACKING_SPREADSHEET_ID;
+const pantry_sheet = test ? process.env.SPREADSHEET_ID_TEST : "1bCtOsgTJa_hAFp7zxGK7y7snEj8zlHKKLM-5GF_3vF4";
+const bag_packing_sheet = test ? process.env.SPREADSHEET_ID_TEST : "1Pu5pHqtd9FmJpVK3s-sL43c2Lh2OPw2DQD8MyWBXUvo";
+const doordash_sheet = test ? process.env.SPREADSHEET_ID_TEST : "13BcniNuHl6P5uoG3SPJ7aP-yJeS0n1eB6EUL0wYcV4o";
+
+const sheetNames = ["TechTesting",  "[Testing] Spring Delivery Packing Info", "Customer Information"]
 
 export const config = { // https://nextjs.org/docs/api-routes/api-middlewares
   api: {
@@ -129,18 +131,17 @@ function addOrder(body, itemNames) {
       )
     );
     deliveryMMDD = (deliveryMMDD.getMonth() + 1) + "/" + deliveryMMDD.getDate()
-    console.log("MM/DD/YYYY:", deliveryMMDD) // the next week's day
 
     let deliveryWindow = `${deliveryWindowStart} - ${deliveryWindowEnd}`
     
     // Schema is [current date, CalID (encrypted), unique order id, email]
     const request1 = {
       spreadsheetId: pantry_sheet,
-      range: "'TechTesting'!A:F",
+      range: sheetNames[0] + "!A:F",
       valueInputOption: "USER_ENTERED", 
       insertDataOption: "INSERT_ROWS",
       resource: {
-          "range": "'TechTesting'!A:F",
+          "range": sheetNames[0] + "!A:F",
           "majorDimension": "ROWS",
           "values": [
             [currentDate, calID, orderID, email,
@@ -175,11 +176,11 @@ function addOrder(body, itemNames) {
 
     const request2 = {
       spreadsheetId: bag_packing_sheet,
-      range: "[Testing] Spring Delivery Packing Info!A:J",
+      range: sheetNames[1] + "!A:J",
       valueInputOption: "USER_ENTERED", 
       insertDataOption: "INSERT_ROWS",
       resource: {
-          "range": "[Testing] Spring Delivery Packing Info!A:J",
+          "range": sheetNames[1] + "!A:J",
           "majorDimension": "ROWS",
           "values": [
             [deliveryMMDD, firstName + " " + lastName.slice(0,1), deliveryWindow, numberOfBags, frequency, 
@@ -197,11 +198,11 @@ function addOrder(body, itemNames) {
     /* [deliveryDate, delivery window start/end, first name, last NAME, address, item code (always F), # of bags (must be <= 3) ] */
     const request3 = {
       spreadsheetId: doordash_sheet,
-      range: "Customer Information!A:U",
+      range: sheetNames[2] + "!A:U",
       valueInputOption: "USER_ENTERED",
       insertDataOption: "INSERT_ROWS",
       resource: {
-          "range": "Customer Information!A:U",
+          "range": sheetNames[2] + "!A:U",
           "majorDimension": "ROWS",
           "values": [
             [
@@ -241,7 +242,6 @@ function addOrder(body, itemNames) {
 
     firebase.auth().signInAnonymously()
     .then(() => {
-      console.log("Adding orderID:", orderID);
       let itemRef = firebase.database().ref('/order/' + orderID);
 
       itemRef.once('value')
