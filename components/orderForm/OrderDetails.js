@@ -1,5 +1,3 @@
-// TODO: add upper limit for counts
-
 import useSWR from 'swr'
 import { useContext, useState } from 'react';
 import { DispatchCartContext, StateCartContext } from '../../context/cartContext'

@@ -1,8 +1,6 @@
-import {validateFunc} from '../validate';
 import { google } from 'googleapis'; 
 import firebase from "firebase/app";
 import { server } from '../../_app.js'
-import { resolveHref } from 'next/dist/next-server/lib/router/router';
 
 const test = true;
 const client_email = test ? process.env.GOOGLE_SHEETS_CLIENT_EMAIL_TEST : process.env.GOOGLE_SHEETS_CLIENT_EMAIL;
