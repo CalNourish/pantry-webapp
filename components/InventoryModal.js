@@ -30,7 +30,7 @@ class CheckboxGrid extends React.Component {
 
         return (
             <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
+                <label className="block text-gray-600 text-sm font-bold mb-2">
                     Categories
                 </label>
                 <div className={"grid grid-cols-5 gap-4 p-2" + (this.props.error ? " rounded-md border border-red-500" : "")}>
@@ -61,7 +61,7 @@ export default function InventoryModal(props) {
 
     return (
         <div className="modal-wrapper p-3">
-            <div id="modalExit" className="text-4xl absolute top-0 right-0 cursor-pointer hover:text-gray-600" onClick={props.onCloseHandler}>&times; &nbsp;</div>
+            <div id="modalExit" className="text-4xl absolute top-0 right-0 cursor-pointer hover:text-gray-500" onClick={props.onCloseHandler}>&times; &nbsp;</div>
             <div className="modal-header text-3xl font-bold">
                 {props.isAdd ? "Add Item" : "Edit Item"}
             </div>
@@ -73,11 +73,11 @@ export default function InventoryModal(props) {
                     <form id="modal-form" className="bg-white rounded mb-4" onSubmit={(e) => props.onSubmitHandler(e)}>
                         {/* Item Barcode */}
                         <div className="mb-4">
-                            <label className="block text-gray-700 text-sm font-bold mb-2">
+                            <label className="block text-gray-600 text-sm font-bold mb-2">
                                 Item Barcode
                             </label>
                             <input type="text" id="barcode" autoComplete="off" autoFocus
-                                className={"shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" + (props.errors.barcode && " border-2 border-red-500")}
+                                className={"shadow appearance-none border rounded w-full py-2 px-3 text-gray-600 leading-tight focus:outline-none focus:shadow-outline" + (props.errors.barcode && " border-2 border-red-500")}
                                 placeholder="scan or type item barcode" onBlur={props.barcodeLookup ? (e) => props.barcodeLookup(e.target.value) : null}
                                 value={props.parentState.barcode} onChange={(e) => {
                                     props.dispatch({type: 'editItemBarcode', value: e.currentTarget.value})
@@ -87,11 +87,11 @@ export default function InventoryModal(props) {
 
                         {/* Item Name */}
                         <div className="mb-4">
-                            <label className="block text-gray-700 text-sm font-bold mb-2">
+                            <label className="block text-gray-600 text-sm font-bold mb-2">
                                 Item Name
                             </label>
                             <input type="text" id="itemName" autoComplete="off"
-                                className={"shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" + (props.errors.itemName && " border-red-500")}
+                                className={"shadow appearance-none border rounded w-full py-2 px-3 text-gray-600 leading-tight focus:outline-none focus:shadow-outline" + (props.errors.itemName && " border-red-500")}
                                 placeholder="item name" value={props.parentState.itemName} 
                                 onChange={(e) => {props.dispatch({type: 'editItemName', value: e.currentTarget.value})}} />
                             {props.errors.itemName && <div className="mt-2 text-sm text-red-600">{props.errors.itemName}</div>}
@@ -99,12 +99,12 @@ export default function InventoryModal(props) {
 
                         {/* Count */}
                         <div className="mb-4">
-                            <label className="block text-gray-700 text-sm font-bold mb-2">
+                            <label className="block text-gray-600 text-sm font-bold mb-2">
                                 Quantity in Stock
                             </label>
                             <div className="flex relative items-stretch">
                                 <input type="number" id="count" autoComplete="off"
-                                    className={"shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" + (props.errors.count && " border-red-500")}
+                                    className={"shadow appearance-none border rounded w-full py-2 px-3 text-gray-600 leading-tight focus:outline-none focus:shadow-outline" + (props.errors.count && " border-red-500")}
                                     placeholder="default: 0" value={props.parentState.count}
                                     onChange={(e) => {props.dispatch({type: 'editItemCount', value: e.currentTarget.value})}}/>
                                 <select className="ml-5" id="packOption" defaultValue="individual">
@@ -119,20 +119,20 @@ export default function InventoryModal(props) {
                         <div className="mb-4">
                             <div className="flex relative items-stretch">
                                 <div className="mr-3">
-                                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                                    <label className="block text-gray-600 text-sm font-bold mb-2">
                                         Quantity per Pack
                                     </label>
                                     <input type="number" id="packSize" autoComplete="off"
-                                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-600 leading-tight focus:outline-none focus:shadow-outline"
                                         placeholder="default: 1" value={props.parentState.packSize} 
                                         onChange={(e) => {props.dispatch({type: 'editItemPackSize', value: e.currentTarget.value})}} />
                                 </div>
                                 <div className="ml-3">
-                                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                                    <label className="block text-gray-600 text-sm font-bold mb-2">
                                         Low Stock Threshold
                                     </label>
                                     <input type="number" id="lowStock" autoComplete="off"
-                                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-600 leading-tight focus:outline-none focus:shadow-outline"
                                         placeholder="default: 10" value={props.parentState.lowStock} 
                                         onChange={(e) => {props.dispatch({type: 'editItemLowStock', value: e.currentTarget.value})}} />
                                 </div>

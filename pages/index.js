@@ -119,9 +119,9 @@ export default function Home() {
 
           {/* Edit message box */}
           {isEditingInfo &&
-            <textarea className="form-control w-full h-64 block px-3 py-1 text-base font-normal text-gray-700 bg-white
-              border border-solid border-gray-300 rounded mb-4
-            focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" value={info}
+            <textarea className="form-control w-full h-64 block px-3 py-1 text-base font-normal text-gray-600 bg-white
+              border border-solid border-gray-200 rounded mb-4
+            focus:text-gray-600 focus:bg-white focus:border-blue-600 focus:outline-none" value={info}
               onChange={(e) => {
                 setInfo(e.target.value);
               }}>

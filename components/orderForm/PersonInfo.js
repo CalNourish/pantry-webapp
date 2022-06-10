@@ -10,16 +10,16 @@ export default function PersonInfo(props) {
   const cartDispatch = useContext(DispatchCartContext)
   const { personal } = useContext(StateCartContext)
 
-  let inputAppearance = "appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+  let inputAppearance = "appearance-none block w-full bg-gray-100 text-gray-600 border border-gray-100 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-400"
   let errorAppearance = " border-red-600 border-2 focus:border-red-500"
 
   return (
     <>
-      <h2 className="text-lg mb-4 block tracking-wide text-gray-700 font-bold">Personal Information</h2>
+      <h2 className="text-lg mb-4 block tracking-wide text-gray-600 font-bold">Personal Information</h2>
       <div className="form-group flex flex-col md:flex-row mb-2">
         <div className="flex-grow mr-0 md:mr-8">
           <label 
-            className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" 
+            className="block uppercase tracking-wide text-gray-600 text-xs font-bold mb-2" 
             htmlFor="first-name" data-required="T"
           >
             First Name
@@ -37,7 +37,7 @@ export default function PersonInfo(props) {
         </div>
         <div className="flex-grow">
           <label data-required="T"
-            className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" htmlFor="last-name">
+            className="block uppercase tracking-wide text-gray-600 text-xs font-bold mb-2" htmlFor="last-name">
             Last Name
           </label>
           <input
@@ -54,7 +54,7 @@ export default function PersonInfo(props) {
       </div>
       <div className="form-group mb-2">
         <label data-required="T"
-          className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" 
+          className="block uppercase tracking-wide text-gray-600 text-xs font-bold mb-2" 
           htmlFor="cal-id"
         >
           Cal ID
@@ -72,7 +72,7 @@ export default function PersonInfo(props) {
       </div>
       <div className="form-group mb-2">
         <label 
-          className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+          className="block uppercase tracking-wide text-gray-600 text-xs font-bold mb-2"
           htmlFor="email" data-required="T"
         >
           Email
@@ -91,7 +91,7 @@ export default function PersonInfo(props) {
       </div>
       <div className="form-group mb-2">
         <label 
-          className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+          className="block uppercase tracking-wide text-gray-600 text-xs font-bold mb-2"
           htmlFor="confirm-email" data-required="T"
         >
           Confirm Email
@@ -111,7 +111,7 @@ export default function PersonInfo(props) {
       </div>
       <div className="form-group mb-2">
         <label 
-          className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+          className="block uppercase tracking-wide text-gray-600 text-xs font-bold mb-2"
           htmlFor="status" data-required="T"
         >
           Status
@@ -132,7 +132,7 @@ export default function PersonInfo(props) {
             <option>Visiting Scholar</option>
             <option>Postdoc</option>
           </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-600">
             <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
           </div>
         </div>
@@ -140,18 +140,18 @@ export default function PersonInfo(props) {
       <div className="form-group mb-2">
         <div className="mb-2">
           <label 
-            className="block uppercase tracking-wide text-gray-700 text-xs font-bold"
+            className="block uppercase tracking-wide text-gray-600 text-xs font-bold"
             htmlFor="confirm-email" data-required="F"
           >
             Number of Dependents
           </label>
-          <p className="text-gray-600 text-xs italic">
+          <p className="text-gray-500 text-xs italic">
             Include anyone in your household who depends on you for at least half of their meals
           </p>
         </div>
         <input 
           type="number" 
-          className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+          className="appearance-none block w-full bg-gray-100 text-gray-600 border border-gray-100 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-400"
           placeholder="0"
           id="dependents"
           value={personal.dependents}

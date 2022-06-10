@@ -248,10 +248,10 @@ class PackingOrder extends React.Component {
       <>
         <Layout>
           <div className="flex h-full">
-            <div className="w-1/4 bg-gray-200 items-center p-5">
+            <div className="w-1/4 bg-gray-100 items-center p-5">
               <h1 className="text-xl">Pantry Note</h1>
               <textarea
-                class="form-control w-full text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+                class="form-control w-full text-base font-normal text-gray-600 bg-white bg-clip-padding border border-solid border-gray-200 rounded transition ease-in-out m-0 focus:text-gray-600 focus:bg-white focus:border-blue-600 focus:outline-none"
                 id="pantry_note"
                 rows="4"
                 placeholder="Leave a note here for other pantry workers!"

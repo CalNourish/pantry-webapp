@@ -12,7 +12,7 @@ import ReactMarkdown from 'react-markdown';
 import cookie from 'js-cookie';
 
 export const requiredField = <div className='inline text-red-600'> *</div>
-export const optionalField = <div className='inline text-gray-600 normal-case tracking-normal font-semibold'>(optional)</div>
+export const optionalField = <div className='inline text-gray-500 normal-case tracking-normal font-semibold'>(optional)</div>
 
 export default function Order() {
   let { cart, personal, delivery } = useContext(StateCartContext)
@@ -207,9 +207,9 @@ export default function Order() {
 
     {/* Edit message box */}
     {isEditingInfo &&
-      <textarea className="form-control w-full h-64 block px-3 py-1 text-base font-normal text-gray-700 bg-white
-        border border-solid border-gray-300 rounded mb-4
-      focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" value={info}
+      <textarea className="form-control w-full h-64 block px-3 py-1 text-base font-normal text-gray-600 bg-white
+        border border-solid border-gray-200 rounded mb-4
+      focus:text-gray-600 focus:bg-white focus:border-blue-600 focus:outline-none" value={info}
         onChange={(e) => {
           setInfo(e.target.value);
         }}>
@@ -231,7 +231,7 @@ export default function Order() {
           I confirm that I meet these conditions, and I allow the food pantry to share my information with DoorDash.
         </span>
       </label>
-      <p className="mt-2 text-gray-600 text-xs italic">
+      <p className="mt-2 text-gray-500 text-xs italic">
         By clicking this, you are permitting us to share your information with DoorDash so that they can deliver to you.
         The information provided includes your name, address, phone number, and delivery notes.
       </p>

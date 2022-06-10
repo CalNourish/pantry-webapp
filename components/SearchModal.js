@@ -47,7 +47,7 @@ export default function SearchModal(props) {
       {/* Item Search Select */}
       <div className="mb-5">
         <Select options={options} id="search-select"
-          placeholder={<span className="text-sm text-gray-500">Search item name</span>}
+          placeholder={<span className="text-sm text-gray-400">Search item name</span>}
           styles={selectStyle}
           onChange={(e) => selectItem(e.value)}
           autoFocus/>
@@ -55,8 +55,8 @@ export default function SearchModal(props) {
 
       {/* Quantity Input */}
       <div className="mb-5">
-        <input className="appearance-none rounded border border-gray-400 block px-3 py-2 w-full text-sm placeholder-gray-500 text-gray-700 
-                        focus:bg-white focus:placeholder-gray-600 focus:text-gray-700 focus:outline-none"
+        <input className="appearance-none rounded border border-gray-300 block px-3 py-2 w-full text-sm placeholder-gray-400 text-gray-600 
+                        focus:bg-white focus:placeholder-gray-500 focus:text-gray-600 focus:outline-none"
             id="search-quantity"
             onChange={(e) => setQuantity(e.target.value)}
             placeholder="Item quantity (default: 1)"

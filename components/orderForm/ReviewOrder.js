@@ -64,7 +64,7 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
       {submitStatus.success ? <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-3">{submitStatus.success}</div> :
         submitStatus.error ? <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-3">{submitStatus.error}</div> : ""
       }
-      <h2 className="h-10 text-lg mb-2 block tracking-wide text-gray-700 font-bold">Review Order</h2>
+      <h2 className="h-10 text-lg mb-2 block tracking-wide text-gray-600 font-bold">Review Order</h2>
       <div className="flex">
         <div className="mr-16 flex-grow">
           <div className='border-b-2 pb-4'>
@@ -72,7 +72,7 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
               <h3 className='font-bold mr-2'>Personal Info</h3>
               {submitStatus.success ? "" : updatePersonalInfo}
             </div>
-            <div className='text-gray-700'>
+            <div className='text-gray-600'>
               <div className='mb-2'><span className='font-semibold'>Name:</span> { personal.first } {personal.last}</div>
               <div className='mb-2'><span className='font-semibold'>Email:</span> { personal.email }</div>
               <div className='mb-2'><span className='font-semibold'>Cal ID:</span> { personal.calID }</div>
@@ -84,7 +84,7 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
               <h3 className='font-bold mr-2'>Delivery Details</h3>
               {submitStatus.success ? "" : updateDeliveryDetails}
             </div>
-            <div className='mb-4 text-gray-700'>
+            <div className='mb-4 text-gray-600'>
               <div className='mb-2'>
                 <div className='font-semibold'>Address:</div>
                 <div> { delivery.streetAddress }{delivery.address2 && delivery.address2.length > 0 ? `, ${delivery.address2}` : ''}</div>
@@ -104,15 +104,15 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
           <div className='mt-4'>
             <h3 className='font-bold mr-2 mb-1'>Notes</h3>
             <div>
-              <span className='font-semibold tracking-wide text-gray-700'>Delivery Instructions: </span>
+              <span className='font-semibold tracking-wide text-gray-600'>Delivery Instructions: </span>
               {delivery.notes}
             </div>
             <div className='mt-1'>
-              <span className='font-semibold tracking-wide text-gray-700'>Dietary Restrictions: </span>
+              <span className='font-semibold tracking-wide text-gray-600'>Dietary Restrictions: </span>
               {personal.dietaryRestrictions}
             </div>
             <div className='mt-1'>
-              <span className='font-semibold tracking-wide text-gray-700'>Additional Requests: </span>
+              <span className='font-semibold tracking-wide text-gray-600'>Additional Requests: </span>
               {personal.additionalRequests}
             </div>
           </div>
