@@ -3,10 +3,10 @@ import firebase from '../../../firebase/clientApp';
 import { server } from '../../_app.js'
 import {ORDER_STATUS_OPEN} from "../../../utils/orderStatuses"
 
-const test = process.env.NEXT_PUBLIC_VERCEL_ENV == undefined;
-const client_email = process.env.GOOGLE_SHEETS_CLIENT_EMAIL;
-const private_key = process.env.GOOGLE_SHEETS_PRIVATE_KEY;
+import service from "../../../service-account.enc";
+import crypto from 'crypto';
 
+const test = process.env.NEXT_PUBLIC_VERCEL_ENV == undefined;
 const pantry_sheet = test ? process.env.SPREADSHEET_ID_TEST : "1bCtOsgTJa_hAFp7zxGK7y7snEj8zlHKKLM-5GF_3vF4";
 const bag_packing_sheet = test ? process.env.SPREADSHEET_ID_TEST : "1Pu5pHqtd9FmJpVK3s-sL43c2Lh2OPw2DQD8MyWBXUvo";
 const doordash_sheet = test ? process.env.SPREADSHEET_ID_TEST : "13BcniNuHl6P5uoG3SPJ7aP-yJeS0n1eB6EUL0wYcV4o";
@@ -17,6 +17,19 @@ export const config = { // https://nextjs.org/docs/api-routes/api-middlewares
   api: {
     bodyParser: true,
   },
+}
+
+/* AES-CBC decryption on the encrypted service account info in `service-account.js` */
+function decrypt (encrypted) {
+  const algorithm = 'aes-128-cbc';
+  const decipher = crypto.createDecipheriv(
+    algorithm,
+    process.env.SERVICE_ENCRYPTION_KEY,
+    process.env.SERVICE_ENCRYPTION_IV
+  );
+  let decrypted = decipher.update(encrypted, 'base64', 'utf8');
+  decrypted += decipher.final('utf8');
+  return decrypted
 }
 
 function requireParams(body, res) {
@@ -96,18 +109,26 @@ function updateInventory(items) {
 /* Write order to three google sheets (pantry, bag-packing, doordash), and add order to firebase. */
 function addOrder(body, itemNames) {
 
+  let service_info = JSON.parse(decrypt(service.encrypted))
+  console.log(typeof(service_info))
+  console.log(service_info.client_email)
+  console.log(service_info.private_key)
+
   let { firstName, lastName, address, address2, city, zip,
         frequency, dependents, dietaryRestrictions, additionalRequests,
         calID, items, deliveryDay, deliveryWindowStart, deliveryWindowEnd, altDelivery,
         email, phone, dropoffInstructions } =  body;
 
   return new Promise((resolve, reject) => {
+
     const target = ['https://www.googleapis.com/auth/spreadsheets'];
     var sheets_auth = new google.auth.JWT(
-      client_email,
+      service_info.client_email,
       null,
-      (private_key || '').replace(/\\n/g, '\n'),
-      target
+      (service_info.private_key)?.replace(/\\n/g, '\n'),
+      target,
+      null,
+      service_info.private_key_id
     );
 
     const sheets = google.sheets({ version: 'v4', auth: sheets_auth });
@@ -269,8 +290,7 @@ function addOrder(body, itemNames) {
 } 
   
 export default async function(req, res) {   
-  // verify this request is legit
-
+  
   return new Promise((resolve) => {
     const {body} = req //unpacks the request object 
     if (!body.frequency) {
