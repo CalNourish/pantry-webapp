@@ -110,9 +110,6 @@ function updateInventory(items) {
 function addOrder(body, itemNames) {
 
   let service_info = JSON.parse(decrypt(service.encrypted))
-  console.log(typeof(service_info))
-  console.log(service_info.client_email)
-  console.log(service_info.private_key)
 
   let { firstName, lastName, address, address2, city, zip,
         frequency, dependents, dietaryRestrictions, additionalRequests,
