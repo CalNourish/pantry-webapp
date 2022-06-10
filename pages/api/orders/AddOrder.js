@@ -1,5 +1,5 @@
 import { google } from 'googleapis'; 
-import firebase from "firebase/app";
+import firebase from '../../../firebase/clientApp';
 import { server } from '../../_app.js'
 
 const test = true;
