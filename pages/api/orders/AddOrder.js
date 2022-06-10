@@ -1,6 +1,7 @@
 import { google } from 'googleapis'; 
 import firebase from '../../../firebase/clientApp';
 import { server } from '../../_app.js'
+import {ORDER_STATUS_OPEN} from "../../../utils/orderStatuses"
 
 const test = true;
 const client_email = test ? process.env.GOOGLE_SHEETS_CLIENT_EMAIL_TEST : process.env.GOOGLE_SHEETS_CLIENT_EMAIL;
@@ -46,7 +47,7 @@ function requireParams(body, res) {
       return false;
     }
 
-    //require order items object with at least one entry (order array)
+    // require order items object with at least one entry (order array)
     if (!body.items || body.items.length <= 0) {
       res.status(400).json({error: "There are no items in this order."});
       return false;
@@ -56,7 +57,6 @@ function requireParams(body, res) {
 }
 
 /* decrement inventory amounts in firebase */
-// TODO: also convert barcodes to item names for bag packing sheet?
 function updateInventory(items) {
   let itemNames = {};
 
@@ -66,7 +66,12 @@ function updateInventory(items) {
       value.json().then((inventoryJson) => {
         const inventoryUpdates = {}
         for (let item in items) {
-          if (inventoryJson[item]['count'] >= items[item]) { // make sure we have enough in inventory for order
+          // make sure we have enough in inventory for order
+          if (inventoryJson[item]['count'] >= items[item]) {
+
+            // TODO: require quantities to be positive and within range
+            // this is enforced in frontend, but should maybe enforce on backend as well for security?
+            
             inventoryUpdates['/inventory/' + item + "/count"] = firebase.database.ServerValue.increment(-1 * items[item]);
             itemNames[inventoryJson[item]['itemName']] = items[item];
           }
@@ -217,13 +222,15 @@ function addOrder(body, itemNames) {
     /* Add order to firebase */
     let newOrder = {};
     newOrder["orderID"] = orderID;
-    newOrder["status"] = "Not started";
+    newOrder["status"] = ORDER_STATUS_OPEN;
 
-    // TODO: need to somehow handle the multiple delivery options
+    // TODO: need to handle the multiple delivery options better
     newOrder["deliveryDate"] = deliveryMMDD;
     newOrder["deliveryWindow"] = deliveryWindow;
 
-    newOrder["items"] = items;
+    // Map
+    newOrder["items"] = Object.keys(items).map((bcode) => ({quantity: items[bcode], isPacked: false}))
+
     newOrder["guestNote"] = additionalRequests;
     newOrder["dietaryRestriction"] = dietaryRestrictions;
     newOrder["firstName"] = firstName;
