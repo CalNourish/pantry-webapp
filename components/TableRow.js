@@ -17,7 +17,7 @@ export default function TableRow(props) {
         const toDisplay = []
         for (const key in itemCategories) {
             toDisplay.push(
-                <span className="relative inline-block p-1 px-3 py-1 font-semibold text-gray-900 leading-tight" key={`category-${key}`}>
+                <span className="relative inline-block p-1 px-3 py-1 font-semibold text-gray-900 leading-tight mb-1" key={`category-${key}`}>
                     <span aria-hidden
                         className="absolute inset-0 bg-gray-200 opacity-50 rounded-full mx-1"></span>
                     <span className="relative">{categoryLookup[itemCategories[key]]}</span>
@@ -75,7 +75,7 @@ export default function TableRow(props) {
         <td className="px-5 py-5 border-b border-gray-100 bg-white text-sm">
             <div className="flex items-center" onDoubleClick={() => authToken ? setEditing("itemName") : null}>
                 <div className="ml-3">
-                    <p className="text-gray-900 whitespace-no-wrap">
+                    <p className="text-gray-900 whitespace-nowrap">
                         {editing=="itemName" ? editNameInput : name}
                     </p>
                 </div>
@@ -83,11 +83,11 @@ export default function TableRow(props) {
             {authToken ? <div id={`barcode-${props.barcode}`} className="ml-3 text-gray-400">{props.barcode}</div> : ""}
         </td>
         <td className="px-5 py-5 border-b border-gray-100 bg-white text-sm">
-            <p className="text-gray-900 whitespace-no-wrap">{categoryDisplay(props.itemCategories)}</p>
+            <p className="text-gray-900 max-w-xs">{categoryDisplay(props.itemCategories)}</p>
         </td>
         <td className="px-3 py-3 border-b border-gray-100 bg-white text-sm text-center"
             onDoubleClick={() => authToken ? setEditing("count") : null}>
-            <p className="text-gray-900 whitespace-no-wrap font-bold">
+            <p className="text-gray-900 whitespace-nowrap font-bold">
                 {editing=="count" ? editCountInput : count}
             </p>
         </td>
@@ -96,19 +96,19 @@ export default function TableRow(props) {
                 className="relative inline-block px-3 py-1 font-semibold text-green-900 leading-tight">
                 <span aria-hidden
                     className="absolute inset-0 bg-green-200 opacity-50 rounded-full"></span>
-                <span className="relative overflow-hidden whitespace-no-wrap">In Stock</span>
+                <span className="relative overflow-hidden whitespace-nowrap">In Stock</span>
             </span>}
             {(lowStockThresh >= count) && (count > 0) && <span  key="lowStock"
                 className="relative inline-block px-3 py-1 font-semibold text-yellow-900 leading-tight">
                 <span aria-hidden
                     className="absolute inset-0 bg-yellow-200 opacity-50 rounded-full"></span>
-                <span className="relative overflow-hidden whitespace-no-wrap">Low Stock</span>
+                <span className="relative overflow-hidden whitespace-nowrap">Low Stock</span>
             </span>}
             {(count <= 0) && <span key="noStock"
                 className="relative inline-block px-3 py-1 font-semibold text-red-900 leading-tight">
                 <span aria-hidden
                     className="absolute inset-0 bg-red-200 opacity-50 rounded-full"></span>
-                <span className="relative overflow-hidden whitespace-no-wrap">Out of Stock</span>
+                <span className="relative overflow-hidden whitespace-nowrap">Out of Stock</span>
             </span>}
         </td>
         { /* Edit or Delete item shortcut buttons */
