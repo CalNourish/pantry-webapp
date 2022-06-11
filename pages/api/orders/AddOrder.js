@@ -4,7 +4,7 @@ import { server } from '../../_app.js'
 import {ORDER_STATUS_OPEN} from "../../../utils/orderStatuses"
 
 import service from "../../../service-account.enc";
-import crypto from 'crypto';
+import decrypt from "../../../utils/decrypt.js"
 
 const test = process.env.NEXT_PUBLIC_VERCEL_ENV == undefined;
 const pantry_sheet = test ? process.env.SPREADSHEET_ID_TEST : "1bCtOsgTJa_hAFp7zxGK7y7snEj8zlHKKLM-5GF_3vF4";
@@ -17,19 +17,6 @@ export const config = { // https://nextjs.org/docs/api-routes/api-middlewares
   api: {
     bodyParser: true,
   },
-}
-
-/* AES-CBC decryption on the encrypted service account info in `service-account.js` */
-function decrypt (encrypted) {
-  const algorithm = 'aes-128-cbc';
-  const decipher = crypto.createDecipheriv(
-    algorithm,
-    process.env.SERVICE_ENCRYPTION_KEY,
-    process.env.SERVICE_ENCRYPTION_IV
-  );
-  let decrypted = decipher.update(encrypted, 'base64', 'utf8');
-  decrypted += decipher.final('utf8');
-  return decrypted
 }
 
 function requireParams(body, res) {
@@ -171,8 +158,17 @@ function addOrder(body, itemNames) {
     }
 
     sheets.spreadsheets.values.append(request1)
+    .then(result => {
+      if (result.status == 200) {
+        console.log("wrote to pantry sheet at:", result.data.updates.updatedRange)
+        // TODO: update font/appearance if we are writing to the first (non-pinned) row
+        // otherwise it shows up with the same style as the header
+      } else {
+        throw result.statusText
+      }
+    })
     .catch((error) => {
-      return reject("error writing to Pantry data sheet: ", error);
+      return reject("error writing to Pantry data sheet.", error);
     });
 
     // determine approximate # of bags by # of items
@@ -243,7 +239,7 @@ function addOrder(body, itemNames) {
     newOrder["orderID"] = orderID;
     newOrder["status"] = ORDER_STATUS_OPEN;
 
-    // TODO: need to handle the multiple delivery options better
+    // TODO: need to handle the multiple delivery options somewhere
     newOrder["deliveryDate"] = deliveryMMDD;
     newOrder["deliveryWindow"] = deliveryWindow;
 
