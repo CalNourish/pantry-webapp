@@ -213,7 +213,11 @@ class PackingOrder extends React.Component {
   }
 
   displayNoItemTable() {
-    return <h1 className="text-xl">No items placed in order :(</h1>;
+    return (
+      <tbody><tr><td>
+        <h1 className="text-xl">No items placed in order :(</h1>
+      </td></tr></tbody>
+    )
   }
 
   displayItemTable() {
@@ -251,17 +255,17 @@ class PackingOrder extends React.Component {
             <div className="w-1/4 bg-gray-100 items-center p-5">
               <h1 className="text-xl">Pantry Note</h1>
               <textarea
-                class="form-control w-full text-base font-normal text-gray-600 bg-white bg-clip-padding border border-solid border-gray-200 rounded transition ease-in-out m-0 focus:text-gray-600 focus:bg-white focus:border-blue-600 focus:outline-none"
+                className="form-control w-full text-base font-normal text-gray-600 bg-white bg-clip-padding border border-solid border-gray-200 rounded transition ease-in-out m-0 focus:text-gray-600 focus:bg-white focus:border-blue-600 focus:outline-none"
                 id="pantry_note"
                 rows="4"
                 placeholder="Leave a note here for other pantry workers!"
+                defaultValue={this.state.pantryNote}
               >
-                {this.state.pantryNote}
               </textarea>
               <div>
                 <React.Fragment>
                   <button
-                    class="btn btn-pantry-blue mr-2"
+                    className="btn btn-pantry-blue mr-2"
                     onClick={() =>
                       this.savePantryNote(
                         document.getElementById("pantry_note").value
@@ -271,7 +275,7 @@ class PackingOrder extends React.Component {
                     Save
                   </button>
                   <button
-                    class="btn btn-outline"
+                    className="btn btn-outline"
                     onClick={() => this.cancelPantryNote()}
                   >
                     Cancel
@@ -279,7 +283,7 @@ class PackingOrder extends React.Component {
                 </React.Fragment>
               </div>
             </div>
-            <div className="w-3/4 p-5 space-x-10 space-y-5">
+            <div className="w-3/4 m-5 space-x-10 space-y-5">
               {this.state.error ? errorBanner : null}
               {this.state.success ? successBanner : null}
               <h1 className="inline text-2xl font-medium mb-2">
@@ -295,7 +299,7 @@ class PackingOrder extends React.Component {
               <div className="text-large font-medium">
                 {"Additional Note: " + this.state.guestNote}
               </div>
-              <table className="w-full table-fixed my-5" id="order">
+              <table className="w-full table-fixed" id="order">
                 <thead>
                   <tr className="border-b-2">
                     <th className="w-auto text-left">Item</th>
