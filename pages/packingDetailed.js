@@ -3,6 +3,7 @@ import Head from "next/head";
 import useSWR from "swr";
 import cookie from "js-cookie";
 import { useRouter } from "next/router";
+import React from "react";
 import {
   ORDER_STATUS_COMPLETE,
   ORDER_STATUS_OPEN,

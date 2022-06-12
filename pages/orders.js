@@ -1,6 +1,7 @@
 import Layout from '../components/Layout'
 import useSWR from 'swr'
 import cookie from 'js-cookie'
+import React from 'react';
 
 const fetcher = (url,token) => fetch(url,{headers: {'Content-Type': "application/json", 'Authorization': token}}).then((res) => res.json())
 

@@ -1,8 +1,5 @@
 import React from 'react';
 import useSWR from 'swr';
-import firebase from 'firebase/app';
-import Select from 'react-select';
-import {useReducer} from 'react';
 import { server } from "../pages/_app.js"
 
 /* category checkboxes, used in add/edit item modal */
