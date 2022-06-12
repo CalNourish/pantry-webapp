@@ -7,8 +7,6 @@
     "start": "next start"
   },
   "dependencies": {
-    "@firebase/database-compat": "0.1.2",
-    "autoprefixer": "^10.4.4",
     "cors": "^2.8.5",
     "firebase": "^9.0.0",
     "firebase-admin": "^10.3.0",

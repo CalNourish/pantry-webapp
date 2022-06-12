@@ -51,10 +51,10 @@ export default function Home() {
         <title>Pantry</title>
         <link rel="icon" href="/favicon.ico" />
         {/* Link to fonts for now. May look at storing fonts locally or just usign system fonts */}
-        <link
+        {/* <link
           href="https://fonts.googleapis.com/css2?family=Roboto&family=Rubik:wght@400;700&display=swap"
           rel="stylesheet"
-        ></link>
+        ></link> */}
       </Head>
       <Layout>
         <div className="m-8">
