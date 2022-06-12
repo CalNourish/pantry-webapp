@@ -2,12 +2,14 @@ import Layout from '../components/Layout'
 import Sidebar from '../components/Sidebar'
 import Table from '../components/Table'
 import InventoryModal from '../components/InventoryModal'
+
+import { useUser } from '../context/userContext'
+import { server } from './_app.js'
+
 import Modal from 'react-modal'
 import React, { useState, useReducer } from 'react';
 import cookie from 'js-cookie';
-import firebase from 'firebase';
-import { useUser } from '../context/userContext'
-import { server } from './_app.js'
+import firebase from '../firebase/clientApp';
 
 export default function Inventory() {
   const token = cookie.get("firebaseToken")

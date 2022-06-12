@@ -2,7 +2,6 @@ import firebase from '../../../firebase/clientApp'
 import {validateFunc} from '../validate'
 
 import {ORDER_STATUS_OPEN, ORDER_STATUS_PROCESSING, ORDER_STATUS_COMPLETE} from "../../../utils/orderStatuses"
-import ReactMultiSelectCheckboxes from 'react-multiselect-checkboxes';
 
 /*
 * /api/orders/SetOrderStatus

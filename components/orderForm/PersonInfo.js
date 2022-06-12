@@ -1,4 +1,3 @@
-import next from 'next';
 import { useContext } from 'react';
 import { DispatchCartContext, StateCartContext } from '../../context/cartContext'
 
