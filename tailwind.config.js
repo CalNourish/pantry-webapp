@@ -1,3 +1,5 @@
+const colors = require('tailwindcss/colors')
+
 module.exports = {
   future: {
     removeDeprecatedGapUtilities: true,
@@ -13,6 +15,7 @@ module.exports = {
       },
       // 500 is root color
       colors: {
+        gray: colors.slate,
         "pantry-blue": {
           50: '#F3F5F7',
           100: '#E7EBEF',

@@ -34,15 +34,15 @@
   }
 
   .btn-outline {
-    @apply bg-transparent text-gray-700 border border-gray-500;
+    @apply bg-transparent text-gray-600 border border-gray-400;
   }
 
   .btn-outline:hover {
-    @apply bg-gray-300;
+    @apply bg-gray-200;
   }
 
   .btn-outline:focus, .btn-outline:active {
-    @apply bg-gray-400;
+    @apply bg-gray-300;
   }
 
   .btn-pantry-blue {
@@ -81,7 +81,7 @@
 
   label[data-required="F"]::after {
     content: " (optional)";
-    @apply text-gray-600 font-normal normal-case tracking-normal;
+    @apply text-gray-500 font-normal normal-case tracking-normal;
   }
 
 }

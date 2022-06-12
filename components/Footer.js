@@ -3,7 +3,7 @@ import Image from 'next/image'
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-100 text-gray-500 text-sm pb-4 flex-shrink-0">
+    <footer className="bg-gray-50 text-gray-400 text-sm pb-4 flex-shrink-0">
       <div className="p-4 mx-auto">
         <ul className="p-2 mx-auto max-w-4xl sm:flex sm:items-center sm:justify-center md:p-4">
           <li className="mx-1 flex justify-center items-center text-center">Designed and built with ❤️ by CalNourish</li>
