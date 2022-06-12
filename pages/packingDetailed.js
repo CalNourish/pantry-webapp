@@ -169,13 +169,13 @@ class PackingOrder extends React.Component {
 
   displayChangeOrderStatus() {
     var textForButton = "";
-    const blueButtonClass = "float-right bg-blue-700 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+    const blueButtonClass = "float-right font-bold btn btn-pantry-blue"
 
     if (this.state.status == ORDER_STATUS_COMPLETE) {
       textForButton = "Mark as incomplete";
       return (
         <button
-          className="float-right btn-pantry-blue hover:btn-pantry-bluetext-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          className="float-right font-bold btn btn-outline"
           onClick={() => this.changeOrderStatus()}
         >
           {textForButton}
@@ -261,7 +261,7 @@ class PackingOrder extends React.Component {
               <div>
                 <React.Fragment>
                   <button
-                    class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 border border-blue-700 rounded"
+                    class="btn btn-pantry-blue mr-2"
                     onClick={() =>
                       this.savePantryNote(
                         document.getElementById("pantry_note").value
@@ -271,7 +271,7 @@ class PackingOrder extends React.Component {
                     Save
                   </button>
                   <button
-                    class="bg-white-500 hover:bg-white-700 text-blue py-1 px-2 border border-blue-700 rounded"
+                    class="btn btn-outline"
                     onClick={() => this.cancelPantryNote()}
                   >
                     Cancel
