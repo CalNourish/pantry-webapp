@@ -1,10 +1,15 @@
 import firebase from '../../../firebase/clientApp'    
 import {validateFunc} from '../validate'
+import { google } from 'googleapis'; 
 
 /*
 * /api/inventory/CheckoutItems.js
 * req.body = {barcode1: quantity1, barcode2: quantity2, ...}
 */
+
+import service from "../../../service-account.enc";
+import decrypt from "../../../utils/decrypt.js"
+const sheetID = "1waiCSO7hm8kmWLaG8OdB8_7ksfEbm_B3CyKHbXTIf5E"
 
 function requireParams(body, res) {
     /* require elements: array of elements {barcode: quantity} */
@@ -17,6 +22,125 @@ function requireParams(body, res) {
     }
 
     return true;
+}
+
+function writeLog(items) {
+
+    let {client_email, private_key} = JSON.parse(decrypt(service.encrypted));
+
+    return new Promise((resolve) => {
+        const target = ['https://www.googleapis.com/auth/spreadsheets'];
+        var sheets_auth = new google.auth.JWT(
+          client_email,
+          null,
+          (private_key || '').replace(/\\n/g, '\n'),
+          target
+        );
+        const sheets = google.sheets({ version: 'v4', auth: sheets_auth });
+    
+        let now = new Date();
+
+        let input = []
+        let row1 = now.toLocaleString().replace(',', '')
+        for (let barcode in items) {
+            input.push([row1, barcode, items[barcode]])
+            row1 = "";
+        }
+    
+        const values = {
+            spreadsheetId: sheetID,
+            range: "June22!A:C",
+            valueInputOption: "USER_ENTERED", 
+            insertDataOption: "INSERT_ROWS",
+            resource: {
+                "range": "June22!A:C",
+                "majorDimension": "ROWS",
+                "values": input
+              } ,
+            auth: sheets_auth
+        }
+
+        const sheetFormat = {
+            spreadsheetId: sheetID,
+            resource: {
+                requests: [
+                { // column 1 (timestamp)
+                    repeatCell: {
+                        range: {
+                            sheetId: 0,
+                            startRowIndex: 1,
+                            endRowIndex: 1 + input.length,
+                            startColumnIndex: 0,
+                            endColumnIndex: 1
+                        },
+                        cell: {
+                            userEnteredFormat: {
+                                numberFormat: {
+                                    type: "DATE",
+                                    pattern: "mm/dd/yyyy h:mm am/pm"
+                                },
+                                textFormat: {
+                                    bold: false
+                                }
+                            }
+                        },
+                        fields: "userEnteredFormat(numberFormat,textFormat)"
+                    }
+                },
+                { // column 2 (barcode)
+                    repeatCell: {
+                        range: {
+                            sheetId: 0,
+                            startRowIndex: 1,
+                            endRowIndex: 1 + input.length,
+                            startColumnIndex: 1,
+                            endColumnIndex: 2
+                        },
+                        cell: {
+                            userEnteredFormat: {
+                                numberFormat: {
+                                    type: "TEXT",
+                                },
+                                textFormat: {
+                                    bold: false
+                                }
+                            }
+                        },
+                        fields: "userEnteredFormat(numberFormat,textFormat)"
+                    }
+                },
+                { // column 3 (quantity)
+                    repeatCell: {
+                        range: {
+                            sheetId: 0,
+                            startRowIndex: 1,
+                            endRowIndex: 1 + input.length,
+                            startColumnIndex: 2,
+                            endColumnIndex: 3
+                        },
+                        cell: {
+                            userEnteredFormat: {
+                                textFormat: {
+                                    bold: false
+                                }
+                            }
+                        },
+                        fields: "userEnteredFormat(textFormat)"
+                    }
+                },
+                ]
+            }
+        }
+
+        sheets.spreadsheets.values.append(values)
+        .then((resp) => {
+            // if first entry, set format for future appends
+            if (resp.data.tableRange.split("!")[1] == "A1:C1") {
+                sheets.spreadsheets.batchUpdate(sheetFormat).then(() => resolve())
+            }
+            else resolve();
+        })
+    })
 }
 
 export default async function(req,res) {  
@@ -61,10 +185,12 @@ export default async function(req,res) {
                         })
                     })
                 ).then(() => {
-                    console.log("checkout done")
-                    res.status(200);
-                    res.json({message: "success"});
-                    return resolve();
+                    // perform checkout logging
+                    writeLog(body).then(() => {
+                        res.status(200);
+                        res.json({message: "success"});
+                        return resolve();
+                    })
                 })
                 .catch(() => {
                     console.log(`possible data corruption`)
