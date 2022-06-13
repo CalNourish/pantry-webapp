@@ -43,7 +43,7 @@ function writeLog(items) {
         let input = []
         let row1 = now.toLocaleString().replace(',', '')
         for (let barcode in items) {
-            input.push([row1, barcode, items[barcode]])
+            input.push([row1, row1, barcode, items[barcode]])
             row1 = "";
         }
     
@@ -64,7 +64,7 @@ function writeLog(items) {
             spreadsheetId: sheetID,
             resource: {
                 requests: [
-                { // column 1 (timestamp)
+                { // column 1 (date)
                     repeatCell: {
                         range: {
                             sheetId: 0,
@@ -77,7 +77,7 @@ function writeLog(items) {
                             userEnteredFormat: {
                                 numberFormat: {
                                     type: "DATE",
-                                    pattern: "mm/dd/yyyy h:mm am/pm"
+                                    pattern: "ddd m/dd"
                                 },
                                 textFormat: {
                                     bold: false
@@ -87,7 +87,7 @@ function writeLog(items) {
                         fields: "userEnteredFormat(numberFormat,textFormat)"
                     }
                 },
-                { // column 2 (barcode)
+                { // column 2 (time)
                     repeatCell: {
                         range: {
                             sheetId: 0,
@@ -95,6 +95,29 @@ function writeLog(items) {
                             endRowIndex: 1 + input.length,
                             startColumnIndex: 1,
                             endColumnIndex: 2
+                        },
+                        cell: {
+                            userEnteredFormat: {
+                                numberFormat: {
+                                    type: "TIME",
+                                    pattern: "h:mm am/pm"
+                                },
+                                textFormat: {
+                                    bold: false
+                                }
+                            }
+                        },
+                        fields: "userEnteredFormat(numberFormat,textFormat)"
+                    }
+                },
+                { // column 3 (barcode)
+                    repeatCell: {
+                        range: {
+                            sheetId: 0,
+                            startRowIndex: 1,
+                            endRowIndex: 1 + input.length,
+                            startColumnIndex: 2,
+                            endColumnIndex: 3
                         },
                         cell: {
                             userEnteredFormat: {
@@ -109,14 +132,14 @@ function writeLog(items) {
                         fields: "userEnteredFormat(numberFormat,textFormat)"
                     }
                 },
-                { // column 3 (quantity)
+                { // column 4 (quantity)
                     repeatCell: {
                         range: {
                             sheetId: 0,
                             startRowIndex: 1,
                             endRowIndex: 1 + input.length,
-                            startColumnIndex: 2,
-                            endColumnIndex: 3
+                            startColumnIndex: 3,
+                            endColumnIndex: 4
                         },
                         cell: {
                             userEnteredFormat: {
@@ -135,7 +158,7 @@ function writeLog(items) {
         sheets.spreadsheets.values.append(values)
         .then((resp) => {
             // if first entry, set format for future appends
-            if (resp.data.tableRange.split("!")[1] == "A1:C1") {
+            if (resp.data.tableRange.split("!")[1].match(/^\w+1:\w+1$/)) { // TODO: better way to determine "no existing entries"?
                 sheets.spreadsheets.batchUpdate(sheetFormat).then(() => resolve())
             }
             else resolve();
