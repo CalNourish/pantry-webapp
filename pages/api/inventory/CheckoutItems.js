@@ -10,7 +10,7 @@ import { google } from 'googleapis';
 /*
  * NOTE: there is a distinction between a spreadsheet and a sheet:
  *  - `spreadsheet` refers to a single google sheet document
- *  - `sheet` refers to a named page within a spreadsheet. a spreadsheet can contain 1 or more sheets.
+ *  - `sheet` or `page` refers to a named page within a spreadsheet. a spreadsheet can contain 1 or more sheets.
  *
  * In this code, `sheetId` is something like `June22`, but `spreadsheetId` is a long string of characters
 */
@@ -45,7 +45,7 @@ function getFirebaseInfo() {
     })
 }
 
-// Gets the unique ID for each page of the spreadsheet
+// Gets the *sheet* ID for the page of the spreadsheet that we want to write to.
 function getSheetIds(sheets, spreadsheetId, sheetName) {
     return new Promise((resolve) => {
         sheets.spreadsheets.get({spreadsheetId: spreadsheetId, fields: "sheets.properties.sheetId,sheets.properties.title"})
