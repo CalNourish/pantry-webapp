@@ -9,7 +9,8 @@ import { google } from 'googleapis';
 
 import service from "../../../service-account.enc";
 import decrypt from "../../../utils/decrypt.js"
-const sheetID = "1waiCSO7hm8kmWLaG8OdB8_7ksfEbm_B3CyKHbXTIf5E"
+const spreadsheetId = "1waiCSO7hm8kmWLaG8OdB8_7ksfEbm_B3CyKHbXTIf5E"
+const sheetName = "June22"
 
 function requireParams(body, res) {
     /* require elements: array of elements {barcode: quantity} */
@@ -22,6 +23,17 @@ function requireParams(body, res) {
     }
 
     return true;
+}
+
+function getSheetIds(sheets) {
+    return new Promise((resolve) => {
+        sheets.spreadsheets.get({spreadsheetId: spreadsheetId, fields: "sheets.properties.sheetId,sheets.properties.title"})
+        .then((sheetIds) => {
+            let sheetDict = {}
+            sheetIds.data.sheets.forEach((x) => sheetDict[x.properties.title] = x.properties.sheetId)
+            resolve(sheetDict); // dictionary of sheetName (string) -> sheetId (number)
+        })
+    })
 }
 
 function writeLog(items) {
@@ -41,127 +53,131 @@ function writeLog(items) {
         let now = new Date();
 
         let input = []
-        let row1 = now.toLocaleString().replace(',', '')
+        let row1 = now.toLocaleString("en-US",{timeZone:"America/Los_Angeles"}).replace(',', '')
         for (let barcode in items) {
             input.push([row1, row1, barcode, items[barcode]])
             row1 = "";
         }
     
         const values = {
-            spreadsheetId: sheetID,
-            range: "June22!A:C",
+            spreadsheetId: spreadsheetId,
+            range: sheetName + "!A:C",
             valueInputOption: "USER_ENTERED", 
             insertDataOption: "INSERT_ROWS",
             resource: {
-                "range": "June22!A:C",
+                "range": sheetName + "!A:C",
                 "majorDimension": "ROWS",
                 "values": input
               } ,
             auth: sheets_auth
         }
 
-        const sheetFormat = {
-            spreadsheetId: sheetID,
-            resource: {
-                requests: [
-                { // column 1 (date)
-                    repeatCell: {
-                        range: {
-                            sheetId: 0,
-                            startRowIndex: 1,
-                            endRowIndex: 1 + input.length,
-                            startColumnIndex: 0,
-                            endColumnIndex: 1
-                        },
-                        cell: {
-                            userEnteredFormat: {
-                                numberFormat: {
-                                    type: "DATE",
-                                    pattern: "ddd m/dd"
-                                },
-                                textFormat: {
-                                    bold: false
-                                }
-                            }
-                        },
-                        fields: "userEnteredFormat(numberFormat,textFormat)"
-                    }
-                },
-                { // column 2 (time)
-                    repeatCell: {
-                        range: {
-                            sheetId: 0,
-                            startRowIndex: 1,
-                            endRowIndex: 1 + input.length,
-                            startColumnIndex: 1,
-                            endColumnIndex: 2
-                        },
-                        cell: {
-                            userEnteredFormat: {
-                                numberFormat: {
-                                    type: "TIME",
-                                    pattern: "h:mm am/pm"
-                                },
-                                textFormat: {
-                                    bold: false
-                                }
-                            }
-                        },
-                        fields: "userEnteredFormat(numberFormat,textFormat)"
-                    }
-                },
-                { // column 3 (barcode)
-                    repeatCell: {
-                        range: {
-                            sheetId: 0,
-                            startRowIndex: 1,
-                            endRowIndex: 1 + input.length,
-                            startColumnIndex: 2,
-                            endColumnIndex: 3
-                        },
-                        cell: {
-                            userEnteredFormat: {
-                                numberFormat: {
-                                    type: "TEXT",
-                                },
-                                textFormat: {
-                                    bold: false
-                                }
-                            }
-                        },
-                        fields: "userEnteredFormat(numberFormat,textFormat)"
-                    }
-                },
-                { // column 4 (quantity)
-                    repeatCell: {
-                        range: {
-                            sheetId: 0,
-                            startRowIndex: 1,
-                            endRowIndex: 1 + input.length,
-                            startColumnIndex: 3,
-                            endColumnIndex: 4
-                        },
-                        cell: {
-                            userEnteredFormat: {
-                                textFormat: {
-                                    bold: false
-                                }
-                            }
-                        },
-                        fields: "userEnteredFormat(textFormat)"
-                    }
-                },
-                ]
-            }
-        }
-
         sheets.spreadsheets.values.append(values)
         .then((resp) => {
+
             // if first entry, set format for future appends
-            if (resp.data.tableRange.split("!")[1].match(/^\w+1:\w+1$/)) { // TODO: better way to determine "no existing entries"?
+            let range = resp.data.updates.updatedRange
+            let rstart = range.match(/(?<row>\d+):/).groups.row - 1 // the index of the first newly written row
+
+            getSheetIds(sheets).then((sheetIds) => {
+                let pageID = sheetIds[sheetName]
+                const sheetFormat = {
+                    spreadsheetId: spreadsheetId,
+                    resource: {
+                        requests: [
+                        { // column 1 (date)
+                            repeatCell: {
+                                range: {
+                                    sheetId: pageID,
+                                    startRowIndex: rstart,
+                                    endRowIndex: rstart + input.length,
+                                    startColumnIndex: 0,
+                                    endColumnIndex: 1
+                                },
+                                cell: {
+                                    userEnteredFormat: {
+                                        numberFormat: {
+                                            type: "DATE",
+                                            pattern: "ddddd m/dd"
+                                        },
+                                        textFormat: {
+                                            bold: false
+                                        }
+                                    }
+                                },
+                                fields: "userEnteredFormat(numberFormat,textFormat)"
+                            }
+                        },
+                        { // column 2 (time)
+                            repeatCell: {
+                                range: {
+                                    sheetId: pageID,
+                                    startRowIndex: rstart,
+                                    endRowIndex: rstart + input.length,
+                                    startColumnIndex: 1,
+                                    endColumnIndex: 2
+                                },
+                                cell: {
+                                    userEnteredFormat: {
+                                        numberFormat: {
+                                            type: "TIME",
+                                            pattern: "h:mm am/pm"
+                                        },
+                                        textFormat: {
+                                            bold: false
+                                        }
+                                    }
+                                },
+                                fields: "userEnteredFormat(numberFormat,textFormat)"
+                            }
+                        },
+                        { // column 3 (barcode)
+                            repeatCell: {
+                                range: {
+                                    sheetId: pageID,
+                                    startRowIndex: rstart,
+                                    endRowIndex: rstart + input.length,
+                                    startColumnIndex: 2,
+                                    endColumnIndex: 3
+                                },
+                                cell: {
+                                    userEnteredFormat: {
+                                        numberFormat: {
+                                            type: "TEXT",
+                                        },
+                                        textFormat: {
+                                            bold: false
+                                        }
+                                    }
+                                },
+                                fields: "userEnteredFormat(numberFormat,textFormat)"
+                            }
+                        },
+                        { // column 4 (quantity)
+                            repeatCell: {
+                                range: {
+                                    sheetId: pageID,
+                                    startRowIndex: rstart,
+                                    endRowIndex: rstart + input.length,
+                                    startColumnIndex: 3,
+                                    endColumnIndex: 4
+                                },
+                                cell: {
+                                    userEnteredFormat: {
+                                        textFormat: {
+                                            bold: false
+                                        }
+                                    }
+                                },
+                                fields: "userEnteredFormat(textFormat)"
+                            }
+                        },
+                        ]
+                    }
+                }
+
                 sheets.spreadsheets.batchUpdate(sheetFormat).then(() => resolve())
-            }
-            else resolve();
+            })
         })
     })
 }
