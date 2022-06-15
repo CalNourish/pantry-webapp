@@ -7,6 +7,14 @@ import { google } from 'googleapis';
 * req.body = {barcode1: quantity1, barcode2: quantity2, ...}
 */
 
+/*
+ * NOTE: there is a distinction between a spreadsheet and a sheet:
+ *  - `spreadsheet` refers to a single google sheet document
+ *  - `sheet` refers to a named page within a spreadsheet. a spreadsheet can contain 1 or more sheets.
+ *
+ * In this code, `sheetId` is something like `June22`, but `spreadsheetId` is a long string of characters
+*/
+
 import service from "../../../service-account.enc";
 import decrypt from "../../../utils/decrypt.js"
 
@@ -23,7 +31,8 @@ function requireParams(body, res) {
     return true;
 }
 
-function getSpreadsheetInfo() {
+// Gets the spreadsheetID and sheetName from firebase. These can be changed in the admin page.
+function getFirebaseInfo() {
     return new Promise((resolve) => {
         firebase.auth().signInAnonymously()
         .then(() => {
@@ -37,13 +46,17 @@ function getSpreadsheetInfo() {
 }
 
 // Gets the unique ID for each page of the spreadsheet
-function getSheetIds(sheets, spreadsheetId) {
+function getSheetIds(sheets, spreadsheetId, sheetName) {
     return new Promise((resolve) => {
         sheets.spreadsheets.get({spreadsheetId: spreadsheetId, fields: "sheets.properties.sheetId,sheets.properties.title"})
-        .then((sheetIds) => {
-            let sheetDict = {}
-            sheetIds.data.sheets.forEach((x) => sheetDict[x.properties.title] = x.properties.sheetId)
-            resolve(sheetDict); // dictionary of sheetName (string) -> sheetId (number)
+        .then((resp) => {
+            let sheetIds = resp.data.sheets//.forEach((x) => sheetDict[x.properties.title] = x.properties.sheetId)
+            let sheetMatch = sheetIds.filter((info) => sheetName === info.properties.title)
+            if (sheetMatch.length == 0) {
+                console.log("warning: given sheet name cannot be found in this spreadsheet")
+                resolve(0); // default to home sheet (first page)
+            }
+            resolve(sheetMatch[0].properties.sheetId); // dictionary of sheetName (string) -> sheetId (number)
         })
     })
 }
@@ -52,7 +65,7 @@ function writeLog(items) {
 
     let {client_email, private_key} = JSON.parse(decrypt(service.encrypted));
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         const target = ['https://www.googleapis.com/auth/spreadsheets'];
         var sheets_auth = new google.auth.JWT(
           client_email,
@@ -63,7 +76,8 @@ function writeLog(items) {
         const sheets = google.sheets({ version: 'v4', auth: sheets_auth });
     
 
-        getSpreadsheetInfo().then(({spreadsheetId, sheetName}) => {
+        getFirebaseInfo().then(({spreadsheetId, sheetName}) => {
+
             let now = new Date();
 
             let input = []
@@ -95,9 +109,8 @@ function writeLog(items) {
                 let range = resp.data.updates.updatedRange
                 let rstart = range.match(/(?<row>\d+):/).groups.row - 1 // the index of the first newly written row
     
-                getSheetIds(sheets, spreadsheetId).then((sheetIds) => {
-                    let pageID = sheetIds[sheetName]
-                    
+                getSheetIds(sheets, spreadsheetId, sheetName).then((pageID) => {    
+                   
                     // this is very long and annoying :( sorry
                     const sheetFormat = {
                         spreadsheetId: spreadsheetId,
@@ -197,6 +210,9 @@ function writeLog(items) {
                     sheets.spreadsheets.batchUpdate(sheetFormat).then(() => resolve())
                 })
             })
+            .catch((err) => {
+                reject("Unable to access the google sheet.")
+            })
         })
     })
 }
@@ -247,6 +263,13 @@ export default async function(req,res) {
                     writeLog(body).then(() => {
                         res.status(200);
                         res.json({message: "success"});
+                        return resolve();
+                    })
+                    .catch((err) => {
+                        // TODO: shows to user as successful. can try to notify the user of an error though?
+                        console.log(`Error writing to log (${err}). Inventory was still updated.`)
+                        res.status(200);
+                        res.json({message: `Error writing to log (${err}). Inventory was still updated.`});
                         return resolve();
                     })
                 })
