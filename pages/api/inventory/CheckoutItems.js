@@ -34,14 +34,11 @@ function requireParams(body, res) {
 // Gets the spreadsheetID and sheetName from firebase. These can be changed in the admin page.
 function getFirebaseInfo() {
     return new Promise((resolve) => {
-        firebase.auth().signInAnonymously()
-        .then(() => {
-            firebase.database().ref('/sheetIDs')
-            .once('value', snapshot => {
-                let val = snapshot.val();
-                return resolve({spreadsheetId: val.checkoutLog, sheetName: val.checkoutLogSheet})
-            });
-        })
+        firebase.database().ref('/sheetIDs')
+        .once('value', snapshot => {
+            let val = snapshot.val();
+            return resolve({spreadsheetId: val.checkoutLog, sheetName: val.checkoutLogSheet})
+        });
     })
 }
 
