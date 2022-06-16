@@ -61,7 +61,7 @@ function getSheetIds(sheets, spreadsheetId, sheetName) {
     })
 }
 
-function writeLog(items) {
+function writeLog(log) {
 
     let {client_email, private_key} = JSON.parse(decrypt(service.encrypted));
 
@@ -84,18 +84,19 @@ function writeLog(items) {
             let row1 = now.toLocaleString("en-US",{timeZone:"America/Los_Angeles"}).replace(',', '')
 
             // create payload to write to sheet. only first row of checkout should have timestamp
-            for (let barcode in items) {
-                input.push([row1, row1, barcode, items[barcode]])
+            for (let barcode in log) {
+                let itemLog = log[barcode]
+                input.push([row1, row1, barcode, itemLog.quantity, itemLog.itemName, itemLog.newQuantity])
                 row1 = "";
             }
         
             const values = {
                 spreadsheetId: spreadsheetId,
-                range: `${sheetName}!A:D`,
+                range: `${sheetName}!A:F`,
                 valueInputOption: "USER_ENTERED", 
                 insertDataOption: "INSERT_ROWS",
                 resource: {
-                    "range": `${sheetName}!A:D`,
+                    "range": `${sheetName}!A:F`,
                     "majorDimension": "ROWS",
                     "values": input
                   } ,
@@ -191,7 +192,7 @@ function writeLog(items) {
                                         startRowIndex: rstart,
                                         endRowIndex: rstart + input.length,
                                         startColumnIndex: 3,
-                                        endColumnIndex: 4
+                                        endColumnIndex: 6
                                     },
                                     cell: {
                                         userEnteredFormat: {
@@ -223,6 +224,7 @@ export default async function(req,res) {
 
     return new Promise((resolve, reject) => {
         const {body} = req
+        let log = {};
     
         // verify parameters
         let ok = requireParams(body, res);
@@ -242,9 +244,11 @@ export default async function(req,res) {
                             let ref = firebase.database().ref(`/inventory/${barcode}`)
                             ref.once("value")
                             .then(snapshot => {
+                                const itemInfo = snapshot.val();
                                 if (snapshot.exists()) {
                                     ref.update({"count": firebase.database.ServerValue.increment(-1 * body[barcode])})
                                     .then(() => {
+                                        log[barcode] = {quantity: body[barcode], itemName: itemInfo.itemName, newQuantity: (itemInfo.count - body[barcode])}
                                         return resolve();
                                     })
                                     .catch(error => {
@@ -260,7 +264,7 @@ export default async function(req,res) {
                     })
                 ).then(() => {
                     // perform checkout logging
-                    writeLog(body).then(() => {
+                    writeLog(log).then(() => {
                         res.status(200);
                         res.json({message: "success"});
                         return resolve();
