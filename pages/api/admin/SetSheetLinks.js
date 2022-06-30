@@ -21,6 +21,7 @@ export default async function (req, res) {
   const token = req.headers.authorization
 
   // TODO: check to make sure that this sheet actually exists?
+  // TODO: turn checkout logging on/off?
 
   return new Promise((resolve) => {
 
@@ -35,7 +36,11 @@ export default async function (req, res) {
     validateFunc(token).then(() => {
       firebase.auth().signInAnonymously()
       .then(() => {
-        firebase.database().ref(`/sheetIDs`).update(body);
+        firebase.database().ref(`/sheetIDs`).update(body)
+        .then(() => {
+          res.status(200).json({message:"success"})
+          return resolve()
+        });
       });
     })
   })
