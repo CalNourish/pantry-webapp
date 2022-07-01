@@ -3,7 +3,8 @@ import Layout from "../components/Layout";
 import { useUser } from "../context/userContext";
 import { server } from './_app.js'
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import useSWR from 'swr'
 import ReactMarkdown from 'react-markdown';
 import cookie from "js-cookie";
 
@@ -21,29 +22,25 @@ const markdownStyle = {
   blockquote: ({node, ...props}) => <blockquote className='px-4 border-l-4' {...props}></blockquote>
 }
 
+const fetcher = (url) => fetch(url).then((res) => res.json())
+
 export default function Home() {
   // Our custom hook to get context values
-  const { user, setUser, googleLogin } = useUser();
+  const { user } = useUser();
   const token = cookie.get("firebaseToken");
 
-  console.log("User:", user);
   let authToken = (user && user.authorized === "true") ? token : null;
 
   const [info, setInfo] = useState(false);
   const [isEditingInfo, setIsEditingInfo] = useState(false);
   const [showPreviewInfo, setShowPreview] = useState(false);
 
-  let getInfo = () => {
-    fetch(`${server}/api/admin/GetHomeInfo`)
-    .then((result) => {
-      result.json().then((data) => {
-        setInfo(data.markdown);
-      });
-    });
-  }
-  if (info === false) {
-    getInfo();
-  }
+  const { data, error } = useSWR(`${server}/api/admin/GetHomeInfo`, fetcher);
+
+  useEffect(() => setInfo(data?.markdown), [data])
+
+  if (!data) return <div>Loading...</div>
+  if (error) return <div>Error loading data.</div>
 
   return (
     <>
