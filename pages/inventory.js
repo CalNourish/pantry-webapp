@@ -8,8 +8,11 @@ import { server } from './_app.js'
 
 import Modal from 'react-modal'
 import React, { useState, useReducer } from 'react';
+import useSWR from 'swr';
 import cookie from 'js-cookie';
 import firebase from '../firebase/clientApp';
+
+const fetcher = (url) => fetch(url).then((res) => res.json())
 
 export default function Inventory() {
   const token = cookie.get("firebaseToken")
@@ -103,7 +106,8 @@ export default function Inventory() {
   const [errors, setErrors] = useState(emptyErrors);
   const [status, setStatus] = useState(emptyStatus);
   const [dataState, changeData] = useState({});
-  const [categoryState, setCategories] = useState({});
+  // const [categoryState, setCategories] = useState({});
+  const {data: categoryState, error} = useSWR(`${server}/api/categories/ListCategories`, fetcher)
 
   const setBarcodeError = (errorMsg) => setErrors({...errors, barcode: errorMsg})
   const setNameError = (errorMsg) => setErrors({...errors, itemName: errorMsg})
@@ -137,6 +141,7 @@ export default function Inventory() {
   /* do this once, after dataState is set */
   if (Object.keys(dataState).length > 0) {
     ref.once("child_changed", snapshot => {
+      console.log('changed inventory')
       let barcode = snapshot.val().barcode
       changeData({
         ...dataState,
@@ -145,17 +150,17 @@ export default function Inventory() {
     });
   }
 
-  if (Object.keys(categoryState).length == 0) {
-    fetch(`${server}/api/categories/ListCategories`)
-    .then((result) => {
-      result.json().then((data) => {
-        setCategories(data);
-      })
-    })
-  }
+  // if (Object.keys(categoryState).length == 0) {
+  //   fetch(`${server}/api/categories/ListCategories`)
+  //   .then((result) => {
+  //     result.json().then((data) => {
+  //       setCategories(data);
+  //     })
+  //   })
+  // }
 
   // opens modal with barcode & fields already completed. used by shortcut edit button.
-  function editItem(barcode) {
+  function openEditItemModal(barcode) {
     setShowEditItem(true);
     dispatch({type: "editItemBarcode", value: barcode});
     handleBarcodeEdit(barcode);
@@ -243,16 +248,16 @@ export default function Inventory() {
     const lowStock = state.lowStock ? state.lowStock : -1;                                                  // defaults to -1
     const categories = Object.keys(state.categoryName).length ? state.categoryName : undefined;             // defaults to "no change"
 
-    const payload = JSON.stringify({
+    const itemInfo = {
       "barcode": barcode,
       "itemName": itemName,
       "packSize": packSize,
       "count": quantity,
       "lowStock": lowStock,
       "categoryName": categories
-    });
+    };
     fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
-      body: payload,
+      body: JSON.stringify(itemInfo),
       headers: {'Content-Type': "application/json", 'Authorization': token}})
     .then((response) => response.json())
     .then(json => {
@@ -260,6 +265,8 @@ export default function Inventory() {
         setStatusError(json.error);
       } else {
         dispatch({type: 'reset'});
+        dataState[barcode] = itemInfo;
+        changeData(dataState);
         closeUpdateItem();
         setStatusSuccess(`successfully updated: ${itemName} (${barcode})`);
       }
@@ -397,7 +404,7 @@ export default function Inventory() {
             {status.success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded relative mb-3">{status.success}</div>}
             {Object.keys(dataState).length > 0
               ? <Table className="table-auto my-1" data={dataState} categories={categoryState} authToken={authToken}
-                       editItemFunc={editItem} deleteItemFunc={deleteItem}></Table>
+                       openEditItemModal={openEditItemModal} deleteItemFunc={deleteItem}></Table>
               : "Loading inventory..."}
           </div>
         </div>

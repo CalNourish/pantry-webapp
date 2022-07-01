@@ -187,7 +187,7 @@ export default function Table(props) {
                             { itemData.map((item, idx) => {
                                 return <TableRow key={idx} barcode={item.barcode} itemName={item.itemName} itemCount={item.count} itemCategories={item.categoryName} 
                                                  itemLowStock={item.lowStock} categoryData={categoryData} authToken={props.authToken}
-                                                 editItemFunc={props.editItemFunc} deleteItemFunc={props.deleteItemFunc}/>
+                                                 openEditItemModal={props.openEditItemModal} deleteItemFunc={props.deleteItemFunc}/>
                             }) 
                             }
                         </tbody>

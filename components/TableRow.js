@@ -42,7 +42,6 @@ export default function TableRow(props) {
       fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
         body: JSON.stringify({"barcode": props.barcode, [editing]: newValue}),
         headers: {'Content-Type': "application/json", 'Authorization': authToken}})
-
       setEditing(null);
     }
 
@@ -115,7 +114,7 @@ export default function TableRow(props) {
         authToken ?
             <td className="px-5 py-5 border-b border-gray-100 bg-white text-sm">
                 {/* todo: change icons? */}
-                <img className="w-6 h-6 inline-block cursor-pointer" src="/images/edit-pencil.svg" onClick={() => props.editItemFunc(props.barcode)}></img>
+                <img className="w-6 h-6 inline-block cursor-pointer" src="/images/edit-pencil.svg" onClick={() => props.openEditItemModal(props.barcode)}></img>
                 <img className="w-6 h-6 inline-block cursor-pointer" src="/images/trash-can.svg" onClick={() => props.deleteItemFunc(props.barcode)}></img>
             </td> : null
         }
