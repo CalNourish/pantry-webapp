@@ -30,7 +30,7 @@ export default function OrderDetails({children}) {
       return
     }
     // if not max order size, set to infinity
-    const maxQuantity = parseInt(items[key].maxOrderSize) || items[key].count
+    const maxQuantity = parseInt(items[key].maxOrderSize) || parseInt(items[key].count)
     // let invalid_quantity = cart[key] && cart[key].quantity > maxQuantity
     let inputId = `item-${items[key].barcode}`
     let itemInput = (
