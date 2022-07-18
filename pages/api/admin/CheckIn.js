@@ -1,5 +1,6 @@
 import firebase from '../../../firebase/clientApp'
 import {validateFunc} from '../validate'
+import { google } from 'googleapis'; 
 
 const test = true;
 const client_email = test ? process.env.GOOGLE_SHEETS_CLIENT_EMAIL_TEST : process.env.GOOGLE_SHEETS_CLIENT_EMAIL;
@@ -7,7 +8,7 @@ const private_key = test? process.env.GOOGLE_SHEETS_PRIVATE_KEY_TEST : process.e
 const checkin_sheet = test ? process.env.SPREADSHEET_ID_TEST : process.env.CHECKIN_SPREADSHEET_ID;
 
 /*
-* /api/admin/CheckIn
+* /api/admin/checkin
 * req.body = { string calID }
 */
 
@@ -18,7 +19,7 @@ function requireParams(body, res) {
   return false;
 }
 
-export default async function(req,res) {
+export default async function(req, res) {
   console.log("Checking In")
   const token = req.headers.authorization
 
@@ -47,7 +48,7 @@ export default async function(req,res) {
       // write to google sheets
       var timestamp = new Date();
       const request = {
-        spreadsheetId: doordash_sheet,
+        spreadsheetId: checkin_sheet,
         range: "Check In!A:B",
         valueInputOption: "USER_ENTERED",
         insertDataOption: "INSERT_ROWS",
@@ -62,17 +63,16 @@ export default async function(req,res) {
           } 
       }
 
-      console.log(request)
       sheets.spreadsheets.values.append(request)
       .catch((error) => {
         return reject("error writing to Pantry data sheet: ", error);
       });
 
-      // formatting output (non-bold, bg color, etc.)
+      // format output (date-time format, non-bold, bg color, etc.)
       
       // read & search for previous check-ins
       
-      // respond with <write success>, <most recent visit>, <number of visits this week>, <last 2 visits?> 
+      // response with <write success>, <most recent visit>, <number of visits this week>, <last 2 visits?> 
     });
   });
 }
