@@ -1,9 +1,10 @@
 import {validateFunc} from '../validate'
 import { google } from 'googleapis'; 
 
-const test = true;
-const client_email = test ? process.env.GOOGLE_SHEETS_CLIENT_EMAIL_TEST : process.env.GOOGLE_SHEETS_CLIENT_EMAIL;
-const private_key = test? process.env.GOOGLE_SHEETS_PRIVATE_KEY_TEST : process.env.GOOGLE_SHEETS_PRIVATE_KEY;
+import service from "../../../service-account.enc";
+import decrypt from "../../../utils/decrypt.js";
+
+const test = process.env.NEXT_PUBLIC_VERCEL_ENV == undefined;
 const checkin_sheet = test ? process.env.SPREADSHEET_ID_TEST : process.env.CHECKIN_SPREADSHEET_ID;
 
 /*
@@ -34,12 +35,16 @@ export default async function(req, res) {
 
     validateFunc(token)
     .then(() => {
+      let service_info = JSON.parse(decrypt(service.encrypted))
+
       const target = ['https://www.googleapis.com/auth/spreadsheets'];
       var sheets_auth = new google.auth.JWT(
-        client_email,
+        service_info.client_email,
         null,
-        (private_key || '').replace(/\\n/g, '\n'),
-        target
+        (service_info.private_key || '').replace(/\\n/g, '\n'),
+        target,
+        null,
+        service_info.private_key_id
       );
 
       const sheets = google.sheets({ version: 'v4', auth: sheets_auth });

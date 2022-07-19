@@ -37,9 +37,11 @@ export default function Hours() {
   const handleScanSubmit = (e) => {
     e.preventDefault();
     console.log("Scanned ID:", e.target.calID.value)
-    fetch('/api/admin/checkin', { method: 'POST',
+    fetch('/api/admin/CheckIn', { method: 'POST',
       body: JSON.stringify({calID: e.target.calID.value}),
       headers: {'Content-Type': "application/json", 'Authorization': token}
+    }).catch((err) => {
+      console.log("error with checkin:", err)
     })
   }
 
