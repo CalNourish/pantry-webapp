@@ -1,4 +1,3 @@
-import firebase from '../../../firebase/clientApp'
 import {validateFunc} from '../validate'
 import { google } from 'googleapis'; 
 
@@ -58,9 +57,9 @@ export default async function(req, res) {
             "values": [
               [
                 timestamp, body.calID
-              ] 
-            ] 
-          } 
+              ]
+            ]
+          }
       }
 
       sheets.spreadsheets.values.append(request)
@@ -69,10 +68,10 @@ export default async function(req, res) {
       });
 
       // format output (date-time format, non-bold, bg color, etc.)
-      
+
       // read & search for previous check-ins
-      
-      // response with <write success>, <most recent visit>, <number of visits this week>, <last 2 visits?> 
+
+      // respond with <write success>, <most recent visit>, <number of visits this week>, <last 2 visits?> 
     });
   });
 }
