@@ -1,22 +1,31 @@
 import { google } from 'googleapis'; 
 import firebase from '../../../firebase/clientApp';
-import { server } from '../../_app.js'
 import {ORDER_STATUS_OPEN} from "../../../utils/orderStatuses"
 
 import service from "../../../service-account.enc";
 import decrypt from "../../../utils/decrypt.js"
 
 const test = process.env.NEXT_PUBLIC_VERCEL_ENV == undefined;
-const pantry_sheet = test ? process.env.SPREADSHEET_ID_TEST : "1bCtOsgTJa_hAFp7zxGK7y7snEj8zlHKKLM-5GF_3vF4";
-const bag_packing_sheet = test ? process.env.SPREADSHEET_ID_TEST : "1Pu5pHqtd9FmJpVK3s-sL43c2Lh2OPw2DQD8MyWBXUvo";
-const doordash_sheet = test ? process.env.SPREADSHEET_ID_TEST : "13BcniNuHl6P5uoG3SPJ7aP-yJeS0n1eB6EUL0wYcV4o";
-
-const sheetNames = ["TechTesting",  "[Testing] Spring Delivery Packing Info", "Customer Information"]
+const testSheetNames = ["TechTesting",  "[Testing] Spring Delivery Packing Info", "Customer Information"]
 
 export const config = { // https://nextjs.org/docs/api-routes/api-middlewares
   api: {
     bodyParser: true,
   },
+}
+
+function getAllItems() {
+  return new Promise((resolve, reject) => {
+    firebase.database().ref('/inventory/').once('value')
+    .catch(function(error){
+      res.status(500).json({error: "server error getting items from the database", errorstack: error});
+      return reject();
+    })
+    .then(function(resp){
+      var allItems = resp.val();
+      return resolve(allItems);
+    })
+  })
 }
 
 function requireParams(body, res) {
@@ -63,9 +72,8 @@ function updateInventory(items) {
   let itemNames = {};
 
   return new Promise((resolve, reject) => {
-    fetch(`${server}/api/inventory/GetAllItems`)
-    .then((value) => {
-      value.json().then((inventoryJson) => {
+    getAllItems().then((inventoryJson) => {
+      // value.json().then((inventoryJson) => {
         const inventoryUpdates = {}
         for (let item in items) {
           // make sure we have enough in inventory for order
@@ -88,13 +96,40 @@ function updateInventory(items) {
         .catch((error) => {
           return reject();
         })
-      })
+      // })
+    })
+  })
+}
+
+function getOrderSheets() {
+  if (test) {
+    var sheets = ["pantryMaster", "bagPacking", "doordash"]
+    return new Promise((resolve) => {
+      let retval = {}
+      for (var idx in sheets) {
+        retval[sheets[idx]] = {
+          spreadsheetId: process.env.SPREADSHEET_ID_TEST,
+          sheetName: testSheetNames[idx]
+        }
+      }
+      return resolve(retval)
+    })
+  }
+  return new Promise((resolve, reject) => {
+    firebase.database().ref('/sheetIDs/').once('value')
+    .catch(function(error){
+      res.status(500).json({error: "server error getting sheet ID(s) from the database", errorstack: error});
+      return reject();
+    })
+    .then(function(resp){
+      var {pantryMaster, bagPacking, doordash} = resp.val(); 
+      return resolve({pantryMaster, bagPacking, doordash});
     })
   })
 }
 
 /* Write order to three google sheets (pantry, bag-packing, doordash), and add order to firebase. */
-function addOrder(body, itemNames) {
+function writeToSheets(body, itemNames) {
 
   let service_info = JSON.parse(decrypt(service.encrypted))
 
@@ -104,181 +139,187 @@ function addOrder(body, itemNames) {
         email, phone, dropoffInstructions } =  body;
 
   return new Promise((resolve, reject) => {
+    getOrderSheets().then((sheetsInfo)=> {
 
-    const target = ['https://www.googleapis.com/auth/spreadsheets'];
-    var sheets_auth = new google.auth.JWT(
-      service_info.client_email,
-      null,
-      (service_info.private_key)?.replace(/\\n/g, '\n'),
-      target,
-      null,
-      service_info.private_key_id
-    );
-
-    const sheets = google.sheets({ version: 'v4', auth: sheets_auth });
-
-    /* Sheet 1: Food pantry master data sheet for tracking calIDs */
-    
-    // Generate orderID: random six digit value.
-    // We check later to make sure that the ID isn't in use already.
-    const orderID = Math.random().toString().slice(2, 8);
-
-    let now = new Date();
-    const currentDate = (now.getMonth() + 1) + "/" + now.getDate() + "/" + now.getFullYear();
-
-    const days = {"Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, "Saturday": 6}
-    const dayOfWeekIdx = days[deliveryDay]
-
-    let d = new Date();
-    let deliveryMMDD = new Date(
-      d.setDate(
-        d.getDate() + (((dayOfWeekIdx + 7 - d.getDay()) % 7) || 7)
-      )
-    );
-    deliveryMMDD = (deliveryMMDD.getMonth() + 1) + "/" + deliveryMMDD.getDate()
-
-    let deliveryWindow = `${deliveryWindowStart} - ${deliveryWindowEnd}`
-    
-    // Schema is [current date, CalID (encrypted), unique order id, email]
-    const request1 = {
-      spreadsheetId: pantry_sheet,
-      range: sheetNames[0] + "!A:F",
-      valueInputOption: "USER_ENTERED", 
-      insertDataOption: "INSERT_ROWS",
-      resource: {
-          "range": sheetNames[0] + "!A:F",
-          "majorDimension": "ROWS",
-          "values": [
-            [currentDate, calID, orderID, email,
-              `${deliveryDay} ${deliveryWindow}`,
-              altDelivery] //each inner array is a row if we specify ROWS as majorDim
-          ] 
-        } ,
-      auth: sheets_auth
-    }
-
-    sheets.spreadsheets.values.append(request1)
-    .then(result => {
-      if (result.status == 200) {
-        console.log("wrote to pantry sheet at:", result.data.updates.updatedRange)
-        // TODO: update font/appearance if we are writing to the first (non-pinned) row
-        // otherwise it shows up with the same style as the header
-      } else {
-        throw result.statusText
-      }
-    })
-    .catch((error) => {
-      return reject("error writing to Pantry data sheet.", error);
-    });
-
-    // determine approximate # of bags by # of items
-    var totalItems = 0;
-    for (let item in items) {
-      totalItems += items[item];
-    }
-    let numberOfBags = Math.ceil(totalItems / 10);
-    if (numberOfBags > 3) {
-      numberOfBags = 3;
-    }
-
-
-    /* Sheet 2: Bag packing sheet */
-    /* [confirmed date (delivery date), first name + last initial, delivery window, # of bags,
-     *  frequency, # of dependents, dietary restrictions, additional requests, order id, items] */
-
-    // frequency: one-time or recurring (once a week or every two weeks for now)
-
-    const request2 = {
-      spreadsheetId: bag_packing_sheet,
-      range: sheetNames[1] + "!A:J",
-      valueInputOption: "USER_ENTERED", 
-      insertDataOption: "INSERT_ROWS",
-      resource: {
-          "range": sheetNames[1] + "!A:J",
-          "majorDimension": "ROWS",
-          "values": [
-            [deliveryMMDD, firstName + " " + lastName.slice(0,1), deliveryWindow, numberOfBags, frequency, 
-             dependents, dietaryRestrictions, additionalRequests, orderID, JSON.stringify(itemNames)]
-          ] 
-        }
-    }
-
-    sheets.spreadsheets.values.append(request2)
-    .catch((error) => {
-      return reject("error writing to bag-packing data sheet: ", error);
-    });
+      const target = ['https://www.googleapis.com/auth/spreadsheets'];
+      var sheets_auth = new google.auth.JWT(
+        service_info.client_email,
+        null,
+        (service_info.private_key)?.replace(/\\n/g, '\n'),
+        target,
+        null,
+        service_info.private_key_id
+      );
   
-    /* Sheet 3: DoorDash information */
-    /* [deliveryDate, delivery window start/end, first name, last NAME, address, item code (always F), # of bags (must be <= 3) ] */
-    const request3 = {
-      spreadsheetId: doordash_sheet,
-      range: sheetNames[2] + "!A:U",
-      valueInputOption: "USER_ENTERED",
-      insertDataOption: "INSERT_ROWS",
-      resource: {
-          "range": sheetNames[2] + "!A:U",
-          "majorDimension": "ROWS",
-          "values": [
-            [
-              "UCB BNC Food Pantry", "VENTURA-01", "F", deliveryMMDD, deliveryWindowStart, deliveryWindowEnd,
-              "US/Pacific", firstName, lastName, address, address2, city, "CA", zip, phone, numberOfBags,
-              dropoffInstructions, "UCB BNC Food Pantry"
+      const sheets = google.sheets({ version: 'v4', auth: sheets_auth });
+  
+      /* Sheet 1: "pantryMaster"
+       * Food pantry master data sheet for tracking calIDs
+      */
+      
+      // Generate orderID: random six digit value.
+      // We check later to make sure that the ID isn't in use already.
+      const orderID = Math.random().toString().slice(2, 8);
+  
+      let now = new Date();
+      const currentDate = (now.getMonth() + 1) + "/" + now.getDate() + "/" + now.getFullYear();
+  
+      const days = {"Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, "Saturday": 6}
+      const dayOfWeekIdx = days[deliveryDay]
+  
+      let d = new Date();
+      let deliveryMMDD = new Date(
+        d.setDate(
+          d.getDate() + (((dayOfWeekIdx + 7 - d.getDay()) % 7) || 7)
+        )
+      );
+      deliveryMMDD = (deliveryMMDD.getMonth() + 1) + "/" + deliveryMMDD.getDate()
+  
+      let deliveryWindow = `${deliveryWindowStart} - ${deliveryWindowEnd}`
+      
+      // Schema is [current date, CalID (encrypted), unique order id, email]
+      var {spreadsheetId, sheetName} = sheetsInfo["pantryMaster"]
+      const request1 = {
+        spreadsheetId: spreadsheetId,
+        range: sheetName + "!A:F",
+        valueInputOption: "USER_ENTERED", 
+        insertDataOption: "INSERT_ROWS",
+        resource: {
+            "range": sheetName + "!A:F",
+            "majorDimension": "ROWS",
+            "values": [
+              [currentDate, calID, orderID, email,
+                `${deliveryDay} ${deliveryWindow}`,
+                altDelivery] //each inner array is a row if we specify ROWS as majorDim
             ] 
-          ] 
-        } 
-    }
-    
-    sheets.spreadsheets.values.append(request3)
-    .catch((error) => {
-      return reject("error writing to Doordash data sheet: ", error);
-    });
-
-
-    /* Add order to firebase */
-    let newOrder = {};
-    newOrder["orderID"] = orderID;
-    newOrder["status"] = ORDER_STATUS_OPEN;
-
-    // TODO: need to handle the multiple delivery options somewhere
-    newOrder["deliveryDate"] = deliveryMMDD;
-    newOrder["deliveryWindow"] = deliveryWindow;
-
-    // add the isPacked entry to match order schema
-    newOrder["items"] = {}
-    Object.keys(items).forEach((bcode) => {
-      newOrder["items"][bcode] = {quantity: items[bcode], isPacked: false}
-    })
-
-    newOrder["guestNote"] = additionalRequests;
-    newOrder["dietaryRestriction"] = dietaryRestrictions;
-    newOrder["firstName"] = firstName;
-    newOrder["lastInitial"] = lastName.slice(0, 1);
-
-    firebase.auth().signInAnonymously()
-    .then(() => {
-      let itemRef = firebase.database().ref('/order/' + orderID);
-
-      itemRef.once('value')
-      .catch(function(error){
-        return reject("Unable to access database");
-      })
-      .then(function(resp){
-        // the version of the item in the database
-        var dbItem = resp.val();
-        // this item already exists
-        if (dbItem != null) {
-            return reject(`${orderID} already exists`);
+          } ,
+        auth: sheets_auth
+      }
+  
+      sheets.spreadsheets.values.append(request1)
+      .then(result => {
+        if (result.status == 200) {
+          console.log("wrote to pantry sheet at:", result.data.updates.updatedRange)
+          // TODO: update font/appearance if we are writing to the first (non-pinned) row
+          // otherwise it shows up with the same style as the header
+        } else {
+          throw result.statusText
         }
-        // otherwise the item doesn't exist and we can create it
-        itemRef.update(newOrder)
-        .catch(function(error) {
-            return reject("Error writing to firebase");
+      })
+      .catch((error) => {
+        return reject("error writing to Pantry data sheet.", error);
+      });
+  
+      /* Sheet 2: "bagPacking" */
+      /* [confirmed date (delivery date), first name + last initial, delivery window, # of bags,
+       *  frequency, # of dependents, dietary restrictions, additional requests, order id, items] */
+  
+      // frequency: one-time or recurring (once a week or every two weeks for now)
+      
+      // determine approximate # of bags by # of items
+      var totalItems = 0;
+      for (let item in items) {
+        totalItems += items[item];
+      }
+      let numberOfBags = Math.ceil(totalItems / 10);
+      if (numberOfBags > 3) {
+        numberOfBags = 3;
+      }
+
+      var {spreadsheetId, sheetName} = sheetsInfo["bagPacking"]
+      const request2 = {
+        spreadsheetId: spreadsheetId,
+        range: sheetName + "!A:J",
+        valueInputOption: "USER_ENTERED", 
+        insertDataOption: "INSERT_ROWS",
+        resource: {
+            "range": sheetName + "!A:J",
+            "majorDimension": "ROWS",
+            "values": [
+              [deliveryMMDD, firstName + " " + lastName.slice(0,1), deliveryWindow, numberOfBags, frequency, 
+               dependents, dietaryRestrictions, additionalRequests, orderID, JSON.stringify(itemNames)]
+            ] 
+          }
+      }
+  
+      sheets.spreadsheets.values.append(request2)
+      .catch((error) => {
+        return reject("error writing to bag-packing data sheet: ", error);
+      });
+    
+      /* Sheet 3: "doordash" */
+      /* [deliveryDate, delivery window start/end, first name, last name, address, item code (always F), # of bags (must be <= 3) ] */
+      var {spreadsheetId, sheetName} = sheetsInfo["doordash"]
+      const request3 = {
+        spreadsheetId: spreadsheetId,
+        range: sheetName + "!A:U",
+        valueInputOption: "USER_ENTERED",
+        insertDataOption: "INSERT_ROWS",
+        resource: {
+            "range": sheetName + "!A:U",
+            "majorDimension": "ROWS",
+            "values": [
+              [
+                "UCB BNC Food Pantry", "VENTURA-01", "F", deliveryMMDD, deliveryWindowStart, deliveryWindowEnd,
+                "US/Pacific", firstName, lastName, address, address2, city, "CA", zip, phone, numberOfBags,
+                dropoffInstructions, "UCB BNC Food Pantry"
+              ] 
+            ] 
+          } 
+      }
+      
+      sheets.spreadsheets.values.append(request3)
+      .catch((error) => {
+        return reject("error writing to Doordash data sheet: ", error);
+      });
+  
+  
+      /* Add order to firebase */
+      let newOrder = {};
+      newOrder["orderID"] = orderID;
+      newOrder["status"] = ORDER_STATUS_OPEN;
+  
+      // TODO: need to handle the multiple delivery options somewhere
+      newOrder["deliveryDate"] = deliveryMMDD;
+      newOrder["deliveryWindow"] = deliveryWindow;
+  
+      // add the isPacked entry to match order schema
+      newOrder["items"] = {}
+      Object.keys(items).forEach((bcode) => {
+        newOrder["items"][bcode] = {quantity: items[bcode], isPacked: false}
+      })
+  
+      newOrder["guestNote"] = additionalRequests;
+      newOrder["dietaryRestriction"] = dietaryRestrictions;
+      newOrder["firstName"] = firstName;
+      newOrder["lastInitial"] = lastName.slice(0, 1);
+  
+      firebase.auth().signInAnonymously()
+      .then(() => {
+        let itemRef = firebase.database().ref('/order/' + orderID);
+  
+        itemRef.once('value')
+        .catch(function(error){
+          return reject("Unable to access database");
         })
-        .then(() => {
-            return resolve(orderID);
+        .then(function(resp){
+          // the version of the item in the database
+          var dbItem = resp.val();
+          // this item already exists
+          if (dbItem != null) {
+              return reject(`${orderID} already exists`);
+          }
+          // otherwise the item doesn't exist and we can create it
+          itemRef.update(newOrder)
+          .catch(function(error) {
+              return reject("Error writing to firebase");
+          })
+          .then(() => {
+              return resolve(orderID);
+          });
         });
       });
-    });
+    })
   })
 } 
   
@@ -297,7 +338,7 @@ export default async function(req, res) {
     firebase.auth().signInAnonymously()
     .then(() => {
       updateInventory(body.items).then((itemNames) => {
-        addOrder(body, itemNames).then((orderID) => {
+        writeToSheets(body, itemNames).then((orderID) => {
           res.status(200).json({success: `Successfully added order! Order ID: ${orderID}`});
           return resolve();
         })
