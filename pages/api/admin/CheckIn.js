@@ -99,7 +99,7 @@ export default async function (req, res) {
         spreadsheetId: checkin_sheet,
       };
       var numRows = 0;
-      let numberOfRowsToGoBack = 1000;
+      let numberOfRowsToGoBack = 2000;
       var checkInTime = new Date();
       var rangeQuery = "Check Out Form!A:B";
       // write to google sheets
