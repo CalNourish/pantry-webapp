@@ -24,12 +24,11 @@ function requireParams(body, res) {
 //returns the start of the week given a day
 function determineStartOfWeek(currDay) {
   let startOfWeek = new Date(currDay.toLocaleDateString());
-  const millisecondsPerDay = 86400000
-  const milSecondsUntilStart = millisecondsPerDay * currDay.getDay()
-  startOfWeek.setTime(startOfWeek.getTime() - milSecondsUntilStart)
-  return startOfWeek.getTime()
+  const millisecondsPerDay = 86400000;
+  const milSecondsUntilStart = millisecondsPerDay * currDay.getDay();
+  startOfWeek.setTime(startOfWeek.getTime() - milSecondsUntilStart);
+  return startOfWeek.getTime();
 }
-
 
 //converts from 2022-07-23T20:35:41.935Z to 7/23/2022 12:15:52
 function formatTime(timeToConvert) {
@@ -56,19 +55,22 @@ function getNumRowsForCheckIn(properties) {
 //scans table of values for a visitor visiting more than once a week
 //loops through each pair in the table backwords until either hits calId or a week has passed
 function scanTableForVisitInPastWeek(values, startOfWeek, calId) {
-  var visitedTimes = []
-    for(var i = values.length - 1; i >= 0; i--) {
-        var currDate = new Date(values[i][0])
-        if(values[i][1] == calId) {
-            if(currDate.getTime() - startOfWeek > 0) {
-              visitedTimes.push(formatTime(currDate))
-            }
-        }
-        else if(currDate.getTime() - startOfWeek <= 0) { //reach the end of week
-          break;
-        }
+  var visitedTimes = [];
+  if (parseInt(calId) == 1) {
+    return visitedTimes;
+  }
+  for (var i = values.length - 1; i >= 0; i--) {
+    var currDate = new Date(values[i][0]);
+    if (values[i][1] == calId) {
+      if (currDate.getTime() - startOfWeek > 0) {
+        visitedTimes.push(formatTime(currDate));
+      }
+    } else if (currDate.getTime() - startOfWeek <= 0) {
+      //reach the end of week
+      break;
     }
-  return visitedTimes
+  }
+  return visitedTimes;
 }
 
 export default async function (req, res) {
@@ -102,7 +104,6 @@ export default async function (req, res) {
       let numberOfRowsToGoBack = 2000;
       var checkInTime = new Date();
       var rangeQuery = "Check Out Form!A:B";
-      // write to google sheets
       const request = {
         spreadsheetId: checkin_sheet,
         range: "Check Out Form!A:B",
@@ -119,29 +120,36 @@ export default async function (req, res) {
       sheets.spreadsheets
         .get(paramsForCheckIn)
         .then((properties) => (numRows = getNumRowsForCheckIn(properties)))
-        .then(function() {
-            var startingRow = numRows - numberOfRowsToGoBack;
-            var startOfWeek = determineStartOfWeek(checkInTime)
-            if (startingRow > 0) {
-              rangeQuery = "Check Out Form!A" + startingRow.toString() + ":B";
-            }
-            const paramsForVisits = {
-              spreadsheetId: checkin_sheet,
-              range: rangeQuery,
-            };
-            sheets.spreadsheets.values
+        .then(function () {
+          var startingRow = numRows - numberOfRowsToGoBack;
+          var startOfWeek = determineStartOfWeek(checkInTime);
+          if (startingRow > 0) {
+            rangeQuery = "Check Out Form!A" + startingRow.toString() + ":B";
+          }
+          const paramsForVisits = {
+            spreadsheetId: checkin_sheet,
+            range: rangeQuery,
+          };
+          sheets.spreadsheets.values
             .get(paramsForVisits)
-            .then((result) =>  
-                  {
-                  sheets.spreadsheets.values.append(request).catch((error) => {
-                    return reject("error writing to Pantry data sheet: ", error);
-                  });              
-                  res.json(scanTableForVisitInPastWeek(result.data.values, startOfWeek, body.calID));
-                  return resolve()})
+            .then((result) => {
+              // write to google sheets
+              sheets.spreadsheets.values.append(request).catch((error) => {
+                return reject("error writing to Pantry data sheet: ", error);
+              });
+              res.json(
+                scanTableForVisitInPastWeek(
+                  result.data.values,
+                  startOfWeek,
+                  body.calID
+                )
+              );
+              return resolve();
+            })
             .catch((error) => {
-               return reject("error reading from Pantry data sheet: " +  error);
-             });
-        })
+              return reject("error reading from Pantry data sheet: " + error);
+            });
+        });
 
       // format output (date-time format, non-bold, bg color, etc.)
 
