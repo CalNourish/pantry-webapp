@@ -202,6 +202,8 @@ function writeToSheets(body, itemNames) {
           console.log("wrote to pantry sheet at:", result.data.updates.updatedRange)
           // TODO: update font/appearance if we are writing to the first (non-pinned) row
           // otherwise it shows up with the same style as the header
+
+          // see `checkout-logging` branch
         } else {
           throw result.statusText
         }
@@ -324,9 +326,8 @@ function writeToSheets(body, itemNames) {
 } 
   
 export default async function(req, res) {   
-  
+  const {body} = req //unpacks the request object   
   return new Promise((resolve) => {
-    const {body} = req //unpacks the request object 
     if (!body.frequency) {
       body.frequency = "one-time";
     }

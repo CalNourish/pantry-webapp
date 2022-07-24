@@ -224,6 +224,21 @@ export default function Hours() {
                             </tbody>
                         </table>
                     </div>
+
+                    <button onClick={() => {
+                        fetch('/api/admin/SetSheetInfo', { method: 'POST',
+                            body: JSON.stringify({ checkoutLog: {
+                                spreadsheetId: "1waiCSO7hm8kmWLaG8OdB8_7ksfEbm_B3CyKHbXTIf5E",
+                                sheetName: "July22"
+                            } }),
+                            headers: {'Content-Type': "application/json", 'Authorization': token}
+                        }).then(res => res.json())
+                        .then(res => {
+                            console.log(res);
+                        })
+                    }} >
+                        btn
+                    </button>
                 </Layout>
             </>
 
