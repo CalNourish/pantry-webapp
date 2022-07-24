@@ -21,6 +21,7 @@ const AUTH_SIGNEDIN_ROUTES = [
   { title: "Inventory", route: "/inventory" },
   { title: "Hours", route: "/hours" },
   { title: "Order", route: "/order"},
+  { title: "Check in", route: "/checkin"},
   { title: "Checkout", route: "/checkout"},
   { title: "Bag Packing", route: "/orders"}
 ]
