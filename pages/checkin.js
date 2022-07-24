@@ -16,8 +16,6 @@ export default function Hours() {
   const [data, setData] = useState(undefined);
   const { user } = useUser();
 
-  // let { data, error } = useSWR('/api/admin/getHours', fetcher)
-
   /* Display loading message */
   let authToken = (user && user.authorized === "true") ? token : null;
   if (!authToken) {
@@ -40,7 +38,14 @@ export default function Hours() {
     fetch('/api/admin/CheckIn', { method: 'POST',
       body: JSON.stringify({calID: e.target.calID.value}),
       headers: {'Content-Type': "application/json", 'Authorization': token}
-    }).catch((err) => {
+    })
+    .then((result) => {
+      result.json()
+      .then((data) => {
+        console.log(data);
+      });
+    })
+    .catch((err) => {
       console.log("error with checkin:", err)
     })
   }
