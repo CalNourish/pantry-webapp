@@ -8,7 +8,7 @@ The Cal Nourish Web App is an application that is being built as a tool for the 
 
 For more information about the UC Berkeley Food Pantry, you can visit their [website](https://basicneeds.berkeley.edu/pantry)
 
-This app is powered by [Vercel](https://vercel.com?utm_source=cal-nourish&utm_campaign=oss) and built with [Next.js](https://nextjs.org/), [Tailwind CSS](https://tailwindcss.com/), [Firebase](https://firebase.google.com/) (for our database and authentication), and an various AWS and Google tools as needed.
+This app is powered by [Vercel](https://vercel.com?utm_source=cal-nourish&utm_campaign=oss) and built with [Next.js](https://nextjs.org/), [Tailwind CSS](https://tailwindcss.com/), [Firebase](https://firebase.google.com/) (for our database and authentication), and various AWS and Google tools as needed.
 
 ## Setup
 This application is based on the [Next.js Firebase example](https://github.com/vercel/next.js/tree/canary/examples/with-firebase). View the [Firebase readme](./Firebase_example.md) for more details.
