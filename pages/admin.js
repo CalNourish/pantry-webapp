@@ -227,10 +227,24 @@ export default function Hours() {
 
                     <button onClick={() => {
                         fetch('/api/admin/SetSheetInfo', { method: 'POST',
-                            body: JSON.stringify({ checkoutLog: {
-                                spreadsheetId: "1waiCSO7hm8kmWLaG8OdB8_7ksfEbm_B3CyKHbXTIf5E",
-                                sheetName: "July22"
-                            } }),
+                            body: JSON.stringify({
+                                checkoutLog: {
+                                    spreadsheetId: "1waiCSO7hm8kmWLaG8OdB8_7ksfEbm_B3CyKHbXTIf5E",
+                                    sheetName: "July22"
+                                },
+                                bagPacking: {
+                                    sheetName: "[Testing] Spring Delivery Packing Info",
+                                    spreadsheetId: "1Pu5pHqtd9FmJpVK3s-sL43c2Lh2OPw2DQD8MyWBXUvo"
+                                },
+                                doordash: {
+                                    sheetName: "Customer Information",
+                                    spreadsheetId: "13BcniNuHl6P5uoG3SPJ7aP-yJeS0n1eB6EUL0wYcV4o"
+                                },
+                                pantryMaster: {
+                                    sheetName: "TechTesting",
+                                    spreadsheetId:"1bCtOsgTJa_hAFp7zxGK7y7snEj8zlHKKLM-5GF_3vF4"
+                                }
+                            }),
                             headers: {'Content-Type': "application/json", 'Authorization': token}
                         }).then(res => res.json())
                         .then(res => {
