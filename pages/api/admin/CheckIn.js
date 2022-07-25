@@ -43,10 +43,10 @@ function formatTime(timeToConvert) {
   return formattedTime;
 }
 
-//get the number of rows for the check out form sheet
+//get the number of rows for the Check Out sheet
 function getNumRowsForCheckIn(properties) {
   for (var sheet of properties["data"]["sheets"]) {
-    if (sheet.properties.title == "Check Out Form") {
+    if (sheet.properties.title == "Check Out") {
       return sheet.properties.gridProperties.rowCount;
     }
   }
@@ -103,14 +103,14 @@ export default async function (req, res) {
       var numRows = 0;
       let numberOfRowsToGoBack = 2000;
       var checkInTime = new Date();
-      var rangeQuery = "Check Out Form!A:B";
+      var rangeQuery = "Check Out!A:B";
       const request = {
         spreadsheetId: checkin_sheet,
-        range: "Check Out Form!A:B",
+        range: "Check Out!A:B",
         valueInputOption: "USER_ENTERED",
         insertDataOption: "INSERT_ROWS",
         resource: {
-          range: "Check Out Form!A:B",
+          range: "Check Out!A:B",
           majorDimension: "ROWS",
           values: [[formatTime(checkInTime), body.calID]],
         },
@@ -124,7 +124,7 @@ export default async function (req, res) {
           var startingRow = numRows - numberOfRowsToGoBack;
           var startOfWeek = determineStartOfWeek(checkInTime);
           if (startingRow > 0) {
-            rangeQuery = "Check Out Form!A" + startingRow.toString() + ":B";
+            rangeQuery = "Check Out!A" + startingRow.toString() + ":B";
           }
           const paramsForVisits = {
             spreadsheetId: checkin_sheet,
