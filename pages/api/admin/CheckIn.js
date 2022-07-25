@@ -7,7 +7,7 @@ import decrypt from "../../../utils/decrypt.js";
 const test = process.env.NEXT_PUBLIC_VERCEL_ENV == undefined;
 const checkin_sheet = test
   ? process.env.SPREADSHEET_ID_TEST
-  : process.env.CHECKIN_SPREADSHEET_ID;
+  : process.env.PANTRY_DATA_SPREADSHEET_ID;
 
 /*
  * /api/admin/checkin
