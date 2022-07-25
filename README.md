@@ -73,7 +73,7 @@ View list of current aliases for this local project: ```firebase use```.
 
 To add an alias, run ```firebase use --add``` to add aliases for the test and prod projects.
 
-To switch between projects, run ```firebase use <alias>```.
+To switch between projects, run ```firebase use <alias>```. 
 
 These aliases will automatically connect with the appropriate firebase projects (i.e. database, auth, etc.). In development, you should only use **TestCalNourish** with the alias of `default` or `test`.
 
