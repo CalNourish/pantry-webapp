@@ -32,15 +32,9 @@ function determineStartOfWeek(currDay) {
 
 //converts from 2022-07-23T20:35:41.935Z to 7/23/2022 12:15:52
 function formatTime(timeToConvert) {
-  const formattedHours =
-    timeToConvert.getHours() +
-    ":" +
-    timeToConvert.getMinutes() +
-    ":" +
-    timeToConvert.getSeconds();
-  const formattedTime =
-    timeToConvert.toLocaleDateString() + " " + formattedHours;
-  return formattedTime;
+const formattedHours = timeToConvert.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit', second:'2-digit'})
+const formattedTime = timeToConvert.toLocaleDateString() + " " + formattedHours;
+    return formattedTime;
 }
 
 //get the number of rows for the Check Out sheet
@@ -149,13 +143,10 @@ export default async function (req, res) {
             .catch((error) => {
               return reject("error reading from Pantry data sheet: " + error);
             });
+        })
+        .catch((error) => {
+          return reject("error with firebase auth: " + error);
         });
-
-      // format output (date-time format, non-bold, bg color, etc.)
-
-      // read & search for previous check-ins
-
-      // respond with <write success>, <most recent visit>, <number of visits this week>, <last 2 visits?>
     });
   });
 }
