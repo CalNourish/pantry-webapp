@@ -36,13 +36,13 @@ export default function Admin() {
           <div className='mb-2'>
             <div className='mx-2 w-1/6 inline-block'>Spreadsheet ID:</div>
             <input className="border rounded w-1/2 py-2 px-3 text-gray-600 leading-tight mr-4"
-              id="checkoutLog" autoComplete="off" value={data.checkoutLog || ""}
+              id="checkoutLog" autoComplete="off" value={data.checkoutLog.spreadsheetId || ""}
               onChange={(e) => updateLinks({...data, checkoutLog: e.target.value})}/>
           </div>
           <div className='mb-4'>
             <div className='mx-2 w-1/6 inline-block'>Sheet Name:</div>
             <input className="border rounded w-1/4 py-2 px-3 text-gray-600 leading-tight mr-4"
-              id="checkoutLogSheet" autoComplete="off" value={data.checkoutLogSheet || ""}
+              id="checkoutLogSheet" autoComplete="off" value={data.checkoutLog.sheetName || ""}
               onChange={(e) => updateLinks({...data, checkoutLogSheet: e.target.value})}/>
           </div>
           <button className='btn btn-outline' type='submit'
