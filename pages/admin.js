@@ -12,11 +12,13 @@ const fetcher = (url) => fetch(url).then((res) => res.json())
 const token = cookie.get("firebaseToken")
 
 export default function Admin() {
-  const [formStatus, setFormStatus] = useState({checkoutLog: null});
+  const [submitStatus, setSubmitStatus] = useState({checkoutLog: null});
+  const [formData, setFormData] = useState({});
 
   const fetcher = (url) => fetch(url, {
-        method:'GET', headers: {'Content-Type': "application/json", 'Authorization': token}
-      }).then((res) => res.json());
+    method:'GET', headers: {'Content-Type': "application/json", 'Authorization': token}
+  }).then((res) => res.json());
+
   const { data, error } = useSWR(`${server}/api/admin/GetSheetLinks`, fetcher);
 
   if (!data) return <div>Loading...</div>
@@ -28,6 +30,20 @@ export default function Admin() {
     )
   }
 
+  // initialize form info if empty
+  if (Object.keys(formData).length == 0) {
+    setFormData(data.checkoutLog)
+  }
+
+  let successTimer = null;
+  let showSuccess = (t) => {
+    /* show error banner with error text for 5 seconds, or custom time */
+    setSubmitStatus({...submitStatus, checkoutLog: true})
+    t = t ? t : 5000;
+    clearTimeout(successTimer);
+    successTimer = setTimeout(() => setSubmitStatus({...submitStatus, checkoutLog: null}), t);
+  }
+
   return (
     <Layout>
       <div className='m-4'>
@@ -36,36 +52,42 @@ export default function Admin() {
           <div className='mb-2'>
             <div className='mx-2 w-1/6 inline-block'>Spreadsheet ID:</div>
             <input className="border rounded w-1/2 py-2 px-3 text-gray-600 leading-tight mr-4"
-              id="checkoutLog" autoComplete="off" value={data.checkoutLog.spreadsheetId || ""}
-              onChange={(e) => updateLinks({...data, checkoutLog: e.target.value})}/>
+              id="checkoutLogId" autoComplete="off" value={formData.spreadsheetId || ""}
+              onChange={(e) => {
+                setFormData({...formData, spreadsheetId: e.target.value})
+                setSubmitStatus({...submitStatus, checkoutLog: false})
+              }}/>
           </div>
           <div className='mb-4'>
             <div className='mx-2 w-1/6 inline-block'>Sheet Name:</div>
             <input className="border rounded w-1/4 py-2 px-3 text-gray-600 leading-tight mr-4"
-              id="checkoutLogSheet" autoComplete="off" value={data.checkoutLog.sheetName || ""}
-              onChange={(e) => updateLinks({...data, checkoutLogSheet: e.target.value})}/>
+              id="checkoutLogSheet" autoComplete="off" value={formData.sheetName || ""}
+              onChange={(e) => {
+                setFormData({...formData, sheetName: e.target.value})
+                setSubmitStatus({...submitStatus, checkoutLog: false})
+              }}/>
           </div>
           <button className='btn btn-outline' type='submit'
             onClick={(e) => {
               e.preventDefault();
-              console.log('clicked')
-              fetch(`${server}/api/admin/SetSheetLinks`, { method: 'POST',
-                body: JSON.stringify({checkoutLog: data.checkoutLog, checkoutLogSheet: data.checkoutLogSheet}),
+              fetch(`${server}/api/admin/SetSheetInfo`, { method: 'POST',
+                body: JSON.stringify({checkoutLog: formData}),
                 headers: {'Content-Type': "application/json", 'Authorization': token}
               })
               .then((result) => {
-                result.json().then(() => {
-                  setFormStatus({...formStatus, checkoutLog: true})
+                result.json().then((res) => {
+                  console.log(res)
+                  showSuccess();
                 })
                 .catch((err) => {
                   console.log("error submitting form:", err)
-                  setFormStatus({...formStatus, checkoutLog: false})
+                  setSubmitStatus({...submitStatus, checkoutLog: false})
                 })
               });
             }}>
             Update!
           </button>
-          {formStatus.checkoutLog && <div className='mx-4 my-auto text-2xl font-bold text-green-600 inline-block'>✓</div>}
+          {submitStatus.checkoutLog && <div className='mx-4 my-auto text-2xl font-bold text-green-600 inline-block'>✓</div>}
         </form>
       </div>
     </Layout>
