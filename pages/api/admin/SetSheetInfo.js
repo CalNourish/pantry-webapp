@@ -76,7 +76,6 @@ export default async function(req, res) {
         })
       )
       .then(() => {
-        console.log(sheetInfo)
         firebase.auth().signInAnonymously()
         .then(() => {
           let itemRef = firebase.database().ref('/sheetIDs');
@@ -94,6 +93,10 @@ export default async function(req, res) {
           return resolve();
         });
       })
+    }).catch((err) => {
+      console.log("Error with validating:", err)
+      res.status(401).json({error: "Not logged in"})
+      return resolve()
     })
   })
 }
