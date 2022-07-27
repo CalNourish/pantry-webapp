@@ -39,7 +39,7 @@ export default function Admin() {
   let successTimer = null;
   let showSuccess = (t) => {
     /* show error banner with error text for 5 seconds, or custom time */
-    setSubmitStatus({...submitStatus, checkoutLog: true})
+    setSubmitStatus({...submitStatus, checkoutLog: "success"})
     t = t ? t : 5000;
     clearTimeout(successTimer);
     successTimer = setTimeout(() => setSubmitStatus({...submitStatus, checkoutLog: null}), t);
@@ -56,7 +56,7 @@ export default function Admin() {
               id="checkoutLogId" autoComplete="off" value={formData?.spreadsheetId || ""}
               onChange={(e) => {
                 setFormData({...formData, spreadsheetId: e.target.value})
-                setSubmitStatus({...submitStatus, checkoutLog: false})
+                setSubmitStatus({...submitStatus, checkoutLog: null})
               }}/>
           </div>
           <div className='mb-4'>
@@ -65,12 +65,13 @@ export default function Admin() {
               id="checkoutLogSheet" autoComplete="off" value={formData?.sheetName || ""}
               onChange={(e) => {
                 setFormData({...formData, sheetName: e.target.value})
-                setSubmitStatus({...submitStatus, checkoutLog: false})
+                setSubmitStatus({...submitStatus, checkoutLog: null})
               }}/>
           </div>
-          <button className='btn btn-outline' type='submit'
+          <button className='btn btn-outline' type='submit' disabled={submitStatus.checkoutLog === "loading"}
             onClick={(e) => {
               e.preventDefault();
+              setSubmitStatus({...submitStatus, checkoutLog: "loading"})
               fetch(`${server}/api/admin/SetSheetInfo`, { method: 'POST',
                 body: JSON.stringify({checkoutLog: formData}),
                 headers: {'Content-Type': "application/json", 'Authorization': token}
@@ -81,14 +82,18 @@ export default function Admin() {
                   showSuccess();
                 })
                 .catch((err) => {
-                  console.log("error submitting form:", err)
-                  setSubmitStatus({...submitStatus, checkoutLog: false})
+                  console.log("error parsing JSON response:", err)
+                  setSubmitStatus({...submitStatus, checkoutLog: "error"})
                 })
+              }).catch((err) => {
+                console.log("error submitting form:", err)
+                setSubmitStatus({...submitStatus, checkoutLog: "error"})
               });
             }}>
             Update!
           </button>
-          {submitStatus.checkoutLog && <div className='mx-4 my-auto text-2xl font-bold text-green-600 inline-block'>✓</div>}
+          {(submitStatus.checkoutLog === "success") && <div className='mx-4 my-auto text-xl font-bold text-green-600 inline-block'>✓</div>}
+          {(submitStatus.checkoutLog === "loading") && <div className='mx-4 inline-block italic text-gray-400'>loading...</div>}
         </form>
       </div>
     </Layout>
