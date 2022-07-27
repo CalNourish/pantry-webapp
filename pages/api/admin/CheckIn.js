@@ -148,6 +148,10 @@ export default async function (req, res) {
                   )
                 );
               }
+              else {
+                var emptyVisits = [] //case where we can't scan the table due too many blank cells added at bottom of spreadsheet
+                res.json(emptyVisits)
+              }
               return resolve();
             })
             .catch((error) => {
