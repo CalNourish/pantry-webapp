@@ -1,6 +1,5 @@
 import { google } from 'googleapis';
-import service from "../../../service-account.enc";
-import decrypt from "../../../utils/decrypt.js";
+import { service_info } from "../../../utils/decrypt.js";
 import { validateFunc } from '../validate';
 import firebase from '../../../firebase/clientApp';
 
@@ -57,7 +56,6 @@ export default async function(req, res) {
 
     const token = req.headers.authorization
     validateFunc(token).then(() => {
-      let service_info = JSON.parse(decrypt(service.encrypted))
       const target = ['https://www.googleapis.com/auth/spreadsheets'];
       var sheets_auth = new google.auth.JWT(
         service_info.client_email,
@@ -71,11 +69,10 @@ export default async function(req, res) {
       const sheets = google.sheets({ version: 'v4', auth: sheets_auth });
       let sheetInfo = {}
       Promise.all(
-        Object.keys(req.body).map((key) => {
+        Object.keys(req.body).map(async (key) => {
           let {spreadsheetId, sheetName} = req.body[key];
-          return getSheetIds(sheets, spreadsheetId, sheetName).then((pageId) => {
-            sheetInfo[key] = {...req.body[key], pageId};
-          })
+          const pageId = await getSheetIds(sheets, spreadsheetId, sheetName);
+          sheetInfo[key] = { ...req.body[key], pageId };
         })
       )
       .then(() => {
@@ -90,8 +87,12 @@ export default async function(req, res) {
             res.status(200);
             return resolve();
           })
+        })
+        .catch((err) => {
+          console.log("error writing to firebase:", err)
+          res.status(500);
+          return resolve();
         });
-        // write to firebase
       })
     })
   })

@@ -23,9 +23,10 @@ export default function Admin() {
 
   if (!data) return <div>Loading...</div>
   if (error || data.error) {
+    console.log(error || data.error)
     return (
       <Layout>
-        <div className='m-4'>{error || data.error}</div>
+        <div className='m-4'>Error! See console log for details.</div>
       </Layout>
     )
   }

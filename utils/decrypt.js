@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import service from "../service-account.enc";
 
 /* AES-CBC decryption on the encrypted service account info in `service-account.js` */
 export default function decrypt (encrypted) {
@@ -12,3 +13,5 @@ export default function decrypt (encrypted) {
   decrypted += decipher.final('utf8');
   return decrypted
 }
+
+export const service_info = JSON.parse(decrypt(service.encrypted))
