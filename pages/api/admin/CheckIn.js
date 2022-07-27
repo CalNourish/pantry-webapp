@@ -37,6 +37,13 @@ const formattedTime = timeToConvert.toLocaleDateString() + " " + formattedHours;
     return formattedTime;
 }
 
+//converts from 2022-07-23T20:35:41.935Z to Mon Jul 23 2022 at 08:35 PM
+function formatTimeForVisits(timeToConvert) {
+  const formattedHours = timeToConvert.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'})
+  const formattedTime = timeToConvert.toDateString() + " at " + formattedHours;
+  return formattedTime;
+  }
+
 //get the number of rows for the Check Out sheet
 function getNumRowsForCheckIn(properties) {
   for (var sheet of properties["data"]["sheets"]) {
@@ -57,7 +64,7 @@ function scanTableForVisitInPastWeek(values, startOfWeek, calId) {
     var currDate = new Date(values[i][0]);
     if (values[i][1] == calId) {
       if (currDate.getTime() - startOfWeek > 0) {
-        visitedTimes.push(formatTime(currDate));
+        visitedTimes.push(formatTimeForVisits(currDate));
       }
     } else if (currDate.getTime() - startOfWeek <= 0) {
       //reach the end of week
@@ -131,13 +138,15 @@ export default async function (req, res) {
               sheets.spreadsheets.values.append(request).catch((error) => {
                 return reject("error writing to Pantry data sheet: ", error);
               });
-              res.json(
-                scanTableForVisitInPastWeek(
-                  result.data.values,
-                  startOfWeek,
-                  body.calID
-                )
-              );
+              if (result.data.values != null) {
+                res.json(
+                  scanTableForVisitInPastWeek(
+                    result.data.values,
+                    startOfWeek,
+                    body.calID
+                  )
+                );
+              }
               return resolve();
             })
             .catch((error) => {

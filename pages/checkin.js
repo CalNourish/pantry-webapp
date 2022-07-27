@@ -51,12 +51,12 @@ class Checkin extends React.Component {
   
   showLastScannedInfo = () => {
     if (this.state.lastScannedID == "N/A") {
-      return <div className='flex-grow text-center'>Last Scanned ID: {this.state.lastScannedID}</div>
+      return <div className='flex-grow text-left'>Last Scanned ID: {this.state.lastScannedID}</div>
     }
     else {
       return (
         <>
-        <div className='flex-grow text-center'>Last Scanned ID: {this.state.lastScannedID} at {this.state.lastScannedTime}.</div>
+        <div className='flex-grow text-left'>Last Scanned ID: {this.state.lastScannedID} at {this.state.lastScannedTime}.</div>
         </>
       )
     }
@@ -93,7 +93,7 @@ class Checkin extends React.Component {
         }
       }
     }
-    return <div className='flex-grow text-center'>{messageToReturn}</div>;
+    return <div className='flex-grow text-left'>{messageToReturn}</div>;
   };
    
   handleScanSubmit = (e) => {
@@ -155,7 +155,7 @@ class Checkin extends React.Component {
         {this.state.error && errorBanner}
         {this.state.success && successBanner}
           <h1 className='text-3xl font-medium mb-2'>Pantry Check-In</h1>
-          <div className='flex flex-row space-x-8 my-8'>
+          <div className='flex flex-row space-x-16 my-8'>
             <form onSubmit={(e) => this.handleScanSubmit(e)}>
               <fieldset id="calIDFieldset" disabled={false}>
               <div>
