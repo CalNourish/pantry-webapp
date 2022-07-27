@@ -138,6 +138,7 @@ export default async function (req, res) {
               sheets.spreadsheets.values.append(request).catch((error) => {
                 return reject("error writing to Pantry data sheet: ", error);
               });
+              console.log(result.data)
               if (result.data.values != null) {
                 res.json(
                   scanTableForVisitInPastWeek(
