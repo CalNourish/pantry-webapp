@@ -53,7 +53,7 @@ export default function Admin() {
           <div className='mb-2'>
             <div className='mx-2 w-1/6 inline-block'>Spreadsheet ID:</div>
             <input className="border rounded w-1/2 py-2 px-3 text-gray-600 leading-tight mr-4"
-              id="checkoutLogId" autoComplete="off" value={formData.spreadsheetId || ""}
+              id="checkoutLogId" autoComplete="off" value={formData?.spreadsheetId || ""}
               onChange={(e) => {
                 setFormData({...formData, spreadsheetId: e.target.value})
                 setSubmitStatus({...submitStatus, checkoutLog: false})
@@ -62,7 +62,7 @@ export default function Admin() {
           <div className='mb-4'>
             <div className='mx-2 w-1/6 inline-block'>Sheet Name:</div>
             <input className="border rounded w-1/4 py-2 px-3 text-gray-600 leading-tight mr-4"
-              id="checkoutLogSheet" autoComplete="off" value={formData.sheetName || ""}
+              id="checkoutLogSheet" autoComplete="off" value={formData?.sheetName || ""}
               onChange={(e) => {
                 setFormData({...formData, sheetName: e.target.value})
                 setSubmitStatus({...submitStatus, checkoutLog: false})
