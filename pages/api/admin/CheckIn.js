@@ -102,6 +102,7 @@ export default async function (req, res) {
         spreadsheetId: checkin_sheet,
       };
       var numRows = 0;
+      var calID = body.calID
       let numberOfRowsToGoBack = 2000;
       var checkInTime = new Date();
       var rangeQuery = "Check Out!A:B";
@@ -133,26 +134,30 @@ export default async function (req, res) {
           };
           sheets.spreadsheets.values
             .get(paramsForVisits)
-            .then((result) => {
+            .then((body) => {
+              var scannedRows = body.data.values
               // write to google sheets
-              sheets.spreadsheets.values.append(request).catch((error) => {
-                return reject("error writing to Pantry data sheet: ", error);
+              sheets.spreadsheets.values.append(request)
+              .then(() => {
+                if (scannedRows != null) {
+                  res.json(
+                    scanTableForVisitInPastWeek(
+                      scannedRows,
+                      startOfWeek,
+                      calID
+                    )
+                  );
+                }
+                else {
+                  var emptyVisits = [] //case where we can't scan the table due too many blank cells added at bottom of spreadsheet
+                  res.json(emptyVisits)
+                }
+                return resolve();
+              }
+              )
+              .catch((error) => {
+                return reject("error writing to Pantry data sheet: " +  error);
               });
-              console.log(result.data)
-              if (result.data.values != null) {
-                res.json(
-                  scanTableForVisitInPastWeek(
-                    result.data.values,
-                    startOfWeek,
-                    body.calID
-                  )
-                );
-              }
-              else {
-                var emptyVisits = [] //case where we can't scan the table due too many blank cells added at bottom of spreadsheet
-                res.json(emptyVisits)
-              }
-              return resolve();
             })
             .catch((error) => {
               return reject("error reading from Pantry data sheet: " + error);

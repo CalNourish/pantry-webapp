@@ -120,10 +120,13 @@ class Checkin extends React.Component {
         this.showSuccess("Sucessfully scanned ID: " + e.target.calID.value,1000)
         e.target.calID.value = null;
         document.getElementById("calID").focus();
+      })
+      .catch((err) => {
+        this.showError("Failed scanning ID: " + e.target.calID.value,3000)
       });
     })
     .catch((err) => {
-      this.showError("Failed scanning ID: " + e.target.calID.value,1000)
+      this.showError("Failed scanning ID: " + e.target.calID.value,300)
     })
   
   }
