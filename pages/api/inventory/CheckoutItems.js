@@ -15,8 +15,7 @@ import { google } from 'googleapis';
  * In this code, `sheetId` is something like `June22`, but `spreadsheetId` is a long string of characters
 */
 
-import service from "../../../service-account.enc";
-import decrypt from "../../../utils/decrypt.js"
+import { service_info } from "../../../utils/decrypt.js"
 
 function requireParams(body, res) {
     /* require elements: array of elements {barcode: quantity} */
@@ -37,8 +36,10 @@ function getFirebaseInfo() {
         firebase.database().ref('/sheetIDs')
         .once('value', snapshot => {
             let val = snapshot.val();
-            return resolve({spreadsheetId: val.checkoutLog, sheetName: val.checkoutLogSheet})
+
+            return resolve(val.checkoutLog)
         });
+        //TODO: error handling
     })
 }
 
@@ -60,7 +61,7 @@ function getSheetIds(sheets, spreadsheetId, sheetName) {
 
 function writeLog(log) {
 
-    let {client_email, private_key} = JSON.parse(decrypt(service.encrypted));
+    let {client_email, private_key} = service_info;
 
     return new Promise((resolve, reject) => {
         const target = ['https://www.googleapis.com/auth/spreadsheets'];
@@ -73,7 +74,7 @@ function writeLog(log) {
         const sheets = google.sheets({ version: 'v4', auth: sheets_auth });
     
 
-        getFirebaseInfo().then(({spreadsheetId, sheetName}) => {
+        getFirebaseInfo().then(({spreadsheetId, sheetName, pageId}) => {
 
             let now = new Date();
 
@@ -107,7 +108,7 @@ function writeLog(log) {
                 let range = resp.data.updates.updatedRange
                 let rstart = range.match(/(?<row>\d+):/).groups.row - 1 // the index of the first newly written row
     
-                getSheetIds(sheets, spreadsheetId, sheetName).then((pageID) => {    
+                //getSheetIds(sheets, spreadsheetId, sheetName).then((pageId) => {    
                    
                     // this is very long and annoying :( sorry
                     const sheetFormat = {
@@ -117,7 +118,7 @@ function writeLog(log) {
                             { // column 1 (date)
                                 repeatCell: {
                                     range: {
-                                        sheetId: pageID,
+                                        sheetId: pageId,
                                         startRowIndex: rstart,
                                         endRowIndex: rstart + input.length,
                                         startColumnIndex: 0,
@@ -140,7 +141,7 @@ function writeLog(log) {
                             { // column 2 (time)
                                 repeatCell: {
                                     range: {
-                                        sheetId: pageID,
+                                        sheetId: pageId,
                                         startRowIndex: rstart,
                                         endRowIndex: rstart + input.length,
                                         startColumnIndex: 1,
@@ -163,7 +164,7 @@ function writeLog(log) {
                             { // column 3 (barcode)
                                 repeatCell: {
                                     range: {
-                                        sheetId: pageID,
+                                        sheetId: pageId,
                                         startRowIndex: rstart,
                                         endRowIndex: rstart + input.length,
                                         startColumnIndex: 2,
@@ -185,7 +186,7 @@ function writeLog(log) {
                             { // column 4 (quantity)
                                 repeatCell: {
                                     range: {
-                                        sheetId: pageID,
+                                        sheetId: pageId,
                                         startRowIndex: rstart,
                                         endRowIndex: rstart + input.length,
                                         startColumnIndex: 3,
@@ -206,7 +207,7 @@ function writeLog(log) {
                     }
     
                     sheets.spreadsheets.batchUpdate(sheetFormat).then(() => resolve())
-                })
+                //})
             })
             .catch((err) => {
                 reject("Unable to access the google sheet.")
