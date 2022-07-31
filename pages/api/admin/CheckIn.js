@@ -61,7 +61,6 @@ function scanTableForVisitInPastWeek(values, startOfWeek, calId) {
     return visitedTimes;
   }
   for (var i = values.length - 1; i >= 0; i--) {
-    console.log(values[i][1] + " vs " + calId);
     var currDate = new Date(values[i][0]);
     if (values[i][1] == calId) {
       if (currDate.getTime() - startOfWeek > 0) {
