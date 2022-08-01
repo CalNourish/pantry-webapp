@@ -40,10 +40,14 @@ function getSheetIds(sheets, spreadsheetId, sheetName) {
       let sheetIds = resp.data.sheets;
       let sheetMatch = sheetIds.filter((info) => sheetName === info.properties.title)
       if (sheetMatch.length == 0) {
-        console.log("warning: given sheet name cannot be found in this spreadsheet") // TODO: make this warning visible to user
-        return reject("A sheet with the given name does not exist at this link."); // default to home sheet (first page)
+        // console.log("warning: given sheet name cannot be found in this spreadsheet") // TODO: make this warning visible to user
+        return reject("This sheet does not exist."); // default to home sheet (first page)
       }
       return resolve(sheetMatch[0].properties.sheetId); // dictionary of sheetName (string) -> sheetId (number)
+    })
+    .catch((err) => {
+      // console.log(err)
+      return reject("Need permission to access sheet.")
     })
   })
 }
@@ -88,18 +92,19 @@ export default async function(req, res) {
           })
         })
         .catch((err) => {
-          console.log("error writing to firebase:", err)
+          // console.log("error writing to firebase:", err)
           res.status(500);
           return resolve();
         });
       }).catch((errMsg) => {
-        // can't find the sheetName in the specified spreadsheet
+        // can't find the sheetName in the specified spreadsheet,
+        // or the sheet is private and the sheet-writer can't access it
         res.status(400).json({error: errMsg})
         return reject();
       })
     }).catch((err) => {
-      console.log("Error with validating:", err)
-      res.status(401).json({error: "Not logged in"})
+      // console.log("Error with validating:", err)
+      res.status(401).json({error: "Not logged in."})
       return resolve()
     })
   })

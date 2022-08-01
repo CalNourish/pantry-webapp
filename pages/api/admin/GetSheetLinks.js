@@ -7,8 +7,8 @@ export default async function (req, res) {
 
   return new Promise((resolve) => {
 
-    validateFunc(token).then(() => {
-      console.log('signed in')
+    // validateFunc(token).then(() => {
+    //   console.log('signed in')
       firebase.auth().signInAnonymously()
       .then(() => {
         firebase.database().ref('/sheetIDs')
@@ -18,9 +18,9 @@ export default async function (req, res) {
           return resolve()
         });
       });
-    }).catch((err) => {
-      res.status(401).json({error: err})
-      return resolve()
-    })
+    // }).catch((err) => {
+    //   res.status(401).json({error: err})
+    //   return resolve()
+    // })
   })
 }
