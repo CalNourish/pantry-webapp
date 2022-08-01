@@ -114,7 +114,7 @@ export default async function (req, res) {
         resource: {
           range: "Check Out!A:B",
           majorDimension: "ROWS",
-          values: [[formatTime(checkInTime), body.calID]],
+          values: [[formatTime(checkInTime), "'" + calID]],
         },
       };
 
