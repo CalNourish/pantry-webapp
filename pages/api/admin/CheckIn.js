@@ -126,7 +126,7 @@ export default async function (req, res) {
           var startingRow = numRows - numberOfRowsToGoBack;
           var startOfWeek = determineStartOfWeek(checkInTime);
           if (startingRow > 0) {
-            rangeQuery = "Check Out!A" + startingRow.toString() + ":B";
+            rangeQuery = "Check Out Form!A" + startingRow.toString() + ":B";
           }
           const paramsForVisits = {
             spreadsheetId: checkin_sheet,
