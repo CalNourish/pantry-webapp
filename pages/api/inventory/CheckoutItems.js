@@ -27,6 +27,15 @@ function requireParams(body, res) {
         return false;
     }
 
+    // require quantities to be integers
+    for (let barcode in body) {
+        if (!parseInt(body[barcode])) {
+            res.json({error: `unable to parse quantity '${body[barcode]}'`})
+            res.status(400);
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -75,7 +84,6 @@ function writeLog(log) {
     
 
         getFirebaseInfo().then(({spreadsheetId, sheetName, pageId}) => {
-
             let now = new Date();
 
             let input = []
