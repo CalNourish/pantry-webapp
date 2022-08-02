@@ -47,7 +47,7 @@ function formatTimeForVisits(timeToConvert) {
 //get the number of rows for the Check Out sheet
 function getNumRowsForCheckIn(properties) {
   for (var sheet of properties["data"]["sheets"]) {
-    if (sheet.properties.title == "Check Out") {
+    if (sheet.properties.title == "Check Out Form") {
       return sheet.properties.gridProperties.rowCount;
     }
   }
@@ -105,7 +105,7 @@ export default async function (req, res) {
       var calID = body.calID
       let numberOfRowsToGoBack = 2000;
       var checkInTime = new Date();
-      var rangeQuery = "Check Out!A:B";
+      var rangeQuery = "Check Out Form!A:B";
       const request = {
         spreadsheetId: checkin_sheet,
         range: "Check Out Form!A:B",
