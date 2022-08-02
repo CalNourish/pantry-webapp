@@ -39,7 +39,7 @@ const formattedTime = timeToConvert.toLocaleDateString() + " " + formattedHours;
 
 //converts from 2022-07-23T20:35:41.935Z to Mon Jul 23 2022 at 08:35 PM
 function formatTimeForVisits(timeToConvert) {
-  const formattedHours = timeToConvert.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', timeZone: 'America/Los_Angeles'})
+  const formattedHours = timeToConvert.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'})
   const formattedTime = timeToConvert.toDateString() + " at " + formattedHours;
   return formattedTime;
   }
