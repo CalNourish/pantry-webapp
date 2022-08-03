@@ -10,20 +10,13 @@ import { server } from './_app.js'
 const fetcher = (url) => fetch(url).then((res) => res.json())
 
 const token = cookie.get("firebaseToken")
-const tagsToTitles = {
-  "checkoutLog": "Item Checkout Log",
-  "pantryMaster": "Pantry Master Doc",
-  "doordash": "DoorDash Sheet",
-  "bagPacking": "Bag Packing Sheet",
-  "checkIn": "Check-In Log"
-}
 
 export default function Admin() {
   const [submitStatus, setSubmitStatus] = useState({});
   const [statusTimer, setStatusTimer] = useState(null);
   const [formData, setFormData] = useState({});
 
-  const { loadingUser, user } = useUser();
+  const { user } = useUser();
   let authToken = (user && user.authorized === "true") ? token : null;
 
   const fetcher = (url) => fetch(url, {
@@ -84,7 +77,9 @@ export default function Admin() {
 
     return (
       <form key={`sheet-info-${tag}`} id={`sheet-info-${tag}`} className='p-4 border border-gray-400 bg-gray-50'>
-        <div className='font-semibold text-xl'>{tagData.displayName}</div>
+        <div className='font-semibold text-xl'>{tagData.displayName || tag}
+          {tagData.displayName ? "" : <span className='font-normal text-gray-500 text-sm'></span>}
+        </div>
         <table className='w-full my-2 table-auto'>
           <tbody>
             <tr className='mb-2'>
@@ -121,7 +116,9 @@ export default function Admin() {
               headers: {'Content-Type': "application/json", 'Authorization': token}
             })
             .then((result) => {
+              console.log("result:", result)
               result.json().then((res) => {
+                console.log("res data:", res)
                 if (result.ok) {
                   showSuccess(tag);
                 } else {
@@ -155,7 +152,7 @@ export default function Admin() {
       <div className='m-8'>
         <div className='font-semibold text-3xl mb-4'>Google Sheets Links</div>
         <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
-          {Object.keys(tagsToTitles).map((tag) => generateForm(tag))}
+          {Object.keys(formData).map((tag) => generateForm(tag))}
         </div>
       </div>
     </Layout>

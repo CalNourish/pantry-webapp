@@ -14,18 +14,17 @@ import firebase from '../../../firebase/clientApp';
 * }
 */
 
-const allowedTags = ['checkoutLog', 'pantryMaster', 'bagPacking', 'doordash', 'checkIn'];
+const sheetTags = ['checkoutLog', 'pantryMaster', 'bagPacking', 'doordash', 'checkIn'];
 
 function requireParams(req, res) {
   let {body} = req;
   for (let tag in body) {
-    if (!allowedTags.includes(tag)) {
-      res.json(`${tag} not a valid sheet tag.`);
-      res.status(400);
+    if (!sheetTags.includes(tag)) {
+      res.status(400).json({error: `'${tag}' not a valid sheet tag.`});
       return false;
     }
     if (!body[tag].spreadsheetId || !body[tag].sheetName) {
-      res.json(`Missing spreadsheetId or sheetName for tag '${tag}'`)
+      res.status(400).json({error: `Missing ${body[tag].spreadsheetId ? "sheet name" : "spreadsheet ID"}`})
       return false;
     }
   }
@@ -55,6 +54,7 @@ function getSheetIds(sheets, spreadsheetId, sheetName) {
 export default async function(req, res) {
   return new Promise((resolve) => {
     if (!requireParams(req, res)) {
+      console.log("not ok")
       return resolve();
     }
 
