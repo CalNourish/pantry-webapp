@@ -102,28 +102,14 @@ function updateInventory(items) {
 }
 
 function getOrderSheets() {
-  if (test) {
-    var sheets = ["pantryMaster", "bagPacking", "doordash"]
-    return new Promise((resolve) => {
-      let retval = {}
-      for (var idx in sheets) {
-        retval[sheets[idx]] = {
-          spreadsheetId: process.env.SPREADSHEET_ID_TEST,
-          sheetName: testSheetNames[idx]
-        }
-      }
-      return resolve(retval)
-    })
-  }
   return new Promise((resolve, reject) => {
     firebase.database().ref('/sheetIDs/').once('value')
     .catch(function(error){
       res.status(500).json({error: "server error getting sheet ID(s) from the database", errorstack: error});
       return reject();
     })
-    .then(function(resp){
-      var {pantryMaster, bagPacking, doordash} = resp.val(); 
-      return resolve({pantryMaster, bagPacking, doordash});
+    .then(function(resp) {
+      return resolve(resp.val());
     })
   })
 }
