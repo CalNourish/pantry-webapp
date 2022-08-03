@@ -32,7 +32,7 @@ function determineStartOfWeek(currDay) {
 
 //converts from 2022-07-23T20:35:41.935Z to 7/23/2022 12:15:52
 function formatTime(timeToConvert) {
-const formattedHours = timeToConvert.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit', second:'2-digit'})
+const formattedHours = timeToConvert.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit', second:'2-digit', timeZone: 'America/Los_Angeles'})
 const formattedTime = timeToConvert.toLocaleDateString() + " " + formattedHours;
     return formattedTime;
 }
@@ -47,7 +47,7 @@ function formatTimeForVisits(timeToConvert) {
 //get the number of rows for the Check Out sheet
 function getNumRowsForCheckIn(properties) {
   for (var sheet of properties["data"]["sheets"]) {
-    if (sheet.properties.title == "Check Out") {
+    if (sheet.properties.title == "Check Out Form") {
       return sheet.properties.gridProperties.rowCount;
     }
   }
@@ -105,16 +105,16 @@ export default async function (req, res) {
       var calID = body.calID
       let numberOfRowsToGoBack = 2000;
       var checkInTime = new Date();
-      var rangeQuery = "Check Out!A:B";
+      var rangeQuery = "Check Out Form!A:B";
       const request = {
         spreadsheetId: checkin_sheet,
-        range: "Check Out!A:B",
+        range: "Check Out Form!A:B",
         valueInputOption: "USER_ENTERED",
         insertDataOption: "INSERT_ROWS",
         resource: {
-          range: "Check Out!A:B",
+          range: "Check Out Form!A:B",
           majorDimension: "ROWS",
-          values: [[formatTime(checkInTime), body.calID]],
+          values: [[formatTime(checkInTime), "'" + calID]],
         },
       };
 
@@ -126,7 +126,7 @@ export default async function (req, res) {
           var startingRow = numRows - numberOfRowsToGoBack;
           var startOfWeek = determineStartOfWeek(checkInTime);
           if (startingRow > 0) {
-            rangeQuery = "Check Out!A" + startingRow.toString() + ":B";
+            rangeQuery = "Check Out Form!A" + startingRow.toString() + ":B";
           }
           const paramsForVisits = {
             spreadsheetId: checkin_sheet,
