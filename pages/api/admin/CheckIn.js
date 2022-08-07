@@ -1,13 +1,8 @@
 import { validateFunc } from "../validate";
 import { google } from "googleapis";
 
-import service from "../../../service-account.enc";
-import decrypt from "../../../utils/decrypt.js";
-
-const test = process.env.NEXT_PUBLIC_VERCEL_ENV == undefined;
-const checkin_sheet = test
-  ? process.env.SPREADSHEET_ID_TEST
-  : process.env.PANTRY_DATA_SPREADSHEET_ID;
+import {service_info} from "../../../utils/decrypt.js";
+import firebase from '../../../firebase/clientApp'
 
 /*
  * /api/admin/checkin
@@ -74,6 +69,16 @@ function scanTableForVisitInPastWeek(values, startOfWeek, calId) {
   return visitedTimes;
 }
 
+function getFirebaseInfo() {
+  return new Promise((resolve) => {
+    firebase.database().ref('/sheetIDs')
+    .once('value', snapshot => {
+        let val = snapshot.val();
+        return resolve(val.checkIn)
+    });
+  })
+}
+
 export default async function (req, res) {
   const token = req.headers.authorization;
   return new Promise((resolve, reject) => {
@@ -87,7 +92,6 @@ export default async function (req, res) {
     }
 
     validateFunc(token).then(() => {
-      let service_info = JSON.parse(decrypt(service.encrypted));
       const target = ["https://www.googleapis.com/auth/spreadsheets"];
       var sheets_auth = new google.auth.JWT(
         service_info.client_email,
@@ -98,74 +102,72 @@ export default async function (req, res) {
         service_info.private_key_id
       );
       const sheets = google.sheets({ version: "v4", auth: sheets_auth });
-      const paramsForCheckIn = {
-        spreadsheetId: checkin_sheet,
-      };
-      var numRows = 0;
-      var calID = body.calID
-      let numberOfRowsToGoBack = 2000;
-      var checkInTime = new Date();
-      var rangeQuery = "Check Out Form!A:B";
-      const request = {
-        spreadsheetId: checkin_sheet,
-        range: "Check Out Form!A:B",
-        valueInputOption: "USER_ENTERED",
-        insertDataOption: "INSERT_ROWS",
-        resource: {
-          range: "Check Out Form!A:B",
-          majorDimension: "ROWS",
-          values: [[formatTime(checkInTime), "'" + calID]],
-        },
-      };
 
-      //check for visit in past calendar week
-      sheets.spreadsheets
-        .get(paramsForCheckIn)
+      getFirebaseInfo().then(({spreadsheetId, sheetName}) => {
+        var numRows = 0;
+        var calID = body.calID
+        let numberOfRowsToGoBack = 2000;
+        var checkInTime = new Date();
+        var rangeQuery = sheetName + "!A:B";
+        const request = {
+          spreadsheetId: spreadsheetId,
+          range: rangeQuery,
+          valueInputOption: "USER_ENTERED",
+          insertDataOption: "INSERT_ROWS",
+          resource: {
+            range: rangeQuery,
+            majorDimension: "ROWS",
+            values: [[formatTime(checkInTime), "'" + calID]],
+          },
+        };
+
+        //check for visit in past calendar week
+        sheets.spreadsheets.get({spreadsheetId: spreadsheetId})
         .then((properties) => (numRows = getNumRowsForCheckIn(properties)))
         .then(function () {
           var startingRow = numRows - numberOfRowsToGoBack;
           var startOfWeek = determineStartOfWeek(checkInTime);
           if (startingRow > 0) {
-            rangeQuery = "Check Out Form!A" + startingRow.toString() + ":B";
+            rangeQuery = sheetName + "!A" + startingRow.toString() + ":B";
           }
           const paramsForVisits = {
-            spreadsheetId: checkin_sheet,
+            spreadsheetId: spreadsheetId ,
             range: rangeQuery,
           };
-          sheets.spreadsheets.values
-            .get(paramsForVisits)
-            .then((body) => {
-              var scannedRows = body.data.values
-              // write to google sheets
-              sheets.spreadsheets.values.append(request)
-              .then(() => {
-                if (scannedRows != null) {
-                  res.json(
-                    scanTableForVisitInPastWeek(
-                      scannedRows,
-                      startOfWeek,
-                      calID
-                    )
-                  );
-                }
-                else {
-                  var emptyVisits = [] //case where we can't scan the table due too many blank cells added at bottom of spreadsheet
-                  res.json(emptyVisits)
-                }
-                return resolve();
+          sheets.spreadsheets.values.get(paramsForVisits)
+          .then((body) => {
+            var scannedRows = body.data.values
+            // write to google sheets
+            sheets.spreadsheets.values.append(request)
+            .then(() => {
+              if (scannedRows != null) {
+                res.json(
+                  scanTableForVisitInPastWeek(
+                    scannedRows,
+                    startOfWeek,
+                    calID
+                  )
+                );
               }
-              )
-              .catch((error) => {
-                return reject("error writing to Pantry data sheet: " +  error);
-              });
-            })
+              else {
+                var emptyVisits = [] //case where we can't scan the table due too many blank cells added at bottom of spreadsheet
+                res.json(emptyVisits)
+              }
+              return resolve();
+            }
+            )
             .catch((error) => {
-              return reject("error reading from Pantry data sheet: " + error);
+              return reject("error writing to Pantry data sheet: " +  error);
             });
+          })
+          .catch((error) => {
+            return reject("error reading from Pantry data sheet: " + error);
+          });
         })
         .catch((error) => {
           return reject("error with firebase auth: " + error);
         });
+      });
     });
   });
 }
