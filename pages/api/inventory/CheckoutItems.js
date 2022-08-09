@@ -52,20 +52,38 @@ function getFirebaseInfo() {
     })
 }
 
-// Gets the *sheet* ID for the page of the spreadsheet that we want to write to.
-function getSheetIds(sheets, spreadsheetId, sheetName) {
-    return new Promise((resolve) => {
-        sheets.spreadsheets.get({spreadsheetId: spreadsheetId, fields: "sheets.properties.sheetId,sheets.properties.title"})
-        .then((resp) => {
-            let sheetIds = resp.data.sheets//.forEach((x) => sheetDict[x.properties.title] = x.properties.sheetId)
-            let sheetMatch = sheetIds.filter((info) => sheetName === info.properties.title)
-            if (sheetMatch.length == 0) {
-                console.log("warning: given sheet name cannot be found in this spreadsheet")
-                resolve(0); // default to home sheet (first page)
+// returns a function that can setup the formatter based on the result of a `append` call
+const setupFormatColumns = (resp, pageId) => {
+    // if first entry, set format for future appends
+    let range = resp.data.updates.updatedRange
+    let rowStart = range.match(/(?<row>\d+):/).groups.row - 1 // the index of the first newly written row
+    let length = resp.data.updates.updatedRows
+
+    return (colIndex, numberFormat, textFormat) => {
+        var cstart = colIndex, cend = colIndex + 1;
+        if (typeof(colIndex) == 'object') {
+            cstart = colIndex[0];
+            cend = colIndex[1];
+        }
+        return {
+            repeatCell: {
+                range: {
+                    sheetId: pageId,
+                    startRowIndex: rowStart,
+                    endRowIndex: rowStart + length,
+                    startColumnIndex: cstart,
+                    endColumnIndex: cend
+                },
+                cell: {
+                    userEnteredFormat: {
+                        numberFormat: numberFormat,
+                        textFormat: textFormat
+                    }
+                },
+                fields: `userEnteredFormat(${numberFormat ? "numberFormat," : ""}textFormat)`
             }
-            resolve(sheetMatch[0].properties.sheetId); // dictionary of sheetName (string) -> sheetId (number)
-        })
-    })
+        }
+    }
 }
 
 function writeLog(log) {
@@ -110,115 +128,30 @@ function writeLog(log) {
             }
     
             sheets.spreadsheets.values.append(values)
-            .then((resp) => {
-    
-                // if first entry, set format for future appends
-                let range = resp.data.updates.updatedRange
-                let rstart = range.match(/(?<row>\d+):/).groups.row - 1 // the index of the first newly written row
-    
-                //getSheetIds(sheets, spreadsheetId, sheetName).then((pageId) => {    
-                   
-                    // this is very long and annoying :( sorry
-                    const sheetFormat = {
-                        spreadsheetId: spreadsheetId,
-                        resource: {
-                            requests: [
-                            { // column 1 (date)
-                                repeatCell: {
-                                    range: {
-                                        sheetId: pageId,
-                                        startRowIndex: rstart,
-                                        endRowIndex: rstart + input.length,
-                                        startColumnIndex: 0,
-                                        endColumnIndex: 1
-                                    },
-                                    cell: {
-                                        userEnteredFormat: {
-                                            numberFormat: {
-                                                type: "DATE",
-                                                pattern: "ddddd m/dd"
-                                            },
-                                            textFormat: {
-                                                bold: false
-                                            }
-                                        }
-                                    },
-                                    fields: "userEnteredFormat(numberFormat,textFormat)"
-                                }
-                            },
-                            { // column 2 (time)
-                                repeatCell: {
-                                    range: {
-                                        sheetId: pageId,
-                                        startRowIndex: rstart,
-                                        endRowIndex: rstart + input.length,
-                                        startColumnIndex: 1,
-                                        endColumnIndex: 2
-                                    },
-                                    cell: {
-                                        userEnteredFormat: {
-                                            numberFormat: {
-                                                type: "TIME",
-                                                pattern: "h:mm am/pm"
-                                            },
-                                            textFormat: {
-                                                bold: false
-                                            }
-                                        }
-                                    },
-                                    fields: "userEnteredFormat(numberFormat,textFormat)"
-                                }
-                            },
-                            { // column 3 (barcode)
-                                repeatCell: {
-                                    range: {
-                                        sheetId: pageId,
-                                        startRowIndex: rstart,
-                                        endRowIndex: rstart + input.length,
-                                        startColumnIndex: 2,
-                                        endColumnIndex: 3
-                                    },
-                                    cell: {
-                                        userEnteredFormat: {
-                                            numberFormat: {
-                                                type: "TEXT",
-                                            },
-                                            textFormat: {
-                                                bold: false
-                                            }
-                                        }
-                                    },
-                                    fields: "userEnteredFormat(numberFormat,textFormat)"
-                                }
-                            },
-                            { // column 4 (quantity)
-                                repeatCell: {
-                                    range: {
-                                        sheetId: pageId,
-                                        startRowIndex: rstart,
-                                        endRowIndex: rstart + input.length,
-                                        startColumnIndex: 3,
-                                        endColumnIndex: 6
-                                    },
-                                    cell: {
-                                        userEnteredFormat: {
-                                            textFormat: {
-                                                bold: false
-                                            }
-                                        }
-                                    },
-                                    fields: "userEnteredFormat(textFormat)"
-                                }
-                            },
-                            ]
-                        }
-                    }
-    
-                    sheets.spreadsheets.batchUpdate(sheetFormat).then(() => resolve())
-                //})
-            })
             .catch((err) => {
                 reject("Unable to access the google sheet.")
+            })
+            .then((resp) => {    
+                let generateFormatter = setupFormatColumns(resp, pageId)
+
+                // this is very long and annoying :( sorry
+                const sheetFormat = {
+                    spreadsheetId: spreadsheetId,
+                    resource: {
+                        requests: [
+                            generateFormatter(0, {type:"DATE", pattern:"ddddd m/dd"}, {bold:false}), // column 1 (date)
+                            generateFormatter(1, {type:"TIME", pattern:"h:mm am/pm"}, {bold:false}), // column 2 (time)
+                            generateFormatter(2, {type:"TEXT"}, {bold:false}),               // column 3 (barcode)
+                            generateFormatter([3,6], {}, {bold:false}),                   // column 4 (quantity)
+                        ]
+                    }
+                }
+    
+                sheets.spreadsheets.batchUpdate(sheetFormat).then(() => resolve())
+            })
+            .catch((err) => {
+                console.log(err)
+                resolve("warning: possible problem with sheet formatting");
             })
         })
     })
@@ -260,19 +193,25 @@ export default async function(req,res) {
                                     .catch(error => {
                                         res.status(500);
                                         res.json({error: `Error when checking out item (barcode ${barcode}): ${error}`});
-                                        return resolve();
+                                        return reject();
                                     })
                                 } else {
                                     console.log(`possible data corruption: invalid barcode ${barcode}`)
+                                    return resolve();
                                 }
+                            })
+                            .catch(err => {
+                                res.status(500);
+                                res.json({error: `Error accessing firebase (barcode ${barcode}): ${err}`});
+                                return reject();
                             });
                         })
                     })
                 ).then(() => {
                     // perform checkout logging
-                    writeLog(log).then(() => {
+                    writeLog(log).then((msg) => {
                         res.status(200);
-                        res.json({message: "success"});
+                        res.json({message: msg});
                         return resolve();
                     })
                     .catch((err) => {
@@ -285,6 +224,9 @@ export default async function(req,res) {
                 })
                 .catch(() => {
                     console.log(`possible data corruption`)
+                    res.status(500);
+                    res.json({message: "error modifying firebase"});
+                    return resolve();
                 })
             }).catch((err) => {
                 console.log("CheckoutItems signInAnonymously error:", err)
