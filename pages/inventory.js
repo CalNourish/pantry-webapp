@@ -2,12 +2,14 @@ import Layout from '../components/Layout'
 import Sidebar from '../components/Sidebar'
 import Table from '../components/Table'
 import InventoryModal from '../components/InventoryModal'
+
+import { useUser } from '../context/userContext'
+import { server } from './_app.js'
+
 import Modal from 'react-modal'
 import React, { useState, useReducer } from 'react';
 import cookie from 'js-cookie';
-import firebase from 'firebase';
-import { useUser } from '../context/userContext'
-import { server } from './_app.js'
+import firebase from '../firebase/clientApp';
 
 export default function Inventory() {
   const token = cookie.get("firebaseToken")
@@ -380,14 +382,14 @@ export default function Inventory() {
         
         <div className="flex">
           {!(user && user.authorized === "true") ? "" :
-              <div className="w-64 bg-gray-200 items-center">
+              <div className="w-64 items-center">
                 <Sidebar className="py-4">
                   <h1 className="text-3xl font-semibold mb-2">Inventory</h1>
                   <div className="my-4">
                     <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowAddItem(true)}>Add new item</button>
                     <button className="my-1 btn-outline w-56 rounded-md p-1" onClick={() => setShowEditItem(true)}>Edit existing item</button>
                   </div>
-                  <p className="mb-5 text-sm italic text-gray-700">You can double-click on an item name or count to change the value quickly!</p>
+                  <p className="mb-5 text-sm italic text-gray-600">You can double-click on an item name or count to change the value quickly!</p>
                 </Sidebar>
               </div>
           }

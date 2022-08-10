@@ -68,7 +68,7 @@ function requireParams(body, res) {
 }
 
 /* decrement inventory amounts in firebase */
-function updateInventory(items) {
+function updateFirebase(items) {
   let itemNames = {};
 
   return new Promise((resolve, reject) => {
@@ -324,7 +324,7 @@ export default async function(req, res) {
 
     firebase.auth().signInAnonymously()
     .then(() => {
-      updateInventory(body.items).then((itemNames) => {
+      updateFirebase(body.items).then((itemNames) => {
         writeToSheets(body, itemNames).then((orderID) => {
           res.status(200).json({success: `Successfully added order! Order ID: ${orderID}`});
           return resolve();

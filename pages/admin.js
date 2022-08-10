@@ -1,277 +1,160 @@
 import Layout from '../components/Layout'
 import Head from 'next/head'
 import useSWR from 'swr'
+import cookie from 'js-cookie';
 
 import { useEffect, useState } from 'react'
 import { useUser } from '../context/userContext'
-import cookie from 'js-cookie';
+import { server } from './_app.js'
 
 const fetcher = (url) => fetch(url).then((res) => res.json())
 
 const token = cookie.get("firebaseToken")
 
-export default function Hours() {
+export default function Admin() {
+  const [submitStatus, setSubmitStatus] = useState({});
+  const [statusTimer, setStatusTimer] = useState(null);
+  const [formData, setFormData] = useState({});
 
-    var dayToHours;
-    var dayObjects = [];
+  const { user } = useUser();
+  let authToken = (user && user.authorized === "true") ? token : null;
 
-    /**
-     * Fetch the current hours of the pantry and convert them to a map with
-     * the format being day:hours
-     */
-    const fetchHours = async () => {
+  const fetcher = (url) => fetch(url, {
+    method:'GET', headers: {'Content-Type': "application/json", 'Authorization': token}
+  }).then((res) => res.json());
 
-        await fetch('/api/admin/getHours', {
-            method: 'GET',
-            headers: { 'Content-Type': "application/json" }
-        })
-            .then(function (res) {
-                res.json().then(json => {
-                    dayToHours = json.message
-                    dayToHours = new Map(dayToHours)
-                    createDayObjects()
-                });
+  const { data, error } = useSWR(`${server}/api/admin/GetSheetLinks`, fetcher);
 
+  if (!data) return <div>Loading...</div>
+  if (error || data.error) {
+    return (
+      <Layout>
+        <div className='m-4'>Error! See console log for details.</div>
+      </Layout>
+    )
+  }
+
+  if (!authToken) {
+    return <>
+      <Head>
+        <title>Pantry</title>
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <Layout>
+          <h1 className='text-xl m-6'>Sorry, you are not authorized to view this page.</h1>
+      </Layout>
+    </>
+  }
+
+  // initialize form info if empty
+  if (Object.keys(formData).length == 0) {
+    setFormData(data)
+  }
+
+  let showSuccess = (tag, t = 5000) => {
+    /* show error banner with error text for 5 seconds, or custom time */
+    setSubmitStatus({[tag]: "success"})
+    clearTimeout(statusTimer);
+    let timer = setTimeout(() => {
+      setSubmitStatus({})
+    }, t)
+    setStatusTimer(timer);
+  }
+
+  let generateForm = (tag) => {
+    let tagData = formData[tag]; // should be another map...
+    if (!tagData) {
+      return (
+        <div key={`missing-sheet-${tag}`} className='p-4 border border-red-400 bg-red-50'>
+          <div className='font-semibold text-xl text-red-600'>[{tag}] - missing data</div>
+        </div>
+      )
+    }
+
+    let setTagData = (newTagData) => {
+      setFormData({...formData, [tag]: {...tagData, ...newTagData}})
+    }
+
+    return (
+      <form key={`sheet-info-${tag}`} id={`sheet-info-${tag}`} className='p-4 border border-gray-400 bg-gray-50'>
+        <div className='font-semibold text-xl'>{tagData.displayName || tag}
+          {tagData.displayName ? "" : <span className='font-normal text-gray-500 text-sm'></span>}
+        </div>
+        <table className='w-full my-2 table-auto'>
+          <tbody>
+            <tr className='mb-2'>
+              <td className='pr-4 whitespace-nowrap w-1'>Spreadsheet ID:</td>
+              <td>
+                <input className="border rounded w-full py-2 px-3 text-gray-600 leading-tight mr-4"
+                id={`${tag}-spreadsheetId`} autoComplete="off" value={tagData.spreadsheetId || ""}
+                onChange={(e) => {
+                  setTagData({spreadsheetId: e.target.value})
+                  setSubmitStatus({...submitStatus, [tag]: null})
+                }}/>
+              </td>
+            </tr>
+            <tr>
+              <td className='pr-4 whitespace-nowrap w-1'>Sheet Name:</td>
+              <td>
+                <input className="border rounded w-full py-2 px-3 text-gray-600 leading-tight mr-4"
+                id={`${tag}-sheetName`} autoComplete="off" value={tagData.sheetName || ""}
+                onChange={(e) => {
+                  setTagData({sheetName: e.target.value})
+                  setSubmitStatus({...submitStatus, [tag]: null})
+                }}/>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <button className='btn btn-outline uppercase tracking-wide text-xs font-semibold' type='submit' disabled={submitStatus[tag] === "loading"}
+          onClick={(e) => {
+            e.preventDefault();
+            setSubmitStatus({[tag]: "loading"})
+
+            fetch(`${server}/api/admin/SetSheetInfo`, { method: 'POST',
+              body: JSON.stringify({[tag]: tagData}),
+              headers: {'Content-Type': "application/json", 'Authorization': token}
             })
-            .catch(function (error) {
+            .then((result) => {
+              console.log("result:", result)
+              result.json().then((res) => {
+                console.log("res data:", res)
+                if (result.ok) {
+                  showSuccess(tag);
+                } else {
+                  // error response from API
+                  setSubmitStatus({[tag]: "error", [tag+"-msg"]: res.error})
+                  return;
+                }
+              })
+              .catch((err) => {
+                console.log("error parsing JSON response:", err)
+                setSubmitStatus({[tag]: "error", [tag+"-msg"]: err})
+              })
+            }).catch((err) => {
+              console.log("error calling SetSheetInfo API:", err)
+              setSubmitStatus({[tag]: "error", [tag+"-msg"]: err})
             });
+          }}>
+          update
+        </button>
 
+        {(submitStatus[tag] === "success") && <div className='mx-4 my-auto text-xl font-bold text-green-600 inline-block'>✓</div>}
+        {(submitStatus[tag] === "loading") && <div className='mx-4 inline-block italic text-gray-400'>loading...</div>}
+        {(submitStatus[tag] === "error") && <div className='mx-4 my-auto text-xl font-semibold text-red-600 inline-block'>
+          {submitStatus[tag+"-msg"] || "X"}</div>}
+      </form>
+    )
+  } 
 
-
-    }
-
-    /**
-     * Convert the map into objects with day and hour properties
-     * 
-     */
-    const createDayObjects = () => {
-        const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
-
-        for (let day in days) {
-            const dayObject = new Object();
-            dayObject.day = days[day];
-            dayObject.hours = dayToHours.get(days[day])
-            dayObjects.push(dayObject);
-        }
-
-    }
-
-    useEffect(() => {
-
-        fetchHours();
-    }, []);
-
-
-    const [inEditMode, setInEditMode] = useState({
-        status: false,
-        rowKey: null
-    });
-
-    const [hours, setHours] = useState(null);
-
-    /**
-     *
-     * @param day - The day we are trying to edit
-     * @param currentHours - The current hours
-     */
-    const onEdit = ({ day, currentHours }) => {
-        setInEditMode({
-            status: true,
-            rowKey: day
-        })
-        setHours(currentHours)
-
-    }
-
-
-
-    /**
-     *
-     * @param day -The day we are trying to change
-     * @param newHours- The new hours of the day
-     */
-    const onSave = ({ day, newHours }) => {
-
-        fetch('/api/admin/updateHours', {
-            method: 'POST',
-            body: JSON.stringify({
-                "day": day,
-                "hours": newHours,
-            }),
-            headers: { 'Content-Type': "application/json", 'Authorization': token }
-        })
-            .then(response => response.json())
-            .then(json => {
-                // reset inEditMode and unit price state values
-                onCancel();
-
-                // fetch the updated data
-                fetchHours();
-                location.reload();
-            })
-
-    }
-
-    const onCancel = () => {
-        // reset the inEditMode state value
-        setInEditMode({
-            status: false,
-            rowKey: null
-        })
-        // reset the hours
-        setHours(null);
-    }
-
-
-    const { data, error } = useSWR('/api/admin/getHours', fetcher)
-    if (error) {
-        return (
-            <>
-                <Head>
-                    <title>Pantry</title>
-                    <link rel="icon" href="/favicon.ico" />
-                    <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Rubik:wght@400;700&display=swap" rel="stylesheet"></link>
-                </Head>
-                <Layout>
-                    <th>Failed to get hours</th>
-                </Layout>
-            </>
-        )
-    }
-    if (!data) {
-        return (
-            <>
-                <Head>
-                    <title>Pantry</title>
-                    <link rel="icon" href="/favicon.ico" />
-                    <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Rubik:wght@400;700&display=swap" rel="stylesheet"></link>
-                </Head>
-                <Layout>
-                    <th>Fetching hours...</th>
-                </Layout>
-            </>
-        )
-    }
-    else {
-        dayToHours = data.message
-        dayToHours = new Map(dayToHours)
-        createDayObjects()
-        return (
-            <>
-                <Head>
-                    <title>Pantry</title>
-                    <link rel="icon" href="/favicon.ico" />
-                    <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Rubik:wght@400;700&display=swap" rel="stylesheet"></link>
-                </Head>
-                <Layout>
-                    <div className="container">
-                        <h1 class="text-3xl flex justify-center items-center">Pantry Hours</h1>
-                        <table class="text-xl flex justify-center items-center" cellpadding="10" cellspacing="10">
-                            <thead>
-                                <tr>
-                                    <th></th>
-                                    <th></th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {
-                                    dayObjects.map((item) => (
-                                        <tr key={item.day}>
-                                            <td>{item.day[0].toUpperCase() + item.day.substring(1)}</td>
-                                            <td>
-                                                {
-                                                    inEditMode.status && inEditMode.rowKey === item.day ? (
-                                                        <input value={hours}
-                                                            onChange={(event) => setHours(event.target.value)}
-                                                        />
-                                                    ) : (
-                                                        item.hours
-                                                    )
-                                                }
-                                            </td>
-                                            <td>
-                                                {
-                                                    inEditMode.status && inEditMode.rowKey === item.day ? (
-                                                        <React.Fragment>
-                                                            <button
-                                                                class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 border border-blue-700 rounded"
-                                                                onClick={() => onSave({ day: item.day, newHours: hours })}
-                                                            >
-                                                                Save
-                                                            </button>
-
-                                                            <button
-                                                                class="bg-white-500 hover:bg-white-700 text-blue py-1 px-2 border border-blue-700 rounded"
-                                                                style={{ marginLeft: 8 }}
-                                                                onClick={() => onCancel()}
-                                                            >
-                                                                Cancel
-                                                            </button>
-                                                        </React.Fragment>
-                                                    ) : (
-                                                        <button className="font-bold text-xl pl-2" onClick={() => onEdit({ day: item.day, currentHours: item.hours })}>
-                                                            <span>&#9999;</span>
-                                                        </button>
-
-                                                    )
-                                                }
-                                            </td>
-                                        </tr>
-                                    ))
-                                }
-
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <button onClick={() => {
-                        fetch('/api/admin/SetSheetInfo', { method: 'POST',
-                            body: JSON.stringify({
-                                checkoutLog: {
-                                    spreadsheetId: "1waiCSO7hm8kmWLaG8OdB8_7ksfEbm_B3CyKHbXTIf5E",
-                                    sheetName: "July22"
-                                },
-                                bagPacking: {
-                                    sheetName: "[Testing] Spring Delivery Packing Info",
-                                    spreadsheetId: "1Pu5pHqtd9FmJpVK3s-sL43c2Lh2OPw2DQD8MyWBXUvo"
-                                },
-                                doordash: {
-                                    sheetName: "Customer Information",
-                                    spreadsheetId: "13BcniNuHl6P5uoG3SPJ7aP-yJeS0n1eB6EUL0wYcV4o"
-                                },
-                                pantryMaster: {
-                                    sheetName: "TechTesting",
-                                    spreadsheetId:"1bCtOsgTJa_hAFp7zxGK7y7snEj8zlHKKLM-5GF_3vF4"
-                                }
-                            }),
-                            headers: {'Content-Type': "application/json", 'Authorization': token}
-                        }).then(res => res.json())
-                        .then(res => {
-                            console.log(res);
-                        })
-                    }} >
-                        btn
-                    </button>
-                </Layout>
-            </>
-
-
-
-
-        )
-    }
+  return (
+    <Layout>
+      <div className='m-8'>
+        <div className='font-semibold text-3xl mb-4'>Google Sheets Links</div>
+        <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
+          {Object.keys(formData).map((tag) => generateForm(tag))}
+        </div>
+      </div>
+    </Layout>
+  )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

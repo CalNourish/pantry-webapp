@@ -1,33 +1,11 @@
 import Head from "next/head";
-import useSWR from "swr";
-
-import { useState, useEffect } from "react";
-import { useUser } from "../context/userContext";
 import Layout from "../components/Layout";
+import { useUser } from "../context/userContext";
 import { server } from './_app.js'
+
+import { useState } from "react";
 import ReactMarkdown from 'react-markdown';
 import cookie from "js-cookie";
-
-// fetcher for get requests
-const fetcher = (url) => fetch(url).then((res) => res.json());
-
-function fixCounts() {
-  const token = cookie.get("firebaseToken");
-  fetch("/api/inventory/GetAllItems", {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      for (var bcode in data) {
-        fetch("/api/inventory/UpdateItem", {
-          method: "POST",
-          body: JSON.stringify({ barcode: bcode, count: data[bcode]["count"] }),
-          headers: { "Content-Type": "application/json", Authorization: token },
-        });
-      }
-    });
-}
 
 const markdownStyle = {
   h1: ({node, ...props}) => <h1 className='text-4xl mb-4 block tracking-wide font-bold' {...props}/>,
@@ -73,10 +51,10 @@ export default function Home() {
         <title>Pantry</title>
         <link rel="icon" href="/favicon.ico" />
         {/* Link to fonts for now. May look at storing fonts locally or just usign system fonts */}
-        <link
+        {/* <link
           href="https://fonts.googleapis.com/css2?family=Roboto&family=Rubik:wght@400;700&display=swap"
           rel="stylesheet"
-        ></link>
+        ></link> */}
       </Head>
       <Layout>
         <div className="m-8">
@@ -119,9 +97,9 @@ export default function Home() {
 
           {/* Edit message box */}
           {isEditingInfo &&
-            <textarea className="form-control w-full h-64 block px-3 py-1 text-base font-normal text-gray-700 bg-white
-              border border-solid border-gray-300 rounded mb-4
-            focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" value={info}
+            <textarea className="form-control w-full h-64 block px-3 py-1 text-base font-normal text-gray-600 bg-white
+              border border-solid border-gray-200 rounded mb-4
+            focus:text-gray-600 focus:bg-white focus:border-blue-600 focus:outline-none" value={info}
               onChange={(e) => {
                 setInfo(e.target.value);
               }}>

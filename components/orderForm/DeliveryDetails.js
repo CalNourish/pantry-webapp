@@ -19,16 +19,16 @@ export default function DeliveryDetails(props) {
     )
   }
 
-  let inputAppearance = "appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+  let inputAppearance = "appearance-none block w-full bg-gray-100 text-gray-600 border border-gray-100 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-400"
   let errorAppearance = " border-red-600 border-2 focus:border-red-500"
   
   return (
     <>
-      <h2 className="text-lg mb-4 block tracking-wide text-gray-700 font-bold">Delivery Details</h2>
+      <h2 className="text-lg mb-4 block tracking-wide text-gray-600 font-bold">Delivery Details</h2>
       <div className="form-group flex flex-col md:flex-row mb-2">
         <div className="mr-0 md:mr-8 flex-grow">
           <label 
-            className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" 
+            className="block uppercase tracking-wide text-gray-600 text-xs font-bold mb-2" 
             htmlFor="street-address" data-required="T"
           >
             Street Address
@@ -46,7 +46,7 @@ export default function DeliveryDetails(props) {
         </div>
         <div>
           <label 
-            className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+            className="block uppercase tracking-wide text-gray-600 text-xs font-bold mb-2"
             htmlFor="address-two" data-required="F"
           >
             Apt, ste, etc.
@@ -66,7 +66,7 @@ export default function DeliveryDetails(props) {
       <div className="form-group flex flex-col md:flex-row mb-2">
         <div className="mr-0 md:mr-8 flex-grow">
           <label 
-            className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" 
+            className="block uppercase tracking-wide text-gray-600 text-xs font-bold mb-2" 
             htmlFor="city" data-required="T"
           >
             City
@@ -84,7 +84,7 @@ export default function DeliveryDetails(props) {
         </div>
         <div>
           <label 
-            className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+            className="block uppercase tracking-wide text-gray-600 text-xs font-bold mb-2"
             htmlFor="zip" data-required="T"
           >
             Zip Code
@@ -104,12 +104,12 @@ export default function DeliveryDetails(props) {
       <div className="form-group mb-4">
         <div className="mb-2">
           <label 
-            className="block uppercase tracking-wide text-gray-700 text-xs font-bold" 
+            className="block uppercase tracking-wide text-gray-600 text-xs font-bold" 
             htmlFor="phone" data-required="T"
           >
             Phone
           </label>
-        <p className="text-gray-600 text-xs italic">Used to call/text to confirm delivery</p>
+        <p className="text-gray-500 text-xs italic">Used to call/text to confirm delivery</p>
         </div>
         <input 
           type="tel" 
@@ -127,12 +127,12 @@ export default function DeliveryDetails(props) {
       <div className="form-group mb-4">
         <div className="mb-2">
           <label 
-            className="block uppercase tracking-wide text-gray-700 text-xs font-bold" 
+            className="block uppercase tracking-wide text-gray-600 text-xs font-bold" 
             htmlFor="deliveryTimes" data-required="T"
           >
             What times will you be available to accept a delivery this week?
           </label>
-        <p className="text-gray-600 text-xs italic">Please select all that work, we will send an email for a final confirmation.</p>
+        <p className="text-gray-500 text-xs italic">Please select all that work, we will send an email for a final confirmation.</p>
         </div>
         <Select options={deliveryTimeOptions} isMulti isClearable isSearchable value={delivery.deliveryTimes}
           onChange={(selections) => cartDispatch({ type: 'UPDATE_DELIVERY', payload: {deliveryTimes: selections} })}
@@ -142,15 +142,15 @@ export default function DeliveryDetails(props) {
       <div className="form-group mb-4">
         <div className="mb-2">
           <label 
-            className="block uppercase tracking-wide text-gray-700 text-xs font-bold" 
+            className="block uppercase tracking-wide text-gray-600 text-xs font-bold" 
             htmlFor="delivery-notes" data-required="F"
           >
             Delivery notes: any other information we might need to know to do a no-contact drop off?
           </label>
-        <p className="text-gray-600 text-xs italic">For example, if you live in an apartment building with a locked gate or if there is a convenient spot to leave your bag of groceries.</p>
+        <p className="text-gray-500 text-xs italic">For example, if you live in an apartment building with a locked gate or if there is a convenient spot to leave your bag of groceries.</p>
         </div>
         <textarea
-          className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
+          className="appearance-none block w-full bg-gray-100 text-gray-600 border border-gray-100 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-400" 
           id="delivery-notes" 
           type="text" 
           placeholder="Leave at door"

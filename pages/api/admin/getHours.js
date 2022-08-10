@@ -6,47 +6,22 @@ import firebase from '../../../firebase/clientApp'
 * req is empty 
 */
 
-export default async function handler(req,res) { 
+export default async function (req, res) {
+    return new Promise((resolve, reject) => {
 
-    var dayToHours = new Map();
-    let days = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"];
-    let promiseArray = [];
-
-    for (let day in days) {       
-        let p = returnPromise(days[day])
-        promiseArray.push(p)
-    }
-    
-    return await Promise.all(promiseArray)
-    .then((snapshots) => {
-        for (let snapshot in snapshots) {
-            var hours = snapshots[snapshot].child("hours").val();
-            dayToHours.set(days[snapshot],hours);
-        }        
-        res.status(201).json({
-            message:Array.from(dayToHours.entries())
+        // no need to sign in since we're just reading
+        firebase.database()
+        .ref('/hours/')
+        .once('value')  
+        .catch(function(error){
+            res.status(500).json({error: "server error getting items from the database", errorstack: error});
+            return resolve();
+        })
+        .then(function(resp){
+            var hoursMap = resp.val();
+            Object.keys(hoursMap).map((key) => hoursMap[key] = hoursMap[key].hours)
+            res.status(200).json(hoursMap);
+            return resolve();
         });
-      })
-    .catch(error => {
-        console.error(error.message)
-        res.status(500).json({
-            success: false,
-            blob: error,
-          });
-    });
-    }
-
-    async function returnPromise(day) {
-        return new Promise(function(resolve, reject) {
-            const ref = firebase.database().ref("/hours/"+day);
-            return resolve(ref.once("value"))
-      });
-    
-    }
-
-
-
-
-
-
-
+    })
+}
