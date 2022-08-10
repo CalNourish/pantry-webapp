@@ -1,5 +1,6 @@
 import firebase from '../../../firebase/clientApp'    
 import {validateFunc} from '../validate'
+import { setupFormatColumns } from '../../../utils/sheets'
 import { google } from 'googleapis'; 
 
 /*
@@ -52,40 +53,6 @@ function getFirebaseInfo() {
     })
 }
 
-// returns a function that can setup the formatter based on the result of a `append` call
-const setupFormatColumns = (resp, pageId) => {
-    // if first entry, set format for future appends
-    let range = resp.data.updates.updatedRange
-    let rowStart = range.match(/(?<row>\d+):/).groups.row - 1 // the index of the first newly written row
-    let length = resp.data.updates.updatedRows
-
-    return (colIndex, numberFormat, textFormat) => {
-        var cstart = colIndex, cend = colIndex + 1;
-        if (typeof(colIndex) == 'object') {
-            cstart = colIndex[0];
-            cend = colIndex[1];
-        }
-        return {
-            repeatCell: {
-                range: {
-                    sheetId: pageId,
-                    startRowIndex: rowStart,
-                    endRowIndex: rowStart + length,
-                    startColumnIndex: cstart,
-                    endColumnIndex: cend
-                },
-                cell: {
-                    userEnteredFormat: {
-                        numberFormat: numberFormat,
-                        textFormat: textFormat
-                    }
-                },
-                fields: `userEnteredFormat(${numberFormat ? "numberFormat," : ""}textFormat)`
-            }
-        }
-    }
-}
-
 function writeLog(log) {
 
     let {client_email, private_key} = service_info;
@@ -100,7 +67,6 @@ function writeLog(log) {
         );
         const sheets = google.sheets({ version: 'v4', auth: sheets_auth });
     
-
         getFirebaseInfo().then(({spreadsheetId, sheetName, pageId}) => {
             let now = new Date();
 
@@ -134,15 +100,15 @@ function writeLog(log) {
             .then((resp) => {    
                 let generateFormatter = setupFormatColumns(resp, pageId)
 
-                // this is very long and annoying :( sorry
+                // reformat the cells written
                 const sheetFormat = {
                     spreadsheetId: spreadsheetId,
                     resource: {
                         requests: [
-                            generateFormatter(0, {type:"DATE", pattern:"ddddd m/dd"}, {bold:false}), // column 1 (date)
-                            generateFormatter(1, {type:"TIME", pattern:"h:mm am/pm"}, {bold:false}), // column 2 (time)
-                            generateFormatter(2, {type:"TEXT"}, {bold:false}),               // column 3 (barcode)
-                            generateFormatter([3,6], {}, {bold:false}),                   // column 4 (quantity)
+                            generateFormatter(0, {type:"DATE", pattern:"ddddd m/dd"}), // column 1 (date)
+                            generateFormatter(1, {type:"TIME", pattern:"h:mm am/pm"}), // column 2 (time)
+                            generateFormatter(2, {type:"TEXT"}),                       // column 3 (barcode)
+                            generateFormatter([3,6], {}),                              // column 4 (quantity)
                         ]
                     }
                 }
