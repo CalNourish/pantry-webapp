@@ -2,17 +2,16 @@ import { google } from 'googleapis';
 import firebase from '../../../firebase/clientApp';
 import {ORDER_STATUS_OPEN} from "../../../utils/orderStatuses"
 
-import service from "../../../service-account.enc";
-import decrypt from "../../../utils/decrypt.js"
-
-const test = process.env.NEXT_PUBLIC_VERCEL_ENV == undefined;
-const testSheetNames = ["TechTesting",  "[Testing] Spring Delivery Packing Info", "Customer Information"]
+import { service_info } from "../../../utils/decrypt";
+import { setupFormatColumns } from '../../../utils/sheets';
 
 export const config = { // https://nextjs.org/docs/api-routes/api-middlewares
   api: {
     bodyParser: true,
   },
 }
+
+const dayNameToIndex = {"Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, "Saturday": 6}
 
 function getAllItems() {
   return new Promise((resolve, reject) => {
@@ -116,9 +115,6 @@ function getOrderSheets() {
 
 /* Write order to three google sheets (pantry, bag-packing, doordash), and add order to firebase. */
 function writeToSheets(body, itemNames) {
-
-  let service_info = JSON.parse(decrypt(service.encrypted))
-
   let { firstName, lastName, address, address2, city, zip,
         frequency, dependents, dietaryRestrictions, additionalRequests,
         calID, items, deliveryDay, deliveryWindowStart, deliveryWindowEnd, altDelivery,
@@ -148,10 +144,17 @@ function writeToSheets(body, itemNames) {
       const orderID = Math.random().toString().slice(2, 8);
   
       let now = new Date();
-      const currentDate = (now.getMonth() + 1) + "/" + now.getDate() + "/" + now.getFullYear();
-  
-      const days = {"Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, "Saturday": 6}
-      const dayOfWeekIdx = days[deliveryDay]
+
+      // format as 1/23 14:56
+      const currentDate = now.toLocaleString('en-US', {
+        timeZone: "America/Los_Angeles",
+        month: "numeric",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      });
+
+      const dayOfWeekIdx = dayNameToIndex[deliveryDay]
   
       let d = new Date();
       let deliveryMMDD = new Date(
@@ -163,20 +166,20 @@ function writeToSheets(body, itemNames) {
   
       let deliveryWindow = `${deliveryWindowStart} - ${deliveryWindowEnd}`
       
-      // Schema is [current date, CalID (encrypted), unique order id, email]
-      var {spreadsheetId, sheetName} = sheetsInfo["pantryMaster"]
+      // Schema is [current date, CalID (encrypted), unique order id, email, deliveryDate, alternateDates]
+      const pantryInfo = sheetsInfo["pantryMaster"]
       const request1 = {
-        spreadsheetId: spreadsheetId,
-        range: sheetName + "!A:F",
+        spreadsheetId: pantryInfo.spreadsheetId,
+        range: pantryInfo.sheetName + "!A:F",
         valueInputOption: "USER_ENTERED", 
         insertDataOption: "INSERT_ROWS",
         resource: {
-            "range": sheetName + "!A:F",
+            "range": pantryInfo.sheetName + "!A:F",
             "majorDimension": "ROWS",
             "values": [
               [currentDate, calID, orderID, email,
                 `${deliveryDay} ${deliveryWindow}`,
-                altDelivery] //each inner array is a row if we specify ROWS as majorDim
+                "(" + altDelivery + ")"] //each inner array is a row if we specify ROWS as majorDim
             ] 
           } ,
         auth: sheets_auth
@@ -185,18 +188,27 @@ function writeToSheets(body, itemNames) {
       sheets.spreadsheets.values.append(request1)
       .then(result => {
         if (result.status == 200) {
-          console.log("wrote to pantry sheet at:", result.data.updates.updatedRange)
-          // TODO: update font/appearance if we are writing to the first (non-pinned) row
-          // otherwise it shows up with the same style as the header
+          let generateFormatRequest = setupFormatColumns(result, pantryInfo.pageId)
 
-          // see `checkout-logging` branch
+          // reformat the cells written
+          const sheetFormat1 = {
+            spreadsheetId: pantryInfo.spreadsheetId,
+            resource: {
+              requests: [
+                generateFormatRequest(0, {type:"DATE", pattern:"m/dd h:mm"}),
+                generateFormatRequest([1,6]) // default formatting is fine, we just want non-bold text
+              ]
+            }
+          }
+
+          sheets.spreadsheets.batchUpdate(sheetFormat1).then(() => resolve())
         } else {
           throw result.statusText
         }
       })
       .catch((error) => {
         return reject("error writing to Pantry data sheet.", error);
-      });
+      })
   
       /* Sheet 2: "bagPacking" */
       /* [confirmed date (delivery date), first name + last initial, delivery window, # of bags,
@@ -214,14 +226,14 @@ function writeToSheets(body, itemNames) {
         numberOfBags = 3;
       }
 
-      var {spreadsheetId, sheetName} = sheetsInfo["bagPacking"]
+      const bagPackingInfo = sheetsInfo["bagPacking"]
       const request2 = {
-        spreadsheetId: spreadsheetId,
-        range: sheetName + "!A:J",
+        spreadsheetId: bagPackingInfo.spreadsheetId,
+        range: bagPackingInfo.sheetName + "!A:J",
         valueInputOption: "USER_ENTERED", 
         insertDataOption: "INSERT_ROWS",
         resource: {
-            "range": sheetName + "!A:J",
+            "range": bagPackingInfo.sheetName + "!A:J",
             "majorDimension": "ROWS",
             "values": [
               [deliveryMMDD, firstName + " " + lastName.slice(0,1), deliveryWindow, numberOfBags, frequency, 
@@ -231,20 +243,40 @@ function writeToSheets(body, itemNames) {
       }
   
       sheets.spreadsheets.values.append(request2)
+      .then(result => {
+        if (result.status == 200) {
+          let generateFormatRequest = setupFormatColumns(result, bagPackingInfo.pageId)
+
+          // reformat the cells written
+          const sheetFormat2 = {
+            spreadsheetId: bagPackingInfo.spreadsheetId,
+            resource: {
+              requests: [
+                generateFormatRequest(0, {type:"DATE", pattern:"m/dd"}),
+                generateFormatRequest([1,10]) // default formatting is fine, we just want non-bold text
+              ]
+            }
+          }
+
+          sheets.spreadsheets.batchUpdate(sheetFormat2).then(() => resolve())
+        } else {
+          throw result.statusText
+        }
+      })
       .catch((error) => {
         return reject("error writing to bag-packing data sheet: ", error);
-      });
+      })
     
       /* Sheet 3: "doordash" */
       /* [deliveryDate, delivery window start/end, first name, last name, address, item code (always F), # of bags (must be <= 3) ] */
-      var {spreadsheetId, sheetName} = sheetsInfo["doordash"]
+      const doordashInfo = sheetsInfo["doordash"]
       const request3 = {
-        spreadsheetId: spreadsheetId,
-        range: sheetName + "!A:U",
+        spreadsheetId: doordashInfo.spreadsheetId,
+        range: doordashInfo.sheetName + "!A:U",
         valueInputOption: "USER_ENTERED",
         insertDataOption: "INSERT_ROWS",
         resource: {
-            "range": sheetName + "!A:U",
+            "range": doordashInfo.sheetName + "!A:U",
             "majorDimension": "ROWS",
             "values": [
               [
@@ -257,10 +289,31 @@ function writeToSheets(body, itemNames) {
       }
       
       sheets.spreadsheets.values.append(request3)
+      .then(result => {
+        if (result.status == 200) {
+          let generateFormatRequest = setupFormatColumns(result, doordashInfo.pageId)
+
+          // reformat the cells written
+          const sheetFormat3 = {
+            spreadsheetId: doordashInfo.spreadsheetId,
+            resource: {
+              requests: [
+                generateFormatRequest([0,3]),
+                generateFormatRequest(3, {type:"DATE", pattern:"m/dd/yyyy"}),
+                generateFormatRequest([4,6], {type:"TIME", pattern:"h:mm am/pm"}),
+                generateFormatRequest([6,26])
+              ]
+            }
+          }
+
+          sheets.spreadsheets.batchUpdate(sheetFormat3).then(() => resolve())
+        } else {
+          throw result.statusText
+        }
+      })
       .catch((error) => {
         return reject("error writing to Doordash data sheet: ", error);
-      });
-  
+      })  
   
       /* Add order to firebase */
       let newOrder = {};
