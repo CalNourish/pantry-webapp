@@ -34,7 +34,7 @@ export default function Admin() {
     )
   }
 
-if (!authToken) {
+  if (!authToken) {
     return <>
       <Head>
         <title>Pantry</title>

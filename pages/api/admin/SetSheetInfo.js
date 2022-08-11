@@ -39,7 +39,7 @@ function getSheetIds(sheets, spreadsheetId, sheetName) {
       let sheetIds = resp.data.sheets;
       let sheetMatch = sheetIds.filter((info) => sheetName === info.properties.title)
       if (sheetMatch.length == 0) {
-        return reject("This sheet name does not exist."); // default to home sheet (first page)
+        return reject("This sheet name does not exist.");
       }
       return resolve(sheetMatch[0].properties.sheetId); // dictionary of sheetName (string) -> sheetId (number)
     })
