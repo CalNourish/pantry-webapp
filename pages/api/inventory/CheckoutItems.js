@@ -23,16 +23,14 @@ function requireParams(body, res) {
 
   //require orders to have at least one item
   if (body.length <= 0) {
-    res.json({ error: "empty order" });
-    res.status(400);
+    res.status(400).json({ error: "Order does not contain any items." });
     return false;
   }
 
   // require quantities to be parse-able as integers
   for (let barcode in body) {
     if (!parseInt(body[barcode])) {
-      res.json({ error: `unable to parse quantity '${body[barcode]}'` })
-      res.status(400);
+      res.status(400).json({ error: `Unable to parse quantity for barcode ${barcode}: '${body[barcode]}'` })
       return false;
     }
   }
@@ -96,17 +94,17 @@ function writeLog(log) {
           reject("Unable to access the google sheet.")
         })
         .then((resp) => {
-          let generateFormatter = setupFormatColumns(resp, pageId)
+          let requestFormat = setupFormatColumns(resp, pageId)
 
           // reformat the cells written
           const sheetFormat = {
             spreadsheetId: spreadsheetId,
             resource: {
               requests: [
-                generateFormatter(0, { type: "DATE", pattern: "ddddd m/dd" }), // column 1 (date)
-                generateFormatter(1, { type: "TIME", pattern: "h:mm am/pm" }), // column 2 (time)
-                generateFormatter(2, { type: "TEXT" }),                       // column 3 (barcode)
-                generateFormatter([3, 6], {}),                              // column 4 (quantity)
+                requestFormat(0, { type: "DATE", pattern: "ddddd m/dd" }), // column 1 (date)
+                requestFormat(1, { type: "TIME", pattern: "h:mm am/pm" }), // column 2 (time)
+                requestFormat(2, { type: "TEXT" }),                        // column 3 (barcode)
+                requestFormat([3, 6]),                                     // column 4-6 (quantity, name, new quantity)
               ]
             }
           }
@@ -130,81 +128,77 @@ export default async function (req, res) {
     const { body } = req
     let log = {};
 
-    // verify parameters
-    let ok = requireParams(body, res);
-    if (!ok) {
-      res.status(400).json({ message: "bad request parameters" });
+    // check request parameters
+    if (!requireParams(body, res)) {
       return resolve();
     }
 
     const token = req.headers.authorization
     validateFunc(token)
+    .then(() => {
+      firebase.auth().signInAnonymously()
       .then(() => {
-        firebase.auth().signInAnonymously()
-          .then(() => {
-            // update quantities for each item in inventory and get item info for loggin
-            Promise.all(
-              Object.keys(body).map(barcode => {
-                return new Promise((resolve) => {
-                  let ref = firebase.database().ref(`/inventory/${barcode}`)
-                  ref.once("value")
-                    .then(snapshot => {
-                      const itemInfo = snapshot.val();
-                      if (snapshot.exists()) {
-                        ref.update({ "count": firebase.database.ServerValue.increment(-1 * body[barcode]) })
-                          .then(() => {
-                            log[barcode] = { quantity: body[barcode], itemName: itemInfo.itemName, newQuantity: (itemInfo.count - body[barcode]) }
-                            return resolve();
-                          })
-                          .catch(error => {
-                            res.status(500);
-                            res.json({ error: `Error when checking out item (barcode ${barcode}): ${error}` });
-                            return reject();
-                          })
-                      } else {
-                        console.log(`possible data corruption: invalid barcode ${barcode}`)
-                        return resolve();
-                      }
-                    })
-                    .catch(err => {
-                      res.status(500);
-                      res.json({ error: `Error accessing firebase (barcode ${barcode}): ${err}` });
-                      return reject();
-                    });
-                })
+        // update quantities for each item in inventory and get item info for logging
+        Promise.all(
+          Object.keys(body).map(barcode => {
+            return new Promise((resolve) => {
+              let ref = firebase.database().ref(`/inventory/${barcode}`)
+              ref.once("value")
+              .then(snapshot => {
+                const itemInfo = snapshot.val();
+                if (snapshot.exists()) {
+                  ref.update({ "count": firebase.database.ServerValue.increment(-1 * body[barcode]) })
+                  .then(() => {
+                    log[barcode] = {
+                      quantity: body[barcode],
+                      itemName: itemInfo.itemName,
+                      newQuantity: (itemInfo.count - body[barcode])
+                    }
+                    return resolve();
+                  })
+                  .catch(error => {
+                    console.log("Error updating ref:", error)
+                    return reject(`Cannot update item (barcode: ${barcode})`);
+                  })
+                } else {
+                  console.log(`Possible data corruption. Nonexistent barcode ${barcode}`)
+                  return reject(`Nonexistent item (barcode: ${barcode})`);
+                }
               })
-            ).then(() => {
-              // perform checkout logging
-              writeLog(log).then((msg) => {
-                res.status(200);
-                res.json({ message: msg });
-                return resolve();
-              })
-              .catch((err) => {
-                // TODO: shows to user as successful. can try to notify the user of an error though?
-                console.log(`Error writing to log (${err}). Inventory was still updated.`)
-                res.status(200);
-                res.json({ message: `Error writing to log (${err}). Inventory was still updated.` });
-                return resolve();
-              })
+              .catch(err => {
+                console.log("Unable to access firebase database.", err)
+                return reject(`Unable to access firebase database (barcode ${barcode})`);
+              });
             })
-              .catch(() => {
-                console.log(`possible data corruption`)
-                res.status(500);
-                res.json({ message: "error modifying firebase" });
-                return resolve();
-              })
-          }).catch((err) => {
-            console.log("CheckoutItems signInAnonymously error:", err)
-            res.status(500);
-            res.json({ message: "error signing in to firebase" });
+          })
+        ).then(() => {
+          // perform checkout logging
+          writeLog(log).then((msg) => {
+            res.status(200);
+            res.json({ success: msg });
             return resolve();
           })
-      }).catch(() => {
-        console.log("Checkout: user not authenticated")
-        res.status(401);
-        res.json({ error: "you are not authenticated to perform this action" })
+          .catch((err) => {
+            // TODO: shows to user as successful. can try to notify the user of an error though?
+            console.log("Error writing to checkoutLog.", err)
+            res.status(200).json({ warning: `Error writing to log. Inventory was still updated.` });
+            return resolve();
+          })
+        })
+        .catch((err) => {
+          res.status(500).json({ error: "Database Error." + err });
+          return resolve();
+        })
+      }).catch((err) => {
+        res.status(500);
+        res.json({ error: "Error signing in to firebase. " + err });
         return resolve();
       })
+    }).catch(() => {
+      console.log("Checkout: user not authenticated")
+      res.status(401);
+      res.json({ error: "You are not authorized to perform this action. Make sure you are logged in to an authorized account." })
+      return resolve();
+    })
   })
 }

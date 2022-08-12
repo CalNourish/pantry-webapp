@@ -1,4 +1,4 @@
-const TEXT_FORMAT = {type: "TEXT"}
+const DEFAULT_NUMBER_FORMAT = {}
 
 // default black, non-bold
 const PLAIN_TEXT = {
@@ -22,7 +22,7 @@ export const setupFormatColumns = (resp, pageId) => {
   let rowStart = range.match(/(?<row>\d+):/).groups.row - 1 // index of the first newly written row
   let length = resp.data.updates.updatedRows
 
-  return (colIndex, numberFormat=TEXT_FORMAT, textFormat=PLAIN_TEXT, backgroundColor=BACKGROUND_WHITE) => {
+  return (colIndex, numberFormat=DEFAULT_NUMBER_FORMAT, textFormat=PLAIN_TEXT, backgroundColor=BACKGROUND_WHITE) => {
 
     // handle single column and range [cstart, cend)
     var cstart = colIndex, cend = colIndex + 1;
