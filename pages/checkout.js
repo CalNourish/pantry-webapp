@@ -198,18 +198,17 @@ class Cart extends React.Component {
             itemsInCart: 0,
             error: null,
         })
+      }
+      return resp.json()
+    })
+    .then(json => {
+      if (json.error) {
+        this.showError(json.error)
+      } else if (json.warning) {
+        this.showSuccess(json.warning)
+      } else {
         this.showSuccess("Cart submitted successfully", 10000)
       }
-      else if (resp.status == 401) {
-        this.showError(`You are not authorized to perform this action. Make sure you are logged in to an authorized account.`)
-        return resp.text()
-      } else {
-        this.showError(`Error ${resp.status}`)
-        return resp.text()
-      }
-    })
-    .then(msg => {
-      if (msg) console.log("checkout API error:", msg)
     });
   }
 
@@ -385,7 +384,6 @@ class Cart extends React.Component {
     )
   }
 }
-
 
 // Wrapper for useSWR hook. Apparently can't use hooks in class-style definition for react components.
 export default function Checkout() {
