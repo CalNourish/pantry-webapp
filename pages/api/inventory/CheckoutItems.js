@@ -179,13 +179,11 @@ export default async function (req, res) {
             return resolve();
           })
           .catch((err) => {
-            // TODO: shows to user as successful. can try to notify the user of an error though?
             console.log("Error writing to checkoutLog.", err)
             res.status(200).json({ warning: `Error writing to log. Inventory was still updated.` });
             return resolve();
           })
-        })
-        .catch((err) => {
+        }).catch((err) => {
           res.status(500).json({ error: "Database Error." + err });
           return resolve();
         })

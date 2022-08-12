@@ -385,7 +385,6 @@ class Cart extends React.Component {
   }
 }
 
-
 // Wrapper for useSWR hook. Apparently can't use hooks in class-style definition for react components.
 export default function Checkout() {
   const { data } = useSWR("/api/inventory/GetAllItems", fetcher);
