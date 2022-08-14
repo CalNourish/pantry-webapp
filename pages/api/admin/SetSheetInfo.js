@@ -39,13 +39,11 @@ function getSheetIds(sheets, spreadsheetId, sheetName) {
       let sheetIds = resp.data.sheets;
       let sheetMatch = sheetIds.filter((info) => sheetName === info.properties.title)
       if (sheetMatch.length == 0) {
-        // console.log("warning: given sheet name cannot be found in this spreadsheet") // TODO: make this warning visible to user
-        return reject("This sheet does not exist."); // default to home sheet (first page)
+        return reject("This sheet name does not exist.");
       }
       return resolve(sheetMatch[0].properties.sheetId); // dictionary of sheetName (string) -> sheetId (number)
     })
     .catch((err) => {
-      // console.log(err)
       return reject("Need permission to access sheet.")
     })
   })
@@ -54,7 +52,6 @@ function getSheetIds(sheets, spreadsheetId, sheetName) {
 export default async function(req, res) {
   return new Promise((resolve) => {
     if (!requireParams(req, res)) {
-      console.log("not ok")
       return resolve();
     }
 
@@ -92,8 +89,7 @@ export default async function(req, res) {
           })
         })
         .catch((err) => {
-          // console.log("error writing to firebase:", err)
-          res.status(500);
+          res.status(500).json({error: "Error writing to firebase:" + err});
           return resolve();
         });
       }).catch((errMsg) => {
@@ -103,7 +99,6 @@ export default async function(req, res) {
         return reject();
       })
     }).catch((err) => {
-      // console.log("Error with validating:", err)
       res.status(401).json({error: "Not logged in."})
       return resolve()
     })
