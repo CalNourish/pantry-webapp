@@ -18,7 +18,6 @@ export const config = {
   }
 };
 
-
 function requireParams(query, res) {
   var { status } = query;
   if (status != ORDER_STATUS_OPEN && status != ORDER_STATUS_PROCESSING && status != ORDER_STATUS_COMPLETE) {
@@ -31,11 +30,6 @@ function requireParams(query, res) {
 export default async function (req, res) {
   // verify this request is legit
   const token = req.headers.authorization
-  const allowed = await validateFunc(token)
-  if (!allowed) {
-    res.status(401).json({ error: "you are not authenticated to perform this action" })
-    return Promise.resolve();
-  }
 
   // verify params
   const { query } = req;
@@ -44,19 +38,25 @@ export default async function (req, res) {
     return Promise.resolve();
   }
 
-  return new Promise((resolve, reject) => {
-    firebase.auth().signInAnonymously()
+  return new Promise((resolve) => {
+    validateFunc(token).then(() => {
+      firebase.auth().signInAnonymously()
       .then(() => {
         var ref = firebase.database().ref("/order");
         ref.orderByChild("status").equalTo(query["status"]).once("value", snapshot => {
           res.status(200).json(snapshot.toJSON());
-          return;
+          return resolve();
         })
       })
       .catch(err => {
         res.status(500);
         res.json({ error: "Error when checking out items: " + err });
-        return;
+        return resolve();
       })
+    })
+    .catch(() => {
+      res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an authorized account." });
+      return resolve();
+    });
   })
 }

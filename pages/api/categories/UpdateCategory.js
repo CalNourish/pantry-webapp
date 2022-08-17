@@ -29,27 +29,21 @@ export default async function (req, res) {
 
   // verify this request is legit
   const token = req.headers.authorization
-  const allowed = await validateFunc(token)
-  if (!allowed) {
-    res.status(401)
-    res.json({ error: "you are not authenticated to perform this action" })
-    return Promise.resolve();
-  }
 
   return new Promise((resolve, reject) => {
-    const { body } = req
-    console.log("req: ", body);
+    validateFunc(token).then(() => {
+      const { body } = req
 
-    // verify parameters
-    let ok = requireParams(body, res);
-    if (!ok) {
-      return resolve();
-    }
+      // verify parameters
+      let ok = requireParams(body, res);
+      if (!ok) {
+        return resolve();
+      }
 
-    let displayName = body.displayName;
-    let iconName = body.iconName;
+      let displayName = body.displayName;
+      let iconName = body.iconName;
 
-    firebase.database().ref('/category')
+      firebase.database().ref('/category')
       .once('value', snapshot => {
         // make sure this cateogry exists
         let categories = snapshot.val();
@@ -65,32 +59,36 @@ export default async function (req, res) {
 
         // is there throttling on anonymous sign ins?
         firebase.auth().signInAnonymously()
+        .then(() => {
+          // write the updated category
+          let dbref = firebase.database().ref('/category/' + key);
+
+          dbref.once('value')
           .then(() => {
-            // write the updated category
-            let dbref = firebase.database().ref('/category/' + key);
-
-            dbref.once('value')
-              .catch(function (error) {
-                res.status(500);
-                res.json({ error: "server error getting reference to categories ref", errorstack: error });
-                return resolve();
-              })
-              .then(() => {
-                // write to the database, only have to update iconName since displayName is immutable
-                dbref.update({ "iconName": iconName })
-                  .catch(error => {
-                    res.status(500);
-                    res.json({ error: "Error when writing updated category to database" });
-                    return resolve();
-                  })
-                  .then(() => {
-                    res.status(200);
-                    res.json({ message: "success" });
-                    return resolve();
-                  })
-              });
+            // write to the database, only have to update iconName since displayName is immutable
+            dbref.update({ "iconName": iconName })
+            .catch(error => {
+              res.status(500);
+              res.json({ error: "Error when writing updated category to database" });
+              return resolve();
+            })
+            .then(() => {
+              res.status(200);
+              res.json({ message: "success" });
+              return resolve();
+            })
+          })
+          .catch(function (error) {
+            res.status(500);
+            res.json({ error: "server error getting reference to categories ref", errorstack: error });
+            return resolve();
           });
+        });
       });
-
+    })
+    .catch(() => {
+      res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an authorized account." });
+      return resolve();
+    });
   })
 }

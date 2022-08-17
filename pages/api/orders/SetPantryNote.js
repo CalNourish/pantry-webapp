@@ -1,5 +1,5 @@
-import firebase from '../../../firebase/clientApp'    
-import {validateFunc} from '../validate'
+import firebase from '../../../firebase/clientApp'
+import { validateFunc } from '../validate'
 
 /*
 * /api/orders/SetPantryNote
@@ -7,79 +7,80 @@ import {validateFunc} from '../validate'
 */
 
 function requireParams(body, res) {
-    var {orderId} = body;
-    if (!orderId) {
-        res.status(400).json({error: "missing order ID"});
-        return false;
-    }
+  var { orderId } = body;
+  if (!orderId) {
+    res.status(400).json({ error: "missing order ID" });
+    return false;
+  }
 
-    return true;
+  return true;
 }
 
-export default async function(req, res) {
-    // verify this request is legit
-    const token = req.headers.authorization
-    const allowed = await validateFunc(token)
-    if (!allowed) {
-        res.status(401).json({error: "you are not authenticated to perform this action"})
-        return Promise.resolve();
-    }
+export default async function (req, res) {
+  // verify this request is legit
+  const token = req.headers.authorization
 
-    // verify params
-    const {body} = req;
-    let ok = requireParams(body, res);
-    if (!ok) {
-        return Promise.resolve();
-    }
+  // verify params
+  const { body } = req;
+  let ok = requireParams(body, res);
+  if (!ok) {
+    return Promise.resolve();
+  }
 
-    let orderId = req.body.orderId.toString();
-    let message = req.body.message;
-    if (!message) {
-      message = "";
-    } else {
-      message = message.toString();
-    }
+  let orderId = req.body.orderId.toString();
+  let message = req.body.message;
+  if (!message) {
+    message = "";
+  } else {
+    message = message.toString();
+  }
 
-    return new Promise((resolve, reject) => {
-        firebase.auth().signInAnonymously()
+  return new Promise((resolve, reject) => {
+    validateFunc(token).then(() => {
+      firebase.auth().signInAnonymously()
         .then(() => {
-            var orderRef = firebase.database().ref("/order/" + orderId);
-            
-            orderRef.once('value')
-            .catch(function(error) {
-                res.status(500);
-                res.json({error: "server error getting that order from database", errorstack: error});
-                return resolve();
-            })
-            .then(function(resp) {
-                // the current version of the order in the database
-                var currOrder = resp.val();
+          var orderRef = firebase.database().ref("/order/" + orderId);
 
-                // this order was not found
-                if (currOrder === null) {
-                    res.status(404);
-                    res.json({error: "unable to find order with ID " + orderId})
-                    return resolve();
-                }
-                
-                // otherwise the orderId exists and we can update the status
-                orderRef.update({"pantryNote": message})
-                .catch(function(error) {
-                    res.status(500);
-                    res.json({error: "error updating order pantryNote" + orderId, errorstack: error});
-                    return resolve();
+          orderRef.once('value')
+            .catch(function (error) {
+              res.status(500);
+              res.json({ error: "server error getting that order from database", errorstack: error });
+              return resolve();
+            })
+            .then(function (resp) {
+              // the current version of the order in the database
+              var currOrder = resp.val();
+
+              // this order was not found
+              if (currOrder === null) {
+                res.status(404);
+                res.json({ error: "unable to find order with ID " + orderId })
+                return resolve();
+              }
+
+              // otherwise the orderId exists and we can update the status
+              orderRef.update({ "pantryNote": message })
+                .catch(function (error) {
+                  res.status(500);
+                  res.json({ error: "error updating order pantryNote" + orderId, errorstack: error });
+                  return resolve();
                 })
                 .then(() => {
-                    res.status(200);
-                    res.json({message: "success"});
-                    return resolve();
+                  res.status(200);
+                  res.json({ message: "success" });
+                  return resolve();
                 });
             })
         })
         .catch(err => {
-            res.status(500);
-            res.json({error: "error signing into firebase: " + err});
-            return;
+          res.status(500);
+          res.json({ error: "error signing into firebase: " + err });
+          return;
         })
     })
+      .catch(() => {
+        res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an authorized account." });
+        return resolve();
+      });
+  })
 }

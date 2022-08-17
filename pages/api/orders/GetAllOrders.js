@@ -17,29 +17,30 @@ export const config = {
 export default async function(req,res) {   
     // verify this request is legit
     const token = req.headers.authorization
-    const allowed = await validateFunc(token)
-    if (!allowed) {
-        res.status(401).json({error: "you are not authenticated to perform this action"})
-        return Promise.resolve();
-    }
 
-    return new Promise((resolve, reject) => {
-      firebase.auth().signInAnonymously()
-      .then(() => {
-        firebase.database().ref('/order/')
-        .once('value')  
-        .catch(function(error){
-          res.status(500);
-          res.json({error: "server error getting that order from the database", errorstack: error});
-          return resolve();
-        })
-        .then(function(resp){
-          // the version of the order in the database
-          var dbItem = resp.val();
-            res.status(200);
-            res.json(dbItem);
+    return new Promise((resolve) => {
+      validateFunc(token).then(() => {
+        firebase.auth().signInAnonymously()
+        .then(() => {
+          firebase.database().ref('/order/')
+          .once('value')
+          .then(function(resp){
+            // the version of the order in the database
+            var dbItem = resp.val();
+              res.status(200);
+              res.json(dbItem);
+              return resolve();
+          })
+          .catch(function(error){
+            res.status(500);
+            res.json({error: "server error getting that order from the database", errorstack: error});
             return resolve();
-        });
+          });
+        })
       })
+      .catch(() => {
+        res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an authorized account." });
+        return resolve();
+      });
     })
 }
