@@ -11,14 +11,12 @@ import {ORDER_STATUS_OPEN, ORDER_STATUS_PROCESSING, ORDER_STATUS_COMPLETE} from 
 function requireParams(body, res) {
     var {orderId, status} = body;
     if (!orderId) {
-        res.json({error: "missing order ID"});
-        res.status(400);
+        res.status(400).json({error: "Missing order ID"});
         return false;
     }
 
     if (status != ORDER_STATUS_OPEN && status != ORDER_STATUS_PROCESSING && status != ORDER_STATUS_COMPLETE) {
-        res.json({error: "requested status must be either open, processing, or complete"});
-        res.status(400);
+        res.status(400).json({error: "Requested status must be either open, processing, or complete"});
         return false;
     }
     return true;
@@ -30,14 +28,14 @@ export default async function(req, res) {
     const allowed = await validateFunc(token)
     if (!allowed) {
         res.status(401).json({error: "you are not authenticated to perform this action"})
-        return;
+        return Promise.resolve();
     }
 
     // verify params
     const {body} = req;
     let ok = requireParams(body, res);
     if (!ok) {
-        return;
+        return Promise.resolve();
     }
 
     let orderId = req.body.orderId.toString();

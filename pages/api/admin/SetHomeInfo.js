@@ -45,6 +45,10 @@ export default async function(req,res) {
           res.status(500).json({error: "server error", errorstack: err});
         });
       });
+    })
+    .catch(() => {
+      res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an authorized account." });
+      return resolve();
     });
   })
 }

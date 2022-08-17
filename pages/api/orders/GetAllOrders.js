@@ -20,29 +20,26 @@ export default async function(req,res) {
     const allowed = await validateFunc(token)
     if (!allowed) {
         res.status(401).json({error: "you are not authenticated to perform this action"})
-        return;
+        return Promise.resolve();
     }
 
     return new Promise((resolve, reject) => {
-
-      console.log("getting all orders");
-
-      return firebase.auth().signInAnonymously()
-          .then(() => {
-            firebase.database().ref('/order/')
-            .once('value')  
-            .catch(function(error){
-              res.status(500);
-              res.json({error: "server error getting that order from the database", errorstack: error});
-              return resolve();
-            })
-            .then(function(resp){
-              // the version of the order in the database
-              var dbItem = resp.val();
-                res.status(200);
-                res.json(dbItem);
-                return resolve();
-            });
-          })
+      firebase.auth().signInAnonymously()
+      .then(() => {
+        firebase.database().ref('/order/')
+        .once('value')  
+        .catch(function(error){
+          res.status(500);
+          res.json({error: "server error getting that order from the database", errorstack: error});
+          return resolve();
+        })
+        .then(function(resp){
+          // the version of the order in the database
+          var dbItem = resp.val();
+            res.status(200);
+            res.json(dbItem);
+            return resolve();
+        });
+      })
     })
 }

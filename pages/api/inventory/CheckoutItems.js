@@ -193,9 +193,7 @@ export default async function (req, res) {
         return resolve();
       })
     }).catch(() => {
-      console.log("Checkout: user not authenticated")
-      res.status(401);
-      res.json({ error: "You are not authorized to perform this action. Make sure you are logged in to an authorized account." })
+      res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an authorized account." })
       return resolve();
     })
   })

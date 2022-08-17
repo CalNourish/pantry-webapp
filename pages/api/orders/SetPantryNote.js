@@ -9,8 +9,7 @@ import {validateFunc} from '../validate'
 function requireParams(body, res) {
     var {orderId} = body;
     if (!orderId) {
-        res.json({error: "missing order ID"});
-        res.status(400);
+        res.status(400).json({error: "missing order ID"});
         return false;
     }
 
@@ -23,14 +22,14 @@ export default async function(req, res) {
     const allowed = await validateFunc(token)
     if (!allowed) {
         res.status(401).json({error: "you are not authenticated to perform this action"})
-        return;
+        return Promise.resolve();
     }
 
     // verify params
     const {body} = req;
     let ok = requireParams(body, res);
     if (!ok) {
-        return;
+        return Promise.resolve();
     }
 
     let orderId = req.body.orderId.toString();

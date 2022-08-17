@@ -11,14 +11,13 @@ function requireParams(body, res) {
     // returns false and an error if not a good input 
     var {orderId, itemId, isPacked} = body;
     if (orderId == undefined) {
-        res.json({error: "missing order ID"});
-        res.status(400);
+        res.status(400).json({error: "missing order ID"});
         return false;
     }
 
     // validation for itemId (must not be undefined) and isPacked (must be true or false)
     if (itemId == undefined || isPacked == undefined) {
-        res.json({error: "missing item ID or boolean isPacked"}).status(400);
+        res.status(400).json({error: "missing item ID or boolean isPacked"});
         return false;
     }
 
@@ -31,14 +30,14 @@ export default async function(req, res) {
     const allowed = await validateFunc(token)
     if (!allowed) {
         res.status(401).json({error: "you are not authenticated to perform this action"})
-        return;
+        return Promise.resolve();
     }
 
     // verify params
     const {body} = req;
     let ok = requireParams(body, res);
     if (!ok) {
-        return;
+        return Promise.resolve();
     }
 
     let orderId = body.orderId.toString();
@@ -84,8 +83,7 @@ export default async function(req, res) {
             })
         })
         .catch(err => {
-            res.status(500);
-            res.json({error: "error signing into firebase: " + err});
+            res.status(500).json({error: "error signing into firebase: " + err});
             return;
         })
     })
