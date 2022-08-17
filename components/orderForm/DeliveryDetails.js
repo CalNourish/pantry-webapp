@@ -3,7 +3,12 @@ import { DispatchCartContext, StateCartContext } from '../../context/cartContext
 import useSWR from 'swr'
 import Select from 'react-select'
 
+// Form stage #2
+
 const fetcher = (url) => fetch(url).then((res) => res.json());
+
+const inputAppearance = "appearance-none block w-full bg-gray-100 text-gray-600 border border-gray-100 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-400"
+const errorAppearance = " border-red-600 border-1 focus:border-red-500"
 
 export default function DeliveryDetails(props) {
   const cartDispatch = useContext(DispatchCartContext)
@@ -18,9 +23,6 @@ export default function DeliveryDetails(props) {
       (id) => { return { value: id, label: deliveryTimes[id].display, info: deliveryTimes[id]} }
     )
   }
-
-  let inputAppearance = "appearance-none block w-full bg-gray-100 text-gray-600 border border-gray-100 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-400"
-  let errorAppearance = " border-red-600 border-2 focus:border-red-500"
   
   return (
     <>
