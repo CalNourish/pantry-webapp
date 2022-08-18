@@ -2,6 +2,8 @@ import useSWR from 'swr'
 import { useContext, useState } from 'react';
 import { DispatchCartContext, StateCartContext } from '../../context/cartContext'
 
+// Form stage #3
+
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export default function OrderDetails({children}) {

@@ -1,16 +1,18 @@
 import { useContext } from 'react';
 import { DispatchCartContext, StateCartContext } from '../../context/cartContext'
 
+// Form stage #1
+
 function isValidEmail(email) {
   return /^\w+([\.-]?\w+)*@berkeley.edu$/.test(email)
 }
 
+const inputAppearance = "appearance-none block w-full bg-gray-100 text-gray-600 border border-gray-100 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-400"
+const errorAppearance = " border-red-600 border-1 focus:border-red-500"
+
 export default function PersonInfo(props) {
   const cartDispatch = useContext(DispatchCartContext)
   const { personal } = useContext(StateCartContext)
-
-  let inputAppearance = "appearance-none block w-full bg-gray-100 text-gray-600 border border-gray-100 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-400"
-  let errorAppearance = " border-red-600 border-2 focus:border-red-500"
 
   return (
     <>
@@ -140,7 +142,7 @@ export default function PersonInfo(props) {
         <div className="mb-2">
           <label 
             className="block uppercase tracking-wide text-gray-600 text-xs font-bold"
-            htmlFor="confirm-email" data-required="F"
+            htmlFor="dependents" data-required="F"
           >
             Number of Dependents
           </label>
