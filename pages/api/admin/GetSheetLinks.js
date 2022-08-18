@@ -10,6 +10,10 @@ export default async function (req, res) {
         res.status(200).json(data)
         return resolve()
       });
+    })
+    .catch(error =>{
+      res.status(500).json({error: error})
+      return reject("Error signing in to firebase: " + error);
     });
   });
 }
