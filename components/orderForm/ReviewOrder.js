@@ -1,6 +1,8 @@
 import { useState, useContext } from 'react';
 import { StateCartContext } from '../../context/cartContext'
 
+// Form stage #4
+
 export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, updateOrderDetails}) {
   const { cart, personal, delivery } = useContext(StateCartContext)
   const [submitStatus, setSubmitStatus] = useState({})

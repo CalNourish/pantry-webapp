@@ -7,12 +7,10 @@ import { useUser } from '../context/userContext'
 import { StateCartContext, DispatchCartContext } from '../context/cartContext';
 import { server } from './_app.js'
 
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { markdownStyle } from '../utils/markdownStyle';
 import cookie from 'js-cookie';
-
-export const requiredField = <div className='inline text-red-600'> *</div>
-export const optionalField = <div className='inline text-gray-500 normal-case tracking-normal font-semibold'>(optional)</div>
 
 export default function Order() {
   let { cart, personal, delivery } = useContext(StateCartContext)
@@ -24,7 +22,7 @@ export default function Order() {
   let [isEditingInfo, setIsEditingInfo] = useState(false);
   let [showPreviewInfo, setShowPreview] = useState(false);
 
-  // Set bounds in case of weird behaviors.
+  // Enforce bounds between 0 and 3 (inclusive)
   if (formStep < 0) {
     setFormStep(0)
   } else if (formStep > 3) {
@@ -32,13 +30,11 @@ export default function Order() {
   }
 
   // prevent accidentally leaving if past the first page   
-  useEffect(() => {
-    if (formStep > 0) {
-      window.onbeforeunload = () => {
-        return "Leave page? Changes will not be saved.";
-      };
-    }
-  }, []);
+  if (formStep > 0) {
+    window.onbeforeunload = () => {
+      return "Leave page? Changes will not be saved.";
+    };
+  }
 
   // function for checking all fields are filled
   let checkNextable = () => {
@@ -58,7 +54,7 @@ export default function Order() {
         return false;
       }
     }
-    if (!personal.eligibilityConf) {
+    if (!personal.eligibilityConf || !personal.doordashConf) {
       return false;
     }
     return true;
@@ -75,7 +71,7 @@ export default function Order() {
   }
 
   /* title and navigation bar for orders */
-  // TODO: add progress indicator?
+  // TODO: add progress indicator
   let topBar = <div className='mb-4 flex flex-row'>
     <button onClick={() => {setFormStep(formStep - 1); setShowMissing(false)}} className={"btn btn-outline" + (formStep == 0 ? " invisible" : "")}>Back</button>
     <h1 className="text-2xl text-center font-bold flex-grow">Food Resource Delivery Request</h1>
@@ -86,10 +82,10 @@ export default function Order() {
   if ([2,3].includes(formStep)) {
     return (
       <Layout>
-        <div className="container mx-auto px-4 mt-8 mb-16">
-          {formStep == 2 && topBar}
-          {
-            formStep == 2 ? 
+        <div className="sm:container mx-auto mt-8 mb-16 px-4">
+          { topBar }
+          <div className="m-8">
+            { formStep == 2 ? 
               <OrderDetails> 
                 <button 
                 className=
@@ -105,7 +101,7 @@ export default function Order() {
                 Review Order
                 </button>
               </OrderDetails>
-                : 
+                :
               <ReviewOrder 
                 updatePersonalInfo={
                   <button 
@@ -125,20 +121,19 @@ export default function Order() {
                 }
                 updateOrderDetails={
                   <button 
-                  className='text-sm hover:text-blue-500 text-blue-700'
-                  onClick={() => {setFormStep(2)}}
-                >
-                  edit
-                </button>
+                    className='text-sm hover:text-blue-500 text-blue-700'
+                    onClick={() => {setFormStep(2)}}
+                  >
+                    edit
+                  </button>
                 }
               />
-          }       
+            }
+          </div>     
         </div>
       </Layout>
     )
   }
-
-  const token = cookie.get("firebaseToken")
 
   let getInfo = () => {
     fetch(`${server}/api/orders/GetEligibilityInfo`)
@@ -153,18 +148,8 @@ export default function Order() {
     getInfo();
   }
 
-  const markdownStyle = {
-    h1: ({node, ...props}) => <h1 className='text-4xl mb-4 block tracking-wide font-bold' {...props}/>,
-    h2: ({node, ...props}) => <h2 className='text-3xl mb-4 block tracking-wide font-bold' {...props}/>,
-    h3: ({node, ...props}) => <h3 className='text-2xl mb-4 block tracking-wide font-bold' {...props}/>,
-    h4: ({node, ...props}) => <h4 className='text-xl mb-2 font-bold' {...props}/>,
-    h5: ({node, ...props}) => <h5 className='text-lg mb-2 font-bold' {...props}/>,
-    h6: ({node, ...props}) => <h6 className='text-md mb-2 font-bold' {...props}></h6>,
-    p: ({node, ...props}) => <p className='mb-4' {...props}/>,
-    ul: ({node, ...props}) => {return <ul className='list-disc pl-4 space-y-2 font-normal' {...props} ordered="false"></ul>}
-  }
-
-  const { loadingUser, user } = useUser();
+  const { user } = useUser();
+  const token = cookie.get("firebaseToken")
   let authToken = (user && user.authorized === "true") ? token : null;
 
   let infoDiv = <div className='py-8 px-16 xl:w-1/2 max-w-2xl rounded'>
@@ -215,10 +200,10 @@ export default function Order() {
         }}>
       </textarea>}
 
-    {/* Information (rendered markdown) */}
+    {/* Information Display or Preview (rendered markdown) */}
     {(!isEditingInfo || showPreviewInfo) && info && <ReactMarkdown className="mb-4" components={markdownStyle} children={info}></ReactMarkdown>}
 
-    {/* Confirmation to share info checkbox */}
+    {/* Eligibility and info sharing confirmation checkboxes */}
     <div>
       <label htmlFor="eligiblility-confirmation" data-required="T"
         className={"block tracking-wide font-bold p-1" + ((showMissing && !personal.eligibilityConf) ? " border-red-600 border rounded" : " border border-transparent")}
@@ -228,7 +213,18 @@ export default function Order() {
           onChange={(e) => cartDispatch({ type: 'UPDATE_PERSONAL', payload: {eligibilityConf: e.target.checked}})}
         />
         <span className="text-base">
-          I confirm that I meet these conditions, and I allow the food pantry to share my information with DoorDash.
+          I confirm that I am currently quarantining due to COVID-19.
+        </span>
+      </label>
+      <label htmlFor="doordash-confirmation" data-required="T"
+        className={"block tracking-wide font-bold p-1" + ((showMissing && !personal.doordashConf) ? " border-red-600 border rounded" : " border border-transparent")}
+      >
+        <input id="doordash-confirmation" className="mr-2 leading-tight" type="checkbox"
+          checked={personal.doordashConf}
+          onChange={(e) => cartDispatch({ type: 'UPDATE_PERSONAL', payload: {doordashConf: e.target.checked}})}
+        />
+        <span className="text-base">
+          I confirm that I allow the food pantry to share my information with DoorDash.
         </span>
       </label>
       <p className="mt-2 text-gray-500 text-xs italic">
@@ -238,12 +234,13 @@ export default function Order() {
     </div>
   </div>
 
+  // Personal Info or Delivery Details page
   return (
     <Layout>
       <div className="sm:container mx-auto mt-8 mb-16 px-4">
         { topBar }
         <div className="flex justify-center m-8 flex-col lg:flex-row">
-          { formStep < 2 && infoDiv }
+          { infoDiv }
           <div className="py-8 px-16 xl:w-1/2 max-w-2xl shadow rounded">
             <div id="form-header">
             </div>
