@@ -16,21 +16,21 @@ const dayNameToIndex = {"Sunday": 0, "Monday": 1, "Tuesday": 2, "Wednesday": 3, 
 function getAllItems() {
   return new Promise((resolve, reject) => {
     firebase.database().ref('/inventory/').once('value')
-    .catch(function(error){
-      res.status(500).json({error: "server error getting items from the database", errorstack: error});
-      return reject();
-    })
     .then(function(resp){
       var allItems = resp.val();
       return resolve(allItems);
+    })
+    .catch(function(error){
+      res.status(500).json({error: "server error getting items from the database", errorstack: error});
+      return reject();
     })
   })
 }
 
 function requireParams(body, res) {
     /* require elements: First name, last name, frequency, address, calID, 
-    delivery_date, order_timestamp, items in the order (orderschema as of now)
-    items are represented as an object with barcode as key and quantity (count) as value*/
+    delivery_date, order_timestamp, items in the order (orderschema as of now).
+    Items are represented as an object with barcode as key and quantity (count) as value*/
 
     if (!body.firstName || !body.lastName || !body.calID) {
       res.status(400).json({error: "Missing name or CalID in request."});
@@ -53,13 +53,13 @@ function requireParams(body, res) {
     }
     
     if (!body.frequency || !body.deliveryDay || !body.deliveryWindowStart || !body.deliveryWindowEnd) {
-      res.status(400).json({error: "Missing delivery date or time in request."});
+      res.status(400).json({error: "Missing delivery frequency, date, or time in request."});
       return false;
     }
 
     // require order items object with at least one entry (order array)
     if (!body.items || body.items.length <= 0) {
-      res.status(400).json({error: "There are no items in this order."});
+      res.status(400).json({error: "Order must contain at least one item."});
       return false;
     }
 
@@ -72,30 +72,28 @@ function updateFirebase(items) {
 
   return new Promise((resolve, reject) => {
     getAllItems().then((inventoryJson) => {
-      // value.json().then((inventoryJson) => {
-        const inventoryUpdates = {}
-        for (let item in items) {
-          // make sure we have enough in inventory for order
-          if (inventoryJson[item]['count'] >= items[item]) {
+      const inventoryUpdates = {}
+      for (let item in items) {
+        // make sure we have enough in inventory for order
+        if (inventoryJson[item]['count'] >= items[item]) {
 
-            // TODO: require quantities to be positive and within range
-            // this is enforced in frontend, but should maybe enforce on backend as well for security?
-            
-            inventoryUpdates['/inventory/' + item + "/count"] = firebase.database.ServerValue.increment(-1 * items[item]);
-            itemNames[inventoryJson[item]['itemName']] = items[item];
-          }
-          else {
-            return reject(`Requested count for "${inventoryJson[item]["itemName"]}" exceeds current stock (${inventoryJson[item]['count']})`);
-          }
+          // TODO: require quantities to be positive and within range
+          // this is enforced in frontend, but should maybe enforce on backend as well for security?
+          
+          inventoryUpdates['/inventory/' + item + "/count"] = firebase.database.ServerValue.increment(-1 * items[item]);
+          itemNames[inventoryJson[item]['itemName']] = items[item];
         }
+        else {
+          return reject(`Requested count for "${inventoryJson[item]["itemName"]}" exceeds current stock (${inventoryJson[item]['count']})`);
+        }
+      }
 
-        firebase.database().ref().update(inventoryUpdates).then(() => {
-          return resolve(itemNames);
-        })
-        .catch((error) => {
-          return reject();
-        })
-      // })
+      firebase.database().ref().update(inventoryUpdates).then(() => {
+        return resolve(itemNames);
+      })
+      .catch((error) => {
+        return reject("Error updating firebase inventory: " + error);
+      })
     })
   })
 }
@@ -103,12 +101,11 @@ function updateFirebase(items) {
 function getOrderSheets() {
   return new Promise((resolve, reject) => {
     firebase.database().ref('/sheetIDs/').once('value')
-    .catch(function(error){
-      res.status(500).json({error: "server error getting sheet ID(s) from the database", errorstack: error});
-      return reject();
-    })
     .then(function(resp) {
       return resolve(resp.val());
+    })
+    .catch(function(error){
+      return reject("Error getting sheet links from firebase: " + error);
     })
   })
 }
@@ -122,7 +119,6 @@ function writeToSheets(body, itemNames) {
 
   return new Promise((resolve, reject) => {
     getOrderSheets().then((sheetsInfo)=> {
-
       const target = ['https://www.googleapis.com/auth/spreadsheets'];
       var sheets_auth = new google.auth.JWT(
         service_info.client_email,
@@ -135,9 +131,9 @@ function writeToSheets(body, itemNames) {
   
       const sheets = google.sheets({ version: 'v4', auth: sheets_auth });
   
-      /* Sheet 1: "pantryMaster"
-       * Food pantry master data sheet for tracking calIDs
-      */
+      /* --- Sheet 1: pantryMaster --- */
+      /* Food pantry master data sheet for tracking calIDs.
+       * [timestamp, calID, orderID, email, deliveryDate(, alternate dates)] */
       
       // Generate orderID: random six digit value.
       // We check later to make sure that the ID isn't in use already.
@@ -168,7 +164,7 @@ function writeToSheets(body, itemNames) {
       
       // Schema is [current date, CalID (encrypted), unique order id, email, deliveryDate, alternateDates]
       const pantryInfo = sheetsInfo["pantryMaster"]
-      const request1 = {
+      const pantry_master_req = {
         spreadsheetId: pantryInfo.spreadsheetId,
         range: pantryInfo.sheetName + "!A:F",
         valueInputOption: "USER_ENTERED", 
@@ -185,7 +181,7 @@ function writeToSheets(body, itemNames) {
         auth: sheets_auth
       }
   
-      sheets.spreadsheets.values.append(request1)
+      sheets.spreadsheets.values.append(pantry_master_req)
       .then(result => {
         if (result.status == 200) {
           let generateFormatRequest = setupFormatColumns(result, pantryInfo.pageId)
@@ -207,10 +203,10 @@ function writeToSheets(body, itemNames) {
         }
       })
       .catch((error) => {
-        return reject("error writing to Pantry data sheet." + error);
+        return reject("error writing to Pantry data sheet: " + error);
       })
   
-      /* Sheet 2: "bagPacking" */
+      /* --- Sheet 2: bagPacking --- */
       /* [confirmed date (delivery date), first name + last initial, delivery window, # of bags,
        *  frequency, # of dependents, dietary restrictions, additional requests, order id, items] */
   
@@ -227,7 +223,7 @@ function writeToSheets(body, itemNames) {
       }
 
       const bagPackingInfo = sheetsInfo["bagPacking"]
-      const request2 = {
+      const bag_packing_req = {
         spreadsheetId: bagPackingInfo.spreadsheetId,
         range: bagPackingInfo.sheetName + "!A:J",
         valueInputOption: "USER_ENTERED", 
@@ -242,7 +238,7 @@ function writeToSheets(body, itemNames) {
           }
       }
   
-      sheets.spreadsheets.values.append(request2)
+      sheets.spreadsheets.values.append(bag_packing_req)
       .then(result => {
         if (result.status == 200) {
           let generateFormatRequest = setupFormatColumns(result, bagPackingInfo.pageId)
@@ -267,10 +263,11 @@ function writeToSheets(body, itemNames) {
         return reject("error writing to bag-packing data sheet: " + error);
       })
     
-      /* Sheet 3: "doordash" */
-      /* [deliveryDate, delivery window start/end, first name, last name, address, item code (always F), # of bags (must be <= 3) ] */
+      /* --- Sheet 3: doordash --- */
+      /* [..., deliveryDate, delivery window start, end, timezone, first name, last name,
+       * address, apt, city, state, zip, phone, # of bags (must be <= 3), delivery instructions, ... ] */
       const doordashInfo = sheetsInfo["doordash"]
-      const request3 = {
+      const doordash_req = {
         spreadsheetId: doordashInfo.spreadsheetId,
         range: doordashInfo.sheetName + "!A:U",
         valueInputOption: "USER_ENTERED",
@@ -288,7 +285,7 @@ function writeToSheets(body, itemNames) {
           } 
       }
       
-      sheets.spreadsheets.values.append(request3)
+      sheets.spreadsheets.values.append(doordash_req)
       .then(result => {
         if (result.status == 200) {
           let generateFormatRequest = setupFormatColumns(result, doordashInfo.pageId)
@@ -340,26 +337,32 @@ function writeToSheets(body, itemNames) {
         let itemRef = firebase.database().ref('/order/' + orderID);
   
         itemRef.once('value')
-        .catch(function(error){
-          return reject("Unable to access database");
-        })
         .then(function(resp){
-          // the version of the item in the database
           var dbItem = resp.val();
-          // this item already exists
+
+          // can't add order if orderID already in use
           if (dbItem != null) {
               return reject(`${orderID} already exists`);
           }
           // otherwise the item doesn't exist and we can create it
           itemRef.update(newOrder)
-          .catch(function(error) {
-              return reject("Error writing to firebase");
-          })
           .then(() => {
               return resolve(orderID);
+          })
+          .catch(error => {
+              return reject("Error updating firebase:" + error);
           });
+        })
+        .catch(error => {
+          return reject("Unable to access item reference in DB:" + error);
         });
+      })
+      .catch(error =>{
+        return reject("Error signing in to firebase: " + error);
       });
+    })
+    .catch(error => {
+      return reject(error);
     })
   })
 } 
@@ -383,7 +386,7 @@ export default async function(req, res) {
           return resolve();
         })
         .catch((error) => {
-          res.status(400).json({error:`Error adding order: ${error}`});
+          res.status(500).json({error:`Error adding order: ${error}`});
           return resolve();
         })
       }
