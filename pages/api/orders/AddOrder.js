@@ -153,7 +153,7 @@ function addOrder(body, itemNames) {
 
     sheets.spreadsheets.values.append(request1)
     .catch((error) => {
-      return reject("error writing to Pantry data sheet: ", error);
+      return reject("error writing to Pantry data sheet: " + error);
     });
 
     // determine approximate # of bags by # of items
@@ -190,7 +190,7 @@ function addOrder(body, itemNames) {
 
     sheets.spreadsheets.values.append(request2)
     .catch((error) => {
-      return reject("error writing to bag-packing data sheet: ", error);
+      return reject("error writing to bag-packing data sheet: " + error);
     });
   
     /* Sheet 3: DoorDash information */
@@ -215,9 +215,8 @@ function addOrder(body, itemNames) {
     
     sheets.spreadsheets.values.append(request3)
     .catch((error) => {
-      return reject("error writing to Doordash data sheet: ", error);
+      return reject("error writing to Doordash data sheet: " + error);
     });
-
 
     /* Add order to firebase */
     let newOrder = {};
