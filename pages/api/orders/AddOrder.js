@@ -139,9 +139,9 @@ function writeToSheets(body, itemNames) {
        * Food pantry master data sheet for tracking calIDs
       */
       
-      // Generate orderID: random six digit value.
+      // Generate orderId: random six digit value.
       // We check later to make sure that the ID isn't in use already.
-      const orderID = Math.random().toString().slice(2, 8);
+      const orderId = Math.random().toString().slice(2, 8);
   
       let now = new Date();
 
@@ -177,7 +177,7 @@ function writeToSheets(body, itemNames) {
             "range": pantryInfo.sheetName + "!A:F",
             "majorDimension": "ROWS",
             "values": [
-              [currentDate, calID, orderID, email,
+              [currentDate, calID, orderId, email,
                 `${deliveryDay} ${deliveryWindow}`,
                 "(" + altDelivery + ")"] //each inner array is a row if we specify ROWS as majorDim
             ] 
@@ -237,7 +237,7 @@ function writeToSheets(body, itemNames) {
             "majorDimension": "ROWS",
             "values": [
               [deliveryMMDD, firstName + " " + lastName.slice(0,1), deliveryWindow, numberOfBags, frequency, 
-               dependents, dietaryRestrictions, additionalRequests, orderID, JSON.stringify(itemNames)]
+               dependents, dietaryRestrictions, additionalRequests, orderId, JSON.stringify(itemNames)]
             ] 
           }
       }
@@ -317,7 +317,7 @@ function writeToSheets(body, itemNames) {
   
       /* Add order to firebase */
       let newOrder = {};
-      newOrder["orderID"] = orderID;
+      newOrder["orderId"] = orderId;
       newOrder["status"] = ORDER_STATUS_OPEN;
   
       // TODO: need to handle the multiple delivery options somewhere
@@ -337,7 +337,7 @@ function writeToSheets(body, itemNames) {
   
       firebase.auth().signInAnonymously()
       .then(() => {
-        let itemRef = firebase.database().ref('/order/' + orderID);
+        let itemRef = firebase.database().ref('/order/' + orderId);
   
         itemRef.once('value')
         .catch(function(error){
@@ -348,7 +348,7 @@ function writeToSheets(body, itemNames) {
           var dbItem = resp.val();
           // this item already exists
           if (dbItem != null) {
-              return reject(`${orderID} already exists`);
+              return reject(`${orderId} already exists`);
           }
           // otherwise the item doesn't exist and we can create it
           itemRef.update(newOrder)
@@ -356,7 +356,7 @@ function writeToSheets(body, itemNames) {
               return reject("Error writing to firebase");
           })
           .then(() => {
-              return resolve(orderID);
+              return resolve(orderId);
           });
         });
       });
@@ -378,8 +378,8 @@ export default async function(req, res) {
     firebase.auth().signInAnonymously()
     .then(() => {
       updateFirebase(body.items).then((itemNames) => {
-        writeToSheets(body, itemNames).then((orderID) => {
-          res.status(200).json({success: `Successfully added order! Order ID: ${orderID}`});
+        writeToSheets(body, itemNames).then((orderId) => {
+          res.status(200).json({success: `Successfully added order! Order ID: ${orderId}`});
           return resolve();
         })
         .catch((error) => {

@@ -25,8 +25,6 @@ export default async function(req,res) {
 
     return new Promise((resolve, reject) => {
 
-      console.log("getting all orders");
-
       return firebase.auth().signInAnonymously()
           .then(() => {
             firebase.database().ref('/order/')
