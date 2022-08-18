@@ -207,7 +207,7 @@ function writeToSheets(body, itemNames) {
         }
       })
       .catch((error) => {
-        return reject("error writing to Pantry data sheet.", error);
+        return reject("error writing to Pantry data sheet." + error);
       })
   
       /* Sheet 2: "bagPacking" */
@@ -264,7 +264,7 @@ function writeToSheets(body, itemNames) {
         }
       })
       .catch((error) => {
-        return reject("error writing to bag-packing data sheet: ", error);
+        return reject("error writing to bag-packing data sheet: " + error);
       })
     
       /* Sheet 3: "doordash" */
@@ -312,7 +312,7 @@ function writeToSheets(body, itemNames) {
         }
       })
       .catch((error) => {
-        return reject("error writing to Doordash data sheet: ", error);
+        return reject("error writing to Doordash data sheet: " + error);
       })  
   
       /* Add order to firebase */
