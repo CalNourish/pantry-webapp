@@ -64,6 +64,10 @@ export default async function(req,res) {
           });
         });
       })
+      .catch(error =>{
+        res.status(500).json({error: error})
+        return resolve("Error signing in to firebase: " + error);
+      });
     })
     .catch(() => {
       res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an authorized account." })

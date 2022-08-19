@@ -6,10 +6,10 @@ import {validateFunc} from '../validate'
 * req.body = { string markdown }
 */
 
-function requireParams(body, res) {
+function requireParams(body) {
   // makes sure that the input is in the right format
   // returns false and an error if not a good input 
-  if (body.markdown) return true;
+  if (body.markdown !== undefined) return true;
   return false;
 }
 
@@ -17,7 +17,7 @@ export default async function(req,res) {
 
   const token = req.headers.authorization
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const { body } = req
 
     // verify parameters
@@ -32,18 +32,19 @@ export default async function(req,res) {
       firebase.auth().signInAnonymously()
       .then(() => {
         let ref = firebase.database().ref('/info/')
-        ref.once('value')
-        .catch(function(error){
-          res.status(500).json({error: "server error getting info", errorstack: error});
+        ref.update({homepage: body.markdown})
+        .then(() => {
+          res.status(200).json({message: "success"})
           return resolve();
         })
-        .then(function(resp){
-          ref.update({homepage: body.markdown})
-        })
         .catch((err) => {
-          console.log("error:", err)
           res.status(500).json({error: "server error", errorstack: err});
+          return resolve("Error updating ref: " + err);
         });
+      })
+      .catch(error =>{
+        res.status(500).json({error: error})
+        return resolve("Error signing in to firebase: " + error);
       });
     })
     .catch(() => {

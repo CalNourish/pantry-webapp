@@ -73,7 +73,6 @@ export default async function (req, res) {
         let verifiedCategories = Object.keys(snapshot.val());
         for (const category in body.categoryName) {
           if (!verifiedCategories.includes(category)) {
-            console.log("Not ok4")
             res.status(400).json({ error: "not all provided cateogries were valid" });
             return resolve();
           }
@@ -86,34 +85,38 @@ export default async function (req, res) {
           let itemRef = firebase.database().ref('/inventory/' + barcode);
 
           itemRef.once('value')
-          .catch(function (error) {
-            console.log("Not ok5")
-            res.status(500).json({ error: "server error getting reference to that item from the database", errorstack: error });
-            return resolve();
-          })
           .then(function (resp) {
             // the version of the item in the database
             var dbItem = resp.val();
             // this item already exists
             if (dbItem != null) {
-              console.log("Not ok6")
               res.status(400).json({ error: "an item with barcode " + barcode + " already exists" })
               return resolve();
             }
             // otherwise the item doesn't exist and we can create it
             itemRef.update(newItem)
-            .catch(function (error) {
-              console.log("Not ok7")
-              res.status(500).json({ error: "error writing new item to inventory database", errorstack: error });
-              return resolve();
-            })
             .then(() => {
-              console.log("OK")
               res.status(200).json({ message: "success" });
               return resolve();
+            })
+            .catch(function (error) {
+              res.status(500).json({ error: "error writing new item to inventory database", errorstack: error });
+              return resolve();
             });
+          })
+          .catch(function (error) {
+            res.status(500).json({ error: "server error getting reference to that item from the database", errorstack: error });
+            return resolve();
           });
         })
+        .catch((err) => {
+          res.status(500).json({error: "Error writing to firebase:" + err});
+          return resolve();
+        });
+      })
+      .catch((err) => {
+        res.status(500).json({error: "Error accessing firebase categories ref:" + err});
+        return resolve();
       });
     })
     .catch(() => {

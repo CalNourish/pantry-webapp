@@ -59,10 +59,6 @@ export default async function (req, res) {
           let dbref = firebase.database().ref('/category/');
 
           dbref.once('value')
-          .catch(function (error) {
-            res.status(500).json({ error: "server error getting reference to categories list", errorstack: error });
-            return resolve();
-          })
           .then(() => {
             // first generate a random ID to use as a key
             let key = makeid(10);
@@ -72,15 +68,23 @@ export default async function (req, res) {
 
             // write to the database
             dbref.update(cat)
-            .catch(error => {
-              res.status(500).json({ error: "Error when writing new category to database: " + error });
-              return resolve();
-            })
             .then(() => {
               res.status(200).json({ message: "success" });
               return resolve();
             })
+            .catch(error => {
+              res.status(500).json({ error: "Error when writing new category to database: " + error });
+              return resolve();
+            })
+          })
+          .catch(function (error) {
+            res.status(500).json({ error: "server error getting reference to categories list", errorstack: error });
+            return resolve();
           });
+        })
+        .catch((err) => {
+          res.status(500).json({error: "Error writing to firebase:" + err});
+          return resolve();
         });
       });
     })

@@ -87,10 +87,14 @@ export default async function(req, res) {
             res.status(200);
             return resolve();
           })
+          .catch((err) => {
+            res.status(500).json({error: "Error updating firebase:" + err});
+            return resolve();
+          });
         })
-        .catch((err) => {
-          res.status(500).json({error: "Error writing to firebase:" + err});
-          return resolve();
+        .catch(error =>{
+          res.status(500).json({error: error})
+          return resolve("Error signing in to firebase: " + error);
         });
       }).catch((errMsg) => {
         // can't find the sheetName in the specified spreadsheet,

@@ -68,7 +68,9 @@ export default function Home() {
                 body: JSON.stringify({markdown: info}),
                 headers: {'Content-Type': "application/json", 'Authorization': token}
               }).then((res) => {
-                console.log(res)
+                if (!res.ok) {
+                  res.json().then(err => console.log("SetHomeInfo error: " + err.error))
+                }
               })
             }}>
             save

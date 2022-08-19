@@ -28,15 +28,19 @@ export default async function (req, res) {
 
       // perform the write
       firebase.auth().signInAnonymously()
-        .then(() => {
-          let dayRef = firebase.database().ref('/hours/' + day);
-          dayRef.update({ 'hours': updatedTime })
-        })
-        .then(() => {
-          res.status(200);
-          res.json({ message: "success" });
-          return resolve();
-        });
+      .then(() => {
+        let dayRef = firebase.database().ref('/hours/' + day);
+        dayRef.update({ 'hours': updatedTime })
+      })
+      .then(() => {
+        res.status(200);
+        res.json({ message: "success" });
+        return resolve();
+      })
+      .catch((err) => {
+        res.status(500).json({error: "Error writing to firebase:" + err});
+        return resolve();
+      });
     })
     .catch(() => {
       res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an authorized account." });

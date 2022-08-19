@@ -16,7 +16,7 @@ export default async function (req, res) {
     })
     .catch(error =>{
       res.status(500).json({error: error})
-      return reject("Error signing in to firebase: " + error);
+      return resolve("Error signing in to firebase: " + error);
     });
   });
 }

@@ -67,22 +67,23 @@ export default async function (req, res) {
           .then(() => {
             // write to the database, only have to update iconName since displayName is immutable
             dbref.update({ "iconName": iconName })
-            .catch(error => {
-              res.status(500);
-              res.json({ error: "Error when writing updated category to database" });
+            .then(() => {
+              res.status(200).json({ message: "success" });
               return resolve();
             })
-            .then(() => {
-              res.status(200);
-              res.json({ message: "success" });
+            .catch(error => {
+              res.status(500).json({ error: "Error when writing updated category to database: " + error });
               return resolve();
             })
           })
           .catch(function (error) {
-            res.status(500);
-            res.json({ error: "server error getting reference to categories ref", errorstack: error });
+            res.status(500).json({ error: "server error getting reference to categories ref", errorstack: error });
             return resolve();
           });
+        })
+        .catch((err) => {
+          res.status(500).json({error: "Error writing to firebase:" + err});
+          return resolve();
         });
       });
     })
