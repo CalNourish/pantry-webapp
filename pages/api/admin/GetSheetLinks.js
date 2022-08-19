@@ -9,6 +9,9 @@ export default async function (req, res) {
         let data = snapshot.val();
         res.status(200).json(data)
         return resolve()
+      })
+      .catch(error => {
+        res.status(500).json("Error accessing firebase: " + error)
       });
     })
     .catch(error =>{
