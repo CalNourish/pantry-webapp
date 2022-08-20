@@ -93,20 +93,20 @@ class Checkin extends React.Component {
         }
       }
     }
-    return <div className='flex-grow text-left'>{messageToReturn}</div>;
+    return <div className='flex-grow text-left'>{messageToReturn}</div>
   };
    
   handleScanSubmit = (e) => {
-    var fieldset = document.getElementById("calIDFieldset")
-    fieldset.disabled = true
-    setTimeout(()=>{
-      fieldset.disabled = false;
-      document.getElementById("calID").focus();
-      }, 1500)
-    
+    var fieldsetCalId = document.getElementById("calIDFieldset")
+    var calIdTextBox = document.getElementById("calID")
+
+    fieldsetCalId.disabled = true    
     e.preventDefault();
     if (e.target.calID.value.length == 0 || e.target.calID.value == null) {
       this.showError("Can't submit blank ID: " + e.target.calID.value,1000)
+      e.target.calID.value = null
+      fieldsetCalId.disabled = false    
+      calIdTextBox.focus();
       return
     }
     fetch('/api/admin/CheckIn', { method: 'POST',
@@ -116,19 +116,25 @@ class Checkin extends React.Component {
     .then((result) => {
       result.json()
       .then((lastVisitedTimes) => {
+        fieldsetCalId.disabled = false
         this.setState({lastScannedID:e.target.calID.value, visitsLastWeek:lastVisitedTimes, lastScannedTime:new Date().toLocaleTimeString()})
         this.showSuccess("Sucessfully scanned ID: " + e.target.calID.value,1000)
-        e.target.calID.value = null;
-        document.getElementById("calID").focus();
+        e.target.calID.value = null
+        calIdTextBox.focus();
       })
       .catch((err) => {
+        e.target.calID.value = null
+        calIdTextBox.focus()
+        fieldsetCalId.disabled = false
         this.showError("Failed scanning ID: " + e.target.calID.value,3000)
       });
     })
     .catch((err) => {
+      e.target.calID.value = null;
+      calIdTextBox.focus();
+      fieldsetCalId.disabled = false
       this.showError("Failed scanning ID: " + e.target.calID.value,300)
-    })
-  
+    })  
   }
 
   
