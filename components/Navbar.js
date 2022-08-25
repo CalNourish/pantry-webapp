@@ -29,7 +29,7 @@ const AUTH_SIGNEDIN_ROUTES = [
 
 export default function Navbar() {
   const linkStyle = "block py-2 pr-3 pl-3 text-white rounded hover:bg-pantry-blue-400 " +
-    "md:ml-4 md:px-3 md:py-2 md:text-sm md:font-medium md:hover:bg-pantry-blue-500"
+    "lg:ml-4 lg:px-3 lg:py-2 lg:text-sm lg:font-medium lg:hover:bg-pantry-blue-500"
   const activeLink = `${linkStyle} text-white`;
   const inactiveLink = `${linkStyle} text-gray-300 hover:text-white`;
   const router = useRouter();
@@ -64,13 +64,13 @@ export default function Navbar() {
   }
 
     return (
-    <nav className="bg-pantry-blue-500 text-white p-4 flex flex-wrap justify-between items-center overflow-visible flex-shrink-0">
+    <nav className="bg-pantry-blue-500 text-white p-4 h-20 flex flex-wrap justify-between items-center overflow-visible flex-shrink-0">
       {/* Pantry Logo */}
-      <a className="" href="/">
-        <Image className="block h-10 w-auto" src="/images/pantry_logo.png" alt="Pantry logo" priority="true" height="32" width="32"/>
+      <a className="h-full" href="/">
+        <img className="block h-full w-auto bg-white" src="/images/pantry_logo.png" alt="Pantry logo" priority="true" height="32" width="32"/>
       </a>
 
-      <div className='flex-grow mr-3 md:order-2 md:flex-grow-0'>
+      <div className='flex-grow mr-3 lg:order-2 lg:flex-grow-0'>
         {!user ? <a className="bg-gray-50 text-gray-600 rounded px-3 py-1 float-right" href="/signin">Sign In</a> :
           <div className="flex flex-col float-right">
             {/* circle with user initials */}
@@ -101,14 +101,14 @@ export default function Navbar() {
       {/* Tabs */}
       {/* drop-down show/hide menu buttons for small screens */}
       <button type="button" onClick={toggleShowTabs}
-        className="inline-flex items-center p-1 text-sm text-gray-400 rounded-lg hover:bg-pantry-blue-400 focus:outline-none md:hidden" aria-controls="mobile-menu-2" aria-expanded="false">
+        className="inline-flex items-center p-1 text-sm text-gray-400 rounded-lg hover:bg-pantry-blue-400 focus:outline-none lg:hidden" aria-controls="mobile-menu-2" aria-expanded="false">
         <svg className={(showTabs ? "hidden " : "") + "w-6 h-6"} fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd"></path></svg>
         <svg className={(showTabs ? "" : "hidden ") + "w-6 h-6"} fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"></path></svg>
       </button>
       
       {/* Tab links */}
-      <div className={(showTabs ? "" : "hidden ") + "justify-between w-full md:flex md:w-auto md:order-1 md:flex-grow md:ml-10"}>
-          <ul className="flex flex-col mt-4 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium">
+      <div className={(showTabs ? "" : "hidden ") + "justify-between w-full lg:flex lg:w-auto lg:order-1 lg:flex-grow lg:ml-10"}>
+          <ul className="flex flex-col mt-4 lg:flex-row lg:space-x-8 lg:mt-0 lg:text-sm lg:font-medium">
             {routes.map(navigationItem => (
               <li key={navigationItem.title}>
                 <a className={navigationItem.route == router.pathname ? activeLink : inactiveLink} href={navigationItem.route}>
