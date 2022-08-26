@@ -67,7 +67,7 @@ export default function Navbar() {
     <nav className="bg-pantry-blue-500 text-white p-4 h-20 flex flex-wrap justify-between items-center overflow-visible flex-shrink-0">
       {/* Pantry Logo */}
       <a className="h-full" href="/">
-        <img className="block h-full w-auto bg-white" src="/images/pantry_logo.png" alt="Pantry logo" priority="true" height="32" width="32"/>
+        <img className="block h-full w-auto" src="/images/pantry_logo.png" alt="Pantry logo" priority="true" height="32" width="32"/>
       </a>
 
       <div className='flex-grow mr-3 lg:order-2 lg:flex-grow-0'>
