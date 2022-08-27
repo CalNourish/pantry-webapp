@@ -53,7 +53,7 @@ export default async function(req,res) {
     }
 
     FIELDS.forEach(field => {
-      if (body[field]) {
+      if (body[field] !== undefined) {
         updatedFields[field] = body[field];
       }
     });

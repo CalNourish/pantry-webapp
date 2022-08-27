@@ -27,9 +27,9 @@ export default async function(req,res) {
           .then(function(resp){
             // the version of the order in the database
             var dbItem = resp.val();
-              res.status(200);
-              res.json(dbItem);
-              return resolve();
+            res.status(200);
+            res.json(dbItem);
+            return resolve();
           })
           .catch(function(error){
             res.status(500);
