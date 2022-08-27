@@ -1,12 +1,12 @@
 import firebase from '../../../firebase/clientApp'
 import { validateFunc } from '../validate'
-
+import { daysInOrder } from '../../hours';
 
 /*
-* /api/admin/updateHours
-* req.body = {string day, string newHours}
+* /api/admin/UpdateHours
+* req.body = {string day, string hours}
 * both fields are required
-* updates the new hours for a certain time 
+* updates the new hours for a certain day
 */
 
 export const config = {
@@ -15,12 +15,37 @@ export const config = {
   },
 }
 
+function requireParams(req, res) {
+  // makes sure that the input is in the right format
+  // returns false and an error if not a good input
+  let { body } = req;
+  if (!daysInOrder.includes(body.day)) {
+    res.status(400).json({error: `'${body.day}' not a day of the week.`});
+    return false;
+  }
+  
+  if (body.hours === undefined) {
+    res.status(400).json({error: `Missing new hours string.`});
+    return false;
+  }
+
+  // if (!validateHours(body.hours)) {
+  //   res.status(400).json({error: `Bad formatting for new hours: '${body.newHours}'`})
+  //   return false;
+  // }
+
+  return true;
+}
 
 export default async function (req, res) {
   // verify this request is legit
   const token = req.headers.authorization
 
   return new Promise((resolve) => {
+    if (!requireParams(req, res)) {
+      return resolve();
+    }
+    
     validateFunc(token).then(() => {
       const { body } = req
       let day = body.day.toString();
@@ -31,26 +56,30 @@ export default async function (req, res) {
       .then(() => {
         let dayRef = firebase.database().ref('/hours/' + day);
         dayRef.update({ 'hours': updatedTime })
+        .then(() => {
+          res.status(200);
+          res.json({ message: "success" });
+          return resolve();
+        })
+        .catch((err) => {
+          res.status(500).json({error: "Error writing to firebase: " + err});
+          return resolve();
+        });
       })
-      .then(() => {
-        res.status(200);
-        res.json({ message: "success" });
+      .catch(() => {
+        res.status(500).json({error: "Error signing in to firebase: " + err});
         return resolve();
       })
-      .catch((err) => {
-        res.status(500).json({error: "Error writing to firebase:" + err});
-        return resolve();
-      });
     })
     .catch(() => {
-      res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an authorized account." });
+      res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an administrator account." });
       return resolve();
     });
   })
 }
 
 /** Rough start to a function used to validate hours of the food pantry, currently
- *  not utilized
+ *  not utilized. TODO
  */
 export function validateHours(hours) {
 

@@ -1,7 +1,7 @@
 import firebase from '../../../firebase/clientApp'    
 
 /*
-* /api/admin/getHours
+* /api/admin/GetHours
 * Gets the current hours of the pantry
 * req is empty 
 */

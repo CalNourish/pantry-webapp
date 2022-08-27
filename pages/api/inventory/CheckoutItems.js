@@ -194,7 +194,7 @@ export default async function (req, res) {
         return resolve();
       })
     }).catch(() => {
-      res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an authorized account." })
+      res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an administrator account." })
       return resolve();
     })
   })

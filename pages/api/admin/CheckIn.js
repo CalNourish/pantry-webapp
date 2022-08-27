@@ -5,7 +5,7 @@ import {service_info} from "../../../utils/decrypt.js";
 import firebase from '../../../firebase/clientApp'
 
 /*
- * /api/admin/checkin
+ * /api/admin/CheckIn
  * req.body = { string calID }
  */
 
@@ -181,7 +181,7 @@ export default async function (req, res) {
       });
     })
     .catch(() => {
-      res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an authorized account." });
+      res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an administrator account." });
       return resolve();
     });
   });

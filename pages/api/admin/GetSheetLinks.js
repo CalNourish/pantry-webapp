@@ -1,5 +1,9 @@
 import firebase from '../../../firebase/clientApp'
 
+/*
+* /api/admin/GetSheetLinks
+*/
+
 export default async function (req, res) {
   return new Promise((resolve) => {
     firebase.auth().signInAnonymously()

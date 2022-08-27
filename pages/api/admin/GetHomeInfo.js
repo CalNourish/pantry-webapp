@@ -1,7 +1,7 @@
 import firebase from '../../../firebase/clientApp'
 
 /*
-* /api/orders/GetHomeInfo
+* /api/admin/GetHomeInfo
 */
 
 export default async function(req,res) {
