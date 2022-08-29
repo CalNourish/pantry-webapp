@@ -116,23 +116,23 @@ class Checkin extends React.Component {
     .then((result) => {
       result.json()
       .then((lastVisitedTimes) => {
-        fieldsetCalId.disabled = false
         this.setState({lastScannedID:e.target.calID.value, visitsLastWeek:lastVisitedTimes, lastScannedTime:new Date().toLocaleTimeString()})
         this.showSuccess("Sucessfully scanned ID: " + e.target.calID.value,1000)
+        fieldsetCalId.disabled = false
         e.target.calID.value = null
         calIdTextBox.focus();
       })
       .catch((err) => {
+        fieldsetCalId.disabled = false
         e.target.calID.value = null
         calIdTextBox.focus()
-        fieldsetCalId.disabled = false
         this.showError("Failed scanning ID: " + e.target.calID.value,3000)
       });
     })
     .catch((err) => {
+      fieldsetCalId.disabled = false
       e.target.calID.value = null;
       calIdTextBox.focus();
-      fieldsetCalId.disabled = false
       this.showError("Failed scanning ID: " + e.target.calID.value,300)
     })  
   }
