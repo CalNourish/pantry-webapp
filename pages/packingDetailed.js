@@ -30,7 +30,7 @@ class PackingOrder extends React.Component {
     this.state = {
       orderId: props.data[0].orderId,
       delivery_date: props.data[0].delivery_date,
-      pantryNote: props.data[0].pantry_note,
+      pantryNote: props.data[0].pantryNote,
       guestNote: props.data[0].guestNote,
       firstName: props.data[0].firstName,
       lastInitial: props.data[0].lastInitial,
