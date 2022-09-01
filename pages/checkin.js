@@ -119,6 +119,7 @@ class Checkin extends React.Component {
     var fieldsetCalId = document.getElementById("calIDFieldset");
     var calIdTextBox = document.getElementById("calID");
     fieldsetCalId.disabled = true;
+    e.preventDefault();
 
     fetch("/api/admin/CheckIn", {
       method: "POST",
