@@ -13,7 +13,7 @@ import { google } from 'googleapis';
  *  - `spreadsheet` refers to a single google sheet document
  *  - `sheet` or `page` refers to a named page within a spreadsheet. a spreadsheet can contain 1 or more sheets.
  *
- * In this code, `sheetId` is something like `June22`, but `spreadsheetId` is a long string of characters
+ * In this code, `sheetId` is something like `June22`, but `spreadsheetId` is a long string of characters in the url.
 */
 
 import { service_info } from "../../../utils/decrypt.js"
@@ -39,12 +39,16 @@ function requireParams(body, res) {
 }
 
 // Gets the spreadsheetID and sheetName from firebase. These can be changed in the admin page.
-function getFirebaseInfo() {
-  return new Promise((resolve) => {
+function getCheckoutSheet() {
+  return new Promise((resolve, reject) => {
     firebase.database().ref('/sheetIDs')
     .once('value', snapshot => {
       let val = snapshot.val();
       return resolve(val.checkoutLog)
+    })
+    .catch((err) => {
+      console.log("error getting google sheet links from firebase")
+      return reject(err)
     });
   })
 }
@@ -62,7 +66,7 @@ function writeLog(log) {
     );
     const sheets = google.sheets({ version: 'v4', auth: sheets_auth });
 
-    getFirebaseInfo()
+    getCheckoutSheet()
     .then(({ spreadsheetId, sheetName, pageId }) => {
       let now = new Date();
 
@@ -90,36 +94,35 @@ function writeLog(log) {
       }
 
       sheets.spreadsheets.values.append(values)
-        .catch((err) => {
-          reject("Unable to access the google sheet.")
-        })
-        .then((resp) => {
-          let requestFormat = setupFormatColumns(resp, pageId)
+      .catch((err) => {
+        reject("Unable to access the google sheet: " + err)
+      })
+      .then((resp) => {
+        let requestFormat = setupFormatColumns(resp, pageId)
 
-          // reformat the cells written
-          const sheetFormat = {
-            spreadsheetId: spreadsheetId,
-            resource: {
-              requests: [
-                requestFormat(0, { type: "DATE", pattern: "ddddd m/dd" }), // column 1 (date)
-                requestFormat(1, { type: "TIME", pattern: "h:mm am/pm" }), // column 2 (time)
-                requestFormat(2, { type: "TEXT" }),                        // column 3 (barcode)
-                requestFormat([3, 6]),                                     // column 4-6 (quantity, name, new quantity)
-              ]
-            }
+        // reformat the cells written
+        const sheetFormat = {
+          spreadsheetId: spreadsheetId,
+          resource: {
+            requests: [
+              requestFormat(0, { type: "DATE", pattern: "ddddd m/dd" }), // column 1 (date)
+              requestFormat(1, { type: "TIME", pattern: "h:mm am/pm" }), // column 2 (time)
+              requestFormat(2, { type: "TEXT" }),                        // column 3 (barcode)
+              requestFormat([3, 6]),                                     // column 4-6 (quantity, name, new quantity)
+            ]
           }
+        }
 
-          sheets.spreadsheets.batchUpdate(sheetFormat).then(() => resolve())
-        })
-        .catch((err) => {
-          console.log(err)
-          resolve("warning: possible problem with sheet formatting");
-        })
+        sheets.spreadsheets.batchUpdate(sheetFormat).then(() => resolve())
+      })
+      .catch((err) => {
+        console.log(err)
+        resolve("warning: possible problem with sheet formatting");
+      })
     })
     .catch((err) => {
-      console.log("error getting google sheet links from firebase")
       return reject(err)
-    })
+    });
   })
 }
 
