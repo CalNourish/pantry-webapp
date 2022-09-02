@@ -41,7 +41,7 @@ export default async function (req, res) {
   // accepts "false" or false, but prefer boolean type
   let isPacked = body.isPacked == "false" ? false : Boolean(body.isPacked);
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     validateFunc(token).then(() => {
       firebase.auth().signInAnonymously()
       .then(() => {
@@ -77,10 +77,14 @@ export default async function (req, res) {
             return resolve();
           });
         })
+        .catch((err) => {
+          res.status(500).json({error: "Error updating order item: " + err})
+          return resolve()
+        })
       })
       .catch(err => {
         res.status(500).json({ error: "error signing into firebase: " + err });
-        return;
+        return resolve();
       })
     })
     .catch(() => {

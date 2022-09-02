@@ -13,13 +13,13 @@ export const config = {
     }
 };
 
-
 export default async function(req,res) {   
     // verify this request is legit
     const token = req.headers.authorization
 
     return new Promise((resolve) => {
-      validateFunc(token).then(() => {
+      validateFunc(token)
+      .then(() => {
         firebase.auth().signInAnonymously()
         .then(() => {
           firebase.database().ref('/order/')
@@ -36,6 +36,11 @@ export default async function(req,res) {
             res.json({error: "server error getting that order from the database", errorstack: error});
             return resolve();
           });
+        })
+        .catch(err => {
+          res.status(500);
+          res.json({ error: "error updating firebase: " + err });
+          return;
         })
       })
       .catch(() => {

@@ -4,8 +4,8 @@ import firebase from '../../../firebase/clientApp'
 * /api/orders/GetDeliveryTimes
 */
 
-export default async function(req,res) {   
-  return new Promise((resolve, reject) => {
+export default async function(_, res) {   
+  return new Promise((resolve) => {
 
     // no need to sign in since we're just reading
     firebase.database()

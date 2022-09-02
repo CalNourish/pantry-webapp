@@ -20,7 +20,7 @@ export const config = {
 
 function requireParams(query, res) {
   var { status } = query;
-  if (status != ORDER_STATUS_OPEN && status != ORDER_STATUS_PROCESSING && status != ORDER_STATUS_COMPLETE) {
+  if (![ORDER_STATUS_OPEN, ORDER_STATUS_PROCESSING, ORDER_STATUS_COMPLETE].includes(status)) {
     res.status(400).json({ error: "requested status must be either open, processing, or complete" });
     return false;
   }
@@ -50,7 +50,7 @@ export default async function (req, res) {
       })
       .catch(err => {
         res.status(500);
-        res.json({ error: "Error when checking out items: " + err });
+        res.json({ error: "Error signing in to firebase: " + err });
         return resolve();
       })
     })
