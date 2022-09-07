@@ -9,8 +9,7 @@ import { validateFunc } from '../validate'
 function requireParams(body, res) {
   // makes sure that the input is in the right format
   // returns false and an error if not a good input 
-  var { orderId } = body;
-  if (!orderId) {
+  if (!body.orderId) {
     res.status(400).json({ error: "missing order ID" });
     return false;
   }

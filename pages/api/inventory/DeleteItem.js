@@ -14,16 +14,13 @@ export const config = {
   },
 }
 
-
-
 export default async function(req,res) {   
   // verify this request is legit
   const token = req.headers.authorization
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     validateFunc(token).then(() => {
       const {body} = req
-      console.log("req: ", body);
 
       // require barcode
       if (!body.barcode) {

@@ -6,25 +6,28 @@ import {validateFunc} from '../validate'
 * req.body = { string markdown }
 */
 
-function requireParams(body, res) {
+function requireParams(body) {
   // makes sure that the input is in the right format
   // returns false and an error if not a good input 
-  if (body.markdown) return true;
-  return false;
+  if (body.markdown === undefined) {
+    res.status(400).json({message: "Missing markdown string."});
+    return false;
+  }
+
+  return true;
 }
 
-export default async function(req,res) {
+export default async function(req, res) {
 
   const token = req.headers.authorization
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const { body } = req
 
     // verify parameters
     let ok = requireParams(body, res);
     if (!ok) {
-        res.status(400).json({message: "bad request parameters"});
-        return resolve();
+      return resolve();
     }
     
     validateFunc(token)
@@ -33,17 +36,18 @@ export default async function(req,res) {
       .then(() => {
         let ref = firebase.database().ref('/info/')
         ref.once('value')
-        .catch(function(error){
-          res.status(500).json({error: "server error getting info", errorstack: error});
-          return resolve();
-        })
-        .then(function(resp){
+        .then(() => {
           ref.update({orderEligibility: body.markdown})
         })
         .catch((err) => {
           console.log("error:", err)
           res.status(500).json({error: "server error", errorstack: err});
         });
+      })
+      .catch(err => {
+        res.status(500);
+        res.json({ error: "Error signing in to firebase: " + err });
+        return resolve();
       });
     })
     .catch(() => {

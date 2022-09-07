@@ -20,13 +20,9 @@ export default async function(req,res) {
     const {
       query: { barcode },
     } = req
-    firebase.database()
-    .ref('/inventory/' + barcode)
+
+    firebase.database().ref('/inventory/' + barcode)
     .once('value')
-    .catch(function(error) {
-      res.status(500).json({error: "server error getting that item from the database", errorstack: error});
-      return resolve();
-    })
     .then(function(resp) {
       // the version of the item in the database
       var dbItem = resp.val();
@@ -39,6 +35,10 @@ export default async function(req,res) {
         res.status(200).json(dbItem);
         return resolve();
       }
+    })
+    .catch((error) => {
+      res.status(500).json({error: "server error getting item from the database", errorstack: error});
+      return resolve();
     });
   })
 }

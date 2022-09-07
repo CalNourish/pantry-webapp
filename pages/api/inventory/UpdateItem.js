@@ -15,11 +15,14 @@ export const config = {
   },
 }
 
+// list of item fields that can be updated
+const UPDATABLE_FIELDS = ["categoryName", "count", "itemName", "lowStock", "packSize"];
+
 export default async function(req,res) {   
   // verify this request is legit
   const token = req.headers.authorization
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const {body} = req
 
     // require barcode
@@ -29,8 +32,6 @@ export default async function(req,res) {
     }
 
     // construct parameters 
-    // list of item fields that can be updated
-    const FIELDS = ["categoryName", "count", "itemName", "lowStock", "packSize"];
     let updatedFields = {};
     // make sure barcode is a string
     let barcode = body.barcode.toString();
@@ -52,7 +53,8 @@ export default async function(req,res) {
       }
     }
 
-    FIELDS.forEach(field => {
+    UPDATABLE_FIELDS.forEach(field => {
+      // copy any non-null fields to update
       if (body[field] !== undefined) {
         updatedFields[field] = body[field];
       }
@@ -64,7 +66,7 @@ export default async function(req,res) {
         let itemRef = firebase.database().ref('/inventory/' + barcode);
 
         itemRef.once('value')  
-        .catch(function(error){
+        .catch((error) => {
           res.status(500);
           res.json({error: "server error getting that item from the database", errorstack: error});
           return resolve();
@@ -87,12 +89,15 @@ export default async function(req,res) {
             return resolve();
           })
           .then(() => {
-            res.status(200);
-            res.json({message: "success"});
+            res.status(200).json({message: "success"});
             return resolve();
           });
         });
       })
+      .catch((err) => {
+        res.status(500).json({error: "Error writing to firebase:" + err});
+        return resolve();
+      });
     })
     .catch(() => {
       res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an administrator account." });

@@ -84,9 +84,13 @@ export default async function (req, res) {
             return resolve();
           }
         }
-
-        // perform the write
-        // is there throttling on anonymous sign ins?
+      })
+      .catch((err) => {
+        res.status(500).json({error: "Error accessing firebase categories ref:" + err});
+        return resolve();
+      })
+      .then(() => {
+        // if no category issues, perform the write
         firebase.auth().signInAnonymously()
         .then(() => {
           let itemRef = firebase.database().ref('/inventory/' + barcode);
@@ -120,11 +124,7 @@ export default async function (req, res) {
           res.status(500).json({error: "Error writing to firebase:" + err});
           return resolve();
         });
-      })
-      .catch((err) => {
-        res.status(500).json({error: "Error accessing firebase categories ref:" + err});
-        return resolve();
-      });
+      })        
     })
     .catch(() => {
       res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an administrator account." });
