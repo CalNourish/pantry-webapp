@@ -3,14 +3,12 @@ import Head from 'next/head'
 import { useEffect, useState } from 'react'
 import cookie from 'js-cookie';
 
-
 import { useUser } from '../context/userContext'
 import { server } from './_app.js'
 
-// const fetcher = (url) => fetch(url).then((res) => res.json())
+export const daysInOrder = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
 
 const token = cookie.get("firebaseToken")
-const daysInOrder = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
 
 export default function Hours() {
 
@@ -18,9 +16,9 @@ export default function Hours() {
   const [data, setData] = useState(undefined);
   const { user } = useUser();
 
-  // let { data, error } = useSWR('/api/admin/getHours', fetcher)
+  // let { data, error } = useSWR('/api/admin/GetHours', fetcher)
   let getHours = () => {
-    fetch(`${server}/api/admin/getHours`)
+    fetch(`${server}/api/admin/GetHours`)
     .then((result) => {
       result.json()
       .then((data) => {
@@ -69,7 +67,7 @@ export default function Hours() {
     event.preventDefault();
     let hourString = event.target[`hours-${day}`].value
 
-    fetch('/api/admin/updateHours', {
+    fetch('/api/admin/UpdateHours', {
       method: 'POST',
       body: JSON.stringify({
           "day": day,
@@ -78,15 +76,19 @@ export default function Hours() {
       headers: { 'Content-Type': "application/json", 'Authorization': token }
     })
     .then(response => {
-      if (response.ok) return response.json()
-      throw response.status
+      if (response.ok) {
+        response.json().then(() => {
+          setEditing(false)
+          setData({...data, [day]: hourString}); // update the data object
+        })
+      } else {
+        response.json().then((resp) => {
+          console.log("Error updating hours: ", resp.error)
+        })
+      }
     })
-    .then(json => {
-      setEditing(false)
-      setData({...data, [day]: hourString}); // update the data object
-    })
-    .catch(errcode => {
-      console.log("Error updating hours: error code", errcode)
+    .catch(err => {
+      console.log("Unknown error: ", err)
     })
   }
 

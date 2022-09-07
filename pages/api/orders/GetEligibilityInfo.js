@@ -4,9 +4,9 @@ import firebase from '../../../firebase/clientApp'
 * /api/orders/GetEligibilityInfo
 */
 
-export default async function(req,res) {
+export default async function(_, res) {
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
 
     // no need to sign in since we're just reading
     firebase.database()

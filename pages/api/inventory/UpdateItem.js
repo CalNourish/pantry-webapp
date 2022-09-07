@@ -15,19 +15,15 @@ export const config = {
   },
 }
 
+// list of item fields that can be updated
+const UPDATABLE_FIELDS = ["categoryName", "count", "itemName", "lowStock", "packSize"];
+
 export default async function(req,res) {   
   // verify this request is legit
   const token = req.headers.authorization
-  console.log("TOKEN: ", token)
-  const allowed = await validateFunc(token)
-  if (!allowed) {
-      res.status(401).json({error: "you are not authenticated to perform this action"})
-      return Promise.resolve();
-  }
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const {body} = req
-    console.log("req: ", body);
 
     // require barcode
     if (!body.barcode) {
@@ -36,12 +32,10 @@ export default async function(req,res) {
     }
 
     // construct parameters 
-    // list of item fields that can be updated
-    const FIELDS = ["categoryName", "count", "itemName", "lowStock", "packSize"];
     let updatedFields = {};
     // make sure barcode is a string
     let barcode = body.barcode.toString();
-    
+
     // convert count to integer
     if (body["count"]) {
       body["count"] = parseInt(body["count"]);
@@ -59,49 +53,55 @@ export default async function(req,res) {
       }
     }
 
-    FIELDS.forEach(field => {
+    UPDATABLE_FIELDS.forEach(field => {
+      // copy any non-null fields to update
       if (body[field] !== undefined) {
         updatedFields[field] = body[field];
       }
     });
 
-    console.log("Fields to update: ", updatedFields)
-    
-    // is there throttling on anonymous sign ins?
-    firebase.auth().signInAnonymously()
-    .then(() => {
-      let itemRef = firebase.database().ref('/inventory/' + barcode);
-      
-      itemRef.once('value')  
-      .catch(function(error){
-        res.status(500);
-        res.json({error: "server error getting that item from the database", errorstack: error});
-        return resolve();
-      })
-      .then(function(resp){
-        // the version of the item in the database
-        var dbItem = resp.val();
-        // this item was not found
-        if (dbItem === null) {
-          res.status(404);
-          res.json({error: "unable to find item with barcode " + barcode})
-          return resolve();
-        }
-        
-        // otherwise the item exists and we can update it
-        itemRef.update(updatedFields)
-        .catch(function(error) {
+    validateFunc(token).then(() => {
+      firebase.auth().signInAnonymously()
+      .then(() => {
+        let itemRef = firebase.database().ref('/inventory/' + barcode);
+
+        itemRef.once('value')  
+        .catch((error) => {
           res.status(500);
-          res.json({error: "error writing update to inventory database", errorstack: error});
+          res.json({error: "server error getting that item from the database", errorstack: error});
           return resolve();
         })
-        .then(() => {
-          res.status(200);
-          res.json({message: "success"});
-          return resolve();
+        .then(function(resp){
+          // the version of the item in the database
+          var dbItem = resp.val();
+          // this item was not found
+          if (dbItem === null) {
+            res.status(404);
+            res.json({error: "unable to find item with barcode " + barcode})
+            return resolve();
+          }
+
+          // otherwise the item exists and we can update it
+          itemRef.update(updatedFields)
+          .catch(function(error) {
+            res.status(500);
+            res.json({error: "error writing update to inventory database", errorstack: error});
+            return resolve();
+          })
+          .then(() => {
+            res.status(200).json({message: "success"});
+            return resolve();
+          });
         });
+      })
+      .catch((err) => {
+        res.status(500).json({error: "Error writing to firebase:" + err});
+        return resolve();
       });
     })
-    
+    .catch(() => {
+      res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an administrator account." });
+      return resolve();
+    });
   })
 }

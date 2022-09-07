@@ -5,11 +5,11 @@ import {service_info} from "../../../utils/decrypt.js";
 import firebase from '../../../firebase/clientApp'
 
 /*
- * /api/admin/checkin
+ * /api/admin/CheckIn
  * req.body = { string calID }
  */
 
-function requireParams(body, res) {
+function requireParams(body) {
   // makes sure that the input is in the right format
   // returns false and an error if not a good input
   if (body.calID) return true;
@@ -69,25 +69,28 @@ function scanTableForVisitInPastWeek(values, startOfWeek, calId) {
   return visitedTimes;
 }
 
-function getFirebaseInfo() {
-  return new Promise((resolve) => {
+function getSheetsLink() {
+  return new Promise((resolve, reject) => {
     firebase.database().ref('/sheetIDs')
     .once('value', snapshot => {
         let val = snapshot.val();
         return resolve(val.checkIn)
+    })
+    .catch(error => {
+      return reject(error);
     });
   })
 }
 
 export default async function (req, res) {
   const token = req.headers.authorization;
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const { body } = req;
 
     // verify parameters
     let ok = requireParams(body, res);
     if (!ok) {
-      res.status(400).json({ message: "bad request parameters" });
+      res.status(400).json({ message: "Missing CalID" });
       return resolve();
     }
 
@@ -103,7 +106,8 @@ export default async function (req, res) {
       );
       const sheets = google.sheets({ version: "v4", auth: sheets_auth });
 
-      getFirebaseInfo().then(({spreadsheetId, sheetName}) => {
+      getSheetsLink()
+      .then(({spreadsheetId, sheetName}) => {
         var numRows = 0;
         var calID = body.calID
         let numberOfRowsToGoBack = 2000;
@@ -157,17 +161,28 @@ export default async function (req, res) {
             }
             )
             .catch((error) => {
-              return reject("error writing to Pantry data sheet: " +  error);
+              res.status(500).json({error: "error writing to Pantry data sheet: " +  error})
+              return resolve();
             });
           })
           .catch((error) => {
-            return reject("error reading from Pantry data sheet: " + error);
+            res.status(500).json({error: "error reading from Pantry data sheet: " + error})
+            return resolve();
           });
         })
         .catch((error) => {
-          return reject("error with firebase auth: " + error);
+          res.status(500).json({error: "error with firebase auth: " + error})
+          return resolve();
         });
+      })
+      .catch((error) => {
+        res.status(500).json({error: "error getting google sheets link: " + error})
+        return resolve();
       });
+    })
+    .catch(() => {
+      res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an administrator account." });
+      return resolve();
     });
   });
 }

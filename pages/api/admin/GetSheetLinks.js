@@ -1,15 +1,20 @@
 import firebase from '../../../firebase/clientApp'
 
-export default async function (req, res) {
+/*
+* /api/admin/GetSheetLinks
+*/
+
+export default async function (_, res) {
   return new Promise((resolve) => {
-    firebase.auth().signInAnonymously()
-    .then(() => {
-      firebase.database().ref('/sheetIDs')
-      .once('value', snapshot => {
-        let data = snapshot.val();
-        res.status(200).json(data)
-        return resolve()
-      });
+    firebase.database().ref('/sheetIDs/')
+    .once('value', snapshot => {
+      let data = snapshot.val();
+      res.status(200).json(data);
+      return resolve();
+    })
+    .catch(error => {
+      res.status(500).json({error: "Error reading firbase sheet IDs: " + error});
+      return resolve();
     });
   });
 }
