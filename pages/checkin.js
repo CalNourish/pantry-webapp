@@ -102,11 +102,11 @@ class Checkin extends React.Component {
     setTimeout(()=>{
       fieldset.disabled = false;
       document.getElementById("calID").focus();
-    }, 1500)
+      }, 1500)
     
     e.preventDefault();
     if (e.target.calID.value.length == 0 || e.target.calID.value == null) {
-      this.showError("Can't submit blank ID: " + e.target.calID.value, 1000)
+      this.showError("Can't submit blank ID: " + e.target.calID.value,1000)
       return
     }
     fetch('/api/admin/CheckIn', { method: 'POST',
@@ -114,21 +114,21 @@ class Checkin extends React.Component {
       headers: {'Content-Type': "application/json", 'Authorization': token}
     })
     .then((result) => {
-      if (!result.ok) {
-        result.json().then(resp => {
-          console.log(resp.error)
-          this.showError("Failed scanning ID: " + e.target.calID.value, 3000)
-        })
-      } else {
-        result.json()
-        .then((lastVisitedTimes) => {
-          this.setState({lastScannedID:e.target.calID.value, visitsLastWeek:lastVisitedTimes, lastScannedTime:new Date().toLocaleTimeString()})
-          this.showSuccess("Sucessfully scanned ID: " + e.target.calID.value, 1000)
-          e.target.calID.value = null;
-          document.getElementById("calID").focus();
-        })
-      }
+      result.json()
+      .then((lastVisitedTimes) => {
+        this.setState({lastScannedID:e.target.calID.value, visitsLastWeek:lastVisitedTimes, lastScannedTime:new Date().toLocaleTimeString()})
+        this.showSuccess("Sucessfully scanned ID: " + e.target.calID.value,1000)
+        e.target.calID.value = null;
+        document.getElementById("calID").focus();
+      })
+      .catch((err) => {
+        this.showError("Failed scanning ID: " + e.target.calID.value,3000)
+      });
     })
+    .catch((err) => {
+      this.showError("Failed scanning ID: " + e.target.calID.value,300)
+    })
+  
   }
 
   

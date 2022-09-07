@@ -5,13 +5,11 @@ import { useState } from 'react'
 
 const UNAUTH_ROUTES = [
   { title: "Home", route: "/" },
-  { title: "Inventory", route: "/inventory" },
   { title: "Hours", route: "/hours" },
 ]
 
 const UNAUTH_SIGNEDIN_ROUTES = [
   { title: "Home", route: "/" },
-  { title: "Inventory", route: "/inventory" },
   { title: "Hours", route: "/hours" },
   { title: "Order", route: "/order"},
 ]
