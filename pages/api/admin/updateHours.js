@@ -29,6 +29,7 @@ function requireParams(req, res) {
     return false;
   }
 
+  // TODO: uncomment when validateHours is done?
   // if (!validateHours(body.hours)) {
   //   res.status(400).json({error: `Bad formatting for new hours: '${body.newHours}'`})
   //   return false;

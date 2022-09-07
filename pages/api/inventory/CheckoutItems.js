@@ -124,7 +124,7 @@ function writeLog(log) {
 }
 
 export default async function (req, res) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const { body } = req
     let log = {};
 
@@ -141,7 +141,7 @@ export default async function (req, res) {
         // update quantities for each item in inventory and get item info for logging
         Promise.all(
           Object.keys(body).map(barcode => {
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
               let ref = firebase.database().ref(`/inventory/${barcode}`)
               ref.once("value")
               .then(snapshot => {

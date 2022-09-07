@@ -44,6 +44,7 @@ function getSheetIds(sheets, spreadsheetId, sheetName) {
       return resolve(sheetMatch[0].properties.sheetId); // dictionary of sheetName (string) -> sheetId (number)
     })
     .catch((err) => {
+      console.log(err);
       return reject("Need permission to access sheet.")
     })
   })
@@ -79,12 +80,11 @@ export default async function(req, res) {
       .then(() => {
         firebase.auth().signInAnonymously()
         .then(() => {
-          let itemRef = firebase.database().ref('/sheetIDs');
+          let itemRef = firebase.database().ref('/sheetIDs/');
     
           itemRef.update(sheetInfo)
           .then(() => {
-            res.json({success: "success"});
-            res.status(200);
+            res.status(200).json({success: "success"});
             return resolve();
           })
           .catch((err) => {
@@ -93,14 +93,14 @@ export default async function(req, res) {
           });
         })
         .catch(error =>{
-          res.status(500).json({error: error})
-          return resolve("Error signing in to firebase: " + error);
+          res.status(500).json({error: "Error signing in to firebase: " + error})
+          return resolve();
         });
       }).catch((errMsg) => {
         // can't find the sheetName in the specified spreadsheet,
         // or the sheet is private and the sheet-writer can't access it
         res.status(400).json({error: errMsg})
-        return reject();
+        return resolve();
       })
     })
     .catch(() => {

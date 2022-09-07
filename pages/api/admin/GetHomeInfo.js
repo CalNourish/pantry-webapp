@@ -2,12 +2,11 @@ import firebase from '../../../firebase/clientApp'
 
 /*
 * /api/admin/GetHomeInfo
+* returns stored markdown for home page
 */
 
-export default async function(req,res) {
-
-  return new Promise((resolve, reject) => {
-
+export default async function(_, res) {
+  return new Promise((resolve) => {
     // no need to sign in since we're just reading
     firebase.database()
     .ref('/info/homepage/')
@@ -18,7 +17,7 @@ export default async function(req,res) {
       return resolve();
     })
     .catch(function(error) {
-      res.status(500).json({error: "server error getting info", errorstack: error});
+      res.status(500).json({error: "Server error getting homepage info: " + error});
       return resolve();
     })
   })

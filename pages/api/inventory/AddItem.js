@@ -22,24 +22,30 @@ function requireParams(body, res) {
   // require barcode and count and itemName
   if (!body.barcode) {
     res.status(400).json({ error: "Missing barcode in request." });
+    return false;
   }
 
   if (body.count == undefined) {
     res.status(400).json({ error: "Missing count in request." });
+    return false;
   }
 
   if (!body.itemName) {
     res.status(400).json({ error: "Missing itemName in request." });
+    return false;
   }
 
   if (isNaN(parseInt(body.count))) {
     res.status(400).json({ error: "Invalid count (not a number)." });
+    return false;
   }
 
   // require categories obj with at least one entry
   if (!body.categoryName || body.categoryName.length < 1) {
     res.status(400).json({ error: "Item must have at least one category." });
+    return false;
   }
+
   return true
 }
 
@@ -59,13 +65,14 @@ export default async function (req, res) {
 
       // construct parameters 
       let barcode = body.barcode.toString();
-      let newItem = {};
-      newItem["barcode"] = barcode;
-      newItem["count"] = parseInt(body.count);
-      newItem["itemName"] = body.itemName;
-      newItem["categoryName"] = Object.keys(body.categoryName); // get it in array format
-      newItem["lowStock"] = body.lowStock ? body.lowStock.toString() : "-1";
-      newItem["packSize"] = body.packSize ? body.packSize.toString() : "1";
+      let newItem = {
+        "barcode": barcode,
+        "count": parseInt(body.count),
+        "itemName": body.itemName,
+        "categoryName": Object.keys(body.categoryName),
+        "lowStock": body.lowStock ? body.lowStock.toString() : "-1",
+        "packSize": body.packSize ? body.packSize.toString() : "1"
+      };
 
       // check that all the categories are valid
       firebase.database().ref('/category')
