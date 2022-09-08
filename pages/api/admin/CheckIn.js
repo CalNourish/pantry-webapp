@@ -27,7 +27,7 @@ function determineStartOfWeek(currDay) {
 
 //converts from 2022-07-23T20:35:41.935Z to 7/23/2022 12:15:52
 function formatTime(timeToConvert) {
-const formattedHours = timeToConvert.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit', second:'2-digit', timeZone: 'America/Los_Angeles'})
+const formattedHours = timeToConvert.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', second:'2-digit', timeZone: 'America/Los_Angeles'})
 const formattedTime = timeToConvert.toLocaleDateString() + " " + formattedHours;
     return formattedTime;
 }
