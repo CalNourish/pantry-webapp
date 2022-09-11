@@ -28,14 +28,14 @@ function determineStartOfWeek(currDay) {
 //converts from 2022-07-23T20:35:41.935Z to 7/23/2022 12:15:52
 function formatTime(timeToConvert) {
 const formattedHours = timeToConvert.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', second:'2-digit', timeZone: 'America/Los_Angeles'})
-const formattedTime = timeToConvert.toLocaleDateString() + " " + formattedHours;
+const formattedTime = timeToConvert.toLocaleDateString({timeZone: 'America/Los_Angeles'}) + " " + formattedHours;
     return formattedTime;
 }
 
 //converts from 2022-07-23T20:35:41.935Z to Mon Jul 23 2022 at 08:35 PM
 function formatTimeForVisits(timeToConvert) {
   const formattedHours = timeToConvert.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'})
-  const formattedTime = timeToConvert.toDateString() + " at " + formattedHours;
+  const formattedTime = timeToConvert.toDateString({timeZone: 'America/Los_Angeles'}) + " at " + formattedHours;
   return formattedTime;
   }
 
