@@ -5,7 +5,6 @@ import React from 'react';
 import Modal from 'react-modal'
 import SearchModal from '../components/SearchModal'
 import cookie from 'js-cookie';
-import { reload } from 'firebase/auth';
 
 const fetcher = async (...args) => {
   const res = await fetch(...args);
