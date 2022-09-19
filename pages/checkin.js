@@ -10,12 +10,13 @@ import { render } from 'react-dom';
 
 const fetcher = (url) => fetch(url).then((res) => res.json())
 
-const token = cookie.get("firebaseToken")
+var token = cookie.get("firebaseToken")
 
 class Checkin extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      user:props.user,
       error: null,
       success: null,
       lastScannedID: "N/A",
@@ -34,6 +35,8 @@ class Checkin extends React.Component {
     t = t ? t : 5000;
     clearTimeout(this.errorTimer);
     this.errorTimer = setTimeout(() => this.setState({error: null}), t);
+    document.getElementById("calIDFieldset").disabled = false;
+    document.getElementById("calID").focus();
   }
 
   showSuccess = (msg, t) => {
@@ -46,6 +49,8 @@ class Checkin extends React.Component {
     t = t ? t : 5000;
     clearTimeout(this.successTimer);
     this.successTimer = setTimeout(() => this.setState({success: null}), t);
+    document.getElementById("calIDFieldset").disabled = false;
+    document.getElementById("calID").focus();
   }
 
   
@@ -96,19 +101,16 @@ class Checkin extends React.Component {
     return <div className='flex-grow text-left'>{messageToReturn}</div>;
   };
    
-  handleScanSubmit = (e) => {
+  handleScanSubmit = async (e) => {
     var fieldset = document.getElementById("calIDFieldset")
     fieldset.disabled = true
-    setTimeout(()=>{
-      fieldset.disabled = false;
-      document.getElementById("calID").focus();
-      }, 1500)
-    
     e.preventDefault();
     if (e.target.calID.value.length == 0 || e.target.calID.value == null) {
       this.showError("Can't submit blank ID: " + e.target.calID.value,1000)
       return
     }
+    token = await this.state.user.googleUser.getIdToken()
+    console.log(token)
     fetch('/api/admin/CheckIn', { method: 'POST',
       body: JSON.stringify({calID: e.target.calID.value}),
       headers: {'Content-Type': "application/json", 'Authorization': token}
@@ -116,18 +118,24 @@ class Checkin extends React.Component {
     .then((result) => {
       result.json()
       .then((lastVisitedTimes) => {
-        this.setState({lastScannedID:e.target.calID.value, visitsLastWeek:lastVisitedTimes, lastScannedTime:new Date().toLocaleTimeString()})
-        this.showSuccess("Sucessfully scanned ID: " + e.target.calID.value,1000)
-        e.target.calID.value = null;
-        document.getElementById("calID").focus();
+        if (lastVisitedTimes.error) {
+          this.showError(lastVisitedTimes.error)
+        }
+        else {
+          this.setState({lastScannedID:e.target.calID.value, visitsLastWeek:lastVisitedTimes, lastScannedTime:new Date().toLocaleTimeString()})
+          this.showSuccess("Sucessfully scanned ID: " + e.target.calID.value,1000)
+          e.target.calID.value = null;
+          document.getElementById("calID").focus();
+        }
       })
       .catch((err) => {
-        this.showError("Failed scanning ID: " + e.target.calID.value,3000)
+        this.showError("Failed scanning ID: " + e.target.calID.value + err,3000)
       });
     })
     .catch((err) => {
-      this.showError("Failed scanning ID: " + e.target.calID.value,300)
+      this.showError("Failed scanning ID: " + e.target.calID.value + err,300)
     })
+    
   
   }
 
@@ -202,6 +210,6 @@ export default function checkin() {
     )
   }
   else {
-    return (<Checkin></Checkin>)
+    return (<Checkin user={user}></Checkin>)
   }
 }
