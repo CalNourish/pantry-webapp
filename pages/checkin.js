@@ -110,7 +110,6 @@ class Checkin extends React.Component {
       return
     }
     token = await this.state.user.googleUser.getIdToken()
-    console.log(token)
     fetch('/api/admin/CheckIn', { method: 'POST',
       body: JSON.stringify({calID: e.target.calID.value}),
       headers: {'Content-Type': "application/json", 'Authorization': token}
