@@ -79,6 +79,9 @@ class Cart extends React.Component {
       items: items,
       itemsInCart: this.state.itemsInCart + quantity,
     });
+
+    // focus back on the barcode field
+    document.getElementById("barcode").focus();
   }
 
   upItemQuantity = (barcode) => {
@@ -91,6 +94,9 @@ class Cart extends React.Component {
     itemData[1] += 1;
     items.set(barcode, itemData);
     this.setState({items: items, itemsInCart: this.state.itemsInCart + 1})
+  
+    // focus back on the barcode field
+    document.getElementById("barcode").focus();
   }
 
   downItemQuantity = (barcode) => {
@@ -112,6 +118,9 @@ class Cart extends React.Component {
     itemData[1] -= 1;
     items.set(barcode, itemData);
     this.setState({items: items, itemsInCart: this.state.itemsInCart - 1})
+  
+    // focus back on the barcode field
+    document.getElementById("barcode").focus();
   }
 
   updateItemQuantity = (barcode, newQuantity) => {
@@ -148,6 +157,9 @@ class Cart extends React.Component {
     }
     items.delete(barcode);
     this.setState({items: items, itemsInCart: this.state.itemsInCart - itemData[1]})
+  
+    // focus back on the barcode field
+    document.getElementById("barcode").focus();
   }
 
   itemFormSubmit = (e) => {
@@ -236,6 +248,13 @@ class Cart extends React.Component {
     )
   }
 
+  closeModal = () => {
+    this.setState({showSearch: false});
+    setTimeout(() => {
+      document.getElementById("barcode").focus();
+    }, 0)
+  }
+
   render() {
 
     /* Hotkeys*/
@@ -263,6 +282,11 @@ class Cart extends React.Component {
         } else if (e.key === "-" || e.key === "_") { // decrement using minus key
           e.preventDefault();
           this.downItemQuantity(barcode);
+        } else if (e.key === "Enter") {
+          e.preventDefault();
+          // focus back on the barcode field
+          document.getElementById("barcode").focus();
+          return;
         } else if (e.key === "ArrowUp" || e.key === "ArrowDown") { // navigate through quantities with arrow keys 
           e.preventDefault();
           let inputs = document.getElementsByClassName("quantity-input")
@@ -275,7 +299,7 @@ class Cart extends React.Component {
             /* focus prev quantity-input */
             inputs[index-1].focus();
           }
-          return
+          return;
         }
       }
 
@@ -305,8 +329,8 @@ class Cart extends React.Component {
     return (
       <>
         <Layout>
-          <Modal id="search-modal" isOpen={this.state.showSearch} ariaHideApp={false} onRequestClose={() => {this.setState({showSearch: false})}}>
-            <SearchModal items={this.data} addItemFunc={this.addItem} onCloseHandler={() => this.setState({showSearch: false})} submitHotkey={searchSubmitHotkey}/>
+          <Modal id="search-modal" isOpen={this.state.showSearch} ariaHideApp={false} onRequestClose={this.closeModal}>
+            <SearchModal items={this.data} addItemFunc={this.addItem} onCloseHandler={this.closeModal} submitHotkey={searchSubmitHotkey}/>
           </Modal>
 
           <div className="flex flex-col h-full sm:flex-row">
