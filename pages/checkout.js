@@ -250,7 +250,9 @@ class Cart extends React.Component {
 
   closeModal = () => {
     this.setState({showSearch: false});
-    document.getElementById('barcode').focus();
+    setTimeout(() => {
+      document.getElementById("barcode").focus();
+    }, 0)
   }
 
   render() {
