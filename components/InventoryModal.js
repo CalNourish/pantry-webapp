@@ -56,6 +56,14 @@ export default function InventoryModal(props) {
     // A reducer to get the categories from firebase in a format that is react-select friendly.
     const categoryOptions = data.categories;
 
+    document.onkeydown = (e) => {
+        /* don't submit if focused on barcode field */
+        if (document.activeElement.id == 'barcode' && e.key === "Enter") {
+            e.preventDefault()
+            document.getElementById("itemName").focus()
+        }
+    }
+
     return (
         <div className="modal-wrapper p-3">
             <div id="modalExit" className="text-4xl absolute top-0 right-0 cursor-pointer hover:text-gray-500" onClick={props.onCloseHandler}>&times; &nbsp;</div>
