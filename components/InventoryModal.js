@@ -109,10 +109,10 @@ export default function InventoryModal(props) {
                             </label>
                             <div className="flex relative items-stretch">
                                 <input type="number" id="count" autoComplete="off"
-                                    className={"shadow appearance-none border rounded w-full py-2 px-3 text-gray-600 leading-tight focus:outline-none focus:shadow-outline" + (props.errors.count && " border-red-500")}
+                                    className={"shadow appearance-none border rounded w-1/2 py-2 px-3 text-gray-600 leading-tight focus:outline-none focus:shadow-outline" + (props.errors.count && " border-red-500")}
                                     placeholder="default: 0" value={props.parentState.count}
                                     onChange={(e) => {props.dispatch({type: 'editItemCount', value: e.currentTarget.value})}}/>
-                                <select className="ml-5" id="packOption" defaultValue="individual">
+                                <select className="w-1/2 ml-5" id="packOption" defaultValue="individual">
                                     <option value="individual">Individual Items</option>
                                     <option value="packs">Packs</option>
                                 </select>
