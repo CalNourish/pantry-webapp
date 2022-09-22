@@ -160,7 +160,7 @@ class Checkin extends React.Component {
           <h1 className='text-3xl font-medium mb-2'>Pantry Check-In</h1>
           <div className='flex flex-row space-x-16 my-8'>
             <form onSubmit={(e) => this.handleScanSubmit(e)}>
-              <fieldset id="calIDFieldset" disabled={false}>
+              <fieldset id="calIDFieldset" disabled={true}>
               <div>
               <div className='flex-grow'>Use scanner or manually enter Cal ID (put 1 if general community member)</div>
               <input className="calID border rounded w-2/3 py-2 px-3 text-gray-600 leading-tight"
