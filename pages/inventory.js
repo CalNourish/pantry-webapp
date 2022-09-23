@@ -260,7 +260,7 @@ export default function Inventory() {
         setStatusError(json.error);
       } else {
         dispatch({type: 'reset'});
-        closeUpdateItem();
+        toggleShowUpdateItem();
         setStatusSuccess(`successfully updated: ${itemName} (${barcode})`);
       }
     })
@@ -313,7 +313,7 @@ export default function Inventory() {
         } else {
           dispatch({type: 'reset'});
           setErrors(emptyErrors);
-          closeAddItem();
+          toggleShowAddItem();
           setStatusSuccess(`successfully added: ${itemName} (${barcode})`);
           
           // modify dataState to contain the new item
@@ -326,8 +326,8 @@ export default function Inventory() {
     })
   }
 
-  function closeAddItem() {
-    setShowAddItem(false); 
+  function toggleShowAddItem() {
+    setShowAddItem(!showAddItem); 
     setErrors(emptyErrors);
     dispatch({type:'reset'});
     setStatus({
@@ -335,8 +335,8 @@ export default function Inventory() {
     })
   }
 
-  function closeUpdateItem() {
-    setShowEditItem(false); 
+  function toggleShowUpdateItem() {
+    setShowEditItem(!showEditItem);
     setErrors(emptyErrors);
     dispatch({type:'reset'});
     setStatus({
@@ -353,10 +353,10 @@ export default function Inventory() {
         {!authToken ? "" :
           <>
             {/* Add Item Modal */}
-            <Modal id="add-item-modal" isOpen={showAddItem} onRequestClose={closeAddItem} ariaHideApp={false}>
+            <Modal id="add-item-modal" isOpen={showAddItem} onRequestClose={toggleShowAddItem} ariaHideApp={false}>
               <InventoryModal
                   onSubmitHandler={handleAddSubmit} 
-                  onCloseHandler={closeAddItem}
+                  onCloseHandler={toggleShowAddItem}
                   dispatch={dispatch}
                   parentState={state}
                   isAdd={true}
@@ -366,10 +366,10 @@ export default function Inventory() {
             </Modal>
             
             {/*  Edit Item Modal  */}
-            <Modal id="edit-item-modal" isOpen={showEditItem} onRequestClose={closeUpdateItem} ariaHideApp={false}>
+            <Modal id="edit-item-modal" isOpen={showEditItem} onRequestClose={toggleShowUpdateItem} ariaHideApp={false}>
               <InventoryModal
                   onSubmitHandler={handleUpdateSubmit} 
-                  onCloseHandler={closeUpdateItem}
+                  onCloseHandler={toggleShowUpdateItem}
                   dispatch={dispatch}
                   parentState={state}
                   isAdd={false}
