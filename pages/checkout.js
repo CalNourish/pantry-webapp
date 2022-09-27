@@ -5,6 +5,8 @@ import React from 'react';
 import Modal from 'react-modal'
 import SearchModal from '../components/SearchModal'
 import cookie from 'js-cookie';
+import { useUser } from '../context/userContext'
+
 
 const fetcher = async (...args) => {
   const res = await fetch(...args);
@@ -14,9 +16,9 @@ const fetcher = async (...args) => {
 class Cart extends React.Component {
   constructor(props) {
     super(props);
-
     this.data = props.data;
     this.state = {
+      user: this.data.user,
       items: new Map([]),   /* entries are {barcode: [itemStruct, quantity]} */
       itemsInCart: 0,
       error: null,
@@ -187,7 +189,7 @@ class Cart extends React.Component {
 
   submitCart = async (e) => {
     e.preventDefault();
-    const token = cookie.get("firebaseToken")
+    let token = await this.state.user.googleUser.getIdToken()
 
     let reqbody = this.makeReq();
     this.showSuccess("Submitting cart...", 10000)
@@ -412,10 +414,12 @@ class Cart extends React.Component {
 // Wrapper for useSWR hook. Apparently can't use hooks in class-style definition for react components.
 export default function Checkout() {
   const { data } = useSWR("/api/inventory/GetAllItems", fetcher);
+  const { user } = useUser();
 
-  if (!data) {
+  if (!data || !user) {
     return (<div>loading...</div>)
   } else {
+    data["user"] = user
     return (<Cart data={data}></Cart>)
   }
 }
