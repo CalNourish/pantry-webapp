@@ -71,7 +71,8 @@ export default async function (req, res) {
         "itemName": body.itemName,
         "categoryName": Object.keys(body.categoryName),
         "lowStock": body.lowStock ? body.lowStock.toString() : "-1",
-        "packSize": body.packSize ? body.packSize.toString() : "1"
+        "packSize": body.packSize ? body.packSize.toString() : "1",
+        "displayPublic": body.displayPublic !== undefined ? body.displayPublic : true // default true
       };
 
       // check that all the categories are valid

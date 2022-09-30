@@ -250,7 +250,7 @@ export default function Inventory() {
     const quantity = state.count * (document.getElementById("packOption").value == "packs" ? packSize : 1)  // required
     const lowStock = state.lowStock ? state.lowStock : -1;                                                  // defaults to -1
     const categories = Object.keys(state.categoryName).length ? state.categoryName : undefined;             // defaults to "no change"
-    const displayPublic = Boolean(displayPublic)
+    const displayPublic = Boolean(state.displayPublic)
 
     const payload = JSON.stringify({
       "barcode": barcode,
@@ -261,6 +261,9 @@ export default function Inventory() {
       "categoryName": categories,
       "displayPublic": displayPublic
     });
+
+    console.log(payload)
+
     fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
       body: payload,
       headers: {'Content-Type': "application/json", 'Authorization': token}})
@@ -286,7 +289,7 @@ export default function Inventory() {
     const count = state.count * (document.getElementById("packOption").value == "packs" ? packSize : 1)     // defaults to 0
     const lowStock = state.lowStock ? state.lowStock : -1;                                                  // defaults to -1
     const categories = state.categoryName;
-    const displayPublic = Boolean(displayPublic);
+    const displayPublic = Boolean(state.displayPublic);
     let catNum = Object.keys(categories).length;
 
     if (!barcode || !itemName || !catNum) {

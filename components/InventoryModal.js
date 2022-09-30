@@ -72,8 +72,8 @@ export default function InventoryModal(props) {
                         <div className='mb-4'>
                             <span className='mr-4'>Display in public inventory:</span>
                             <input type="checkbox" checked={props.parentState.displayPublic}
-                                onClick={(e) => {
-                                    props.dispatch({type: 'editItemDisplayPublic', value: e.currentTarget.value == "on"})
+                                onChange={(e) => {
+                                    props.dispatch({type: 'editItemDisplayPublic', value: e.currentTarget.checked})
                                 }}>
                             </input>
                         </div>

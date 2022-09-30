@@ -16,7 +16,7 @@ export const config = {
 }
 
 // list of item fields that can be updated
-const UPDATABLE_FIELDS = ["categoryName", "count", "itemName", "lowStock", "packSize"];
+const UPDATABLE_FIELDS = ["categoryName", "count", "itemName", "lowStock", "packSize", "displayPublic"];
 
 export default async function(req,res) {   
   // verify this request is legit
@@ -59,6 +59,8 @@ export default async function(req,res) {
         updatedFields[field] = body[field];
       }
     });
+
+    console.log(updatedFields)
 
     validateFunc(token).then(() => {
       firebase.auth().signInAnonymously()
