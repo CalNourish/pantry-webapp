@@ -70,8 +70,8 @@ export default function InventoryModal(props) {
                 <div className="modal-body">
                     <form id="modal-form" className="bg-white rounded mb-4" onSubmit={(e) => props.onSubmitHandler(e)}>
                         <div className='mb-4'>
-                            <span className='mr-4'>Display in public inventory:</span>
-                            <input type="checkbox" checked={props.parentState.displayPublic}
+                            <label className='mr-2' htmlFor="display-public">Display in public inventory:</label>
+                            <input type="checkbox" checked={props.parentState.displayPublic} id="display-public" className='w-4 h-4 align-middle'
                                 onChange={(e) => {
                                     props.dispatch({type: 'editItemDisplayPublic', value: e.currentTarget.checked})
                                 }}>
