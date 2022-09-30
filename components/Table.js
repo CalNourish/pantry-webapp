@@ -165,13 +165,13 @@ export default function Table(props) {
                                     className={headerClass}>
                                     Category
                                 </th>
-                                <th onClick={() => {setSortBy(sortBy == "count" ? "-count" : "count")}}
+                                { props.authToken ? <th onClick={() => {setSortBy(sortBy == "count" ? "-count" : "count")}}
                                     className={headerClass + " cursor-pointer"}>
                                     <div className="flex">
                                         <div className="mr-3">Count</div>
                                         <div className="ml-auto">{sortBy == "count" ? "\u25BC" : sortBy == "-count" ? "\u25B2" : ""}</div>
                                     </div>
-                                </th>
+                                </th> : null}
                                 <th onClick={() => {setSortBy(sortBy == "status" ? "-status" : "status")}}
                                     className={headerClass + " cursor-pointer"}>
                                     <div className="flex">
@@ -185,9 +185,10 @@ export default function Table(props) {
                         </thead>
                         <tbody>
                             { itemData.map((item, idx) => {
-                                return <TableRow key={idx} barcode={item.barcode} itemName={item.itemName} itemCount={item.count} itemCategories={item.categoryName} 
-                                                 itemLowStock={item.lowStock} categoryData={categoryData} authToken={props.authToken}
-                                                 editItemFunc={props.editItemFunc} deleteItemFunc={props.deleteItemFunc}/>
+                                return (props.authToken || item.displayPublic) && 
+                                    <TableRow key={idx} barcode={item.barcode} itemName={item.itemName} itemCount={item.count} itemCategories={item.categoryName} 
+                                              itemLowStock={item.lowStock} categoryData={categoryData} authToken={props.authToken}
+                                              editItemFunc={props.editItemFunc} deleteItemFunc={props.deleteItemFunc}/>
                             }) 
                             }
                         </tbody>

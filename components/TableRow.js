@@ -48,7 +48,8 @@ export default function TableRow(props) {
 
     // choose a "default" low stock threshold if not set 
     let lowStockThresh = parseInt(props.itemLowStock);
-    lowStockThresh = (props.itemLowStock && props.itemLowStock >= 0) ? props.itemLowStock : 10;
+    lowStockThresh = (props.itemLowStock) ? props.itemLowStock : 10;
+    lowStockThresh = authToken ? lowStockThresh : 0; // don't show low stock if public inventory
 
     let editCountInput = (
       <input type="text" autoComplete="off" defaultValue={count} onKeyDown={(e) => {
@@ -85,12 +86,12 @@ export default function TableRow(props) {
         <td className="px-5 py-5 border-b border-gray-100 bg-white text-sm">
             <p className="text-gray-900 max-w-xs">{categoryDisplay(props.itemCategories)}</p>
         </td>
-        <td className="px-3 py-3 border-b border-gray-100 bg-white text-sm text-center"
+        { props.authToken ? <td className="px-3 py-3 border-b border-gray-100 bg-white text-sm text-center"
             onDoubleClick={() => authToken ? setEditing("count") : null}>
             <p className="text-gray-900 whitespace-nowrap font-bold">
                 {editing=="count" ? editCountInput : count}
             </p>
-        </td>
+        </td> : null}
         <td className="px-5 py-5 border-b border-gray-100 bg-white text-sm">
             {(count > lowStockThresh) && <span key="inStock"
                 className="relative inline-block px-3 py-1 font-semibold text-green-900 leading-tight">

@@ -393,7 +393,6 @@ export default function Inventory() {
                 </Sidebar>
               </div>
           }
-          {!(user && user.authorized === "true") ? "Under Construction!" :
           <div className="py-4 px-8">
             {status.success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded relative mb-3">{status.success}</div>}
             {Object.keys(dataState).length > 0
@@ -401,7 +400,6 @@ export default function Inventory() {
                        editItemFunc={editItem} deleteItemFunc={deleteItem}></Table>
               : "Loading inventory..."}
           </div>
-          } 
         </div>
       </Layout>
     </>
