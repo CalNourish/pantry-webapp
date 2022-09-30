@@ -22,6 +22,7 @@ class CheckboxGrid extends React.Component {
     }
 
     render() {
+        console.log(this.props.parentState)
         let opt = this.options;
         let categories = this.props.parentState.categoryName;
 
@@ -68,6 +69,15 @@ export default function InventoryModal(props) {
                     Error: <span className="font-mono font-bold">{props.status.error}</span></div>}                
                 <div className="modal-body">
                     <form id="modal-form" className="bg-white rounded mb-4" onSubmit={(e) => props.onSubmitHandler(e)}>
+                        <div className='mb-4'>
+                            <span className='mr-4'>Display in public inventory:</span>
+                            <input type="checkbox" checked={props.parentState.displayPublic}
+                                onClick={(e) => {
+                                    props.dispatch({type: 'editItemDisplayPublic', value: e.currentTarget.value == "on"})
+                                }}>
+                            </input>
+                        </div>
+
                         {/* Item Barcode */}
                         <div className="mb-4">
                             <label className="block text-gray-600 text-sm font-bold mb-2">

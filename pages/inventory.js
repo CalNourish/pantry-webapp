@@ -21,6 +21,7 @@ export default function Inventory() {
     packSize: "",
     categoryName: {},
     lowStock: "",
+    displayPublic: true,
   };
 
   const emptyErrors = {
@@ -57,14 +58,20 @@ export default function Inventory() {
           ...state,
           barcode: action.value
         }
-      }         
+      }
+      case 'editItemDisplayPublic': {
+        return {
+          ...state,
+          displayPublic: action.value
+        }
+      }
       case 'editItemCount': {
         setCountError("");
         return {
           ...state,
           count: parseInt(action.value)
         }
-      }            
+      }
       case 'editItemPackSize': {
         return {
           ...state,
@@ -201,7 +208,8 @@ export default function Inventory() {
         count: data.count,
         packSize: data.packSize,
         lowStock: data.lowStock,
-        categoryName: categories
+        categoryName: categories,
+        displayPublic: data.displayPublic
       };
       dispatch({type:'itemLookup', value: payload});
     })
@@ -242,6 +250,7 @@ export default function Inventory() {
     const quantity = state.count * (document.getElementById("packOption").value == "packs" ? packSize : 1)  // required
     const lowStock = state.lowStock ? state.lowStock : -1;                                                  // defaults to -1
     const categories = Object.keys(state.categoryName).length ? state.categoryName : undefined;             // defaults to "no change"
+    const displayPublic = Boolean(displayPublic)
 
     const payload = JSON.stringify({
       "barcode": barcode,
@@ -249,7 +258,8 @@ export default function Inventory() {
       "packSize": packSize,
       "count": quantity,
       "lowStock": lowStock,
-      "categoryName": categories
+      "categoryName": categories,
+      "displayPublic": displayPublic
     });
     fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
       body: payload,
@@ -276,6 +286,7 @@ export default function Inventory() {
     const count = state.count * (document.getElementById("packOption").value == "packs" ? packSize : 1)     // defaults to 0
     const lowStock = state.lowStock ? state.lowStock : -1;                                                  // defaults to -1
     const categories = state.categoryName;
+    const displayPublic = Boolean(displayPublic);
     let catNum = Object.keys(categories).length;
 
     if (!barcode || !itemName || !catNum) {
@@ -295,7 +306,8 @@ export default function Inventory() {
       "packSize": packSize,
       "count": count,
       "categoryName": categories,
-      "lowStock": lowStock
+      "lowStock": lowStock,
+      "displayPublic": displayPublic
       /* created by? */
     };
 
