@@ -32,7 +32,6 @@ export default function OrderDetails({children}) {
       return
     }
 
-    console.log("display:", key, items[key].displayPublic)
     if (!items[key].displayPublic) {
       // Skip item if not displayPublic
       return

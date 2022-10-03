@@ -60,8 +60,6 @@ export default async function(req,res) {
       }
     });
 
-    console.log(updatedFields)
-
     validateFunc(token).then(() => {
       firebase.auth().signInAnonymously()
       .then(() => {

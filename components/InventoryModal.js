@@ -22,7 +22,6 @@ class CheckboxGrid extends React.Component {
     }
 
     render() {
-        console.log(this.props.parentState)
         let opt = this.options;
         let categories = this.props.parentState.categoryName;
 

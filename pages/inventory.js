@@ -262,8 +262,6 @@ export default function Inventory() {
       "displayPublic": displayPublic
     });
 
-    console.log(payload)
-
     fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
       body: payload,
       headers: {'Content-Type': "application/json", 'Authorization': token}})

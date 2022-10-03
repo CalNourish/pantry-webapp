@@ -116,9 +116,7 @@ export default function Admin() {
               headers: {'Content-Type': "application/json", 'Authorization': token}
             })
             .then((result) => {
-              console.log("result:", result)
               result.json().then((res) => {
-                console.log("res data:", res)
                 if (result.ok) {
                   showSuccess(tag);
                 } else {
