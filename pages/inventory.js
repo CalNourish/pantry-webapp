@@ -2,7 +2,7 @@ import Layout from '../components/Layout'
 import Sidebar from '../components/Sidebar'
 import Table from '../components/Table'
 import InventoryModal from '../components/InventoryModal'
-
+import TakeInventoryModal from '../components/TakeInventoryModal'
 import { useUser } from '../context/userContext'
 import { server } from './_app.js'
 
@@ -107,6 +107,7 @@ export default function Inventory() {
   // Manage modal show/don't show State
   const [showAddItem, setShowAddItem] = useState(false);
   const [showEditItem, setShowEditItem] = useState(false);
+  const [showTakeInventory, setShowTakeInventory] = useState(false);
   const [errors, setErrors] = useState(emptyErrors);
   const [status, setStatus] = useState(emptyStatus);
   const [dataState, changeData] = useState({});
@@ -339,6 +340,15 @@ export default function Inventory() {
     })
   }
 
+  function closeTakeInventory() {
+    setShowTakeInventory(false); 
+    setErrors(emptyErrors);
+    dispatch({type:'reset'});
+    setStatus({
+      ...status, loading: false, error: ""
+    })
+  }
+
   function closeAddItem() {
     setShowAddItem(false); 
     setErrors(emptyErrors);
@@ -390,6 +400,11 @@ export default function Inventory() {
                   errors={errors}
                   status={status}/>
             </Modal>
+
+            {/* Take Inventory Modal  */}
+            <Modal id="take-inventory-modal" isOpen={showTakeInventory} onRequestClose={closeTakeInventory} ariaHideApp={false}>
+              <TakeInventoryModal items={null} addItemFunc={null} onCloseHandler={closeUpdateItem} submitHotkey={null}/>
+            </Modal>
           </>
         }
         
@@ -401,6 +416,7 @@ export default function Inventory() {
                   <div className="my-4">
                     <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowAddItem(true)}>Add new item</button>
                     <button className="my-1 btn-outline w-56 rounded-md p-1" onClick={() => setShowEditItem(true)}>Edit existing item</button>
+                    <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowTakeInventory(true)}>Take Inventory</button>
                   </div>
                   <p className="mb-5 text-sm italic text-gray-600">You can double-click on an item name or count to change the value quickly!</p>
                 </Sidebar>
