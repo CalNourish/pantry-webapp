@@ -92,12 +92,14 @@ export default function Inventory() {
         }
       } 
       case 'itemLookup': {
+
         if (packOpt) packOpt.value = 'individual'
         return {
           ...state,
           ...action.value
         }
-      }   
+
+      } 
       default:
         break;
     }
@@ -403,7 +405,11 @@ export default function Inventory() {
 
             {/* Take Inventory Modal  */}
             <Modal id="take-inventory-modal" isOpen={showTakeInventory} onRequestClose={closeTakeInventory} ariaHideApp={false}>
-              <TakeInventoryModal items={null} addItemFunc={null} onCloseHandler={closeUpdateItem} submitHotkey={null}/>
+            <TakeInventoryModal
+                barcodeLookup={handleBarcodeEdit}
+                parentState={state}
+                dispatch={dispatch}
+                />
             </Modal>
           </>
         }
