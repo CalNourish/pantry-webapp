@@ -38,25 +38,26 @@ export default function Table(props) {
     }
 
     function comparator(primary, descending, secondary="barcode", descending2=false) {
-        let sgn = descending ? -1 : 1
+        let sgn = descending ? -1 : 1;
+        let sgn2 = descending2 ? -1 : 1;
         return (a, b) => {
-            console.log(a[primary], ">?", b[primary], a[primary] > b[primary])
             if (a[primary] > b[primary]) return 1 * sgn;
             if (a[primary] < b[primary]) return -1 * sgn;
-            return (a[secondary] < b[secondary]) ? !descending2 : descending2;
+            return (a[secondary] > b[secondary]) ? sgn2 : -sgn2;
         }
     }
 
     function compareStatus(descending=false, secondary="barcode", descending2=false) {
-        let sgn = descending ? -1 : 1
+        let sgn = descending ? -1 : 1;
+        let sgn2 = descending2 ? -1 : 1;
         return (a, b) => {
             /* sort ascending alphabetically by default */
             let astock = a["count"] > 0;
             let bstock = b["count"] > 0
             
-            if (astock && !bstock) return -1 * sgn;
-            if (!astock && bstock) return 1 * sgn;
-            return (a[secondary] < b[secondary]) ? !descending2 : descending2;
+            if (astock && (!bstock)) return -1 * sgn;
+            if ((!astock) && bstock) return 1 * sgn;
+            return (a[secondary] > b[secondary]) ? sgn2 : -sgn2;
         }
     }
         
@@ -74,7 +75,7 @@ export default function Table(props) {
                 reverse = true;
             case "count":
                 // default count order is high -> low
-                array.sort(comparator("count", !reverse));
+                array.sort(comparator("count", !reverse, props.authToken ? "barcode" : "itemName"));
                 break;
             case "-status":
                 reverse = true;
