@@ -143,7 +143,7 @@ export default function Inventory() {
 
   /* do this once, after dataState is set */
   if (Object.keys(dataState).length > 0) {
-    ref.once("child_changed", snapshot => {
+    ref.on("child_changed", snapshot => {
       let barcode = snapshot.val().barcode
       changeData({
         ...dataState,
@@ -168,11 +168,11 @@ export default function Inventory() {
     handleBarcodeEdit(barcode);
   }
 
-  function showHideItem(barcode, displayPublic) {
+  function showHideItem(barcode, newDisplayPublic) {
     // toggle public visibility
     const payload = JSON.stringify({
       "barcode": barcode,
-      "displayPublic": !displayPublic
+      "displayPublic": newDisplayPublic
     });
 
     fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
@@ -194,7 +194,6 @@ export default function Inventory() {
       .then(() => {
         // remove something from dataState
         let { [barcode]: deletedItem, ...newDataState } = dataState
-        console.log(newDataState)
         changeData(newDataState)
         setStatusSuccess(`successfully deleted: ${deletedItem.itemName} (${deletedItem.barcode})`)
       })

@@ -119,7 +119,7 @@ export default function TableRow(props) {
                 <img className="w-6 h-6 inline-block cursor-pointer" src="/images/edit-pencil.svg" onClick={() => props.editItemFunc(props.barcode)}></img>
                 <img className="w-6 h-6 inline-block cursor-pointer" src="/images/trash-can.svg" onClick={() => props.deleteItemFunc(props.barcode)}></img>
                 <img className="w-8 h-8 inline-block cursor-pointer" src={props.displayPublic ? "/images/show-eye.svg" : "/images/hidden-eye.svg"} 
-                    onClick={() => props.showHideItemFunc(props.barcode, props.displayPublic)}></img>
+                    onClick={() => props.showHideItemFunc(props.barcode, !props.displayPublic)}></img>
             </td> : null
         }
     </tr>
