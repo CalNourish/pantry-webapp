@@ -56,7 +56,7 @@ export default function TableRow(props) {
           if (e.key=="Enter") finishEditing(e.target.value);
           if (e.key=="Escape") setEditing(null);
         }}
-        className="shadow appearance-none border rounded w-10 py-2 px-3 text-gray-600 leading-tight" autoFocus
+        className="shadow appearance-none border rounded py-2 px-3 text-gray-600 leading-tight w-16" autoFocus
         onBlur={() => setEditing(null)}
       ></input>
     )
@@ -86,14 +86,14 @@ export default function TableRow(props) {
         <td className="px-5 py-5 border-b border-gray-100 bg-white text-sm">
             <p className="text-gray-900 max-w-xs">{categoryDisplay(props.itemCategories)}</p>
         </td>
-        { props.authToken ? <td className="px-3 py-3 border-b border-gray-100 bg-white text-sm text-center"
+        { authToken ? <td className="px-3 py-3 border-b border-gray-100 bg-white text-sm text-center"
             onDoubleClick={() => authToken ? setEditing("count") : null}>
             <p className="text-gray-900 whitespace-nowrap font-bold">
                 {editing=="count" ? editCountInput : count}
             </p>
         </td> : null}
         <td className="px-5 py-5 border-b border-gray-100 bg-white text-sm">
-            {(count > lowStockThresh) && <span key="inStock"
+            {((count > lowStockThresh) && (count > 0)) && <span key="inStock"
                 className="relative inline-block px-3 py-1 font-semibold text-green-900 leading-tight">
                 <span aria-hidden
                     className="absolute inset-0 bg-green-200 opacity-50 rounded-full"></span>
