@@ -168,14 +168,33 @@ export default function Inventory() {
     handleBarcodeEdit(barcode);
   }
 
+  function showHideItem(barcode, displayPublic) {
+    // toggle public visibility
+    const payload = JSON.stringify({
+      "barcode": barcode,
+      "displayPublic": !displayPublic
+    });
+
+    fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
+      body: payload,
+      headers: {'Content-Type': "application/json", 'Authorization': token}})
+    .then((response) => response.json())
+    .then(json => {
+      if (json.error) {
+        console.log(json.error);
+      }
+    })
+  }
+
   function deleteItem(barcode) {
     if (confirm(`Deleting item with barcode ${barcode}. Are you sure?`)){
       fetch(`${server}/api/inventory/DeleteItem`, { method: 'POST',
         body: JSON.stringify({barcode: barcode}),
-        headers: {'Content-Type': "application/json", 'Authorization': authToken}})
+        headers: {'Content-Type': "application/json", 'Authorization': token}})
       .then(() => {
         // remove something from dataState
         let { [barcode]: deletedItem, ...newDataState } = dataState
+        console.log(newDataState)
         changeData(newDataState)
         setStatusSuccess(`successfully deleted: ${deletedItem.itemName} (${deletedItem.barcode})`)
       })
@@ -228,15 +247,12 @@ export default function Inventory() {
       return;
     }
 
-    fetch(`${server}/api/inventory/GetItem/${barcode}`)
-    .then((result) => {
-      if (result.ok) {
-        /* item already exists! */
-        setBarcodeError("item already exists with this barcode");
-      } else {
-        setBarcodeError("");
-      }
-    })
+    if (Object.keys(dataState).includes(barcode)) {
+      /* item already exists! */
+      setBarcodeError("item already exists with this barcode");
+    } else {
+      setBarcodeError("");
+    }
   }
 
   // When an item is submitted from the add-item or edit-item form, write the updated item to firebase.
@@ -250,7 +266,7 @@ export default function Inventory() {
     const quantity = state.count * (document.getElementById("packOption").value == "packs" ? packSize : 1)  // required
     const lowStock = state.lowStock ? state.lowStock : -1;                                                  // defaults to -1
     const categories = Object.keys(state.categoryName).length ? state.categoryName : undefined;             // defaults to "no change"
-    const displayPublic = Boolean(state.displayPublic)
+    const displayPublic = Boolean(state.displayPublic)                                                      // defaults to true
 
     const payload = JSON.stringify({
       "barcode": barcode,
@@ -271,7 +287,7 @@ export default function Inventory() {
         setStatusError(json.error);
       } else {
         dispatch({type: 'reset'});
-        toggleShowUpdateItem();
+        closeUpdateItem();
         setStatusSuccess(`successfully updated: ${itemName} (${barcode})`);
       }
     })
@@ -286,8 +302,8 @@ export default function Inventory() {
     const packSize = state.packSize ? state.packSize : 1;                                                   // defaults to 1
     const count = state.count * (document.getElementById("packOption").value == "packs" ? packSize : 1)     // defaults to 0
     const lowStock = state.lowStock ? state.lowStock : -1;                                                  // defaults to -1
-    const categories = state.categoryName;
-    const displayPublic = Boolean(state.displayPublic);
+    const displayPublic = Boolean(state.displayPublic);                                                     // defaults to true
+    const categories = state.categoryName;                                                                  // required
     let catNum = Object.keys(categories).length;
 
     if (!barcode || !itemName || !catNum) {
@@ -326,7 +342,7 @@ export default function Inventory() {
         } else {
           dispatch({type: 'reset'});
           setErrors(emptyErrors);
-          toggleShowAddItem();
+          closeAddItem();
           setStatusSuccess(`successfully added: ${itemName} (${barcode})`);
           
           // modify dataState to contain the new item
@@ -339,8 +355,8 @@ export default function Inventory() {
     })
   }
 
-  function toggleShowAddItem() {
-    setShowAddItem(!showAddItem); 
+  function closeAddItem() {
+    setShowAddItem(false); 
     setErrors(emptyErrors);
     dispatch({type:'reset'});
     setStatus({
@@ -348,8 +364,8 @@ export default function Inventory() {
     })
   }
 
-  function toggleShowUpdateItem() {
-    setShowEditItem(!showEditItem);
+  function closeUpdateItem() {
+    setShowEditItem(false); 
     setErrors(emptyErrors);
     dispatch({type:'reset'});
     setStatus({
@@ -366,10 +382,10 @@ export default function Inventory() {
         {!authToken ? "" :
           <>
             {/* Add Item Modal */}
-            <Modal id="add-item-modal" isOpen={showAddItem} onRequestClose={toggleShowAddItem} ariaHideApp={false}>
+            <Modal id="add-item-modal" isOpen={showAddItem} onRequestClose={closeAddItem} ariaHideApp={false}>
               <InventoryModal
                   onSubmitHandler={handleAddSubmit} 
-                  onCloseHandler={toggleShowAddItem}
+                  onCloseHandler={closeAddItem}
                   dispatch={dispatch}
                   parentState={state}
                   isAdd={true}
@@ -379,10 +395,10 @@ export default function Inventory() {
             </Modal>
             
             {/*  Edit Item Modal  */}
-            <Modal id="edit-item-modal" isOpen={showEditItem} onRequestClose={toggleShowUpdateItem} ariaHideApp={false}>
+            <Modal id="edit-item-modal" isOpen={showEditItem} onRequestClose={closeUpdateItem} ariaHideApp={false}>
               <InventoryModal
                   onSubmitHandler={handleUpdateSubmit} 
-                  onCloseHandler={toggleShowUpdateItem}
+                  onCloseHandler={closeUpdateItem}
                   dispatch={dispatch}
                   parentState={state}
                   isAdd={false}
@@ -406,15 +422,13 @@ export default function Inventory() {
                 </Sidebar>
               </div>
           }
-          {!(user && user.authorized === "true") ? "Under Construction!" :
           <div className="py-4 px-8">
             {status.success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded relative mb-3">{status.success}</div>}
             {Object.keys(dataState).length > 0
               ? <Table className="table-auto my-1" data={dataState} categories={categoryState} authToken={authToken}
-                       editItemFunc={editItem} deleteItemFunc={deleteItem}></Table>
+                       editItemFunc={editItem} deleteItemFunc={deleteItem} showHideItemFunc={showHideItem}></Table>
               : "Loading inventory..."}
           </div>
-          } 
         </div>
       </Layout>
     </>

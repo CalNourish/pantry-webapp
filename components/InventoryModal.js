@@ -56,14 +56,6 @@ export default function InventoryModal(props) {
     // A reducer to get the categories from firebase in a format that is react-select friendly.
     const categoryOptions = data.categories;
 
-    document.onkeydown = (e) => {
-        /* don't submit if focused on barcode field */
-        if (document.activeElement.id == 'barcode' && e.key === "Enter") {
-            e.preventDefault()
-            document.getElementById("itemName").focus()
-        }
-    }
-
     return (
         <div className="modal-wrapper p-3">
             <div id="modalExit" className="text-4xl absolute top-0 right-0 cursor-pointer hover:text-gray-500" onClick={props.onCloseHandler}>&times; &nbsp;</div>
@@ -118,10 +110,10 @@ export default function InventoryModal(props) {
                             </label>
                             <div className="flex relative items-stretch">
                                 <input type="number" id="count" autoComplete="off"
-                                    className={"shadow appearance-none border rounded w-1/2 py-2 px-3 text-gray-600 leading-tight focus:outline-none focus:shadow-outline" + (props.errors.count && " border-red-500")}
+                                    className={"shadow appearance-none border rounded w-full py-2 px-3 text-gray-600 leading-tight focus:outline-none focus:shadow-outline" + (props.errors.count && " border-red-500")}
                                     placeholder="default: 0" value={props.parentState.count}
                                     onChange={(e) => {props.dispatch({type: 'editItemCount', value: e.currentTarget.value})}}/>
-                                <select className="w-1/2 ml-5" id="packOption" defaultValue="individual">
+                                <select className="ml-5" id="packOption" defaultValue="individual">
                                     <option value="individual">Individual Items</option>
                                     <option value="packs">Packs</option>
                                 </select>
