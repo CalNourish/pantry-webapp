@@ -10,7 +10,7 @@ export default function Table(props) {
     const { data: categoryData, error } = useSWR(`${server}/api/categories/ListCategories`, fetcher);
     const [categoryFilter, setCategoryFilter] = useState("");
     const [searchFilter, setSearchFilter] = useState("");
-    const [sortBy, setSortBy] = useState("");
+    const [sortBy, setSortBy] = useState("status");
 
     if (!props.data || !categoryData) {
         return null
@@ -37,63 +37,51 @@ export default function Table(props) {
         return success;
     }
 
-    function compareName(a, b) {
-        /* sort ascending alphabetically by default */
-        if (a["itemName"] > b["itemName"]) return 1;
-        if (a["itemName"] < b["itemName"]) return -1;
-        return a["barcode"] < b["barcode"];
-    }
-
-    function compareCount(a, b) {
-        /* sort highest count first, by default */
-        if (a["count"] > b["count"]) return -1;
-        if (a["count"] < b["count"]) return 1;
-        return a["barcode"] > b["barcode"];
-    }
-
-    function itemLowStock(item) {
-        var lowStock = item["lowStock"];
-        if (lowStock == undefined || lowStock < 0) {
-            return 10;
+    function comparator(primary, descending, secondary="barcode", descending2=false) {
+        let sgn = descending ? -1 : 1
+        return (a, b) => {
+            console.log(a[primary], ">?", b[primary], a[primary] > b[primary])
+            if (a[primary] > b[primary]) return 1 * sgn;
+            if (a[primary] < b[primary]) return -1 * sgn;
+            return (a[secondary] < b[secondary]) ? !descending2 : descending2;
         }
-        return lowStock;
     }
 
-    function compareStatus(a, b) {
-        /* status: 2 = in stock, 1 = low stock, 0 = out of stock */
-        var aStatus, bStatus;
-        aStatus = a["count"] > itemLowStock(a) ? 2 : (a["count"] <= 0 ? 0 : 1);
-        bStatus = b["count"] > itemLowStock(b) ? 2 : (b["count"] <= 0 ? 0 : 1);
-        
-        /* sort in-stock first, by default */
-        if (aStatus > bStatus) return -1;
-        if (aStatus < bStatus) return 1;
-        return a["barcode"] > b["barcode"];
+    function compareStatus(descending=false, secondary="barcode", descending2=false) {
+        let sgn = descending ? -1 : 1
+        return (a, b) => {
+            /* sort ascending alphabetically by default */
+            let astock = a["count"] > 0;
+            let bstock = b["count"] > 0
+            
+            if (astock && !bstock) return -1 * sgn;
+            if (!astock && bstock) return 1 * sgn;
+            return (a[secondary] < b[secondary]) ? !descending2 : descending2;
+        }
     }
         
     function sortRows(array) {
         /* sortBy should be a name of an object field */
         /* goal: stable sort (preserve previous ordering) */
-        var descending = false;
+        var reverse = false;
         switch(sortBy) {
             case "-itemName":
-                descending = true;
+                reverse = true;
             case "itemName":
-                array.sort(compareName);
+                array.sort(comparator("itemName", reverse));
                 break;
             case "-count":
-                descending = true;
+                reverse = true;
             case "count":
-                array.sort(compareCount);
+                // default count order is high -> low
+                array.sort(comparator("count", !reverse));
                 break;
             case "-status":
-                descending = true;
+                reverse = true;
             case "status":
-                array.sort(compareStatus);
+                // sort by status, then barcode (if auth user) or itemName (if public user) 
+                array.sort(compareStatus(reverse, props.authToken ? "barcode" : "itemName"));
                 break;
-        }
-        if (descending) {
-            array.reverse();
         }
     }
 
@@ -185,8 +173,8 @@ export default function Table(props) {
                         </thead>
                         <tbody>
                             { itemData.map((item, idx) => {
-                                return (props.authToken || item.displayPublic) && 
-                                    <TableRow key={idx} barcode={item.barcode} itemName={item.itemName} itemCount={item.count} itemCategories={item.categoryName} 
+                                return (props.authToken || item.displayPublic) &&
+                                    <TableRow key={idx} barcode={item.barcode} itemName={item.itemName} itemCount={item.count} itemCategories={item.categoryName}
                                               itemLowStock={item.lowStock} categoryData={categoryData} authToken={props.authToken}
                                               editItemFunc={props.editItemFunc} deleteItemFunc={props.deleteItemFunc}/>
                             }) 
