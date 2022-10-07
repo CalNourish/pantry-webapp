@@ -46,7 +46,6 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
       dropoffInstructions: delivery.notes
     }
 
-    console.log("order body:", orderBody)
     fetch('/api/orders/AddOrder',
       { method: 'POST',
         body: JSON.stringify(orderBody),

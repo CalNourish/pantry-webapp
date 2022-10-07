@@ -76,6 +76,15 @@ export default function InventoryModal(props) {
                     Error: <span className="font-mono font-bold">{props.status.error}</span></div>}                
                 <div className="modal-body">
                     <form id="modal-form" className="bg-white rounded mb-4" onSubmit={(e) => props.onSubmitHandler(e)}>
+                        <div className='mb-4'>
+                            <label className='mr-2' htmlFor="display-public">Display in public inventory:</label>
+                            <input type="checkbox" checked={props.parentState.displayPublic} id="display-public" className='w-4 h-4 align-middle'
+                                onChange={(e) => {
+                                    props.dispatch({type: 'editItemDisplayPublic', value: e.currentTarget.checked})
+                                }}>
+                            </input>
+                        </div>
+
                         {/* Item Barcode */}
                         <div className="mb-4">
                             <label className="block text-gray-600 text-sm font-bold mb-2">
