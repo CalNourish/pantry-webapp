@@ -63,7 +63,7 @@ export default function PersonInfo(props) {
         <input 
           type="text" 
           className={inputAppearance + ((props.showMissing && !personal.calID) ? errorAppearance : "")}
-          placeholder="12345678"
+          placeholder="1234567890"
           id="cal-id"
           value={personal.calID}
           onChange={(e) => {

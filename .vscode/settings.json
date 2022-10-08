@@ -1,3 +1,7 @@
 {
-  "css.validate": false
+  "css.validate": false,
+  "files.associations": {
+    "*.ttml": "xml",
+    "*.ttss": "css"
+  }
 }
