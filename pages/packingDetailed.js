@@ -368,8 +368,6 @@ export default function PackingDetailed() {
       </>
     );
   } else {
-    console.log(data)
-
     return <PackingOrder data={data}></PackingOrder>;
   }
 }
