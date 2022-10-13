@@ -298,7 +298,7 @@ class PackingOrder extends React.Component {
               </div>
               <div class="flex space-x-11">
                 <div className="text-large font-medium">
-                {"Dependants: " + this.state.dependents}
+                {"Dependents: " + this.state.dependents}
               </div>
               <div className="text-large font-medium">
                 {"Dietary Restrictions: " + this.state.dietaryRestriction}
