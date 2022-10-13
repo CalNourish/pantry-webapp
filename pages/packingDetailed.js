@@ -296,7 +296,7 @@ class PackingOrder extends React.Component {
                 {this.displayOrderStatus()}
                 {this.displayChangeOrderStatus()}
               </div>
-              <div class="flex space-x-11">
+              <div className="flex space-x-11">
                 <div className="text-large font-medium">
                 {"Dependents: " + this.state.dependents}
               </div>
