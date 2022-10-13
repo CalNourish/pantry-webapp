@@ -326,7 +326,8 @@ function writeToSheets(body, itemNames) {
       Object.keys(items).forEach((bcode) => {
         newOrder["items"][bcode] = {quantity: items[bcode], isPacked: false}
       })
-  
+
+      newOrder["dependents"] = dependents;
       newOrder["guestNote"] = additionalRequests;
       newOrder["dietaryRestriction"] = dietaryRestrictions;
       newOrder["firstName"] = firstName;
