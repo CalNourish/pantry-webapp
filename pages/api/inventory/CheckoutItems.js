@@ -31,11 +31,12 @@ function requireParams(body, res) {
 
   // require quantities to be parse-able as integers
   for (let barcode in body) {
-    if (!parseInt(body[barcode])) {
+    let quantity = parseInt(body[barcode])
+    if (!quantity) {
       res.status(400).json({ error: `Unable to parse quantity for barcode ${barcode}: '${body[barcode]}'` })
       return false;
     }
-    if (body[barcode] > CHECKOUT_MAX) {
+    if (quantity > CHECKOUT_MAX) {
       res.status(400).json({ error: `Quantity of ${barcode} exceeds max quantity (${body[barcode]} > ${CHECKOUT_MAX}).`})
       return false;
     }
