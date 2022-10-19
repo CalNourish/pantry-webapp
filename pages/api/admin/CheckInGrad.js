@@ -74,7 +74,6 @@ function getSheetsLink() {
     firebase.database().ref('/sheetIDs')
     .once('value', snapshot => {
         let val = snapshot.val();
-        console.log(val.checkInGrad + "12332")
         return resolve(val.checkInGrad)
     })
     .catch(error => {
