@@ -12,7 +12,7 @@ import firebase from '../../../firebase/clientApp'
 function requireParams(body) {
   // makes sure that the input is in the right format
   // returns false and an error if not a good input
-  if (body.calID) return true;
+  if (body.calID && body.isGrad != null) return true;
   return false;
 }
 
@@ -69,11 +69,14 @@ function scanTableForVisitInPastWeek(values, startOfWeek, calId) {
   return visitedTimes;
 }
 
-function getSheetsLink() {
+function getSheetsLink(isGrad) {
   return new Promise((resolve, reject) => {
     firebase.database().ref('/sheetIDs')
     .once('value', snapshot => {
         let val = snapshot.val();
+        if (isGrad) {
+            return resolve(val.checkInGrad)
+        }
         return resolve(val.checkIn)
     })
     .catch(error => {
@@ -90,7 +93,7 @@ export default async function (req, res) {
     // verify parameters
     let ok = requireParams(body, res);
     if (!ok) {
-      res.status(400).json({ message: "Missing CalID" });
+      res.status(400).json({ message: "Missing CalID or grad boolean" });
       return resolve();
     }
 
@@ -106,7 +109,7 @@ export default async function (req, res) {
       );
       const sheets = google.sheets({ version: "v4", auth: sheets_auth });
 
-      getSheetsLink()
+      getSheetsLink(body.isGrad)
       .then(({spreadsheetId, sheetName}) => {
         var numRows = 0;
         var calID = body.calID
