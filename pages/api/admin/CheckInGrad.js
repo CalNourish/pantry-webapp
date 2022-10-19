@@ -108,9 +108,6 @@ export default async function (req, res) {
 
       getSheetsLink()
       .then(({spreadsheetId, sheetName}) => {
-        console.log(spreadsheetId + "12332")
-        console.log(sheetName + "12332")
-
         var numRows = 0;
         var calID = body.calID
         let numberOfRowsToGoBack = 2000;
