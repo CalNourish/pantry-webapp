@@ -21,7 +21,19 @@ class TakeInventory extends React.Component {
     });
   }
 
+  updateQuantity(e) {
+    this.props.parentState.count = this.state.newQuantity;
+    this.props.onSubmitHandler(e);
+    this.setState({
+      numPacks: 0,
+      newQuantity:0,
+    });
+    this.props.parentState.barcode = null;
+    document.getElementById('count').value= ""
+  }
+
   selectItem(barcode) {
+    this.props.parentState.barcode = barcode
     this.props.barcodeLookup(barcode);
   }
 
@@ -43,8 +55,9 @@ class TakeInventory extends React.Component {
   render() {
     return (
       <div className="modal-wrapper p-5 h-full flex flex-col">
-        <div className="modal-header text-3xl font-bold mb-5">
-          Take Inventory
+        <div id="modalExit" className="text-4xl absolute top-0 right-0 cursor-pointer hover:text-gray-500" onClick={this.props.onCloseHandler}>&times; &nbsp;</div>
+        <div className="modal-header text-3xl font-bold">
+                {this.props.isAdd ? "Add Inventory" : "Take Inventory"}
         </div>
 
         {/* Item Search Select */}
@@ -89,19 +102,17 @@ class TakeInventory extends React.Component {
                   }
                   onChange={(e) => {
                     this.state.numPacks = e.currentTarget.value;
-                    this.state.newQuantity =
-                      this.state.numPacks * this.props.parentState.packSize;
                     this.setState({
                       numPacks: e.currentTarget.value,
                       newQuantity:
-                        this.state.numPacks * this.props.parentState.packSize,
+                      this.props.isAdd ? this.props.parentState.count + this.state.numPacks * this.props.parentState.packSize : this.state.numPacks * this.props.parentState.packSize,
                     });
                   }}
                 />
               </div>
             </div>
             <div className="mr-3">
-              <label className="block text-gray-600 text-sm font-bold mb-2">
+              <label id="packOption" value="packs" className="block text-gray-600 text-sm font-bold mb-2">
                 Quantity per Pack
               </label>
               <label className="block text-gray-600 text-sm font-bold mb-2">
@@ -118,18 +129,18 @@ class TakeInventory extends React.Component {
                 </label>
               </div>
             </div>
+            <div class="flex justify-center">
+          </div>
           </div>
         </div>
 
-        {/* Submit Button */}
+        {/* Update Quantity */}
         <button
           className="btn btn-pantry-blue uppercase tracking-wide text-xs font-semibold"
-          id="search-submit"
+          id="update-quantity"
+          onClick={(e) => (this.updateQuantity(e))}
         >
-          Add Item{" "}
-          <span className="font-normal hidden sm:inline-block">
-            (Shift + Enter)
-          </span>
+          Update Quantity
         </button>
       </div>
     );
@@ -146,9 +157,12 @@ export default function TakeInventoryModal(props) {
     return (
       <TakeInventory
         data={data}
+        onSubmitHandler={props.onSubmitHandler}
+        onCloseHandler={props.onCloseHandler}
         barcodeLookup={props.barcodeLookup}
         parentState={props.parentState}
         dispatch={props.dispatch}
+        isAdd={props.isAdd}
       ></TakeInventory>
     );
   }

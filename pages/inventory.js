@@ -66,6 +66,7 @@ export default function Inventory() {
         }
       }
       case 'editItemCount': {
+        console.log(state)
         setCountError("");
         return {
           ...state,
@@ -110,6 +111,7 @@ export default function Inventory() {
   const [showAddItem, setShowAddItem] = useState(false);
   const [showEditItem, setShowEditItem] = useState(false);
   const [showTakeInventory, setShowTakeInventory] = useState(false);
+  const [showAddInventory, setShowAddInventory] = useState(false);
   const [errors, setErrors] = useState(emptyErrors);
   const [status, setStatus] = useState(emptyStatus);
   const [dataState, changeData] = useState({});
@@ -265,6 +267,8 @@ export default function Inventory() {
       "displayPublic": displayPublic
     });
 
+    console.log(payload)
+
     fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
       body: payload,
       headers: {'Content-Type': "application/json", 'Authorization': token}})
@@ -351,6 +355,15 @@ export default function Inventory() {
     })
   }
 
+  function closeAddInventory() {
+    setShowAddInventory(false); 
+    setErrors(emptyErrors);
+    dispatch({type:'reset'});
+    setStatus({
+      ...status, loading: false, error: ""
+    })
+  }
+
   function closeAddItem() {
     setShowAddItem(false); 
     setErrors(emptyErrors);
@@ -367,6 +380,10 @@ export default function Inventory() {
     setStatus({
       ...status, loading: false, error: ""
     })
+  }
+
+  function resetInventory() {
+    
   }
 
   const { loadingUser, user } = useUser();
@@ -406,8 +423,23 @@ export default function Inventory() {
             {/* Take Inventory Modal  */}
             <Modal id="take-inventory-modal" isOpen={showTakeInventory} onRequestClose={closeTakeInventory} ariaHideApp={false}>
             <TakeInventoryModal
+                onSubmitHandler={handleUpdateSubmit} 
                 barcodeLookup={handleBarcodeEdit}
+                onCloseHandler={closeTakeInventory}
                 parentState={state}
+                isAdd={false}
+                dispatch={dispatch}
+                />
+            </Modal>
+
+            {/* Add Inventory Modal  */}
+            <Modal id="add-inventory-modal" isOpen={showAddInventory} onRequestClose={closeAddInventory} ariaHideApp={false}>
+            <TakeInventoryModal
+                onSubmitHandler={handleUpdateSubmit} 
+                barcodeLookup={handleBarcodeEdit}
+                onCloseHandler={closeAddInventory}
+                parentState={state}
+                isAdd={true}
                 dispatch={dispatch}
                 />
             </Modal>
@@ -423,6 +455,8 @@ export default function Inventory() {
                     <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowAddItem(true)}>Add new item</button>
                     <button className="my-1 btn-outline w-56 rounded-md p-1" onClick={() => setShowEditItem(true)}>Edit existing item</button>
                     <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowTakeInventory(true)}>Take Inventory</button>
+                    <button className="my-1 btn-outline w-56 rounded-md p-1" onClick={() => setShowAddInventory(true)}>Add Inventory</button>
+                    <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => resetInventory()}>Reset Inventory</button>
                   </div>
                   <p className="mb-5 text-sm italic text-gray-600">You can double-click on an item name or count to change the value quickly!</p>
                 </Sidebar>
