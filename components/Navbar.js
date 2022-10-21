@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import { useRouter } from "next/router";
 import { useUser } from '../context/userContext'
 import { useState } from 'react'
@@ -48,11 +47,9 @@ export default function Navbar() {
     routes = UNAUTH_SIGNEDIN_ROUTES
     // if they're an admin
     if (user.authorized === "true") {
-      console.log("This is an authorized user");
       routes = AUTH_SIGNEDIN_ROUTES;
       userType = "Administrator";
     }
-
   }
 
   function toggleUserDropdown() {
@@ -63,13 +60,14 @@ export default function Navbar() {
     setShowTabs(!showTabs)
   }
 
-    return (
-    <nav className="bg-pantry-blue-500 text-white p-4 h-20 flex flex-wrap justify-between items-center overflow-visible flex-shrink-0">
+  return (
+    <nav className="bg-pantry-blue-500 text-white p-4 flex flex-wrap justify-between items-center overflow-visible flex-shrink-0">
       {/* Pantry Logo */}
-      <a className="h-full" href="/">
+      <a className="h-10" href="/">
         <img className="block h-full w-auto" src="/images/pantry_logo.png" alt="Pantry logo" priority="true" height="32" width="32"/>
       </a>
 
+      {/* User Info */}
       <div className='flex-grow mr-3 lg:order-2 lg:flex-grow-0'>
         {!user ? <a className="bg-gray-50 text-gray-600 rounded px-3 py-1 float-right" href="/signin">Sign In</a> :
           <div className="flex flex-col float-right">
