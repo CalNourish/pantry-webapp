@@ -1,9 +1,9 @@
 import { useState, useContext } from 'react';
-import { StateCartContext } from '../../context/cartContext'
+import { StateCartContext } from '../../context/cartContext';
 
 // Form stage #4
 
-export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, updateOrderDetails}) {
+export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, updateOrderDetails, updateStepOrder}) {
   const { cart, personal, delivery } = useContext(StateCartContext)
   const [submitStatus, setSubmitStatus] = useState({})
 
@@ -149,7 +149,7 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
       </div>
       {submitStatus.success ? "" : <button 
         className="btn btn-pantry-blue font-bold px-4 w-full mt-10"
-        onClick={(e) => {e.preventDefault(); submitCart(cart, personal, delivery)}}
+        onClick={(e) => {e.preventDefault(); submitCart(cart, personal, delivery); updateStepOrder()}}
         >
         Place Order
       </button>}
