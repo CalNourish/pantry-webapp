@@ -72,7 +72,6 @@ export default function Order() {
   }
 
   /* title and navigation bar for orders */
-  // TODO: add progress indicator
   let topBar = 
   <div className='mb-4 flex flex-row items-center'>
       <button onClick={() => {setFormStep(formStep - 1); setShowMissing(false);}} className={"btn btn-outline" + (formStep == 0 ? " invisible" : "")}>Back</button>
@@ -246,7 +245,6 @@ export default function Order() {
       </p>
     </div>
   </div>
-  console.log(formStep);
 
   // Personal Info or Delivery Details page
   return ( 

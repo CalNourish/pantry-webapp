@@ -7,8 +7,6 @@
     "start": "next start"
   },
   "dependencies": {
-    "@next/swc-darwin-x64": "^12.3.1",
-    "@ramonak/react-progress-bar": "^5.0.2",
     "cors": "^2.8.5",
     "firebase": "^9.0.0",
     "firebase-admin": "^10.3.0",
