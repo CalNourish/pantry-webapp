@@ -284,6 +284,21 @@ export default function Inventory() {
     })
   }
 
+  function resetInventory() {
+    if (window.confirm("Reset Inventory?")) {
+    fetch(`${server}/api/inventory/ResetInventory`, { method: 'POST',
+      headers: {'Content-Type': "application/json", 'Authorization': token}})
+    .then((response) => response.json())
+    .then(json => {
+      if (json.error) {
+        setStatusError(json.error);
+      } else {
+        setStatusSuccess(`Sucessfully reset inventory`);
+      }
+    })
+  }
+  }
+
   function handleAddSubmit(e) {
     e.preventDefault();
     setStatusLoading();
@@ -382,9 +397,6 @@ export default function Inventory() {
     })
   }
 
-  function resetInventory() {
-    
-  }
 
   const { loadingUser, user } = useUser();
   let authToken = (user && user.authorized === "true") ? token : null;
