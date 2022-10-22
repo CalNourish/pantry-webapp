@@ -1,6 +1,9 @@
 import { useRouter } from "next/router";
 import { useUser } from '../context/userContext'
 import { useState } from 'react'
+import useSWR from 'swr'
+import { server } from '../pages/_app.js'
+import cookie from 'js-cookie';
 
 const UNAUTH_ROUTES = [
   { title: "Home", route: "/" },
@@ -25,6 +28,12 @@ const AUTH_SIGNEDIN_ROUTES = [
   { title: "Bag Packing", route: "/orders"}
 ]
 
+
+const token = cookie.get("firebaseToken")
+
+const adminFetcher = (url) => fetch(url, {
+  method:'GET', headers: {'Content-Type': "application/json", 'Authorization': token}
+}).then((res) => res.json());
 
 export default function Navbar() {
   const linkStyle = "block py-2 pr-3 pl-3 text-white rounded hover:bg-pantry-blue-400 " +
@@ -59,6 +68,8 @@ export default function Navbar() {
   function toggleShowTabs() {
     setShowTabs(!showTabs)
   }
+
+  const { data: openOrders, error: ordersErr } = useSWR(`${server}/api/orders/GetOrdersByStatus?status=open`, adminFetcher);
 
   return (
     <nav className="bg-pantry-blue-500 text-white p-4 flex flex-wrap justify-between items-center overflow-visible flex-shrink-0">
@@ -109,9 +120,17 @@ export default function Navbar() {
           <ul className="flex flex-col mt-4 lg:flex-row lg:space-x-8 lg:mt-0 lg:text-sm lg:font-medium">
             {routes.map(navigationItem => (
               <li key={navigationItem.title}>
-                <a className={navigationItem.route == router.pathname ? activeLink : inactiveLink} href={navigationItem.route}>
-                  {navigationItem.title}
-                </a>
+                <div className="relative inline-block">
+                  <a className={navigationItem.route == router.pathname ? activeLink : inactiveLink} href={navigationItem.route}>
+                    {navigationItem.title}
+                  </a>
+                  {
+                    navigationItem.title == "Bag Packing" &&
+                    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                      {openOrders !== undefined && (Object.keys(openOrders).length) + " New"}
+                    </span>
+                  }
+                </div>
               </li>
             ))}
           </ul>
