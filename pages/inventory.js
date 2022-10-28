@@ -280,14 +280,18 @@ export default function Inventory() {
     })
   }
 
+
+  function displayUpdatedInventory() {
+    const ref = firebase.database().ref('/inventory')
+    ref.once("value")
+    .then(function(resp) {
+      let res = resp.val();
+      changeData(res);
+    })
+  }
+
+
   function resetInventory() {
-    if (Object.keys(dataState).length == 0) {
-      ref.once("value")
-      .then(function(resp) {
-        let res = resp.val();
-        changeData(res);
-      })
-    }
     if (window.confirm("Reset Inventory?")) {
     fetch(`${server}/api/inventory/ResetInventory`, { method: 'POST',
       headers: {'Content-Type': "application/json", 'Authorization': token}})
@@ -296,6 +300,7 @@ export default function Inventory() {
       if (json.error) {
         setStatusError(json.error);
       } else {
+        displayUpdatedInventory();
         setStatusSuccess(`Sucessfully reset inventory`);
       }
     })
