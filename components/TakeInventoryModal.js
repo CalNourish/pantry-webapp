@@ -9,7 +9,6 @@ class TakeInventory extends React.Component {
     this.state = {
       oldCount: props.parentState.count,
       items: props.data,
-      dispatch: props.dispatch,
       numCases: 0,
       newQuantity: 0,
     };
@@ -60,6 +59,10 @@ class TakeInventory extends React.Component {
                 {this.props.isAdd ? "Add Inventory" : "Take Inventory"}
         </div>
 
+        {this.props.status.loading && <div className="bg-yellow-200 border border-yellow-400 text-yellow-700 px-4 py-2 rounded relative mb-3"> Updating ...</div>}
+        {this.props.status.error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded relative mb-3">
+        Error: <span className="font-mono font-bold">{this.props.status.error}</span></div>}   
+
         {/* Item Search Select */}
         <div className="mb-5">
           <Select
@@ -86,6 +89,7 @@ class TakeInventory extends React.Component {
           </div>
         </div>
 
+        {/* Number of packs and updated count */}
         <div className="mb-4">
           <div className="flex relative space-x-10 items-stretch">
            <div className="ml-3">
@@ -105,7 +109,7 @@ class TakeInventory extends React.Component {
                     this.setState({
                       numPacks: e.currentTarget.value,
                       newQuantity:
-                      this.props.isAdd ? this.props.parentState.count + this.state.numPacks * this.props.parentState.packSize : this.state.numPacks * this.props.parentState.packSize,
+                      (this.props.isAdd && this.props.parentState.count > 0) ? this.props.parentState.count + this.state.numPacks * this.props.parentState.packSize : this.state.numPacks * this.props.parentState.packSize,
                     });
                   }}
                 />
@@ -129,12 +133,12 @@ class TakeInventory extends React.Component {
                 </label>
               </div>
             </div>
-            <div class="flex justify-center">
+            <div className="flex justify-center">
           </div>
           </div>
         </div>
 
-        {/* Update Quantity */}
+        {/* Update Quantity Button */}
         <button
           className="btn btn-pantry-blue uppercase tracking-wide text-xs font-semibold"
           id="update-quantity"
@@ -161,6 +165,8 @@ export default function TakeInventoryModal(props) {
         onCloseHandler={props.onCloseHandler}
         barcodeLookup={props.barcodeLookup}
         parentState={props.parentState}
+        status = {props.status}
+        errors = {props.errors}
         dispatch={props.dispatch}
         isAdd={props.isAdd}
       ></TakeInventory>

@@ -66,7 +66,6 @@ export default function Inventory() {
         }
       }
       case 'editItemCount': {
-        console.log(state)
         setCountError("");
         return {
           ...state,
@@ -266,9 +265,6 @@ export default function Inventory() {
       "categoryName": categories,
       "displayPublic": displayPublic
     });
-
-    console.log(payload)
-
     fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
       body: payload,
       headers: {'Content-Type': "application/json", 'Authorization': token}})
@@ -285,6 +281,13 @@ export default function Inventory() {
   }
 
   function resetInventory() {
+    if (Object.keys(dataState).length == 0) {
+      ref.once("value")
+      .then(function(resp) {
+        let res = resp.val();
+        changeData(res);
+      })
+    }
     if (window.confirm("Reset Inventory?")) {
     fetch(`${server}/api/inventory/ResetInventory`, { method: 'POST',
       headers: {'Content-Type': "application/json", 'Authorization': token}})
@@ -441,6 +444,8 @@ export default function Inventory() {
                 parentState={state}
                 isAdd={false}
                 dispatch={dispatch}
+                errors={errors}
+                status={status}
                 />
             </Modal>
 
@@ -453,6 +458,8 @@ export default function Inventory() {
                 parentState={state}
                 isAdd={true}
                 dispatch={dispatch}
+                errors={errors}
+                status={status}
                 />
             </Modal>
           </>
