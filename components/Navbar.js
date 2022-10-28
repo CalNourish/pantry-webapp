@@ -1,6 +1,9 @@
 import { useRouter } from "next/router";
 import { useUser } from '../context/userContext'
 import { useState } from 'react'
+import useSWR from 'swr'
+import { server } from '../pages/_app.js'
+import cookie from 'js-cookie';
 
 const UNAUTH_ROUTES = [
   { title: "Home", route: "/" },
@@ -21,13 +24,20 @@ const AUTH_SIGNEDIN_ROUTES = [
   { title: "Hours", route: "/hours" },
   { title: "Order", route: "/order"},
   { title: "Check in", route: "/checkin"},
+  { title: "Grad Check in", route: "/checkinGrad"},
   { title: "Checkout", route: "/checkout"},
   { title: "Bag Packing", route: "/orders"}
 ]
 
 
+const token = cookie.get("firebaseToken")
+
+const adminFetcher = (url) => fetch(url, {
+  method:'GET', headers: {'Content-Type': "application/json", 'Authorization': token}
+}).then((res) => res.json());
+
 export default function Navbar() {
-  const linkStyle = "block py-2 pr-3 pl-3 text-white rounded hover:bg-pantry-blue-400 " +
+  const linkStyle = "w-full relative inline-block py-2 pr-3 pl-3 text-white rounded hover:bg-pantry-blue-400 " +
     "lg:ml-4 lg:px-3 lg:py-2 lg:text-sm lg:font-medium lg:hover:bg-pantry-blue-500"
   const activeLink = `${linkStyle} text-white`;
   const inactiveLink = `${linkStyle} text-gray-300 hover:text-white`;
@@ -59,6 +69,8 @@ export default function Navbar() {
   function toggleShowTabs() {
     setShowTabs(!showTabs)
   }
+
+  const { data: openOrders, error: ordersErr } = useSWR(`${server}/api/orders/GetOrdersByStatus?status=open`, adminFetcher);
 
   return (
     <nav className="bg-pantry-blue-500 text-white p-4 flex flex-wrap justify-between items-center overflow-visible flex-shrink-0">
@@ -106,11 +118,17 @@ export default function Navbar() {
       
       {/* Tab links */}
       <div className={(showTabs ? "" : "hidden ") + "justify-between w-full lg:flex lg:w-auto lg:order-1 lg:flex-grow lg:ml-10"}>
-          <ul className="flex flex-col mt-4 lg:flex-row lg:space-x-8 lg:mt-0 lg:text-sm lg:font-medium">
+          <ul className="flex flex-col w-full mt-4 lg:flex-row lg:space-x-8 lg:mt-0 lg:text-sm lg:font-medium">
             {routes.map(navigationItem => (
               <li key={navigationItem.title}>
                 <a className={navigationItem.route == router.pathname ? activeLink : inactiveLink} href={navigationItem.route}>
                   {navigationItem.title}
+                  {
+                    navigationItem.title == "Bag Packing" && openOrders && (Object.keys(openOrders).length > 0) &&
+                    <span className="ml-4 my-auto items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full lg:ml-0 lg:py-1 lg:absolute lg:top-0 lg:right-0 lg:inline-flex lg:transform lg:translate-x-1/2 lg:-translate-y-1/2">
+                      {(Object.keys(openOrders).length) + " New"}
+                    </span>
+                  }
                 </a>
               </li>
             ))}
