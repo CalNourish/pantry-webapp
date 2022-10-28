@@ -6,6 +6,7 @@ import { StateCartContext } from '../../context/cartContext';
 export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, updateOrderDetails, updateStepOrder}) {
   const { cart, personal, delivery } = useContext(StateCartContext)
   const [submitStatus, setSubmitStatus] = useState({})
+  const [disable, setDisable] = useState(false)
 
   const submitCart = (cart, personal, delivery) => {
     const items = {}
@@ -64,8 +65,8 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
   return (
     <>
       {submitStatus.success ? <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-3">{submitStatus.success}</div> :
-        submitStatus.error ? <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-3">{submitStatus.error}</div> : ""
-      }
+        submitStatus.error ? <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-3">{submitStatus.error}</div> : "" } 
+    
       <h2 className="h-10 text-lg mb-2 block tracking-wide text-gray-600 font-bold">Review Order</h2>
       <div className="flex">
         <div className="mr-16 flex-grow">
@@ -150,7 +151,7 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
       </div>
       {submitStatus.success ? "" : <button 
         className="btn btn-pantry-blue font-bold px-4 w-full mt-10"
-        onClick={(e) => {e.preventDefault(); submitCart(cart, personal, delivery); updateStepOrder()}}
+        disabled={disable} onClick={(e) => {setDisable(true); e.preventDefault(); submitCart(cart, personal, delivery); updateStepOrder()}}
         >
         Place Order
       </button>}
