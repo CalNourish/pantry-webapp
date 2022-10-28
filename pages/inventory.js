@@ -92,13 +92,11 @@ export default function Inventory() {
         }
       } 
       case 'itemLookup': {
-
         if (packOpt) packOpt.value = 'individual'
         return {
           ...state,
           ...action.value
         }
-
       } 
       default:
         break;
@@ -280,7 +278,6 @@ export default function Inventory() {
     })
   }
 
-
   function displayUpdatedInventory() {
     const ref = firebase.database().ref('/inventory')
     ref.once("value")
@@ -289,7 +286,6 @@ export default function Inventory() {
       changeData(res);
     })
   }
-
 
   function resetInventory() {
     if (window.confirm("Reset Inventory?")) {
