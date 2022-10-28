@@ -98,7 +98,7 @@ class Checkin extends React.Component {
         }
       }
     }
-    return <div className='flex-grow text-left'>{messageToReturn}</div>;
+    return <div className='flex-grow text-left bg-amber-400'>{messageToReturn}</div>;
   };
    
   handleScanSubmit = async (e) => {
