@@ -1,7 +1,6 @@
 import { useRouter } from "next/router";
 import { useUser } from '../context/userContext'
 import { useState } from 'react'
-import useSWR from 'swr'
 import { server } from '../pages/_app.js'
 import cookie from 'js-cookie';
 
@@ -29,12 +28,7 @@ const AUTH_SIGNEDIN_ROUTES = [
   { title: "Bag Packing", route: "/orders"}
 ]
 
-
 const token = cookie.get("firebaseToken")
-
-const adminFetcher = (url) => fetch(url, {
-  method:'GET', headers: {'Content-Type': "application/json", 'Authorization': token}
-}).then((res) => res.json());
 
 export default function Navbar() {
   const linkStyle = "w-full relative inline-block py-2 pr-3 pl-3 text-white rounded hover:bg-pantry-blue-400 " +
@@ -46,6 +40,7 @@ export default function Navbar() {
   
   const [showUserInfo, setShowUserInfo] = useState(false)
   const [showTabs, setShowTabs] = useState(false)
+  const [numNewOrders, setNumOrders] = useState(false)
 
   var routes = UNAUTH_ROUTES;
   var name = "";
@@ -59,6 +54,20 @@ export default function Navbar() {
     if (user.authorized === "true") {
       routes = AUTH_SIGNEDIN_ROUTES;
       userType = "Administrator";
+
+      // update numNewOrders
+      if (numNewOrders === false) {
+        fetch(`${server}/api/orders/GetOrdersByStatus?status=open`, { method: 'GET',
+          headers: {'Content-Type': "application/json", 'Authorization': token}
+        })
+        .then(resp => resp.json())
+        .then(newOrders => {
+          setNumOrders(newOrders ? Object.keys(newOrders).length : 0)
+        })
+        .catch(err => {
+          console.log("Error getting number of new orders:", err)
+        })
+      }
     }
   }
 
@@ -69,8 +78,6 @@ export default function Navbar() {
   function toggleShowTabs() {
     setShowTabs(!showTabs)
   }
-
-  const { data: openOrders, error: ordersErr } = useSWR(`${server}/api/orders/GetOrdersByStatus?status=open`, adminFetcher);
 
   return (
     <nav className="bg-pantry-blue-500 text-white p-4 flex flex-wrap justify-between items-center overflow-visible flex-shrink-0">
@@ -124,9 +131,9 @@ export default function Navbar() {
                 <a className={navigationItem.route == router.pathname ? activeLink : inactiveLink} href={navigationItem.route}>
                   {navigationItem.title}
                   {
-                    navigationItem.title == "Bag Packing" && openOrders && (Object.keys(openOrders).length > 0) &&
+                    navigationItem.title == "Bag Packing" && numNewOrders > 0 &&
                     <span className="ml-4 my-auto items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full lg:ml-0 lg:py-1 lg:absolute lg:top-0 lg:right-0 lg:inline-flex lg:transform lg:translate-x-1/2 lg:-translate-y-1/2">
-                      {(Object.keys(openOrders).length) + " New"}
+                      {numNewOrders + " New"}
                     </span>
                   }
                 </a>
