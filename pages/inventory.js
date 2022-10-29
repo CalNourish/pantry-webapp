@@ -471,7 +471,7 @@ export default function Inventory() {
               <div className="w-64 items-center">
                 <Sidebar className="py-4">
                   <h1 className="text-3xl font-semibold mb-2">Inventory</h1>
-                  <div className="my-4">
+                  <div className="my-4 space-y-6">
                     <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowAddItem(true)}>Add new item</button>
                     <button className="my-1 btn-outline w-56 rounded-md p-1" onClick={() => setShowEditItem(true)}>Edit existing item</button>
                     <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowTakeInventory(true)}>Take Inventory</button>
