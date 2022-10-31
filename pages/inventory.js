@@ -263,6 +263,7 @@ export default function Inventory() {
       "categoryName": categories,
       "displayPublic": displayPublic
     });
+    
     fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
       body: payload,
       headers: {'Content-Type': "application/json", 'Authorization': token}})
@@ -400,7 +401,6 @@ export default function Inventory() {
       ...status, loading: false, error: ""
     })
   }
-
 
   const { loadingUser, user } = useUser();
   let authToken = (user && user.authorized === "true") ? token : null;
