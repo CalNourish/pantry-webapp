@@ -2,7 +2,7 @@ import Layout from '../components/Layout'
 import Sidebar from '../components/Sidebar'
 import Table from '../components/Table'
 import InventoryModal from '../components/InventoryModal'
-
+import TakeInventoryModal from '../components/TakeInventoryModal'
 import { useUser } from '../context/userContext'
 import { server } from './_app.js'
 
@@ -97,7 +97,7 @@ export default function Inventory() {
           ...state,
           ...action.value
         }
-      }   
+      } 
       default:
         break;
     }
@@ -107,6 +107,8 @@ export default function Inventory() {
   // Manage modal show/don't show State
   const [showAddItem, setShowAddItem] = useState(false);
   const [showEditItem, setShowEditItem] = useState(false);
+  const [showTakeInventory, setShowTakeInventory] = useState(false);
+  const [showAddInventory, setShowAddInventory] = useState(false);
   const [errors, setErrors] = useState(emptyErrors);
   const [status, setStatus] = useState(emptyStatus);
   const [dataState, changeData] = useState({});
@@ -261,7 +263,7 @@ export default function Inventory() {
       "categoryName": categories,
       "displayPublic": displayPublic
     });
-
+    
     fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
       body: payload,
       headers: {'Content-Type': "application/json", 'Authorization': token}})
@@ -275,6 +277,31 @@ export default function Inventory() {
         setStatusSuccess(`successfully updated: ${itemName} (${barcode})`);
       }
     })
+  }
+
+  function displayUpdatedInventory() {
+    const ref = firebase.database().ref('/inventory')
+    ref.once("value")
+    .then(function(resp) {
+      let res = resp.val();
+      changeData(res);
+    })
+  }
+
+  function resetInventory() {
+    if (window.confirm("Reset Inventory?")) {
+    fetch(`${server}/api/inventory/ResetInventory`, { method: 'POST',
+      headers: {'Content-Type': "application/json", 'Authorization': token}})
+    .then((response) => response.json())
+    .then(json => {
+      if (json.error) {
+        setStatusError(json.error);
+      } else {
+        displayUpdatedInventory();
+        setStatusSuccess(`Sucessfully reset inventory`);
+      }
+    })
+  }
   }
 
   function handleAddSubmit(e) {
@@ -339,6 +366,24 @@ export default function Inventory() {
     })
   }
 
+  function closeTakeInventory() {
+    setShowTakeInventory(false); 
+    setErrors(emptyErrors);
+    dispatch({type:'reset'});
+    setStatus({
+      ...status, loading: false, error: ""
+    })
+  }
+
+  function closeAddInventory() {
+    setShowAddInventory(false); 
+    setErrors(emptyErrors);
+    dispatch({type:'reset'});
+    setStatus({
+      ...status, loading: false, error: ""
+    })
+  }
+
   function closeAddItem() {
     setShowAddItem(false); 
     setErrors(emptyErrors);
@@ -390,6 +435,34 @@ export default function Inventory() {
                   errors={errors}
                   status={status}/>
             </Modal>
+
+            {/* Take Inventory Modal  */}
+            <Modal id="take-inventory-modal" isOpen={showTakeInventory} onRequestClose={closeTakeInventory} ariaHideApp={false}>
+            <TakeInventoryModal
+                onSubmitHandler={handleUpdateSubmit} 
+                barcodeLookup={handleBarcodeEdit}
+                onCloseHandler={closeTakeInventory}
+                parentState={state}
+                isAdd={false}
+                dispatch={dispatch}
+                errors={errors}
+                status={status}
+                />
+            </Modal>
+
+            {/* Add Inventory Modal  */}
+            <Modal id="add-inventory-modal" isOpen={showAddInventory} onRequestClose={closeAddInventory} ariaHideApp={false}>
+            <TakeInventoryModal
+                onSubmitHandler={handleUpdateSubmit} 
+                barcodeLookup={handleBarcodeEdit}
+                onCloseHandler={closeAddInventory}
+                parentState={state}
+                isAdd={true}
+                dispatch={dispatch}
+                errors={errors}
+                status={status}
+                />
+            </Modal>
           </>
         }
         
@@ -398,9 +471,12 @@ export default function Inventory() {
               <div className="w-64 items-center">
                 <Sidebar className="py-4">
                   <h1 className="text-3xl font-semibold mb-2">Inventory</h1>
-                  <div className="my-4">
+                  <div className="my-4 space-y-6">
                     <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowAddItem(true)}>Add new item</button>
                     <button className="my-1 btn-outline w-56 rounded-md p-1" onClick={() => setShowEditItem(true)}>Edit existing item</button>
+                    <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowTakeInventory(true)}>Take Inventory</button>
+                    <button className="my-1 btn-outline w-56 rounded-md p-1" onClick={() => setShowAddInventory(true)}>Add Inventory</button>
+                    <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => resetInventory()}>Reset Inventory</button>
                   </div>
                   <p className="mb-5 text-sm italic text-gray-600">You can double-click on an item name or count to change the value quickly!</p>
                 </Sidebar>
