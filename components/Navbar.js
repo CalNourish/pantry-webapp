@@ -62,7 +62,9 @@ export default function Navbar() {
         })
         .then(resp => resp.json())
         .then(newOrders => {
-          setNumOrders(newOrders ? Object.keys(newOrders).length : 0)
+          if (newOrders && !newOrders.error)
+            setNumOrders(newOrders ? Object.keys(newOrders).length : 0)
+          console.log("New Orders:", newOrders)
         })
         .catch(err => {
           console.log("Error getting number of new orders:", err)
@@ -131,7 +133,7 @@ export default function Navbar() {
                 <a className={navigationItem.route == router.pathname ? activeLink : inactiveLink} href={navigationItem.route}>
                   {navigationItem.title}
                   {
-                    navigationItem.title == "Bag Packing" && numNewOrders > 0 &&
+                    navigationItem.title == "Bag Packing" && numNewOrders && numNewOrders > 0 &&
                     <span className="ml-4 my-auto items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full lg:ml-0 lg:py-1 lg:absolute lg:top-0 lg:right-0 lg:inline-flex lg:transform lg:translate-x-1/2 lg:-translate-y-1/2">
                       {numNewOrders + " New"}
                     </span>
