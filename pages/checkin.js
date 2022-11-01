@@ -76,6 +76,7 @@ class Checkin extends React.Component {
       var numVisits = this.state.visitsLastWeek.length
       if (numVisits== 0) {
         messageToReturn= "This visitor has not visited the pantry this week."
+        return <div className='flex-grow text-left'>{messageToReturn}</div>;
       }
       else if (numVisits == 1) {
         messageToReturn= "This visitor has already visited the pantry this week on  " + this.state.visitsLastWeek[0] +"."
