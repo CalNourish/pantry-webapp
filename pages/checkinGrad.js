@@ -76,7 +76,6 @@ class Checkin extends React.Component {
       var numVisits = this.state.visitsLastWeek.length
       if (numVisits== 0) {
         messageToReturn= "This visitor has not visited the pantry this week."
-        return <div className='flex-grow text-left'>{messageToReturn}</div>;
       }
       else if (numVisits == 1) {
         messageToReturn= "This visitor has already visited the pantry this week on  " + this.state.visitsLastWeek[0] +"."
@@ -99,7 +98,7 @@ class Checkin extends React.Component {
         }
       }
     }
-    return <div className='flex-grow text-left bg-amber-400'>{messageToReturn}</div>;
+    return <div className='flex-grow text-left'>{messageToReturn}</div>;
   };
    
   handleScanSubmit = async (e) => {
@@ -112,7 +111,7 @@ class Checkin extends React.Component {
     }
     token = await this.state.user.googleUser.getIdToken()
     fetch('/api/admin/CheckIn', { method: 'POST',
-      body: JSON.stringify({calID: e.target.calID.value, isGrad:false}),
+      body: JSON.stringify({calID: e.target.calID.value, isGrad:true}),
       headers: {'Content-Type': "application/json", 'Authorization': token}
     })
     .then((result) => {
@@ -165,7 +164,7 @@ class Checkin extends React.Component {
         <div className='m-6'>
         {this.state.error && errorBanner}
         {this.state.success && successBanner}
-          <h1 className='text-3xl font-medium mb-2'>Pantry Check-In</h1>
+          <h1 className='text-3xl font-medium mb-2'>Grad Pantry Check-In</h1>
           <div className='flex flex-row space-x-16 my-8'>
             <form onSubmit={(e) => this.handleScanSubmit(e)}>
               <fieldset id="calIDFieldset" disabled={false}>
@@ -192,7 +191,7 @@ class Checkin extends React.Component {
 }
 
 
-export default function checkin() {
+export default function checkinGrad() {
   /* Display loading message */
   const { user } = useUser();
   let authToken = (user && user.authorized === "true") ? token : null;
