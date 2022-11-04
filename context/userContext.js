@@ -54,7 +54,7 @@ const UserProvider = ({ children }) => {
             return result.data;
         }))?.authorized; 
 
-        setUser({"displayName": user.displayName, "photoURL": user.photoURL, "authorized": authorized});
+        setUser({"displayName": user.displayName, "photoURL": user.photoURL, "authorized": authorized, "googleUser": user});
         
         if (authorized === "true") {
           const token = await user.getIdToken();

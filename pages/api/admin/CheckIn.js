@@ -12,7 +12,7 @@ import firebase from '../../../firebase/clientApp'
 function requireParams(body) {
   // makes sure that the input is in the right format
   // returns false and an error if not a good input
-  if (body.calID) return true;
+  if (body.calID && body.isGrad != null) return true;
   return false;
 }
 
@@ -27,15 +27,15 @@ function determineStartOfWeek(currDay) {
 
 //converts from 2022-07-23T20:35:41.935Z to 7/23/2022 12:15:52
 function formatTime(timeToConvert) {
-const formattedHours = timeToConvert.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit', second:'2-digit', timeZone: 'America/Los_Angeles'})
-const formattedTime = timeToConvert.toLocaleDateString() + " " + formattedHours;
+const formattedHours = timeToConvert.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', second:'2-digit', timeZone: 'America/Los_Angeles'})
+const formattedTime = timeToConvert.toLocaleDateString('en-US', {timeZone: 'America/Los_Angeles'}) + " " + formattedHours;
     return formattedTime;
 }
 
 //converts from 2022-07-23T20:35:41.935Z to Mon Jul 23 2022 at 08:35 PM
 function formatTimeForVisits(timeToConvert) {
   const formattedHours = timeToConvert.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'})
-  const formattedTime = timeToConvert.toDateString() + " at " + formattedHours;
+  const formattedTime = timeToConvert.toDateString('en-US', {timeZone: 'America/Los_Angeles'}) + " at " + formattedHours;
   return formattedTime;
   }
 
@@ -69,11 +69,14 @@ function scanTableForVisitInPastWeek(values, startOfWeek, calId) {
   return visitedTimes;
 }
 
-function getSheetsLink() {
+function getSheetsLink(isGrad) {
   return new Promise((resolve, reject) => {
     firebase.database().ref('/sheetIDs')
     .once('value', snapshot => {
         let val = snapshot.val();
+        if (isGrad) {
+            return resolve(val.checkInGrad)
+        }
         return resolve(val.checkIn)
     })
     .catch(error => {
@@ -90,7 +93,7 @@ export default async function (req, res) {
     // verify parameters
     let ok = requireParams(body, res);
     if (!ok) {
-      res.status(400).json({ message: "Missing CalID" });
+      res.status(400).json({ message: "Missing CalID or grad boolean" });
       return resolve();
     }
 
@@ -106,7 +109,7 @@ export default async function (req, res) {
       );
       const sheets = google.sheets({ version: "v4", auth: sheets_auth });
 
-      getSheetsLink()
+      getSheetsLink(body.isGrad)
       .then(({spreadsheetId, sheetName}) => {
         var numRows = 0;
         var calID = body.calID

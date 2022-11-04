@@ -31,6 +31,12 @@ export default function OrderDetails({children}) {
       // Skip to next item if not part of filter
       return
     }
+
+    if (!items[key].displayPublic) {
+      // Skip item if not displayPublic
+      return
+    }
+
     // if not max order size, set to infinity
     const maxQuantity = parseInt(items[key].maxOrderSize) || parseInt(items[key].count)
     // let invalid_quantity = cart[key] && cart[key].quantity > maxQuantity
@@ -92,7 +98,7 @@ export default function OrderDetails({children}) {
             </div>
           </div>
         </div>
-        {maxQuantity === 0 && <div className='text-red-600 w-full text-right'>Out of stock</div>}
+        {maxQuantity <= 0 && <div className='text-red-600 w-full text-right'>Out of stock</div>}
       </div>
     )
     

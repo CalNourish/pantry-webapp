@@ -29,9 +29,11 @@ class PackingOrder extends React.Component {
     super(props);
     this.state = {
       orderId: props.data[0].orderId,
-      delivery_date: props.data[0].delivery_date,
+      delivery_date: props.data[0].deliveryDate,
+      dependents: props.data[0].dependents,
+      dietaryRestriction: props.data[0].dietaryRestriction ? props.data[0].dietaryRestriction : "N/A",
       pantryNote: props.data[0].pantryNote,
-      guestNote: props.data[0].guestNote,
+      guestNote: props.data[0].guestNote ? props.data[0].guestNote : "N/A",
       firstName: props.data[0].firstName,
       lastInitial: props.data[0].lastInitial,
       status: props.data[0].status,
@@ -291,14 +293,19 @@ class PackingOrder extends React.Component {
                 {this.state.firstName + " " + this.state.lastInitial}{" "}
               </h1>
               <div className="inline items-center space-x-4">
-                <h2 className="inline text-l font-medium mb-2">
-                  {this.state.delivery_date}{" "}
-                </h2>
                 {this.displayOrderStatus()}
                 {this.displayChangeOrderStatus()}
               </div>
+              <div className="flex space-x-11">
+                <div className="text-large font-medium">
+                {"Dependents: " + this.state.dependents}
+              </div>
+              <div className="text-large font-medium">
+                {"Dietary Restrictions: " + this.state.dietaryRestriction}
+              </div>
               <div className="text-large font-medium">
                 {"Additional Note: " + this.state.guestNote}
+              </div>
               </div>
               <table className="w-full table-fixed" id="order">
                 <thead>
