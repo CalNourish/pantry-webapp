@@ -11,6 +11,9 @@ import React, { useState, useReducer } from 'react';
 import cookie from 'js-cookie';
 import firebase from '../firebase/clientApp';
 
+/* For hiding inventory to the public */
+const DISABLE_PUBLIC_INVENTORY = true;
+
 export default function Inventory() {
   const token = cookie.get("firebaseToken")
 
@@ -132,6 +135,14 @@ export default function Inventory() {
 
   // Manage form State (look up useReducer tutorials if unfamiliar)
   const [ state, dispatch ] = useReducer(formReducer, emptyItem)
+
+  if (DISABLE_PUBLIC_INVENTORY) {
+    return (
+      <Layout>
+        <div className='m-4'>Inventory is currently not publically available.</div>
+      </Layout>
+    )
+  }
 
   /* initialize dataState value */
   const ref = firebase.database().ref('/inventory')
