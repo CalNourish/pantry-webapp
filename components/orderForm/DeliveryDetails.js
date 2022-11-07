@@ -132,7 +132,7 @@ export default function DeliveryDetails(props) {
             className="block uppercase tracking-wide text-gray-600 text-xs font-bold" 
             htmlFor="deliveryTimes" data-required="T"
           >
-            What times will you be available to accept a delivery this week?
+            What times will you be available to accept a delivery next week?
           </label>
         <p className="text-gray-500 text-xs italic">Please select all that work, we will send an email for a final confirmation.</p>
         </div>

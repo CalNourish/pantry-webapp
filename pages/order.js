@@ -41,9 +41,8 @@ export default function Order() {
   let checkNextable = () => {
     let required, page;
     if (formStep == 0) { // personal info
-      required = ["first", "last", "calID", "email", "emailConf", "status"]
+      required = ["first", "last", "calID", "email", "status"]
       page = personal;
-      if (personal["email"] != personal["emailConf"]) return false;
     }
     else {
       required = ["streetAddress", "city", "zip", "phone", "deliveryTimes"]

@@ -31,7 +31,6 @@ export const ACTIONS = {
     last: !
     calID: !
     email: !
-    emailConf: !
     status: !
     eligibilityConf: ! True
     doordashConf: ! True
@@ -52,7 +51,7 @@ export const ACTIONS = {
  */ 
 const initialState = {
   personal: {
-   first:"", last:"", calID:"", email:"", emailConf:"", status:"", eligibilityConf:false, doordashConf:false,
+   first:"", last:"", calID:"", email:"", status:"", eligibilityConf:false, doordashConf:false,
    dependents:"", dietaryRestrictions: "", additionalRequests:""
   },
   delivery: {
