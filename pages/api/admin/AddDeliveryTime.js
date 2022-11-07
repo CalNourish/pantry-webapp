@@ -1,11 +1,10 @@
 import firebase from '../../../firebase/clientApp'
 import { validateFunc } from '../validate'
-import { daysInOrder } from '../../hours';
 
 /*
 * /api/admin/AddDeliveryTime
 * req.body = {
-    string day,
+    string dayOfWeek,
     int start,
     string start_AMPM ["AM", "PM"],
     int end,
@@ -20,22 +19,26 @@ export const config = {
 }
 
 const AMPM_opt = ["AM", "PM"]
+const days_opt = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 
 function requireParams(req, res) {
   // makes sure that the input is in the right format
   // returns false and an error if not a good input
   let { body } = req;
-  if (!daysInOrder.includes(body.day)) {
-    res.status(400).json({error: `'${body.day}' not a day of the week.`});
+  if (!days_opt.includes(body.dayOfWeek)) {
+    console.log("not ok1")
+    res.status(400).json({error: `'${body.dayOfWeekOfWeek}' not a day of the week.`});
     return false;
   }
   
-  if (body.start === undefined || AMPM_opt.includes(body.start_AMPM)) {
+  if (body.start === undefined || !AMPM_opt.includes(body.start_AMPM)) {
+    console.log("not ok2")
     res.status(400).json({error: `Missing start hours or start AM/PM.`});
     return false;
   }
 
-  if (body.end === undefined || AMPM_opt.includes(body.end_AMPM)) {
+  if (body.end === undefined || !AMPM_opt.includes(body.end_AMPM)) {
+    console.log("not ok3")
     res.status(400).json({error: `Missing end hours or end AM/PM.`});
     return false;
   }
@@ -54,7 +57,7 @@ export default async function (req, res) {
     
     validateFunc(token).then(() => {
       const { body } = req
-      let day = body.day.toString();
+      let day = body.dayOfWeek.toString();
       let start = body.start.toString()
       let start_AMPM = body.start_AMPM.toString()
       let end = body.end.toString()
@@ -76,13 +79,15 @@ export default async function (req, res) {
           .then((resp) => {
             var window = resp.val();
             if (window != null) {
+              console.log("not ok4")
+              console.log(window)
               res.status(400).json({ error: "delivery time with tag " + db_tag + " already exists" })
               return resolve();
             }
 
             windowRef.update(payload)
             .then(() => {
-              res.status(200).json({ message: "success" });
+              res.status(200).json({ message: "success", tag: db_tag });
               return resolve();
             })
             .catch(function (error) {
@@ -96,7 +101,8 @@ export default async function (req, res) {
         return resolve();
       })
     })
-    .catch(() => {
+    .catch((err) => {
+      console.log(err)
       res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an administrator account." });
       return resolve();
     });

@@ -159,7 +159,19 @@ function DeliveryTimes(props) {
     // TODO: call delete API
     console.log('deleting tag:', tag)
     let {[tag]: _, ...newData} = formData;
-    setFormData(newData)
+    fetch(`${server}/api/admin/DeleteDeliveryTime`, { method: 'POST',
+      body: JSON.stringify({"tag": tag}),
+      headers: {'Content-Type': "application/json", 'Authorization': token}
+    })
+    .then((result) => {
+      result.json()
+      .then((res) => {
+        console.log(res)
+      })
+      console.log(result)
+      console.log("Deleted tag:", tag)
+      setFormData(newData)
+    })
   }
 
   let submitForm = (e) => {
@@ -171,17 +183,29 @@ function DeliveryTimes(props) {
     const end = e.target.end_hour.value;
     const end_AM_PM = e.target.end_AM_PM.value;
 
-    const tag = date.toLowerCase().substring(0,3) + start + "-" + end + end_AM_PM;
-    const displayName = `${date} ${start}-${end} ${end_AM_PM}`
+    // const tag = date.toLowerCase().substring(0,3) + start + "-" + end;
+    // const displayName = `${date} ${start}-${end} ${end_AM_PM}`
     const data = {
       dayOfWeek: date,
-      display: displayName,
-      startTime: start + " " + start_AM_PM,
-      endTime: end + " " + end_AM_PM
+      start: start,
+      start_AMPM: start_AM_PM,
+      end: end,
+      end_AMPM: end_AM_PM
     }
 
     // TODO: call add API
-    setFormData({...formData, [tag]: data})
+    fetch(`${server}/api/admin/AddDeliveryTime`, { method: 'POST',
+      body: JSON.stringify(data),
+      headers: {'Content-Type': "application/json", 'Authorization': token}
+    })
+    .then((result) => {
+      console.log(result)
+      result.json()
+      .then((res) => {
+        console.log(res)
+      })
+      // setFormData({...formData, [tag]: data}) // TODO: change this to use db change listener instead?
+    })
   }
 
   return (
