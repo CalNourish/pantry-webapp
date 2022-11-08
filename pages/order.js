@@ -47,6 +47,10 @@ export default function Order() {
           return false;
         }
       }
+
+      if (!personal.eligibilityConf) {
+        return false;
+      }
     }
     else {
       required = ["streetAddress", "city", "zip", "phone", "deliveryTimes"]
@@ -57,11 +61,10 @@ export default function Order() {
           }
         }
       }
-    }
-
-    if (!personal.eligibilityConf || !personal.doordashConf) {
-      // TODO: don't require doordash confirmation if pickup?
-      return false;
+      if (!personal.eligibilityConf || (!delivery.pickup && !personal.doordashConf)) {
+        // don't require doordash confirmation if pickup
+        return false;
+      }
     }
     return true;
   }
@@ -233,21 +236,26 @@ export default function Order() {
           I confirm that I am currently quarantining due to COVID-19 or am facing a significant barrier to coming in person.
         </span>
       </label>
-      <label htmlFor="doordash-confirmation" data-required="T"
-        className={"block tracking-wide font-bold p-1.5" + ((showMissing && !personal.doordashConf) ? " border-red-600 border rounded" : " border border-transparent")}
-      >
-        <input id="doordash-confirmation" className="mr-2 leading-tight" type="checkbox"
-          checked={personal.doordashConf}
-          onChange={(e) => cartDispatch({ type: 'UPDATE_PERSONAL', payload: {doordashConf: e.target.checked}})}
-        />
-        <span className="text-base">
-          I confirm that I allow the food pantry to share my information with DoorDash.
-        </span>
-      </label>
-      <p className="mt-2 text-gray-500 text-xs italic">
-        By clicking this, you are permitting us to share your information with DoorDash so that they can deliver to you.
-        The information provided includes your name, address, phone number, and delivery notes.
-      </p>
+      
+      { formStep > 0 && !delivery.pickup &&
+        <>
+          <label htmlFor="doordash-confirmation" data-required={delivery.pickup ? "" : "T"}
+            className={"block tracking-wide font-bold p-1.5" + ((showMissing && !personal.doordashConf) ? " border-red-600 border rounded" : " border border-transparent")}
+          >
+            <input id="doordash-confirmation" className="mr-2 leading-tight" type="checkbox"
+              checked={personal.doordashConf}
+              onChange={(e) => cartDispatch({ type: 'UPDATE_PERSONAL', payload: {doordashConf: e.target.checked}})}
+            />
+            <span className="text-base">
+              I confirm that I allow the food pantry to share my information with DoorDash.
+            </span>
+          </label>
+          <p className="mt-2 text-gray-500 text-xs italic">
+            By clicking this, you are permitting us to share your information with DoorDash so that they can deliver to you.
+            The information provided includes your name, address, phone number, and delivery notes.
+          </p>
+        </>
+      }
     </div>
   </div>
 

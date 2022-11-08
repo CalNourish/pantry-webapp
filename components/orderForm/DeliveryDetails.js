@@ -36,11 +36,33 @@ export default function DeliveryDetails(props) {
             checked={delivery.pickup}
             onChange={(e) => cartDispatch({ type: 'UPDATE_DELIVERY', payload: {pickup: e.target.checked}})}
           />
-          <span>I will pick up this order in person at the Food Pantry.</span>
+          <span>I will be picking up in person at the Food Pantry.</span>
         </label>
-      </div>
 
-      <div className={delivery.pickup && "opacity-50"}>
+        {delivery.pickup &&
+          <>
+            <div className='mb-2'>
+              <label 
+                className="block uppercase tracking-wide text-gray-600 text-xs font-bold mb-1" 
+                htmlFor="pickup-times" data-required="F"
+              >
+                Pickup notes: time preference, or any other details
+              </label>
+              <p className="text-gray-500 text-xs italic">Pantry staff may contact you to confirm pickup time. Pickup is offered during pantry open hours.</p>
+            </div>
+            <textarea
+              className="appearance-none block w-full bg-gray-100 text-gray-600 border border-gray-100 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-400" 
+              id="pickup-times" 
+              type="text" 
+              placeholder="preferred pickup times, name of person picking up, etc."
+              value={delivery.pickupNotes}
+              onChange={(e) => cartDispatch({ type: 'UPDATE_DELIVERY', payload: {pickupNotes: e.target.value}})}
+            />
+          </>
+        }
+        </div>
+
+      <div className={delivery.pickup && "hidden"}>
         {/* Street Address and Apartment Number */}
         <div className="form-group flex flex-col md:flex-row mb-2">
           <div className="mr-0 md:mr-8 flex-grow">
@@ -176,7 +198,7 @@ export default function DeliveryDetails(props) {
             >
               Delivery notes: any other information we might need to know to do a no-contact drop off?
             </label>
-          <p className="text-gray-500 text-xs italic">For example, if you live in an apartment building with a locked gate or if there is a convenient spot to leave your bag of groceries.</p>
+            <p className="text-gray-500 text-xs italic">For example, if you live in an apartment building with a locked gate or if there is a convenient spot to leave your bag of groceries.</p>
           </div>
           <textarea
             className="appearance-none block w-full bg-gray-100 text-gray-600 border border-gray-100 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-400" 

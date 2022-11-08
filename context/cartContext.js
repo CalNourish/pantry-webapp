@@ -41,6 +41,7 @@ export const ACTIONS = {
   
   delivery: {
     pickup: (False)
+    pickupNotes:
     streetAddress: !
     address2:
     city: !
@@ -56,7 +57,7 @@ const initialState = {
    dependents:"", dietaryRestrictions: "", additionalRequests:""
   },
   delivery: {
-    pickup:false, streetAddress:"", address2:"", city:"", zip:"", phone:"", notes:"", deliveryTimes:[]
+    pickup:false, pickupNotes:"", streetAddress:"", address2:"", city:"", zip:"", phone:"", notes:"", deliveryTimes:[]
   },
   cart: {}
 };
