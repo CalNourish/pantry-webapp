@@ -81,7 +81,6 @@ export default function DeliveryDetails(props) {
               onChange={(e) => {
                 cartDispatch({ type: 'UPDATE_DELIVERY', payload: {streetAddress: e.target.value} })
               }}
-              disabled={delivery.pickup}
             />
           </div>
           <div>
@@ -100,7 +99,6 @@ export default function DeliveryDetails(props) {
               onChange={(e) => {
                 cartDispatch({ type: 'UPDATE_DELIVERY', payload: {address2: e.target.value} })
               }}
-              disabled={delivery.pickup}
             />
           </div>
         </div>
@@ -123,7 +121,6 @@ export default function DeliveryDetails(props) {
               onChange={(e) => {
                 cartDispatch({ type: 'UPDATE_DELIVERY', payload: {city: e.target.value} })
               }}
-              disabled={delivery.pickup}
             />
           </div>
           <div>
@@ -142,7 +139,6 @@ export default function DeliveryDetails(props) {
               onChange={(e) => {
                 cartDispatch({ type: 'UPDATE_DELIVERY', payload: {zip: e.target.value} })
               }}
-              disabled={delivery.pickup}
             />
           </div>
         </div>
@@ -168,7 +164,6 @@ export default function DeliveryDetails(props) {
             onChange={(e) => {
               cartDispatch({ type: 'UPDATE_DELIVERY', payload: {phone: e.target.value} })
             }}
-            disabled={delivery.pickup}
             />
         </div>
 
@@ -185,8 +180,7 @@ export default function DeliveryDetails(props) {
           </div>
           <Select options={deliveryTimeOptions} isMulti isClearable isSearchable value={delivery.deliveryTimes}
             onChange={(selections) => cartDispatch({ type: 'UPDATE_DELIVERY', payload: {deliveryTimes: selections} })}
-            className={(props.showMissing && (delivery.deliveryTimes.length == 0)) ? "border rounded" + errorAppearance : "border border-transparent"}
-            isDisabled={delivery.pickup}/>
+            className={(props.showMissing && (delivery.deliveryTimes.length == 0)) ? "border rounded" + errorAppearance : "border border-transparent"}/>
         </div>
         
         {/* Delivery Notes */}
@@ -207,7 +201,6 @@ export default function DeliveryDetails(props) {
             placeholder="Leave at door"
             value={delivery.notes}
             onChange={(e) => cartDispatch({ type: 'UPDATE_DELIVERY', payload: {notes: e.target.value}})}
-            disabled={delivery.pickup}
           />
         </div>
       </div>
