@@ -26,7 +26,7 @@ export default function DeliveryDetails(props) {
   
   return (
     <>
-      <h2 className="text-lg mb-4 block tracking-wide text-gray-600 font-bold">Delivery Details</h2>
+      <h2 className="text-lg mb-4 block tracking-wide text-gray-600 font-bold">Delivery/Pickup Details</h2>
       {/* Pickup Option */}
       <div className='mb-4'>
         <label htmlFor="pickup-option"
@@ -60,7 +60,7 @@ export default function DeliveryDetails(props) {
             />
           </>
         }
-        </div>
+      </div>
 
       <div className={delivery.pickup && "hidden"}>
         {/* Street Address and Apartment Number */}
