@@ -64,7 +64,6 @@ export default function Navbar() {
         .then(newOrders => {
           if (newOrders && !newOrders.error)
             setNumOrders(newOrders ? Object.keys(newOrders).length : 0)
-          console.log("New Orders:", newOrders)
         })
         .catch(err => {
           console.log("Error getting number of new orders:", err)
