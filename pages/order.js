@@ -82,19 +82,17 @@ export default function Order() {
   /* title and navigation bar for orders */
   let topBar = 
   <div className='mb-4 flex flex-row items-center'>
-      <button onClick={() => {setFormStep(formStep - 1); setShowMissing(false);}} className={"btn btn-outline" + (formStep == 0 ? " invisible" : "")}>Back</button>
+      <button onClick={() => {setFormStep(formStep - 1); setShowMissing(false);}} className={"btn btn-outline" + ((formStep == 0 || formStep >= 4) ? " invisible" : "")}>Back</button>
       <h1 className="text-2xl text-center font-bold flex-grow">Food Resource Delivery Request</h1>
       <button className={"btn btn-pantry-blue py-2 px-4" + (formStep >= 2 ? " invisible" : "")} onClick={handleNext}>Next</button>
   </div>
 
  let progressBar =  
-    <div className='mx-20 ml-28 mb-4 flex flex-row h-5 bg-sky-100 rounded-lg items-center'> 
+    <div className='mx-20 ml-28 mb-4 flex flex-row h-5 bg-gray-100 rounded-lg items-center'> 
        <div style={{ width: `${formStep * 25}%`}}
           className='pl-1 text-sm text-gray-700/50 text-center h-full rounded-lg bg-green-500'> {formStep * 25}%
         </div>
     </div> 
-
-
 
   /* Cart and Review pages */
   if (formStep >= 2) {
@@ -146,7 +144,7 @@ export default function Order() {
               edit
             </button>
           }
-          updateStepOrder={handleNext}
+          updateStepOrder={setFormStep}
         />
             }
           </div>     

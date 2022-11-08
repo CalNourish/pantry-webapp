@@ -121,7 +121,7 @@ function writeToSheets(body, itemNames) {
   let { firstName, lastName, address, address2, city, zip,
         frequency, dependents, dietaryRestrictions, additionalRequests,
         calID, items, deliveryDay, deliveryWindowStart, deliveryWindowEnd, altDelivery,
-        email, phone, dropoffInstructions, pickup, pickupNote } =  body;
+        email, phone, dropoffInstructions, pickup, pickupNotes } =  body;
 
   return new Promise((resolve, reject) => {
     getOrderSheets().then((sheetsInfo)=> {
@@ -182,9 +182,13 @@ function writeToSheets(body, itemNames) {
             "range": pantryInfo.sheetName + "!A:F",
             "majorDimension": "ROWS",
             "values": [
-              [currentDate, calID, orderId, email,
+              [
+                currentDate,
+                calID,
+                orderId,
+                email,
                 pickup ? "Pickup" : `${deliveryDay} ${deliveryWindow}`,
-                pickup ? pickupNote : "(" + altDelivery + ")"] //each inner array is a row if we specify ROWS as majorDim
+                pickup ? pickupNotes : "(" + altDelivery + ")"] //each inner array is a row if we specify ROWS as majorDim
             ] 
           } ,
         auth: sheets_auth
@@ -244,7 +248,7 @@ function writeToSheets(body, itemNames) {
               [
                 pickup ? "Pickup" : deliveryMMDD,
                 firstName + " " + lastName.slice(0,1),
-                pickup ? pickupNote : deliveryWindow,
+                pickup ? pickupNotes : deliveryWindow,
                 numberOfBags,
                 frequency,
                 dependents,
@@ -339,8 +343,8 @@ function writeToSheets(body, itemNames) {
   
       // TODO: need to handle the multiple delivery options somewhere
       newOrder["deliveryDate"] = pickup ? "Pickup" : deliveryMMDD;
-      if (!pickup || pickupNote)
-        newOrder["deliveryWindow"] = pickup ? pickupNote : deliveryWindow;
+      if (!pickup || pickupNotes)
+        newOrder["deliveryWindow"] = pickup ? pickupNotes : deliveryWindow;
   
       // add the isPacked entry to match order schema
       newOrder["items"] = {}

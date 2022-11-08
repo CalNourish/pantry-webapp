@@ -57,7 +57,13 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
       }
     ).then(resp => resp.json())
     .then((json) => {
+      console.log(json)
       setSubmitStatus(json)
+      if (json.error) {
+        setDisable(false)
+      } else {
+        updateStepOrder(4)
+      }
     })
     .catch(err => {
       console.log("unexpected error", err)
@@ -168,8 +174,12 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
         </div>
       </div>
       {submitStatus.success ? "" : <button 
-        className="btn btn-pantry-blue font-bold px-4 w-full mt-10"
-        disabled={disable} onClick={(e) => {setDisable(true); e.preventDefault(); submitCart(cart, personal, delivery); updateStepOrder()}}
+        className="btn btn-pantry-blue font-bold px-4 w-full mt-10 disabled:cursor-wait disabled:opacity-70"
+        disabled={disable} onClick={(e) => {
+          e.preventDefault();
+          setDisable(true);
+          submitCart(cart, personal, delivery);
+        }}
         >
         Place Order
       </button>}

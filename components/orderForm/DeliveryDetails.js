@@ -62,7 +62,7 @@ export default function DeliveryDetails(props) {
         }
       </div>
 
-      <div className={delivery.pickup && "hidden"}>
+      <div className={delivery.pickup ? "hidden" : ""}>
         {/* Street Address and Apartment Number */}
         <div className="form-group flex flex-col md:flex-row mb-2">
           <div className="mr-0 md:mr-8 flex-grow">
