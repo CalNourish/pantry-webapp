@@ -39,22 +39,28 @@ export default function Order() {
 
   // function for checking all fields are filled
   let checkNextable = () => {
-    let required, page;
+    let required;
     if (formStep == 0) { // personal info
       required = ["first", "last", "calID", "email", "status"]
-      page = personal;
+      for (let field of required) {
+        if (!personal[field] || personal[field].length == 0) {
+          return false;
+        }
+      }
     }
     else {
       required = ["streetAddress", "city", "zip", "phone", "deliveryTimes"]
-      page = delivery;
-    }
-
-    for (let field of required) {
-      if (!page[field] || page[field].length == 0) {
-        return false;
+      if (!delivery.pickup) {
+        for (let field of required) {
+          if (!delivery[field] || delivery[field].length == 0) {
+            return false;
+          }
+        }
       }
     }
+
     if (!personal.eligibilityConf || !personal.doordashConf) {
+      // TODO: don't require doordash confirmation if pickup?
       return false;
     }
     return true;
