@@ -110,6 +110,28 @@ function getOrderSheets() {
   })
 }
 
+function calculateDeliveryDate(deliveryDay) {
+  bufferDays = 2 //amount of days the order needs to be placed before delivery day
+  let d = new Date();
+  let deliveryMMDD;
+  d.getDate() + (((dayOfWeekIdx + 7 - d.getDay()) % 7) || 7)
+  if (d.getDate() + (((dayOfWeekIdx + 7 - d.getDay()) < bufferDays))) {
+    deliveryMMDD = new Date(
+      d.setDate(
+        d.getDate() +  (7 - d.getDay()) + dayOfWeekIdx //set delivery date for next week
+      )
+    );
+  }
+  else {
+    deliveryMMDD = new Date(
+      d.setDate(
+        d.getDate() + (dayOfWeekIdx + 7 - d.getDay()) //set delivry for this week
+      )
+    );
+
+  }
+}
+
 /* Write order to three google sheets (pantry, bag-packing, doordash), and add order to firebase. */
 function writeToSheets(body, itemNames) {
   let { firstName, lastName, address, address2, city, zip,
@@ -155,7 +177,7 @@ function writeToSheets(body, itemNames) {
       let d = new Date();
       let deliveryMMDD = new Date(
         d.setDate(
-          d.getDate() + (((dayOfWeekIdx + 7 - d.getDay()) % 7) || 7)
+          d.getDate() +  (7 - d.getDay()) + dayOfWeekIdx
         )
       );
       deliveryMMDD = (deliveryMMDD.getMonth() + 1) + "/" + deliveryMMDD.getDate()

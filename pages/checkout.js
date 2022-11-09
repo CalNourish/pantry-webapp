@@ -2,6 +2,7 @@ import Layout from '../components/Layout'
 import Sidebar from '../components/Sidebar'
 import useSWR from 'swr';
 import React from 'react';
+import Head from 'next/head'
 import Modal from 'react-modal'
 import SearchModal from '../components/SearchModal'
 import cookie from 'js-cookie';
@@ -417,7 +418,17 @@ export default function Checkout() {
   const { user } = useUser();
 
   if (!data || !user) {
-    return (<div>loading...</div>)
+    return (
+      <>
+        <Head>
+          <title>Pantry</title>
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
+        <Layout>
+            <h1 className='text-xl m-6'>Sorry, you are not authorized to view this page.</h1>
+        </Layout>
+      </>
+      )
   } else {
     data["user"] = user
     return (<Cart data={data}></Cart>)
