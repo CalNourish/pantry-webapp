@@ -417,7 +417,17 @@ export default function Checkout() {
   const { user } = useUser();
 
   if (!data || !user) {
-    return (<div>loading...</div>)
+    return (
+    <>
+        <Head>
+          <title>Pantry</title>
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
+        <Layout>
+            <h1 className='text-xl m-6'>Sorry, you are not authorized to view this page.</h1>
+        </Layout>
+      </>
+    )
   } else {
     data["user"] = user
     return (<Cart data={data}></Cart>)
