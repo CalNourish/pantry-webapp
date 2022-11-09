@@ -3,6 +3,7 @@ import Sidebar from '../components/Sidebar'
 import useSWR from 'swr';
 import React from 'react';
 import Modal from 'react-modal'
+import Head from 'next/head'
 import SearchModal from '../components/SearchModal'
 import cookie from 'js-cookie';
 import { useUser } from '../context/userContext'
