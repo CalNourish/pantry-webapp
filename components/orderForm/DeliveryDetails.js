@@ -48,7 +48,7 @@ export default function DeliveryDetails(props) {
               >
                 Pickup notes: time preference, or any other details
               </label>
-              <p className="text-gray-500 text-xs italic">Pantry staff may contact you to confirm pickup time. Pickup is offered during pantry open hours.</p>
+              <p className="text-gray-500 text-xs italic">Pantry staff will contact you by email to confirm pickup time.</p>
             </div>
             <textarea
               className="appearance-none block w-full bg-gray-100 text-gray-600 border border-gray-100 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-400" 
