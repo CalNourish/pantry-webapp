@@ -4,18 +4,26 @@ import { useState } from 'react'
 import { server } from '../pages/_app.js'
 import cookie from 'js-cookie';
 
-const UNAUTH_ROUTES = [
+const DISABLE_PUBLIC_INVENTORY = true;
+
+let UNAUTH_ROUTES = [
   { title: "Home", route: "/" },
   { title: "Hours", route: "/hours" },
   { title: "Inventory", route: "/inventory" },
 ]
 
-const UNAUTH_SIGNEDIN_ROUTES = [
+let UNAUTH_SIGNEDIN_ROUTES = [
   { title: "Home", route: "/" },
   { title: "Hours", route: "/hours" },
   { title: "Inventory", route: "/inventory" },
   { title: "Order", route: "/order"},
 ]
+
+// Hide "inventory" route if public inventory is disabled
+if (DISABLE_PUBLIC_INVENTORY) {
+  UNAUTH_ROUTES.splice(2)
+  UNAUTH_SIGNEDIN_ROUTES.splice(3)
+}
 
 const AUTH_SIGNEDIN_ROUTES = [
   { title: "Home", route: "/" },
