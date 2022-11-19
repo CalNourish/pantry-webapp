@@ -31,7 +31,6 @@ export const ACTIONS = {
     last: !
     calID: !
     email: !
-    emailConf: !
     status: !
     eligibilityConf: ! True
     doordashConf: ! True
@@ -41,6 +40,8 @@ export const ACTIONS = {
   },
   
   delivery: {
+    pickup: (False)
+    pickupNotes:
     streetAddress: !
     address2:
     city: !
@@ -52,11 +53,11 @@ export const ACTIONS = {
  */ 
 const initialState = {
   personal: {
-   first:"", last:"", calID:"", email:"", emailConf:"", status:"", eligibilityConf:false, doordashConf:false,
+   first:"", last:"", calID:"", email:"", status:"", eligibilityConf:false, doordashConf:false,
    dependents:"", dietaryRestrictions: "", additionalRequests:""
   },
   delivery: {
-    streetAddress:"", address2:"", city:"", zip:"", phone:"", notes:"", deliveryTimes:[]
+    pickup:false, pickupNotes:"", streetAddress:"", address2:"", city:"", zip:"", phone:"", notes:"", deliveryTimes:[]
   },
   cart: {}
 };

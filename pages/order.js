@@ -39,24 +39,32 @@ export default function Order() {
 
   // function for checking all fields are filled
   let checkNextable = () => {
-    let required, page;
+    let required;
     if (formStep == 0) { // personal info
-      required = ["first", "last", "calID", "email", "emailConf", "status"]
-      page = personal;
-      if (personal["email"] != personal["emailConf"]) return false;
-    }
-    else {
-      required = ["streetAddress", "city", "zip", "phone", "deliveryTimes"]
-      page = delivery;
-    }
+      required = ["first", "last", "calID", "email", "status"]
+      for (let field of required) {
+        if (!personal[field] || personal[field].length == 0) {
+          return false;
+        }
+      }
 
-    for (let field of required) {
-      if (!page[field] || page[field].length == 0) {
+      if (!personal.eligibilityConf) {
         return false;
       }
     }
-    if (!personal.eligibilityConf || !personal.doordashConf) {
-      return false;
+    else {
+      required = ["streetAddress", "city", "zip", "phone", "deliveryTimes"]
+      if (!delivery.pickup) {
+        for (let field of required) {
+          if (!delivery[field] || delivery[field].length == 0) {
+            return false;
+          }
+        }
+      }
+      if (!personal.eligibilityConf || (!delivery.pickup && !personal.doordashConf)) {
+        // don't require doordash confirmation if pickup
+        return false;
+      }
     }
     return true;
   }
@@ -74,19 +82,17 @@ export default function Order() {
   /* title and navigation bar for orders */
   let topBar = 
   <div className='mb-4 flex flex-row items-center'>
-      <button onClick={() => {setFormStep(formStep - 1); setShowMissing(false);}} className={"btn btn-outline" + (formStep == 0 ? " invisible" : "")}>Back</button>
+      <button onClick={() => {setFormStep(formStep - 1); setShowMissing(false);}} className={"btn btn-outline" + ((formStep == 0 || formStep >= 4) ? " invisible" : "")}>Back</button>
       <h1 className="text-2xl text-center font-bold flex-grow">Food Resource Delivery Request</h1>
       <button className={"btn btn-pantry-blue py-2 px-4" + (formStep >= 2 ? " invisible" : "")} onClick={handleNext}>Next</button>
   </div>
 
  let progressBar =  
-    <div className='mx-20 ml-28 mb-4 flex flex-row h-5 bg-sky-100 rounded-lg items-center'> 
+    <div className='mx-20 ml-28 mb-4 flex flex-row h-5 bg-gray-100 rounded-lg items-center'> 
        <div style={{ width: `${formStep * 25}%`}}
           className='pl-1 text-sm text-gray-700/50 text-center h-full rounded-lg bg-green-500'> {formStep * 25}%
         </div>
     </div> 
-
-
 
   /* Cart and Review pages */
   if (formStep >= 2) {
@@ -138,7 +144,7 @@ export default function Order() {
               edit
             </button>
           }
-          updateStepOrder={handleNext}
+          updateStepOrder={setFormStep}
         />
             }
           </div>     
@@ -228,21 +234,26 @@ export default function Order() {
           I confirm that I am currently quarantining due to COVID-19 or am facing a significant barrier to coming in person.
         </span>
       </label>
-      <label htmlFor="doordash-confirmation" data-required="T"
-        className={"block tracking-wide font-bold p-1.5" + ((showMissing && !personal.doordashConf) ? " border-red-600 border rounded" : " border border-transparent")}
-      >
-        <input id="doordash-confirmation" className="mr-2 leading-tight" type="checkbox"
-          checked={personal.doordashConf}
-          onChange={(e) => cartDispatch({ type: 'UPDATE_PERSONAL', payload: {doordashConf: e.target.checked}})}
-        />
-        <span className="text-base">
-          I confirm that I allow the food pantry to share my information with DoorDash.
-        </span>
-      </label>
-      <p className="mt-2 text-gray-500 text-xs italic">
-        By clicking this, you are permitting us to share your information with DoorDash so that they can deliver to you.
-        The information provided includes your name, address, phone number, and delivery notes.
-      </p>
+      
+      { formStep > 0 && !delivery.pickup &&
+        <>
+          <label htmlFor="doordash-confirmation" data-required={delivery.pickup ? "" : "T"}
+            className={"block tracking-wide font-bold p-1.5" + ((showMissing && !personal.doordashConf) ? " border-red-600 border rounded" : " border border-transparent")}
+          >
+            <input id="doordash-confirmation" className="mr-2 leading-tight" type="checkbox"
+              checked={personal.doordashConf}
+              onChange={(e) => cartDispatch({ type: 'UPDATE_PERSONAL', payload: {doordashConf: e.target.checked}})}
+            />
+            <span className="text-base">
+              I confirm that I allow the food pantry to share my information with DoorDash.
+            </span>
+          </label>
+          <p className="mt-2 text-gray-500 text-xs italic">
+            By clicking this, you are permitting us to share your information with DoorDash so that they can deliver to you.
+            The information provided includes your name, address, phone number, and delivery notes.
+          </p>
+        </>
+      }
     </div>
   </div>
 

@@ -93,26 +93,6 @@ export default function PersonInfo(props) {
       <div className="form-group mb-2">
         <label 
           className="block uppercase tracking-wide text-gray-600 text-xs font-bold mb-2"
-          htmlFor="confirm-email" data-required="T"
-        >
-          Confirm Email
-        </label>
-        <input 
-          type="email" 
-          className={ inputAppearance + ((props.showMissing && !personal.emailConf) ? errorAppearance : "")
-            + ((isValidEmail(personal.email) && personal.emailConf && personal.emailConf !== personal.email) ? errorAppearance : "")}
-          placeholder="oski@berkeley.edu"
-          id="confirm-email"
-          value={personal.emailConf}
-          onChange={(e) => {
-            cartDispatch({ type: 'UPDATE_PERSONAL', payload: {emailConf: e.target.value} })
-          }}
-          />
-          {(isValidEmail(personal.email) && personal.emailConf && personal.emailConf !== personal.email) && <div className='text-red-600'>Emails must match</div>}
-      </div>
-      <div className="form-group mb-2">
-        <label 
-          className="block uppercase tracking-wide text-gray-600 text-xs font-bold mb-2"
           htmlFor="status" data-required="T"
         >
           Status
