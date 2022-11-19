@@ -136,14 +136,6 @@ export default function Inventory() {
   // Manage form State (look up useReducer tutorials if unfamiliar)
   const [ state, dispatch ] = useReducer(formReducer, emptyItem)
 
-  if (DISABLE_PUBLIC_INVENTORY) {
-    return (
-      <Layout>
-        <div className='m-4'>Inventory is currently not publically available.</div>
-      </Layout>
-    )
-  }
-
   /* initialize dataState value */
   const ref = firebase.database().ref('/inventory')
   if (Object.keys(dataState).length == 0) {
