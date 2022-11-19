@@ -136,6 +136,14 @@ export default function Inventory() {
   // Manage form State (look up useReducer tutorials if unfamiliar)
   const [ state, dispatch ] = useReducer(formReducer, emptyItem)
 
+  if (DISABLE_PUBLIC_INVENTORY) {
+    return (
+      <Layout>
+        <div className='m-4'>Inventory is currently not publically available.</div>
+      </Layout>
+    )
+  }
+
   /* initialize dataState value */
   const ref = firebase.database().ref('/inventory')
   if (Object.keys(dataState).length == 0) {
@@ -148,7 +156,7 @@ export default function Inventory() {
 
   /* do this once, after dataState is set */
   if (Object.keys(dataState).length > 0) {
-    ref.once("child_changed", snapshot => {
+    ref.on("child_changed", snapshot => {
       let barcode = snapshot.val().barcode
       changeData({
         ...dataState,
@@ -173,11 +181,29 @@ export default function Inventory() {
     handleBarcodeEdit(barcode);
   }
 
+  function showHideItem(barcode, newDisplayPublic) {
+    // toggle public visibility
+    const payload = JSON.stringify({
+      "barcode": barcode,
+      "displayPublic": newDisplayPublic
+    });
+
+    fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
+      body: payload,
+      headers: {'Content-Type': "application/json", 'Authorization': token}})
+    .then((response) => response.json())
+    .then(json => {
+      if (json.error) {
+        console.log(json.error);
+      }
+    })
+  }
+
   function deleteItem(barcode) {
     if (confirm(`Deleting item with barcode ${barcode}. Are you sure?`)){
       fetch(`${server}/api/inventory/DeleteItem`, { method: 'POST',
         body: JSON.stringify({barcode: barcode}),
-        headers: {'Content-Type': "application/json", 'Authorization': authToken}})
+        headers: {'Content-Type': "application/json", 'Authorization': token}})
       .then(() => {
         // remove something from dataState
         let { [barcode]: deletedItem, ...newDataState } = dataState
@@ -233,15 +259,12 @@ export default function Inventory() {
       return;
     }
 
-    fetch(`${server}/api/inventory/GetItem/${barcode}`)
-    .then((result) => {
-      if (result.ok) {
-        /* item already exists! */
-        setBarcodeError("item already exists with this barcode");
-      } else {
-        setBarcodeError("");
-      }
-    })
+    if (Object.keys(dataState).includes(barcode)) {
+      /* item already exists! */
+      setBarcodeError("item already exists with this barcode");
+    } else {
+      setBarcodeError("");
+    }
   }
 
   // When an item is submitted from the add-item or edit-item form, write the updated item to firebase.
@@ -255,7 +278,7 @@ export default function Inventory() {
     const quantity = state.count * (document.getElementById("packOption").value == "packs" ? packSize : 1)  // required
     const lowStock = state.lowStock ? state.lowStock : -1;                                                  // defaults to -1
     const categories = Object.keys(state.categoryName).length ? state.categoryName : undefined;             // defaults to "no change"
-    const displayPublic = Boolean(state.displayPublic)
+    const displayPublic = Boolean(state.displayPublic)                                                      // defaults to true
 
     const payload = JSON.stringify({
       "barcode": barcode,
@@ -316,8 +339,8 @@ export default function Inventory() {
     const packSize = state.packSize ? state.packSize : 1;                                                   // defaults to 1
     const count = state.count * (document.getElementById("packOption").value == "packs" ? packSize : 1)     // defaults to 0
     const lowStock = state.lowStock ? state.lowStock : -1;                                                  // defaults to -1
-    const categories = state.categoryName;
-    const displayPublic = Boolean(state.displayPublic);
+    const displayPublic = Boolean(state.displayPublic);                                                     // defaults to true
+    const categories = state.categoryName;                                                                  // required
     let catNum = Object.keys(categories).length;
 
     if (!barcode || !itemName || !catNum) {
@@ -482,9 +505,10 @@ export default function Inventory() {
               <div className="w-64 items-center">
                 <Sidebar className="py-4">
                   <h1 className="text-3xl font-semibold mb-2">Inventory</h1>
-                  <div className="my-4 space-y-6">
+                  <div className="my-4">
                     <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowAddItem(true)}>Add new item</button>
                     <button className="my-1 btn-outline w-56 rounded-md p-1" onClick={() => setShowEditItem(true)}>Edit existing item</button>
+                    <hr className="my-2 border-gray-400 border-1"/>
                     <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowTakeInventory(true)}>Take Inventory</button>
                     <button className="my-1 btn-outline w-56 rounded-md p-1" onClick={() => setShowAddInventory(true)}>Add Inventory</button>
                     <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => resetInventory()}>Reset Inventory</button>
@@ -497,7 +521,7 @@ export default function Inventory() {
             {status.success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded relative mb-3">{status.success}</div>}
             {Object.keys(dataState).length > 0
               ? <Table className="table-auto my-1" data={dataState} categories={categoryState} authToken={authToken}
-                       editItemFunc={editItem} deleteItemFunc={deleteItem}></Table>
+                       editItemFunc={editItem} deleteItemFunc={deleteItem} showHideItemFunc={showHideItem}></Table>
               : "Loading inventory..."}
           </div>
         </div>
