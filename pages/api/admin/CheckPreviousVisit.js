@@ -5,8 +5,8 @@ import {service_info} from "../../../utils/decrypt.js";
 import firebase from '../../../firebase/clientApp'
 
 /*
- * /api/admin/CheckIn
- * req.body = { string calID }
+ * /api/admin/CheckPreviousVisit
+ * req.body = { string calID, boolean isGrad }
  */
 
 function requireParams(body) {
