@@ -11,6 +11,42 @@ const fetcher = (url) => fetch(url).then((res) => res.json())
 
 const token = cookie.get("firebaseToken")
 
+let manageKeys = ["Add Admins", "Email?"];
+
+  // Handles pushing to firebase
+  const validateAddAdmin = async (event) => {
+    event.preventDefault()
+    /*ref.on('value', (snapshot) => {
+      console.log(snapshot.val());
+    }, (errorObject) => {
+      console.log('The read failed: ' + errorObject.name);
+    }); 
+    */
+  
+    const adminName = document.querySelector('#adminName').value;  
+    const email = document.querySelector('#adminEmail').value;
+    console.log(adminName);
+    console.log(email);
+  
+    //firebase.auth().signInAnonymously()
+    console.log("signed in")
+    
+      let itemRef = firebase.database().ref('/authorizedUser/');
+      var snapShot
+      itemRef.on('value', (snapshot) => {
+        //console.log(snapshot.val());
+      }, (errorObject) => {
+        console.log('The read failed: ' + errorObject.name);
+      });
+  
+      itemRef.update({
+        [adminName] : email
+      });
+      console.log("Set User")
+      document.getElementById('adminName').value = "";
+      document.getElementById('adminEmail').value = "";
+  }
+
 export default function Admin() {
   const [submitStatus, setSubmitStatus] = useState({});
   const [statusTimer, setStatusTimer] = useState(null);
@@ -152,6 +188,21 @@ export default function Admin() {
         <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
           {Object.keys(formData).map((tag) => generateForm(tag))}
         </div>
+      </div>
+      <div className='m-9'>
+      <div className='font-semibold text-3xl mb-4'>Add Admin Users</div>
+      <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
+      <form  className='p-4 border border-gray-400 bg-gray-50' onSubmit={validateAddAdmin}>
+        <td className='pr-4 whitespace-nowrap w-1' for="adminName">Admin Name: </td> 
+          <input type="text" name="adminName" id="adminName" className="border rounded w-full py-2 px-3 text-gray-600 leading-tight mr-4"/><br></br>
+          <label for="email">Email: </label><br></br>
+          <input type="text" name="adminEmail" id="adminEmail" className="border rounded w-full py-2 px-3 text-gray-600 leading-tight mr-4"/><br></br>
+          <br></br>
+          <input className='btn btn-outline uppercase tracking-wide text-xs font-semibold' type='submit'/><br></br>
+        </form>
+    
+        </div>
+        
       </div>
     </Layout>
   )
