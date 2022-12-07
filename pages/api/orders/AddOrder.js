@@ -162,9 +162,13 @@ function writeToSheets(body, itemNames) {
       }
   
       let d = new Date();
+      let daysToAdd = dayOfWeekIdx + 7 - d.getDay() % 7;
+      if (daysToAdd < 2) {
+        daysToAdd = daysToAdd + 7;
+      }
       let deliveryMMDD = new Date(
         d.setDate(
-          d.getDate() + (((dayOfWeekIdx + 7 - d.getDay()) % 7) || 7)
+          d.getDate() + daysToAdd
         )
       );
       deliveryMMDD = (deliveryMMDD.getMonth() + 1) + "/" + deliveryMMDD.getDate()
