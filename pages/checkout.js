@@ -393,6 +393,36 @@ class Cart extends React.Component {
             <div className="p-4 container mx-3">
               {this.state.error && errorBanner}
               {this.state.success && successBanner}
+              <h1 className="text-3xl font-medium mb-2">Cart</h1>
+              <table className="w-full my-5 table-fixed" id="mycart">
+                <thead>
+                  <tr className="border-b-2">
+                    <th className="w-auto text-left text-lg">Item</th>
+                    <th className="text-left w-48 text-lg">
+                      <div className="w-32 text-center">
+                        Quantity
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {Array.from( this.state.items ).map(([barcode, value]) => (this.displayCartRow(barcode, value)))}
+                  <tr className="bg-gray-50 h-10 m-3" key="totals">
+                    <td className="text-lg font-medium text-right pr-10">Total Items</td>
+                    <td>
+                      <div className="w-32 text-center font-medium">{this.state.itemsInCart}</div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <button className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" onClick={(e) => this.submitCart(e)}>
+                Checkout <span className="font-normal hidden sm:inline-block">(Shift+Enter)</span>
+              </button>
+            </div>
+                        
+            {/*Right-hand Column*/}
+            <div className="flex-none sm:w-64">
+              <Sidebar className="py-4">
               {/* Editing the information */}
               {!this.state.isEditing && <button className='text-blue-700 hover:text-blue-500'
                 onClick={() => this.setState({isEditing:true})}>
@@ -447,31 +477,7 @@ class Cart extends React.Component {
 
               {/* Information Display or Preview (rendered markdown) */}
               {(!this.state.isEditing || this.state.showPreview) && this.state.checkoutInfo && <ReactMarkdown className="mb-4 text-zinc-900" components={markdownStyle} children={this.state.checkoutInfo}></ReactMarkdown>}
-              <h1 className="text-3xl font-medium mb-2">Cart</h1>
-              <table className="w-full my-5 table-fixed" id="mycart">
-                <thead>
-                  <tr className="border-b-2">
-                    <th className="w-auto text-left text-lg">Item</th>
-                    <th className="text-left w-48 text-lg">
-                      <div className="w-32 text-center">
-                        Quantity
-                      </div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {Array.from( this.state.items ).map(([barcode, value]) => (this.displayCartRow(barcode, value)))}
-                  <tr className="bg-gray-50 h-10 m-3" key="totals">
-                    <td className="text-lg font-medium text-right pr-10">Total Items</td>
-                    <td>
-                      <div className="w-32 text-center font-medium">{this.state.itemsInCart}</div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <button className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" onClick={(e) => this.submitCart(e)}>
-                Checkout <span className="font-normal hidden sm:inline-block">(Shift+Enter)</span>
-              </button>
+              </Sidebar>
             </div>
           </div>
         </Layout>
