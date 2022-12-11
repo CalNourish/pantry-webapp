@@ -32,7 +32,7 @@ function requireParams(body, res) {
   // require quantities to be parse-able as integers
   for (let barcode in body) {
     let quantity = parseInt(body[barcode])
-    if (!quantity) {
+    if (quantity != 0 && !quantity) {
       res.status(400).json({ error: `Unable to parse quantity for barcode ${barcode}: '${body[barcode]}'` })
       return false;
     }
