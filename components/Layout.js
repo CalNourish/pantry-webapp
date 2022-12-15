@@ -3,10 +3,13 @@ import Navbar from './Navbar'
 import Footer from './Footer'
 
 export default function Layout(props) {
+  let title = props.pageName
+  if (title) title = String(title) + " | "
+
   return (
     <>
       <Head>
-        <title>Food Pantry</title>
+        <title>{title}Food Pantry</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className="h-screen flex flex-col">

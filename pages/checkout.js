@@ -3,7 +3,6 @@ import Sidebar from '../components/Sidebar'
 import useSWR from 'swr';
 import React from 'react';
 import Modal from 'react-modal'
-import Head from 'next/head'
 import SearchModal from '../components/SearchModal'
 import cookie from 'js-cookie';
 import { useUser } from '../context/userContext'
@@ -330,84 +329,82 @@ class Cart extends React.Component {
     const successBanner = <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-3">{this.state.success}</div>;
 
     return (
-      <>
-        <Layout>
-          <Modal id="search-modal" isOpen={this.state.showSearch} ariaHideApp={false} onRequestClose={this.closeModal}>
-            <SearchModal items={this.data} addItemFunc={this.addItem} onCloseHandler={this.closeModal} submitHotkey={searchSubmitHotkey}/>
-          </Modal>
+      <Layout pageName="Checkout">
+        <Modal id="search-modal" isOpen={this.state.showSearch} ariaHideApp={false} onRequestClose={this.closeModal}>
+          <SearchModal items={this.data} addItemFunc={this.addItem} onCloseHandler={this.closeModal} submitHotkey={searchSubmitHotkey}/>
+        </Modal>
 
-          <div className="flex flex-col h-full sm:flex-row">
-            {/* Left-hand column */}
-            <div className="flex-none sm:w-64">
-              <Sidebar className="py-4">
-              
-                {/* Barcode & Quantity Form */}
-                <form id="checkout-item-form" onSubmit={(e) => this.itemFormSubmit(e)}>
-                  <h1 className="text-3xl font-medium mb-2">Checkout Item</h1>
-                  <p className="mb-5 text-sm">Please enter the amount, then scan the item to add it to the cart. Click "Check Out" to submit the cart.</p>
-                  <div className="form-group" id="barcode-and-quantity">
-                    <div className="col-xs-7 mb-4">
-                      <h1 className="text-2xl font-medium" autoFocus>Barcode</h1>
-                      <p className="text-gray-500 text-xs tracking-normal font-normal mb-2 hidden sm:block">
-                        (hotkey: {barcodeHotkey})
-                      </p>
-                      <input className="border rounded w-full py-2 px-3 text-gray-600 leading-tight" id="barcode" autoComplete="off" autoFocus></input>
-                    </div>
-                    <div className="col-xs-8 mb-4">
-                      <h1 className="text-2xl font-medium">Quantity</h1>
-                      <p className="text-gray-500 text-xs tracking-normal font-normal mb-2 hidden sm:block">(hotkey: {quantityHotkey})</p>
-                      <input className="border rounded w-full py-2 px-3 text-gray-600 leading-tight" id="quantity" autoComplete="off" placeholder="default: 1"></input>
-                    </div>
+        <div className="flex flex-col h-full sm:flex-row">
+          {/* Left-hand column */}
+          <div className="flex-none sm:w-64">
+            <Sidebar className="py-4">
+            
+              {/* Barcode & Quantity Form */}
+              <form id="checkout-item-form" onSubmit={(e) => this.itemFormSubmit(e)}>
+                <h1 className="text-3xl font-medium mb-2">Checkout Item</h1>
+                <p className="mb-5 text-sm">Please enter the amount, then scan the item to add it to the cart. Click "Check Out" to submit the cart.</p>
+                <div className="form-group" id="barcode-and-quantity">
+                  <div className="col-xs-7 mb-4">
+                    <h1 className="text-2xl font-medium" autoFocus>Barcode</h1>
+                    <p className="text-gray-500 text-xs tracking-normal font-normal mb-2 hidden sm:block">
+                      (hotkey: {barcodeHotkey})
+                    </p>
+                    <input className="border rounded w-full py-2 px-3 text-gray-600 leading-tight" id="barcode" autoComplete="off" autoFocus></input>
                   </div>
-
-                  {/* Add Item Button */}
-                  <button className="my-1 btn btn-pantry-blue w-full uppercase tracking-wide text-xs font-semibold focus:shadow-none" id="add-item-btn" type="submit">
-                    Add Item <span className="font-normal hidden sm:inline-block">(Enter)</span>
-                  </button>
-                </form>
-
-                {/* Search Item Button */}
-                <div>
-                  <button className="btn btn-outline w-full uppercase tracking-wide text-xs font-semibold focus:shadow-none" onClick={this.toggleShowSearch}>
-                    Search item by name <span className="font-normal hidden sm:inline-block">({searchHotkey})</span>
-                  </button>
+                  <div className="col-xs-8 mb-4">
+                    <h1 className="text-2xl font-medium">Quantity</h1>
+                    <p className="text-gray-500 text-xs tracking-normal font-normal mb-2 hidden sm:block">(hotkey: {quantityHotkey})</p>
+                    <input className="border rounded w-full py-2 px-3 text-gray-600 leading-tight" id="quantity" autoComplete="off" placeholder="default: 1"></input>
+                  </div>
                 </div>
-              </Sidebar>
-            </div>
 
-            {/* Main body (Cart and Checkout Button) */}
-            <div className="p-4 container mx-3">
-              {this.state.error && errorBanner}
-              {this.state.success && successBanner}
-              <h1 className="text-3xl font-medium mb-2">Cart</h1>
-              <table className="w-full my-5 table-fixed" id="mycart">
-                <thead>
-                  <tr className="border-b-2">
-                    <th className="w-auto text-left text-lg">Item</th>
-                    <th className="text-left w-48 text-lg">
-                      <div className="w-32 text-center">
-                        Quantity
-                      </div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {Array.from( this.state.items ).map(([barcode, value]) => (this.displayCartRow(barcode, value)))}
-                  <tr className="bg-gray-50 h-10 m-3" key="totals">
-                    <td className="text-lg font-medium text-right pr-10">Total Items</td>
-                    <td>
-                      <div className="w-32 text-center font-medium">{this.state.itemsInCart}</div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <button className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" onClick={(e) => this.submitCart(e)}>
-                Checkout <span className="font-normal hidden sm:inline-block">(Shift+Enter)</span>
-              </button>
-            </div>
+                {/* Add Item Button */}
+                <button className="my-1 btn btn-pantry-blue w-full uppercase tracking-wide text-xs font-semibold focus:shadow-none" id="add-item-btn" type="submit">
+                  Add Item <span className="font-normal hidden sm:inline-block">(Enter)</span>
+                </button>
+              </form>
+
+              {/* Search Item Button */}
+              <div>
+                <button className="btn btn-outline w-full uppercase tracking-wide text-xs font-semibold focus:shadow-none" onClick={this.toggleShowSearch}>
+                  Search item by name <span className="font-normal hidden sm:inline-block">({searchHotkey})</span>
+                </button>
+              </div>
+            </Sidebar>
           </div>
-        </Layout>
-      </>
+
+          {/* Main body (Cart and Checkout Button) */}
+          <div className="p-4 container mx-3">
+            {this.state.error && errorBanner}
+            {this.state.success && successBanner}
+            <h1 className="text-3xl font-medium mb-2">Cart</h1>
+            <table className="w-full my-5 table-fixed" id="mycart">
+              <thead>
+                <tr className="border-b-2">
+                  <th className="w-auto text-left text-lg">Item</th>
+                  <th className="text-left w-48 text-lg">
+                    <div className="w-32 text-center">
+                      Quantity
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {Array.from( this.state.items ).map(([barcode, value]) => (this.displayCartRow(barcode, value)))}
+                <tr className="bg-gray-50 h-10 m-3" key="totals">
+                  <td className="text-lg font-medium text-right pr-10">Total Items</td>
+                  <td>
+                    <div className="w-32 text-center font-medium">{this.state.itemsInCart}</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <button className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" onClick={(e) => this.submitCart(e)}>
+              Checkout <span className="font-normal hidden sm:inline-block">(Shift+Enter)</span>
+            </button>
+          </div>
+        </div>
+      </Layout>
     )
   }
 }
@@ -419,15 +416,9 @@ export default function Checkout() {
 
   if (!data || !user) {
     return (
-    <>
-        <Head>
-          <title>Pantry</title>
-          <link rel="icon" href="/favicon.ico" />
-        </Head>
-        <Layout>
-            <h1 className='text-xl m-6'>Sorry, you are not authorized to view this page.</h1>
-        </Layout>
-      </>
+      <Layout pageName="Checkout">
+          <h1 className='text-xl m-6'>Sorry, you are not authorized to view this page.</h1>
+      </Layout>
     )
   } else {
     data["user"] = user

@@ -1,5 +1,4 @@
 import Layout from "../components/Layout";
-import Head from "next/head";
 import useSWR from "swr";
 import cookie from "js-cookie";
 import { useRouter } from "next/router";
@@ -253,7 +252,7 @@ class PackingOrder extends React.Component {
 
     return (
       <>
-        <Layout>
+        <Layout pageName={"Order " + this.state.orderId}>
           <div className="flex h-full">
             <div className="w-1/4 bg-gray-100 items-center p-5">
               <h1 className="text-xl">Pantry Note</h1>
@@ -332,19 +331,9 @@ export default function PackingDetailed() {
   var orderId = router.query.orderid;
   if (orderId == null) {
     return (
-      <>
-        <Head>
-          <title>Pantry</title>
-          <link rel="icon" href="/favicon.ico" />
-          <link
-            href="https://fonts.googleapis.com/css2?family=Roboto&family=Rubik:wght@400;700&display=swap"
-            rel="stylesheet"
-          ></link>
-        </Head>
-        <Layout>
-          <div>No Order Id provided</div>
-        </Layout>
-      </>
+      <Layout pageName="Orders">
+        <div>No Order Id provided</div>
+      </Layout>
     );
   }
   const { data } = useSWR(
@@ -353,19 +342,9 @@ export default function PackingDetailed() {
   );
   if (!data) {
     return (
-      <>
-        <Head>
-          <title>Pantry</title>
-          <link rel="icon" href="/favicon.ico" />
-          <link
-            href="https://fonts.googleapis.com/css2?family=Roboto&family=Rubik:wght@400;700&display=swap"
-            rel="stylesheet"
-          ></link>
-        </Head>
-        <Layout>
-          <div>Loading...</div>
-        </Layout>
-      </>
+      <Layout pageName="Orders">
+        <div>Loading...</div>
+      </Layout>
     );
   } else {
     return <PackingOrder data={data}></PackingOrder>;
