@@ -37,6 +37,9 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
       additionalRequests: personal.additionalRequests,
       calID: personal.calID,
       items: items,
+
+      pickup: delivery.pickup,
+      pickupNotes: delivery.pickupNotes,
       deliveryDay: deliveryDay,
       deliveryWindowStart: timeStart,
       deliveryWindowEnd: timeEnd,
@@ -54,7 +57,13 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
       }
     ).then(resp => resp.json())
     .then((json) => {
+      console.log(json)
       setSubmitStatus(json)
+      if (json.error) {
+        setDisable(false)
+      } else {
+        updateStepOrder(4)
+      }
     })
     .catch(err => {
       console.log("unexpected error", err)
@@ -78,15 +87,30 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
               <div className='mb-2'><span className='font-semibold'>Name:</span> { personal.first } {personal.last}</div>
               <div className='mb-2'><span className='font-semibold'>Email:</span> { personal.email }</div>
               <div className='mb-2'><span className='font-semibold'>Cal ID:</span> { personal.calID }</div>
-              <div className='mb-2'><span className='font-semibold'>Dependents:</span> { personal.dependents }</div>
+              <div className='mb-2'><span className='font-semibold'>Dependents:</span> { personal.dependents || 0 }</div>
             </div>
           </div>
-          <div className='mt-4 border-b-2'>
+
+          {delivery.pickup && <div className='border-b-2 py-4'>
+            <div className='flex mb-1'>
+              <h3 className='font-bold mr-2'>Pickup Details</h3>
+              {submitStatus.success ? "" : updateDeliveryDetails}
+            </div>
+            <div className='mb-2'>
+              You have elected to pick up in person at the Food Pantry.
+            </div>
+            {delivery.pickup && <div>
+              <span className='font-semibold tracking-wide text-gray-600'>Pickup Notes: </span>
+              {delivery.pickupNotes}
+            </div>}
+          </div>}
+
+          {!delivery.pickup && <div className='border-b-2 py-4'>
             <div className='flex mb-1'>
               <h3 className='font-bold mr-2'>Delivery Details</h3>
               {submitStatus.success ? "" : updateDeliveryDetails}
             </div>
-            <div className='mb-4 text-gray-600'>
+            <div className='mbtext-gray-600'>
               <div className='mb-2'>
                 <div className='font-semibold'>Address:</div>
                 <div> { delivery.streetAddress }{delivery.address2 && delivery.address2.length > 0 ? `, ${delivery.address2}` : ''}</div>
@@ -102,13 +126,14 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
                 </div>
               </div>
             </div>
-          </div>
+          </div>}
+
           <div className='mt-4'>
             <h3 className='font-bold mr-2 mb-1'>Notes</h3>
-            <div>
+            {!delivery.pickup && <div>
               <span className='font-semibold tracking-wide text-gray-600'>Delivery Instructions: </span>
               {delivery.notes}
-            </div>
+            </div>}
             <div className='mt-1'>
               <span className='font-semibold tracking-wide text-gray-600'>Dietary Restrictions: </span>
               {personal.dietaryRestrictions}
@@ -149,8 +174,12 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
         </div>
       </div>
       {submitStatus.success ? "" : <button 
-        className="btn btn-pantry-blue font-bold px-4 w-full mt-10"
-        disabled={disable} onClick={(e) => {setDisable(true); e.preventDefault(); submitCart(cart, personal, delivery); updateStepOrder()}}
+        className="btn btn-pantry-blue font-bold px-4 w-full mt-10 disabled:cursor-wait disabled:opacity-70"
+        disabled={disable} onClick={(e) => {
+          e.preventDefault();
+          setDisable(true);
+          submitCart(cart, personal, delivery);
+        }}
         >
         Place Order
       </button>}

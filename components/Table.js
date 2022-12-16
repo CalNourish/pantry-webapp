@@ -83,6 +83,8 @@ export default function Table(props) {
                 // sort by status, then barcode (if auth user) or itemName (if public user) 
                 array.sort(compareStatus(reverse, props.authToken ? "barcode" : "itemName"));
                 break;
+            default:
+                array.sort(comparator(props.authToken ? "barcode" : "itemName"))
         }
     }
 
@@ -140,7 +142,7 @@ export default function Table(props) {
             </div>
             <div className="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
                 <div className="inline-block min-w-full shadow rounded-lg overflow-hidden">
-                    <table className="min-w-full leading-normal">
+                    <table className="min-w-full leading-normal table-auto">
                         <thead>
                             <tr>
                                 <th onClick={() => {setSortBy(sortBy == "itemName" ? "-itemName" : "itemName")}}
@@ -169,15 +171,15 @@ export default function Table(props) {
                                     </div>
                                 </th>
                                 { props.authToken ?
-                                    <th className={headerClass}>Edit</th> : null}
+                                    <th className={headerClass + " w-28"}>Edit</th> : null}
                             </tr>
                         </thead>
                         <tbody>
                             { itemData.map((item, idx) => {
                                 return (props.authToken || item.displayPublic) &&
                                     <TableRow key={idx} barcode={item.barcode} itemName={item.itemName} itemCount={item.count} itemCategories={item.categoryName}
-                                              itemLowStock={item.lowStock} categoryData={categoryData} authToken={props.authToken}
-                                              editItemFunc={props.editItemFunc} deleteItemFunc={props.deleteItemFunc}/>
+                                              itemLowStock={item.lowStock} categoryData={categoryData} displayPublic={item.displayPublic} authToken={props.authToken}
+                                              editItemFunc={props.editItemFunc} deleteItemFunc={props.deleteItemFunc} showHideItemFunc={props.showHideItemFunc}/>
                             }) 
                             }
                         </tbody>

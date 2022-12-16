@@ -37,7 +37,7 @@ function requireParams(body, res) {
       return false;
     } 
     
-    if (!body.address || !body.city) {
+    if (!body.pickup && (!body.address || !body.city)) {
       res.status(400).json({error: "Missing part of delivery address in request."});
       return false;
     }
@@ -47,12 +47,18 @@ function requireParams(body, res) {
       return false;
     }
 
-    if (!body.email || !body.phone) {
-      res.status(400).json({error: "Missing contact email or phone number."});
+    if (!body.email) {
+      res.status(400).json({error: "Missing contact email."});
+      return false;
+    }
+
+    if (!body.pickup && !body.phone) {
+      res.status(400).json({error: "Missing phone number."});
       return false;
     }
     
-    if (!body.frequency || !body.deliveryDay || !body.deliveryWindowStart || !body.deliveryWindowEnd) {
+    if (!body.pickup && 
+      (!body.frequency || !body.deliveryDay || !body.deliveryWindowStart || !body.deliveryWindowEnd)) {
       res.status(400).json({error: "Missing delivery frequency, date, or time in request."});
       return false;
     }
@@ -115,7 +121,7 @@ function writeToSheets(body, itemNames) {
   let { firstName, lastName, address, address2, city, zip,
         frequency, dependents, dietaryRestrictions, additionalRequests,
         calID, items, deliveryDay, deliveryWindowStart, deliveryWindowEnd, altDelivery,
-        email, phone, dropoffInstructions } =  body;
+        email, phone, dropoffInstructions, pickup, pickupNotes } =  body;
 
   return new Promise((resolve, reject) => {
     getOrderSheets().then((sheetsInfo)=> {
@@ -150,12 +156,19 @@ function writeToSheets(body, itemNames) {
         minute: "2-digit"
       });
 
-      const dayOfWeekIdx = dayNameToIndex[deliveryDay]
+      let dayOfWeekIdx = 0;
+      if (!pickup) {
+        dayOfWeekIdx = dayNameToIndex[deliveryDay]
+      }
   
       let d = new Date();
+      let daysToAdd = dayOfWeekIdx + 7 - d.getDay() % 7;
+      if (daysToAdd < 2) {
+        daysToAdd = daysToAdd + 7;
+      }
       let deliveryMMDD = new Date(
         d.setDate(
-          d.getDate() + (((dayOfWeekIdx + 7 - d.getDay()) % 7) || 7)
+          d.getDate() + daysToAdd
         )
       );
       deliveryMMDD = (deliveryMMDD.getMonth() + 1) + "/" + deliveryMMDD.getDate()
@@ -173,9 +186,13 @@ function writeToSheets(body, itemNames) {
             "range": pantryInfo.sheetName + "!A:F",
             "majorDimension": "ROWS",
             "values": [
-              [currentDate, calID, orderId, email,
-                `${deliveryDay} ${deliveryWindow}`,
-                "(" + altDelivery + ")"] //each inner array is a row if we specify ROWS as majorDim
+              [
+                currentDate,
+                calID,
+                orderId,
+                email,
+                pickup ? "Pickup" : `${deliveryDay} ${deliveryWindow}`,
+                pickup ? pickupNotes : "(" + altDelivery + ")"] //each inner array is a row if we specify ROWS as majorDim
             ] 
           } ,
         auth: sheets_auth
@@ -232,8 +249,17 @@ function writeToSheets(body, itemNames) {
             "range": bagPackingInfo.sheetName + "!A:J",
             "majorDimension": "ROWS",
             "values": [
-              [deliveryMMDD, firstName + " " + lastName.slice(0,1), deliveryWindow, numberOfBags, frequency, 
-               dependents, dietaryRestrictions, additionalRequests, orderId, JSON.stringify(itemNames)]
+              [
+                pickup ? "Pickup" : deliveryMMDD,
+                firstName + " " + lastName.slice(0,1),
+                pickup ? pickupNotes : deliveryWindow,
+                numberOfBags,
+                frequency,
+                dependents,
+                dietaryRestrictions,
+                additionalRequests,
+                orderId, 
+                JSON.stringify(itemNames)]
             ] 
           }
       }
@@ -263,54 +289,56 @@ function writeToSheets(body, itemNames) {
         return reject("error writing to bag-packing data sheet: " + error);
       })
     
-      /* --- Sheet 3: doordash --- */
+      /* --- Sheet 3: doordash (if not PICKUP) --- */
       /* [..., deliveryDate, delivery window start, end, timezone, first name, last name,
        * address, apt, city, state, zip, phone, # of bags (must be <= 3), delivery instructions, ... ] */
-      const doordashInfo = sheetsInfo["doordash"]
-      const doordash_req = {
-        spreadsheetId: doordashInfo.spreadsheetId,
-        range: doordashInfo.sheetName + "!A:U",
-        valueInputOption: "USER_ENTERED",
-        insertDataOption: "INSERT_ROWS",
-        resource: {
-            "range": doordashInfo.sheetName + "!A:U",
-            "majorDimension": "ROWS",
-            "values": [
-              [
-                "UCB BNC Food Pantry", "VENTURA-01", "F", deliveryMMDD, deliveryWindowStart, deliveryWindowEnd,
-                "US/Pacific", firstName, lastName, address, address2, city, "CA", zip, phone, numberOfBags,
-                dropoffInstructions, "UCB BNC Food Pantry"
+      if (!pickup) {
+        const doordashInfo = sheetsInfo["doordash"]
+        const doordash_req = {
+          spreadsheetId: doordashInfo.spreadsheetId,
+          range: doordashInfo.sheetName + "!A:U",
+          valueInputOption: "USER_ENTERED",
+          insertDataOption: "INSERT_ROWS",
+          resource: {
+              "range": doordashInfo.sheetName + "!A:U",
+              "majorDimension": "ROWS",
+              "values": [
+                [
+                  "UCB BNC Food Pantry", "VENTURA-01", "F", deliveryMMDD, deliveryWindowStart, deliveryWindowEnd,
+                  "US/Pacific", firstName, lastName, address, address2, city, "CA", zip, phone, numberOfBags,
+                  dropoffInstructions, "UCB BNC Food Pantry"
+                ] 
               ] 
-            ] 
-          } 
-      }
-      
-      sheets.spreadsheets.values.append(doordash_req)
-      .then(result => {
-        if (result.status == 200) {
-          let generateFormatRequest = setupFormatColumns(result, doordashInfo.pageId)
-
-          // reformat the cells written
-          const sheetFormat3 = {
-            spreadsheetId: doordashInfo.spreadsheetId,
-            resource: {
-              requests: [
-                generateFormatRequest([0,3]),
-                generateFormatRequest(3, {type:"DATE", pattern:"m/dd/yyyy"}),
-                generateFormatRequest([4,6], {type:"TIME", pattern:"h:mm am/pm"}),
-                generateFormatRequest([6,26])
-              ]
-            }
-          }
-
-          sheets.spreadsheets.batchUpdate(sheetFormat3).then(() => resolve())
-        } else {
-          throw result.statusText
+            } 
         }
-      })
-      .catch((error) => {
-        return reject("error writing to Doordash data sheet: " + error);
-      })  
+        
+        sheets.spreadsheets.values.append(doordash_req)
+        .then(result => {
+          if (result.status == 200) {
+            let generateFormatRequest = setupFormatColumns(result, doordashInfo.pageId)
+  
+            // reformat the cells written
+            const sheetFormat3 = {
+              spreadsheetId: doordashInfo.spreadsheetId,
+              resource: {
+                requests: [
+                  generateFormatRequest([0,3]),
+                  generateFormatRequest(3, {type:"DATE", pattern:"m/dd/yyyy"}),
+                  generateFormatRequest([4,6], {type:"TIME", pattern:"h:mm am/pm"}),
+                  generateFormatRequest([6,26])
+                ]
+              }
+            }
+  
+            sheets.spreadsheets.batchUpdate(sheetFormat3).then(() => resolve())
+          } else {
+            throw result.statusText
+          }
+        })
+        .catch((error) => {
+          return reject("error writing to Doordash data sheet: " + error);
+        })  
+      }
   
       /* Add order to firebase */
       let newOrder = {};
@@ -318,8 +346,9 @@ function writeToSheets(body, itemNames) {
       newOrder["status"] = ORDER_STATUS_OPEN;
   
       // TODO: need to handle the multiple delivery options somewhere
-      newOrder["deliveryDate"] = deliveryMMDD;
-      newOrder["deliveryWindow"] = deliveryWindow;
+      newOrder["deliveryDate"] = pickup ? "Pickup" : deliveryMMDD;
+      if (!pickup || pickupNotes)
+        newOrder["deliveryWindow"] = pickup ? pickupNotes : deliveryWindow;
   
       // add the isPacked entry to match order schema
       newOrder["items"] = {}
@@ -340,7 +369,6 @@ function writeToSheets(body, itemNames) {
         itemRef.once('value')
         .then(function(resp){
           var dbItem = resp.val();
-
           // can't add order if orderID already in use
           if (dbItem != null) {
               return reject(`${orderId} already exists`);
@@ -355,7 +383,7 @@ function writeToSheets(body, itemNames) {
           });
         })
         .catch(error => {
-          return reject("Unable to access item reference in DB:" + error);
+          return reject("Unable to access reference in DB:" + error);
         });
       })
       .catch(error =>{

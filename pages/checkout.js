@@ -3,27 +3,41 @@ import Sidebar from '../components/Sidebar'
 import useSWR from 'swr';
 import React from 'react';
 import Modal from 'react-modal'
+import Head from 'next/head'
 import SearchModal from '../components/SearchModal'
 import cookie from 'js-cookie';
 import { useUser } from '../context/userContext'
+import ReactMarkdown from 'react-markdown';
+import { markdownStyle } from '../utils/markdownStyle';
 
 
-const fetcher = async (...args) => {
-  const res = await fetch(...args);
-  return res.json();
-};
+
+function fetcher(...urls) {
+  const f = (u) =>
+    fetch(u, {
+      headers: { "Content-Type": "application/json"},
+    }).then((r) => r.json());
+
+  if (urls.length > 1) {
+    return Promise.all(urls.map(f));
+  }
+  return f(urls);
+}
 
 class Cart extends React.Component {
   constructor(props) {
     super(props);
-    this.data = props.data;
+    this.data = props.data[1];
     this.state = {
-      user: this.data.user,
+      user: props.data.user,
       items: new Map([]),   /* entries are {barcode: [itemStruct, quantity]} */
       itemsInCart: 0,
       error: null,
       success: null,
       showSearch: false,
+      checkoutInfo:props.data[0].markdown,
+      isEditing: false,
+      showPreview: false
     }
   }
 
@@ -193,7 +207,6 @@ class Cart extends React.Component {
 
     let reqbody = this.makeReq();
     this.showSuccess("Submitting cart...", 10000)
-
     if (this.state.itemsInCart == 0) {
       this.showError("Cannot submit: Cart is empty");
       return;
@@ -306,21 +319,23 @@ class Cart extends React.Component {
       }
 
       /* hotkeys for item form (left tab) */
-      if (["ArrowUp", barcodeHotkey.toLowerCase(), barcodeHotkey.toUpperCase()].includes(e.key)) {
-        e.preventDefault();
-        barcode.focus();
-      } else if (["ArrowDown", quantityHotkey.toLowerCase(), quantityHotkey.toUpperCase()].includes(e.key)) {
-        e.preventDefault();
-        quantity.focus();
-      } else if (e.key === "Enter" && e.shiftKey) {
-        e.preventDefault();
-        this.submitCart(e);
-      } else if (e.key === "Enter") {
-        e.preventDefault();
-        document.getElementById("checkout-item-form").requestSubmit();
-      } else if (e.key.toLowerCase() === searchHotkey.toLowerCase()) {
-        e.preventDefault();
-        this.toggleShowSearch();
+      if (!this.state.isEditing) {
+        if (["ArrowUp", barcodeHotkey.toLowerCase(), barcodeHotkey.toUpperCase()].includes(e.key)) {
+          e.preventDefault();
+          barcode.focus();
+        } else if (["ArrowDown", quantityHotkey.toLowerCase(), quantityHotkey.toUpperCase()].includes(e.key)) {
+          e.preventDefault();
+          quantity.focus();
+        } else if (e.key === "Enter" && e.shiftKey) {
+          e.preventDefault();
+          this.submitCart(e);
+        } else if (e.key === "Enter") {
+          e.preventDefault();
+          document.getElementById("checkout-item-form").requestSubmit();
+        } else if (e.key.toLowerCase() === searchHotkey.toLowerCase()) {
+          e.preventDefault();
+          this.toggleShowSearch();
+        }
       }
     }
 
@@ -404,6 +419,66 @@ class Cart extends React.Component {
                 Checkout <span className="font-normal hidden sm:inline-block">(Shift+Enter)</span>
               </button>
             </div>
+                        
+            {/*Right-hand Column*/}
+            <div className="flex-none sm:w-64">
+              <Sidebar className="py-4">
+              {/* Editing the information */}
+              {!this.state.isEditing && <button className='text-blue-700 hover:text-blue-500'
+                onClick={() => this.setState({isEditing:true})}>
+                edit
+              </button>}
+
+              {/* cancel edit */}
+              {this.state.isEditing && <button className='text-blue-700 hover:text-blue-500'
+                onClick={() => {
+                  this.setState({isEditing:false});
+                  fetch(`/api/admin/GetCheckoutInfo`)
+                  .then((result) => {
+                    result.json().then((data) => {
+                      this.setState({checkoutInfo:data.markdown})
+                    })
+                  })
+                }}>
+                cancel
+              </button>}
+
+              {/* save edit */}
+              {this.state.isEditing && <button className='ml-5 text-blue-700 hover:text-blue-500'
+                  onClick={async () => {
+                  let token = await this.state.user.googleUser.getIdToken()
+                  this.setState({isEditing:false});
+                  fetch('/api/admin/SetCheckoutInfo', { method: 'POST',
+                    body: JSON.stringify({markdown: this.state.checkoutInfo}),
+                    headers: {'Content-Type': "application/json", 'Authorization': token}
+                  }).then((res) => {
+                  })
+                }}>
+                save
+              </button>}
+
+              {/* show/hide preview */}
+              {this.state.isEditing && <button className='ml-5 text-blue-700 hover:text-blue-500'
+                onClick={() => {
+                  this.setState({showPreview:!this.state.showPreview});
+                }}>
+                {this.state.showPreview ? "hide" : "show"} preview
+              </button>}
+
+              {/* Edit message box */}
+              {this.state.isEditing &&
+                <textarea className="form-control w-full h-64 block px-3 py-1 text-base font-normal text-gray-600 bg-white
+                  border border-solid border-gray-200 rounded mb-4
+                focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" value={this.state.checkoutInfo}
+                  onChange={(e) => {
+                    this.setState({checkoutInfo:e.target.value});
+                  }}>
+                </textarea>}
+
+              {/* Information Display or Preview (rendered markdown) */}
+              {(!this.state.isEditing || this.state.showPreview) && this.state.checkoutInfo && <ReactMarkdown className="mb-4 text-zinc-900" components={markdownStyle} children={this.state.checkoutInfo}></ReactMarkdown>}
+              </Sidebar>
+            </div>
           </div>
         </Layout>
       </>
@@ -413,11 +488,24 @@ class Cart extends React.Component {
 
 // Wrapper for useSWR hook. Apparently can't use hooks in class-style definition for react components.
 export default function Checkout() {
-  const { data } = useSWR("/api/inventory/GetAllItems", fetcher);
+  const { data } = useSWR(
+    ["/api/admin/GetCheckoutInfo", "/api/inventory/GetAllItems"],
+    fetcher
+  );
   const { user } = useUser();
 
   if (!data || !user) {
-    return (<div>loading...</div>)
+    return (
+    <>
+        <Head>
+          <title>Pantry</title>
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
+        <Layout>
+            <h1 className='text-xl m-6'>Sorry, you are not authorized to view this page.</h1>
+        </Layout>
+      </>
+    )
   } else {
     data["user"] = user
     return (<Cart data={data}></Cart>)

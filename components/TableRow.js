@@ -71,8 +71,8 @@ export default function TableRow(props) {
       ></input>
     )
 
-    return (
-        <tr id={props.barcode}>
+    return <tr id={props.barcode}>
+
         <td className="px-5 py-5 border-b border-gray-100 bg-white text-sm">
             <div className="flex items-center" onDoubleClick={() => authToken ? setEditing("itemName") : null}>
                 <div className="ml-3">
@@ -83,16 +83,22 @@ export default function TableRow(props) {
             </div>
             {authToken ? <div id={`barcode-${props.barcode}`} className="ml-3 text-gray-400">{props.barcode}</div> : ""}
         </td>
+
+        {/* Categories */}
         <td className="px-5 py-5 border-b border-gray-100 bg-white text-sm">
             <p className="text-gray-900 max-w-xs">{categoryDisplay(props.itemCategories)}</p>
         </td>
+
+        {/* Quantity */}
         { authToken ? <td className="px-3 py-3 border-b border-gray-100 bg-white text-sm text-center"
             onDoubleClick={() => authToken ? setEditing("count") : null}>
             <p className="text-gray-900 whitespace-nowrap font-bold">
                 {editing=="count" ? editCountInput : count}
             </p>
         </td> : null}
-        <td className="px-5 py-5 border-b border-gray-100 bg-white text-sm">
+
+        {/* Status (InStock, LowStock, OutOfStock) */}
+        <td className="px-3 py-3 border-b border-gray-100 bg-white text-sm">
             {((count > lowStockThresh) && (count > 0)) && <span key="inStock"
                 className="relative inline-block px-3 py-1 font-semibold text-green-900 leading-tight">
                 <span aria-hidden
@@ -112,14 +118,15 @@ export default function TableRow(props) {
                 <span className="relative overflow-hidden whitespace-nowrap">Out of Stock</span>
             </span>}
         </td>
-        { /* Edit or Delete item shortcut buttons */
+
+        { /* Edit/Delete/ShowHide item shortcut buttons */
         authToken ?
-            <td className="px-5 py-5 border-b border-gray-100 bg-white text-sm">
-                {/* todo: change icons? */}
-                <img className="w-6 h-6 inline-block cursor-pointer" src="/images/edit-pencil.svg" onClick={() => props.editItemFunc(props.barcode)}></img>
-                <img className="w-6 h-6 inline-block cursor-pointer" src="/images/trash-can.svg" onClick={() => props.deleteItemFunc(props.barcode)}></img>
+            <td className="px-3 py-3 border-b border-gray-100 bg-white text-sm w-28 whitespace-nowrap text-center">
+                <img className="w-6 inline-block h-6 cursor-pointer" src="/images/edit-pencil.svg" onClick={() => props.editItemFunc(props.barcode)}></img>
+                <img className="w-6 inline-block h-6 cursor-pointer" src="/images/trash-can.svg" onClick={() => props.deleteItemFunc(props.barcode)}></img>
+                <img className="w-8 inline-block h-8 cursor-pointer" src={props.displayPublic ? "/images/show-eye.svg" : "/images/hidden-eye.svg"}
+                    onClick={() => props.showHideItemFunc(props.barcode, !props.displayPublic)}></img>
             </td> : null
         }
     </tr>
-    )
-    }
+}
