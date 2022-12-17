@@ -1,5 +1,4 @@
 import Layout from '../components/Layout'
-import Head from 'next/head'
 import useSWR from 'swr'
 import cookie from 'js-cookie';
 
@@ -8,6 +7,7 @@ import { useUser } from '../context/userContext'
 import { server } from './_app.js'
 
 import { daysInOrder } from './hours';
+import firebase from '../firebase/clientApp';
 
 const token = cookie.get("firebaseToken")
 
@@ -140,6 +140,7 @@ function SheetLinks(props) {
 
 function DeliveryTimes(props) {
   const [formData, setFormData] = useState({});
+  const [submitStatus, setSubmitStatus] = useState("");
 
   const fetcher = (url) => fetch(url).then((res) => res.json())
   let { data, error } = useSWR('/api/orders/GetDeliveryTimes', fetcher)
@@ -155,10 +156,21 @@ function DeliveryTimes(props) {
     setFormData(data)
   }
 
+  /* do this once, after formData is set */
+  const ref = firebase.database().ref('/deliveryTimes')
+  if (Object.keys(formData).length > 0) {
+    ref.on('child_added', snapshot => {
+      let data = snapshot.val()
+      if (!formData[data.tag]) {
+        setFormData({
+          ...formData, [data.tag]: data
+        });
+      }
+    });
+  }
+
   let deleteTime = (tag) => {
-    // TODO: call delete API
-    console.log('deleting tag:', tag)
-    let {[tag]: _, ...newData} = formData;
+    let {[tag]: _, ...newData} = formData; // remove tag for newData
     fetch(`${server}/api/admin/DeleteDeliveryTime`, { method: 'POST',
       body: JSON.stringify({"tag": tag}),
       headers: {'Content-Type': "application/json", 'Authorization': token}
@@ -166,10 +178,8 @@ function DeliveryTimes(props) {
     .then((result) => {
       result.json()
       .then((res) => {
-        console.log(res)
+        setSubmitStatus(res.error)
       })
-      console.log(result)
-      console.log("Deleted tag:", tag)
       setFormData(newData)
     })
   }
@@ -183,8 +193,6 @@ function DeliveryTimes(props) {
     const end = e.target.end_hour.value;
     const end_AM_PM = e.target.end_AM_PM.value;
 
-    // const tag = date.toLowerCase().substring(0,3) + start + "-" + end;
-    // const displayName = `${date} ${start}-${end} ${end_AM_PM}`
     const data = {
       dayOfWeek: date,
       start: start,
@@ -193,65 +201,76 @@ function DeliveryTimes(props) {
       end_AMPM: end_AM_PM
     }
 
-    // TODO: call add API
     fetch(`${server}/api/admin/AddDeliveryTime`, { method: 'POST',
       body: JSON.stringify(data),
       headers: {'Content-Type': "application/json", 'Authorization': token}
     })
     .then((result) => {
-      console.log(result)
       result.json()
       .then((res) => {
-        console.log(res)
+        if (result.ok) {
+          document.getElementById("deliveryTimeForm").reset()
+        } else {
+          console.log("Error adding time window:", res.error)
+        }
+        setSubmitStatus(res.error)
       })
-      // setFormData({...formData, [tag]: data}) // TODO: change this to use db change listener instead?
     })
   }
 
   return (
     <div className='m-8'>
       <div className='font-semibold text-3xl mb-4'>Delivery Time Windows</div>
-      {/* Existing times */}
-      <table className='mb-4'>
-        <tbody>
-          {Object.keys(formData).map((key) => <tr key={key}>
-            <td className='pr-10'>{formData[key].display}</td>
-            <td><img className="w-4 h-4 items-center hover:cursor-pointer" src="/images/trash-can.svg" onClick={() => deleteTime(key)}></img></td>
-          </tr>)}
-        </tbody>
-      </table>
+      { submitStatus &&
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-3">
+          {submitStatus}</div>
+      }
 
-      {/* New times */}
-      <div className='border border-gray-400 bg-gray-50 p-4 w-fit'>
-        <div className='font-semibold text-xl mb-2'>Add a new time window:</div>
-        <form onSubmit={(e) => submitForm(e)}>
-          <div className='mb-2'>
-            <span className='font-semibold mr-2'>Date:</span>
-            <select id="date">
-              {daysInOrder.map((day) => <option key={day}>{day.charAt(0).toUpperCase() + day.slice(1)}</option>)}
-            </select>
-          </div>
+      <div className='sm:flex sm:flex-row sm:space-x-8'>
+        {/* Existing times */}
+        <div className='border border-gray-400 p-4'>
+          <table className='mb-4'>
+            <tbody>
+              {Object.keys(formData).map((key) => <tr key={key}>
+                <td className='pr-10'>{formData[key].display}</td>
+                <td><img className="w-4 h-4 items-center hover:cursor-pointer" src="/images/trash-can.svg" onClick={() => deleteTime(key)}></img></td>
+              </tr>)}
+            </tbody>
+          </table>
+        </div>
 
-          <div className='mb-2'>
-            <span className='font-semibold mr-2'>Start time:</span>
-            <input id="start_hour" className='w-10 mr-2 border-b appearance-none focus:outline-none'></input>
-            <select id="start_AM_PM">
-              <option>AM</option>
-              <option>PM</option>
-            </select>
-          </div>
-          
-          <div className='mb-2'>
-            <span className='font-semibold mr-2'>End time:</span>
-            <input id="end_hour" className='w-10 mr-2 border-b appearance-none focus:outline-none'></input>
-            <select id="end_AM_PM">
-              <option>AM</option>
-              <option>PM</option>
-            </select>
-          </div>
+        {/* New times */}
+        <div className='border border-gray-400 bg-gray-50 p-4 w-fit'>
+          <div className='font-semibold text-xl mb-2'>Add a new time window:</div>
+          <form id="deliveryTimeForm" onSubmit={(e) => submitForm(e)}>
+            <div className='mb-2'>
+              <span className='font-semibold mr-2'>Date:</span>
+              <select id="date">
+                {daysInOrder.map((day) => <option key={day}>{day.charAt(0).toUpperCase() + day.slice(1)}</option>)}
+              </select>
+            </div>
 
-          <button type='submit' className='btn btn-outline p-2'>Add!</button>
-        </form>
+            <div className='mb-2'>
+              <span className='font-semibold mr-2'>Start time:</span>
+              <input id="start_hour" className='w-10 mr-2 border-b appearance-none focus:outline-none' autoComplete='off'></input>
+              <select id="start_AM_PM">
+                <option>AM</option>
+                <option>PM</option>
+              </select>
+            </div>
+            
+            <div className='mb-2'>
+              <span className='font-semibold mr-2'>End time:</span>
+              <input id="end_hour" className='w-10 mr-2 border-b appearance-none focus:outline-none' autoComplete='off'></input>
+              <select id="end_AM_PM">
+                <option>AM</option>
+                <option>PM</option>
+              </select>
+            </div>
+
+            <button type='submit' className='btn btn-outline p-2'>Add!</button>
+          </form>
+        </div>
       </div>
     </div>
   )
@@ -262,15 +281,11 @@ export default function Admin() {
   let authToken = (user && user.authorized === "true") ? token : null;
 
   if (!authToken) {
-    return <>
-      <Head>
-        <title>Pantry</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    return (
       <Layout>
           <h1 className='text-xl m-6'>Sorry, you are not authorized to view this page.</h1>
       </Layout>
-    </>
+    )
   }
 
   return (

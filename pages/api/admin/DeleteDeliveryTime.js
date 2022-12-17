@@ -47,7 +47,7 @@ export default async function (req, res) {
           var window = resp.val();
           if (window === null) {
             res.status(404);
-            res.json({ error: "unable to find delivery time with tag " + body.tag })
+            res.json({ error: `Unable to find delivery time with tag "${body.tag}."` })
             return resolve();
           }
 
