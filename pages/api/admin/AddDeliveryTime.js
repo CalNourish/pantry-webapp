@@ -63,7 +63,7 @@ export default async function (req, res) {
       // perform the write
       firebase.auth().signInAnonymously()
       .then(() => {
-        let db_tag = day.substring(0,3).toLowerCase() + start + "-" + end
+        let db_tag = day.substring(0,3).toLowerCase() + start + start_AMPM + "-" + end + end_AMPM
         let display = `${day} ${start}-${end} ${end_AMPM}`
         let payload = {
           "tag": db_tag,
