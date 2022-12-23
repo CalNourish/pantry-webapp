@@ -152,7 +152,8 @@ function DeliveryTimes(props) {
   }
   if (!data) return <div>Loading...</div>
 
-  if (Object.keys(formData).length == 0) { // TODO: might need to change this
+  if (Object.keys(formData).length == 0 && Object.keys(data).length > 0) {
+    // TODO: might need to change this?
     setFormData(data)
   }
 
@@ -226,21 +227,25 @@ function DeliveryTimes(props) {
           {submitStatus}</div>
       }
 
-      <div className='sm:flex sm:flex-row sm:space-x-8'>
+      <div className='space-y-4 sm:space-y-0 sm:flex sm:flex-row sm:space-x-8'>
         {/* Existing times */}
         <div className='border border-gray-400 p-4'>
-          <table className='mb-4'>
-            <tbody>
-              {Object.keys(formData).map((key) => <tr key={key}>
-                <td className='pr-10'>{formData[key].display}</td>
-                <td><img className="w-4 h-4 items-center hover:cursor-pointer" src="/images/trash-can.svg" onClick={() => deleteTime(key)}></img></td>
-              </tr>)}
-            </tbody>
-          </table>
+          {
+            Object.keys(formData).length == 0 ?
+            <span className='text-gray-500 italic'>No options</span> :
+            <table className='mb-4'>
+              <tbody>
+                {Object.keys(formData).map((key) => <tr key={key}>
+                  <td className='pr-10'>{formData[key].display}</td>
+                  <td><img className="w-4 h-4 items-center hover:cursor-pointer" src="/images/trash-can.svg" onClick={() => deleteTime(key)}></img></td>
+                </tr>)}
+              </tbody>
+            </table>
+          }
         </div>
 
         {/* New times */}
-        <div className='border border-gray-400 bg-gray-50 p-4 w-fit'>
+        <div className='border border-gray-400 bg-gray-50 p-4'>
           <div className='font-semibold text-xl mb-2'>Add a new time window:</div>
           <form id="deliveryTimeForm" onSubmit={(e) => submitForm(e)}>
             <div className='mb-2'>
