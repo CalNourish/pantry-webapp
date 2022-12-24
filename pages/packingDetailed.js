@@ -252,7 +252,7 @@ class PackingOrder extends React.Component {
 
     return (
       <>
-        <Layout pageName={"Order " + this.state.orderId}>
+        <Layout pageName={`${this.state.firstName} ${this.state.lastInitial}'s Order`}>
           <div className="flex h-full">
             <div className="w-1/4 bg-gray-100 items-center p-5">
               <h1 className="text-xl">Pantry Note</h1>
