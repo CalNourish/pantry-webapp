@@ -1,5 +1,4 @@
 import Layout from '../components/Layout'
-import Head from 'next/head'
 import useSWR from 'swr'
 import cookie from 'js-cookie';
 
@@ -28,22 +27,18 @@ export default function Admin() {
   if (!data) return <div>Loading...</div>
   if (error || data.error) {
     return (
-      <Layout>
+      <Layout pageName="Admin">
         <div className='m-4'>Error! See console log for details.</div>
       </Layout>
     )
   }
 
   if (!authToken) {
-    return <>
-      <Head>
-        <title>Pantry</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <Layout>
+    return (
+      <Layout pageName="Admin">
           <h1 className='text-xl m-6'>Sorry, you are not authorized to view this page.</h1>
       </Layout>
-    </>
+    )
   }
 
   // initialize form info if empty
@@ -146,7 +141,7 @@ export default function Admin() {
   } 
 
   return (
-    <Layout>
+    <Layout pageName="Admin">
       <div className='m-8'>
         <div className='font-semibold text-3xl mb-4'>Google Sheets Links</div>
         <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>

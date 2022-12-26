@@ -1,12 +1,10 @@
 import Layout from '../components/Layout'
-import Head from 'next/head'
 import { useEffect, useState } from 'react'
 import cookie from 'js-cookie';
 import React from 'react';
 
 import { useUser } from '../context/userContext'
 import { server } from './_app.js'
-import { render } from 'react-dom';
 
 const fetcher = (url) => fetch(url).then((res) => res.json())
 
@@ -156,37 +154,31 @@ class Checkin extends React.Component {
   }
 
   return (
-    <>
-      <Head>
-        <title>Pantry</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <Layout>
-        <div className='m-6'>
-        {this.state.error && errorBanner}
-        {this.state.success && successBanner}
-          <h1 className='text-3xl font-medium mb-2'>Pantry Check-In</h1>
-          <div className='flex flex-row space-x-16 my-8'>
-            <form onSubmit={(e) => this.handleScanSubmit(e)}>
-              <fieldset id="calIDFieldset" disabled={false}>
-              <div>
-              <div className='flex-grow'>Use scanner or manually enter Cal ID (put 1 if general community member)</div>
-              <input className="calID border rounded w-2/3 py-2 px-3 text-gray-600 leading-tight"
-                placeholder="Cal ID"
-                id="calID" autoComplete="off" autoFocus></input>
-              </div>
-              <input type="submit" id = "submitButton" className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold flex-grow disabled:bg-pantry-blue-400" value="Submit (Enter)" />
-              </fieldset>
-            </form>
-            <div className = "w-1/3">
+    <Layout pageName="Check-In">
+      <div className='m-6'>
+      {this.state.error && errorBanner}
+      {this.state.success && successBanner}
+        <h1 className='text-3xl font-medium mb-2'>Pantry Check-In</h1>
+        <div className='flex flex-row space-x-16 my-8'>
+          <form onSubmit={(e) => this.handleScanSubmit(e)}>
+            <fieldset id="calIDFieldset" disabled={false}>
+            <div>
+            <div className='flex-grow'>Use scanner or manually enter Cal ID (put 1 if general community member)</div>
+            <input className="calID border rounded w-2/3 py-2 px-3 text-gray-600 leading-tight"
+              placeholder="Cal ID"
+              id="calID" autoComplete="off" autoFocus></input>
+            </div>
+            <input type="submit" id = "submitButton" className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold flex-grow disabled:bg-pantry-blue-400" value="Submit (Enter)" />
+            </fieldset>
+          </form>
+          <div className = "w-1/3">
 
-            {this.showLastScannedInfo()}
-            {this.showLastVisitInfo()}
-          </div>
-          </div>
+          {this.showLastScannedInfo()}
+          {this.showLastVisitInfo()}
         </div>
-      </Layout>
-    </>
+        </div>
+      </div>
+    </Layout>
   )
   }
 }
@@ -198,15 +190,9 @@ export default function checkin() {
   let authToken = (user && user.authorized === "true") ? token : null;
   if (!authToken) {
     return (
-    <>
-      <Head>
-        <title>Pantry</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <Layout>
+      <Layout pageName="Check-In">
           <h1 className='text-xl m-6'>Sorry, you are not authorized to view this page.</h1>
       </Layout>
-    </>
     )
   }
   else {

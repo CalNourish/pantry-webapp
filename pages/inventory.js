@@ -425,7 +425,7 @@ export default function Inventory() {
 
   if (DISABLE_PUBLIC_INVENTORY && !authToken) {
     return (
-      <Layout>
+      <Layout pageName="Inventory">
         <div className='m-4'>Inventory is currently not publically available.</div>
       </Layout>
     )
@@ -433,7 +433,7 @@ export default function Inventory() {
 
   return (
     <>
-      <Layout>
+      <Layout pageName="Inventory">
         {!authToken ? "" :
           <>
             {/* Add Item Modal */}
