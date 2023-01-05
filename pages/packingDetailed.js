@@ -62,7 +62,9 @@ class PackingOrder extends React.Component {
   };
 
   cancelPantryNote = () => {
-    document.getElementById("pantry_note").value = this.state.pantryNote;
+    if (this.state.pantryNote !== undefined) {
+      document.getElementById("pantry_note").value = this.state.pantryNote;
+    }
   };
 
   changeOrderStatus = () => {
