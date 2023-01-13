@@ -64,6 +64,14 @@ class Checkin extends React.Component {
     }
   };
 
+
+  overrideHandler = () => {
+    this.writeIDtoSheet(this.state.lastScannedID);
+    this.setState({lastScannedID: "N/A",
+    visitsLastWeek: [], lastScannedTime: "N/A"});
+    this.showLastVisitInfo();
+  }
+
   showLastVisitInfo = () => {
     var messageToReturn = ""
     if (this.state.lastScannedID == "N/A") {
@@ -71,8 +79,9 @@ class Checkin extends React.Component {
     }
     else {
       var numVisits = this.state.visitsLastWeek.length
-      if (numVisits== 0) {
-        messageToReturn= "This visitor has not visited the pantry this week."
+      if (numVisits == 0) {
+        messageToReturn= "This visitor has not visited the pantry this week."  
+        return <div className='flex-grow text-left'>{messageToReturn}</div>;
       }
       else if (numVisits == 1) {
         messageToReturn= "This visitor has already visited the pantry this week on  " + this.state.visitsLastWeek[0] +"."
@@ -94,9 +103,27 @@ class Checkin extends React.Component {
           }
         }
       }
-    }
-    return <div className='flex-grow text-left'>{messageToReturn}</div>;
+      return (
+        <>
+        <div className='flex-grow text-left bg-amber-400'>{messageToReturn}</div>
+        <button type="submit" id = "submitButton" className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold flex-grow disabled:bg-pantry-blue-400" onClick={() => {this.overrideHandler()}}>
+        Override
+        </button>
+        </>
+      )
+
+    }  
   };
+
+  writeIDtoSheet = async (id) => {
+    fetch('/api/admin/WriteCheckIn', { method: 'POST',
+    body: JSON.stringify({calID: id, isGrad:true}),
+    headers: {'Content-Type': "application/json", 'Authorization': token}
+    })
+    .then(() => {
+      this.showSuccess("Sucessfully logged ID: " + id,1000)
+    })
+  }
    
   handleScanSubmit = async (e) => {
     var fieldset = document.getElementById("calIDFieldset")
@@ -107,7 +134,7 @@ class Checkin extends React.Component {
       return
     }
     token = await this.state.user.googleUser.getIdToken()
-    fetch('/api/admin/CheckIn', { method: 'POST',
+    fetch('/api/admin/CheckPreviousVisit', { method: 'POST',
       body: JSON.stringify({calID: e.target.calID.value, isGrad:true}),
       headers: {'Content-Type': "application/json", 'Authorization': token}
     })
@@ -119,8 +146,13 @@ class Checkin extends React.Component {
         }
         else {
           this.setState({lastScannedID:e.target.calID.value, visitsLastWeek:lastVisitedTimes, lastScannedTime:new Date().toLocaleTimeString()})
-          this.showSuccess("Sucessfully scanned ID: " + e.target.calID.value,1000)
-          e.target.calID.value = null;
+          if (lastVisitedTimes.length == 0) {
+            this.writeIDtoSheet(e.target.calID.value)
+          }
+          else {
+            this.showError("Failed scanning ID: " + e.target.calID.value + ". This visitor has visited already.",3000)
+          }
+          document.getElementById("calID").value = null;
           document.getElementById("calID").focus();
         }
       })
