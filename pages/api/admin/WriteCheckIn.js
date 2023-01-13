@@ -5,7 +5,7 @@ import {service_info} from "../../../utils/decrypt.js";
 import firebase from '../../../firebase/clientApp'
 
 /*
- * /api/admin/WriteID
+ * /api/admin/WriteCheckIn
  * req.body = { string calID, boolean isGrad }
  */
 

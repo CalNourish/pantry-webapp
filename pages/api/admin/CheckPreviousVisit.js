@@ -40,9 +40,9 @@ function formatTimeForVisits(timeToConvert) {
   }
 
 //get the number of rows for the Check Out sheet
-function getNumRowsForCheckIn(properties) {
+function getNumRowsForCheckIn(properties, sheetname) {
   for (var sheet of properties["data"]["sheets"]) {
-    if (sheet.properties.title == "Check Out Form") {
+    if (sheet.properties.title == sheetname) {
       return sheet.properties.gridProperties.rowCount;
     }
   }
@@ -130,7 +130,7 @@ export default async function (req, res) {
 
         //check for visit in past calendar week
         sheets.spreadsheets.get({spreadsheetId: spreadsheetId})
-        .then((properties) => (numRows = getNumRowsForCheckIn(properties)))
+        .then((properties) => (numRows = getNumRowsForCheckIn(properties, sheetName)))
         .then(function () {
           var startingRow = numRows - numberOfRowsToGoBack;
           var startOfWeek = determineStartOfWeek(checkInTime);
