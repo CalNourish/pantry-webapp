@@ -59,7 +59,7 @@ export default async function (req, res) {
           })
           .catch(function (error) {
             res.status(500);
-            res.json({ error: "error deleting order" + orderId, errorstack: error });
+            res.json({ error: `Error deleting delivery time with tag "${body.tag}."`, errorstack: error });
             return resolve();
           });
         })
