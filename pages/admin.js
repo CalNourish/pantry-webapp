@@ -2,7 +2,7 @@ import Layout from '../components/Layout'
 import useSWR from 'swr'
 import cookie from 'js-cookie';
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useUser } from '../context/userContext'
 import { server } from './_app.js'
 
@@ -24,17 +24,10 @@ function SheetLinks(props) {
 
   if (error) {
     return (
-      <Layout pageName="Admin">
+      <div className='m-8'>
+        <div className='font-semibold text-3xl mb-4'>Google Sheets Links</div>
         <div className='m-4'>Error! See console log for details.</div>
-      </Layout>
-    )
-  }
-
-  if (!authToken) {
-    return (
-      <Layout pageName="Admin">
-          <h1 className='text-xl m-6'>Sorry, you are not authorized to view this page.</h1>
-      </Layout>
+      </div>
     )
   }
 
