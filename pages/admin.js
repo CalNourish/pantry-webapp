@@ -9,8 +9,6 @@ import { server } from './_app.js'
 import { daysInOrder } from './hours';
 import firebase from '../firebase/clientApp';
 
-const token = cookie.get("firebaseToken")
-
 function SheetLinks(props) {
   const [submitStatus, setSubmitStatus] = useState({});
   const [statusTimer, setStatusTimer] = useState(null);
@@ -27,6 +25,15 @@ function SheetLinks(props) {
       <div className='m-8'>
         <div className='font-semibold text-3xl mb-4'>Google Sheets Links</div>
         <div className='m-4'>Error! See console log for details.</div>
+      </div>
+    )
+  }
+
+  if (!data) {
+    return (
+      <div className='m-8'>
+        <div className='font-semibold text-3xl mb-4'>Google Sheets Links</div>
+        <div className='m-4'>Loading...</div>
       </div>
     )
   }
@@ -98,7 +105,7 @@ function SheetLinks(props) {
 
             fetch(`${server}/api/admin/SetSheetInfo`, { method: 'POST',
               body: JSON.stringify({[tag]: tagData}),
-              headers: {'Content-Type': "application/json", 'Authorization': token}
+              headers: {'Content-Type': "application/json", 'Authorization': props.authToken}
             })
             .then((result) => {
               result.json().then((res) => {
@@ -176,7 +183,7 @@ function DeliveryTimes(props) {
     let {[tag]: _, ...newData} = formData; // remove tag for newData
     fetch(`${server}/api/admin/DeleteDeliveryTime`, { method: 'POST',
       body: JSON.stringify({"tag": tag}),
-      headers: {'Content-Type': "application/json", 'Authorization': token}
+      headers: {'Content-Type': "application/json", 'Authorization': props.authToken}
     })
     .then((result) => {
       result.json()
@@ -206,7 +213,7 @@ function DeliveryTimes(props) {
 
     fetch(`${server}/api/admin/AddDeliveryTime`, { method: 'POST',
       body: JSON.stringify(data),
-      headers: {'Content-Type': "application/json", 'Authorization': token}
+      headers: {'Content-Type': "application/json", 'Authorization': props.authToken}
     })
     .then((result) => {
       result.json()
@@ -285,6 +292,7 @@ function DeliveryTimes(props) {
 
 export default function Admin() {
   const { user } = useUser();
+  const token = cookie.get("firebaseToken")
   let authToken = (user && user.authorized === "true") ? token : null;
 
   if (!authToken) {
@@ -297,8 +305,8 @@ export default function Admin() {
 
   return (
     <Layout>
-      <SheetLinks/>
-      <DeliveryTimes/>
+      <SheetLinks auth={authToken}/>
+      <DeliveryTimes auth={authToken}/>
     </Layout>
   )
 }
