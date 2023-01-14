@@ -13,7 +13,7 @@ export default async function (_, res) {
       return resolve();
     })
     .catch(error => {
-      res.status(500).json({error: "Error reading firbase sheet IDs: " + error});
+      res.status(500).json({error: "Error reading firebase sheet IDs: " + error});
       return resolve();
     });
   });
