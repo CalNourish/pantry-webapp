@@ -156,10 +156,20 @@ function DeliveryTimes(props) {
 
   if (error) {
     return (
-      <div className='m-4'>Error! See console log for details.</div>
+      <div className='m-8'>
+        <div className='font-semibold text-3xl mb-4'>Delivery Time Windows</div>
+        <div className='m-4'>Error! See console log for details.</div>
+      </div>
     )
   }
-  if (!data) return <div>Loading...</div>
+  if (!data) {
+    return (
+      <div className='m-8'>
+        <div className='font-semibold text-3xl mb-4'>Delivery Time Windows</div>
+        <div className='m-4'>Loading...</div>
+      </div>
+    )
+  }
 
   if (Object.keys(formData).length == 0 && Object.keys(data).length > 0) {
     // TODO: might need to change this?
