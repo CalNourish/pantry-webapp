@@ -21,6 +21,7 @@ function SheetLinks(props) {
   const { data, error } = useSWR(`${server}/api/admin/GetSheetLinks`, fetcher);
 
   if (error) {
+    console.log("Error fetching google sheet links:", error)
     return (
       <div className='m-8'>
         <div className='font-semibold text-3xl mb-4'>Google Sheets Links</div>
@@ -155,6 +156,7 @@ function DeliveryTimes(props) {
   let { data, error } = useSWR('/api/orders/GetDeliveryTimes', fetcher)
 
   if (error) {
+    console.log("Error fetching delivery times:", error)
     return (
       <div className='m-8'>
         <div className='font-semibold text-3xl mb-4'>Delivery Time Windows</div>
