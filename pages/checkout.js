@@ -105,10 +105,9 @@ class Cart extends React.Component {
   getDefaultCart = () => {
     this.addItem(this.data["fruit"], 0, true)
     this.addItem(this.data["vegetable"], 0, true)
-    this.setState({
-      itemsInCart: 0,
-      error: null,
-    })
+    this.addItem(this.data["bread"], 0, true)
+    this.addItem(this.data["potato"], 0, true)
+    this.addItem(this.data["onion"], 0, true)
   }
 
   upItemQuantity = (barcode) => {
