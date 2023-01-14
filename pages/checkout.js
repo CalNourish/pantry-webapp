@@ -74,7 +74,7 @@ class Cart extends React.Component {
     this.successTimer = setTimeout(() => this.setState({success: null}), t);
   }
 
-  addItem = (newItem, _quantity, initial = false) => {
+  addItem = (newItem, _quantity, defaultCart = false) => {
     let items = this.state.items;
     let barcode = newItem.barcode;
 
@@ -92,14 +92,15 @@ class Cart extends React.Component {
       items.set(newItem.barcode, [newItem, quantity])
     }
 
-    // focus back on the barcode field
-    if (!initial) {
+    if (!defaultCart) {
+      // focus back on the barcode field
+      document.getElementById("barcode").focus();
       this.setState({
         items: items,
         itemsInCart: this.state.itemsInCart + quantity,
       });
-      document.getElementById("barcode").focus();
     }
+
   }
 
   getDefaultCart = () => {
@@ -205,7 +206,6 @@ class Cart extends React.Component {
         this.showError(`Not a valid barcode (${barcode})`, 10000)
       }
     }
-    document.getElementById("barcode").focus();
   }
 
   toggleShowSearch = () => {
@@ -237,6 +237,7 @@ class Cart extends React.Component {
             error: null,
         })
         this.getDefaultCart();
+        document.getElementById("barcode").focus();
       }
       return resp.json()
     })
