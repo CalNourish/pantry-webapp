@@ -5,8 +5,8 @@ import {service_info} from "../../../utils/decrypt.js";
 import firebase from '../../../firebase/clientApp'
 
 /*
- * /api/admin/CheckIn
- * req.body = { string calID }
+ * /api/admin/CheckPreviousVisit
+ * req.body = { string calID, boolean isGrad }
  */
 
 function requireParams(body) {
@@ -40,9 +40,9 @@ function formatTimeForVisits(timeToConvert) {
   }
 
 //get the number of rows for the Check Out sheet
-function getNumRowsForCheckIn(properties) {
+function getNumRowsForCheckIn(properties, sheetname) {
   for (var sheet of properties["data"]["sheets"]) {
-    if (sheet.properties.title == "Check Out Form") {
+    if (sheet.properties.title == sheetname) {
       return sheet.properties.gridProperties.rowCount;
     }
   }
@@ -130,7 +130,7 @@ export default async function (req, res) {
 
         //check for visit in past calendar week
         sheets.spreadsheets.get({spreadsheetId: spreadsheetId})
-        .then((properties) => (numRows = getNumRowsForCheckIn(properties)))
+        .then((properties) => (numRows = getNumRowsForCheckIn(properties, sheetName)))
         .then(function () {
           var startingRow = numRows - numberOfRowsToGoBack;
           var startOfWeek = determineStartOfWeek(checkInTime);
@@ -144,10 +144,7 @@ export default async function (req, res) {
           sheets.spreadsheets.values.get(paramsForVisits)
           .then((body) => {
             var scannedRows = body.data.values
-            // write to google sheets
-            sheets.spreadsheets.values.append(request)
-            .then(() => {
-              if (scannedRows != null) {
+            if (scannedRows != null) {
                 res.json(
                   scanTableForVisitInPastWeek(
                     scannedRows,
@@ -161,12 +158,6 @@ export default async function (req, res) {
                 res.json(emptyVisits)
               }
               return resolve();
-            }
-            )
-            .catch((error) => {
-              res.status(500).json({error: "error writing to Pantry data sheet: " +  error})
-              return resolve();
-            });
           })
           .catch((error) => {
             res.status(500).json({error: "error reading from Pantry data sheet: " + error})
