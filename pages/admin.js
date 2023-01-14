@@ -14,8 +14,8 @@ function SheetLinks(props) {
   const [statusTimer, setStatusTimer] = useState(null);
   const [formData, setFormData] = useState({});
 
-  const fetcher = (url) => fetch(url, {
-    method:'GET', headers: {'Content-Type': "application/json", 'Authorization': token}
+  const fetcher = (url) => fetch(url, {https://ucbpfa-pantry-webapp-1zzbcbc8s-cal-nourish.vercel.app/
+    method:'GET', headers: {'Content-Type': "application/json", 'Authorization': props.authToken}
   }).then((res) => res.json());
 
   const { data, error } = useSWR(`${server}/api/admin/GetSheetLinks`, fetcher);
