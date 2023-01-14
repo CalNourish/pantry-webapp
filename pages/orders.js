@@ -87,7 +87,7 @@ class PackingOrders extends React.Component {
   render() {
     return (
       <>
-        <Layout>
+        <Layout pageName="Orders">
           <div className="flex justify-center items-center">
             <div className="w-4/5 p-5">
               <h1 className="text-3xl font-medium mb-2">Delivery</h1>

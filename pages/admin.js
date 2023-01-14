@@ -24,10 +24,19 @@ function SheetLinks(props) {
 
   if (error) {
     return (
-      <div className='m-4'>Error! See console log for details.</div>
+      <Layout pageName="Admin">
+        <div className='m-4'>Error! See console log for details.</div>
+      </Layout>
     )
   }
-  if (!data) return <div>Loading...</div>
+
+  if (!authToken) {
+    return (
+      <Layout pageName="Admin">
+          <h1 className='text-xl m-6'>Sorry, you are not authorized to view this page.</h1>
+      </Layout>
+    )
+  }
 
   // initialize form info if empty
   if (Object.keys(formData).length == 0) {
@@ -288,7 +297,7 @@ export default function Admin() {
   if (!authToken) {
     return (
       <Layout>
-          <h1 className='text-xl m-6'>Sorry, you are not authorized to view this page.</h1>
+        <h1 className='text-xl m-6'>Sorry, you are not authorized to view this page.</h1>
       </Layout>
     )
   }

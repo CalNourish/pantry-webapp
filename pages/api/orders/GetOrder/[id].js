@@ -31,7 +31,6 @@ export default async function (req, res) {
         .then(function (resp) {
           // the version of the order in the database
           var dbItem = resp.val();
-          console.log("Item:", dbItem)
           // this order was not found
           if (dbItem === null) {
             res.status(404);

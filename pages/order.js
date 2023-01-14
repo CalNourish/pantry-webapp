@@ -97,7 +97,7 @@ export default function Order() {
   /* Cart and Review pages */
   if (formStep >= 2) {
     return (
-      <Layout>
+      <Layout pageName="Order">
         <div className="sm:container mx-auto mt-8 mb-16 px-4">
           { topBar }
           { formStep == 4 ? false : progressBar }
@@ -259,7 +259,7 @@ export default function Order() {
 
   // Personal Info or Delivery Details page
   return ( 
-    <Layout>
+    <Layout pageName="Order">
       <div className="sm:container mx-auto mt-8 mb-16 px-4">
         { topBar }
         { formStep == 4 ? false : progressBar }
