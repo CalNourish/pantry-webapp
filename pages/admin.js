@@ -7,49 +7,36 @@ import firebase from 'firebase/compat/app'
 import { useEffect, useState } from 'react'
 import { useUser } from '../context/userContext'
 import { server } from './_app.js'
-import { browserLocalPersistence } from 'firebase/auth';
-
-
 
 const fetcher = (url) => fetch(url).then((res) => res.json())
 
-
 const token = cookie.get("firebaseToken")
 
-let manageKeys = ["Add Admins", "Email?"];
+// Handles pushing to firebase
+const validateAddAdmin = async (event) => {
+  event.preventDefault()
 
-  // Handles pushing to firebase
-  const validateAddAdmin = async (event) => {
-    event.preventDefault()
-  
-    const adminName = document.querySelector('#adminName').value;  
-    const email = document.querySelector('#adminEmail').value;
+  const adminName = document.querySelector('#adminName').value;  
+  const email = document.querySelector('#adminEmail').value;
 
-    if(adminName.length < 1 || email.length < 2){
-      alert("Please enter a valid name and email");
-      return;
-    }
-    //console.log(adminName);
-    //console.log(email);
-  
-    //firebase.auth().signInAnonymously()
-    console.log("signed in")
-    
-      let itemRef = firebase.database().ref('/authorizedUser/');
-      var snapShot;
-      itemRef.on('value', (snapshot) => {
-        //console.log(snapshot.val());
-      }, (errorObject) => {
-        console.log('The read failed: ' + errorObject.name);
-      });
-  
-      itemRef.update({
-        [adminName] : email
-      });
-      console.log("Set User")
-      document.getElementById('adminName').value = "";
-      document.getElementById('adminEmail').value = "";
+  if(adminName.length < 1 || email.length < 2){
+    alert("Please enter a valid name and email");
+    return;
   }
+
+  let itemRef = firebase.database().ref('/authorizedUser/');
+  itemRef.on('value', (snapshot) => {
+  }, (errorObject) => {
+    console.log('The read failed: ' + errorObject.name);
+  });
+
+  itemRef.update({
+    [adminName] : email
+  });
+  console.log("Set User")
+  document.getElementById('adminName').value = "";
+  document.getElementById('adminEmail').value = "";
+}
 
 export default function Admin() {
   const [submitStatus, setSubmitStatus] = useState({});
