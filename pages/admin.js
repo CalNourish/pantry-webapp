@@ -9,6 +9,90 @@ import { server } from './_app.js'
 import { daysInOrder } from './hours';
 import firebase from '../firebase/clientApp';
 
+function AddAdmin(props) {
+  const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [submitStatus, setSubmitStatus] = useState(null);
+  const [submitStatusMsg, setSubmitStatusMsg] = useState("");
+  const [statusTimer, setStatusTimer] = useState(null);
+
+  let showSuccess = (t = 5000) => {
+    /* show error banner with error text for 5 seconds, or custom time */
+    setSubmitStatus("success");
+    clearTimeout(statusTimer);
+    let timer = setTimeout(() => {
+      setSubmitStatus(null);
+    }, t)
+    setStatusTimer(timer);
+  }
+
+  // Handles pushing to firebase
+  const submitForm = (event) => {
+    event.preventDefault();
+    setSubmitStatus("loading")
+
+    fetch(`${server}/api/admin/AddAdmin`, { method: 'POST',
+      body: JSON.stringify({name: userName, email: userEmail}),
+      headers: {'Content-Type': "application/json", 'Authorization': props.authToken}
+    })
+    .then((result) => {
+      result.json().then((res) => {
+        if (result.ok) {
+          showSuccess();
+        } else {
+          setSubmitStatus("error");
+          setSubmitStatusMsg(res.error);
+          return;
+        }
+      })
+      .catch((err) => {
+        console.log("error parsing AddAdmin JSON response:", err)
+        setSubmitStatus("error")
+        setSubmitStatusMsg(String(err))
+      })
+    }).catch((err) => {
+      console.log("error calling AddAdmin API:", err)
+      setSubmitStatus("error")
+      setSubmitStatusMsg(String(err))
+    });
+  }
+
+  return (
+    <div className='m-9'>
+      <div className='font-semibold text-3xl mb-4'>Add Admin Users</div>
+      <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
+        <form className='p-4 border border-gray-400 bg-gray-50' onSubmit={submitForm}>
+          <table className='w-full my-2 table-auto'>
+            <tbody>
+              <tr className='mb-2'>
+                <td className='pr-4 whitespace-nowrap w-1' htmlFor="adminName">Admin Name:</td>
+                <td>
+                  <input className="border rounded w-full py-2 px-3 text-gray-600 leading-tight mr-4" type="text" id="adminName"
+                    autoComplete="off" value={userName} onChange={(e) => {setUserName(e.target.value); setSubmitStatus(null);}} />
+                </td>
+              </tr>
+              <tr>
+                <td className='pr-4 whitespace-nowrap w-1' htmlFor="adminEmail">Email:</td>
+                <td>
+                  <input className="border rounded w-full py-2 px-3 text-gray-600 leading-tight mr-4" type="text" id="adminEmail"
+                    autoComplete="off" value={userEmail} onChange={(e) => {setUserEmail(e.target.value); setSubmitStatus(null);}}/>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <input className='btn btn-outline uppercase tracking-wide text-xs font-semibold' type='submit'/>
+
+          {(submitStatus === "success") && <div className='mx-4 my-auto text-xl font-bold text-green-600 inline-block'>✓</div>}
+          {(submitStatus === "loading") && <div className='mx-4 inline-block italic text-gray-400'>loading...</div>}
+          {(submitStatus === "error") && <div className='mx-4 my-auto text-xl font-semibold text-red-600 inline-block'>
+            {submitStatusMsg || "X"}</div>}
+        </form>
+      </div>
+    </div>
+  )
+}
+
 function SheetLinks(props) {
   const [submitStatus, setSubmitStatus] = useState({});
   const [statusTimer, setStatusTimer] = useState(null);
@@ -304,7 +388,7 @@ function DeliveryTimes(props) {
 
 export default function Admin() {
   const { user } = useUser();
-  const token = cookie.get("firebaseToken")
+  const token = cookie.get("firebaseToken");
   let authToken = (user && user.authorized === "true") ? token : null;
 
   if (!authToken) {
@@ -317,8 +401,10 @@ export default function Admin() {
 
   return (
     <Layout>
-      <SheetLinks auth={authToken}/>
-      <DeliveryTimes auth={authToken}/>
+      <SheetLinks authToken={authToken}/>
+      <AddAdmin authToken={authToken}/>
+      <DeliveryTimes authToken={authToken}/>
     </Layout>
   )
 }
+
