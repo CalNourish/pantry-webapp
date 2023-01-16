@@ -38,6 +38,7 @@ class Cart extends React.Component {
       isEditing: false,
       showPreview: false
     }
+    this.getDefaultCart()
   }
 
   makeReq = () => {
@@ -72,7 +73,7 @@ class Cart extends React.Component {
     this.successTimer = setTimeout(() => this.setState({success: null}), t);
   }
 
-  addItem = (newItem, _quantity) => {
+  addItem = (newItem, _quantity, defaultCart = false) => {
     let items = this.state.items;
     let barcode = newItem.barcode;
 
@@ -90,13 +91,23 @@ class Cart extends React.Component {
       items.set(newItem.barcode, [newItem, quantity])
     }
 
-    this.setState({
-      items: items,
-      itemsInCart: this.state.itemsInCart + quantity,
-    });
+    if (!defaultCart) {
+      // focus back on the barcode field
+      document.getElementById("barcode").focus();
+      this.setState({
+        items: items,
+        itemsInCart: this.state.itemsInCart + quantity,
+      });
+    }
 
-    // focus back on the barcode field
-    document.getElementById("barcode").focus();
+  }
+
+  getDefaultCart = () => {
+    this.addItem(this.data["fruit"], 0, true)
+    this.addItem(this.data["vegetable"], 0, true)
+    this.addItem(this.data["bread"], 0, true)
+    this.addItem(this.data["potato"], 0, true)
+    this.addItem(this.data["onion"], 0, true)
   }
 
   upItemQuantity = (barcode) => {
@@ -224,6 +235,8 @@ class Cart extends React.Component {
             itemsInCart: 0,
             error: null,
         })
+        this.getDefaultCart();
+        document.getElementById("barcode").focus();
       }
       return resp.json()
     })
