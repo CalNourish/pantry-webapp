@@ -363,9 +363,9 @@ class Cart extends React.Component {
           <SearchModal items={this.data} addItemFunc={this.addItem} onCloseHandler={this.closeModal} submitHotkey={searchSubmitHotkey}/>
         </Modal>
 
-        <div className="flex flex-col h-full sm:flex-row">
+        <div className="flex flex-col h-full lg:flex-row">
           {/* Left-hand column */}
-          <div className="flex-none sm:w-64">
+          <div className="flex-none lg:w-64">
             <Sidebar className="py-4">
             
               {/* Barcode & Quantity Form */}
@@ -375,28 +375,28 @@ class Cart extends React.Component {
                 <div className="form-group" id="barcode-and-quantity">
                   <div className="col-xs-7 mb-4">
                     <h1 className="text-2xl font-medium" autoFocus>Barcode</h1>
-                    <p className="text-gray-500 text-xs tracking-normal font-normal mb-2 hidden sm:block">
+                    <p className="text-gray-500 text-xs tracking-normal font-normal mb-2 hidden lg:block">
                       (hotkey: {barcodeHotkey})
                     </p>
                     <input className="border rounded w-full py-2 px-3 text-gray-600 leading-tight" id="barcode" autoComplete="off" autoFocus></input>
                   </div>
                   <div className="col-xs-8 mb-4">
                     <h1 className="text-2xl font-medium">Quantity</h1>
-                    <p className="text-gray-500 text-xs tracking-normal font-normal mb-2 hidden sm:block">(hotkey: {quantityHotkey})</p>
+                    <p className="text-gray-500 text-xs tracking-normal font-normal mb-2 hidden lg:block">(hotkey: {quantityHotkey})</p>
                     <input className="border rounded w-full py-2 px-3 text-gray-600 leading-tight" id="quantity" autoComplete="off" placeholder="default: 1"></input>
                   </div>
                 </div>
 
                 {/* Add Item Button */}
                 <button className="my-1 btn btn-pantry-blue w-full uppercase tracking-wide text-xs font-semibold focus:shadow-none" id="add-item-btn" type="submit">
-                  Add Item <span className="font-normal hidden sm:inline-block">(Enter)</span>
+                  Add Item <span className="font-normal hidden lg:inline-block">(Enter)</span>
                 </button>
               </form>
 
               {/* Search Item Button */}
               <div>
                 <button className="btn btn-outline w-full uppercase tracking-wide text-xs font-semibold focus:shadow-none" onClick={this.toggleShowSearch}>
-                  Search item by name <span className="font-normal hidden sm:inline-block">({searchHotkey})</span>
+                  Search item by name <span className="font-normal hidden lg:inline-block">({searchHotkey})</span>
                 </button>
               </div>
             </Sidebar>
@@ -429,12 +429,12 @@ class Cart extends React.Component {
               </tbody>
             </table>
             <button className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" onClick={(e) => this.submitCart(e)}>
-              Checkout <span className="font-normal hidden sm:inline-block">(Shift+Enter)</span>
+              Checkout <span className="font-normal hidden lg:inline-block">(Shift+Enter)</span>
             </button>
           </div>
                       
           {/*Right-hand Column*/}
-          <div className="flex-none sm:w-64">
+          <div className="flex-none lg:w-64">
             <Sidebar className="py-4">
             {/* Editing the information */}
             {!this.state.isEditing && <button className='text-blue-700 hover:text-blue-500'
