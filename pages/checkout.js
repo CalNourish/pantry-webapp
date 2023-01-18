@@ -146,7 +146,6 @@ class Cart extends React.Component {
     this.setState({items: items, itemsInCart: this.state.itemsInCart - 1})
   
     // focus back on the barcode field
-    
     if (refocusBarcode) document.getElementById("barcode").focus();
   }
 
