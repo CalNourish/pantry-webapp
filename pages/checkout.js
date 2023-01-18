@@ -110,7 +110,7 @@ class Cart extends React.Component {
     this.addItem(this.data["onion"], 0, true)
   }
 
-  upItemQuantity = (barcode) => {
+  upItemQuantity = (barcode, refocusBarcode=false) => {
     let items = this.state.items;
     let itemData = items.get(barcode);
     if (!itemData) {
@@ -122,10 +122,10 @@ class Cart extends React.Component {
     this.setState({items: items, itemsInCart: this.state.itemsInCart + 1})
   
     // focus back on the barcode field
-    document.getElementById("barcode").focus();
+    if (refocusBarcode) document.getElementById("barcode").focus();
   }
 
-  downItemQuantity = (barcode) => {
+  downItemQuantity = (barcode, refocusBarcode=false) => {
     let items = this.state.items;
     let itemData = items.get(barcode);
     if (!itemData) {
@@ -146,7 +146,7 @@ class Cart extends React.Component {
     this.setState({items: items, itemsInCart: this.state.itemsInCart - 1})
   
     // focus back on the barcode field
-    document.getElementById("barcode").focus();
+    if (refocusBarcode) document.getElementById("barcode").focus();
   }
 
   updateItemQuantity = (barcode, newQuantity) => {
@@ -259,12 +259,12 @@ class Cart extends React.Component {
           {/* number spinner [-| 1 |+] */}
           <div className="border border-solid border-gray-200 p-px w-32 h-8 flex flex-row float-left">
             {/* minus */}
-            <button className="font-light p-1 bg-gray-200 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.downItemQuantity(barcode)} tabIndex="-1">–</button>
+            <button className="font-light p-1 bg-gray-200 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.downItemQuantity(barcode, true)} tabIndex="-1">–</button>
             {/* quantity input */}
             <input id={barcode + "-quantity"} className="quantity-input w-6 flex-grow mx-1 text-center focus:outline-none" autoComplete="off"
               value={value[1]} onChange={e => this.updateItemQuantity(barcode, e.target.value)}/>
             {/* plus */}
-            <button className="font-light p-1 bg-gray-200 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.upItemQuantity(barcode)} tabIndex="-1">+</button>
+            <button className="font-light p-1 bg-gray-200 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.upItemQuantity(barcode, true)} tabIndex="-1">+</button>
           </div>
           {/* Trash can symbol */}
           <button className="float-right align-middle py-1 focus:outline-none" tabIndex="-1">
@@ -332,10 +332,12 @@ class Cart extends React.Component {
 
       /* hotkeys for item form (left tab) */
       if (!this.state.isEditing) {
-        if (["ArrowUp", barcodeHotkey.toLowerCase(), barcodeHotkey.toUpperCase()].includes(e.key)) {
+        if ((barcodeHotkey.toLowerCase() === e.key.toLowerCase() && document.activeElement.id !== "barcode")
+            || e.key == "ArrowUp") {
           e.preventDefault();
           barcode.focus();
-        } else if (["ArrowDown", quantityHotkey.toLowerCase(), quantityHotkey.toUpperCase()].includes(e.key)) {
+        } else if ((quantityHotkey.toLowerCase() === e.key.toLowerCase() && document.activeElement.id !== "barcode")
+            || e.key == "ArrowDown") {
           e.preventDefault();
           quantity.focus();
         } else if (e.key === "Enter" && e.shiftKey) {
@@ -344,7 +346,7 @@ class Cart extends React.Component {
         } else if (e.key === "Enter") {
           e.preventDefault();
           document.getElementById("checkout-item-form").requestSubmit();
-        } else if (e.key.toLowerCase() === searchHotkey.toLowerCase()) {
+        } else if (e.key.toLowerCase() === searchHotkey.toLowerCase() && document.activeElement.id !== "barcode") {
           e.preventDefault();
           this.toggleShowSearch();
         }
