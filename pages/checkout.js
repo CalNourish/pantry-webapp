@@ -4,12 +4,9 @@ import useSWR from 'swr';
 import React from 'react';
 import Modal from 'react-modal'
 import SearchModal from '../components/SearchModal'
-import cookie from 'js-cookie';
 import { useUser } from '../context/userContext'
 import ReactMarkdown from 'react-markdown';
 import { markdownStyle } from '../utils/markdownStyle';
-
-
 
 function fetcher(...urls) {
   const f = (u) =>
@@ -94,12 +91,15 @@ class Cart extends React.Component {
     if (!defaultCart) {
       // focus back on the barcode field
       document.getElementById("barcode").focus();
-      this.setState({
-        items: items,
-        itemsInCart: this.state.itemsInCart + quantity,
-      });
+      this.setState({items: items});
+      this.updateTotalCount();
     }
+  }
 
+  updateTotalCount = () => {
+    let newCount = 0;
+    this.state.items.forEach((val, _) => { newCount += val[1] })
+    this.setState({itemsInCart: newCount})
   }
 
   getDefaultCart = () => {
@@ -119,7 +119,8 @@ class Cart extends React.Component {
     }
     itemData[1] += 1;
     items.set(barcode, itemData);
-    this.setState({items: items, itemsInCart: this.state.itemsInCart + 1})
+    this.setState({items: items})
+    this.updateTotalCount();
   
     // focus back on the barcode field
     if (refocusBarcode) document.getElementById("barcode").focus();
@@ -143,7 +144,8 @@ class Cart extends React.Component {
 
     itemData[1] -= 1;
     items.set(barcode, itemData);
-    this.setState({items: items, itemsInCart: this.state.itemsInCart - 1})
+    this.setState({items: items})
+    this.updateTotalCount();
   
     // focus back on the barcode field
     if (refocusBarcode) document.getElementById("barcode").focus();
@@ -158,20 +160,20 @@ class Cart extends React.Component {
     }
 
     if (newQuantity === "") {
-      let deltaQuantity = -itemData[1];
       itemData[1] = 0;
       items.set(barcode, itemData);
-      this.setState({items: items, itemsInCart: this.state.itemsInCart+deltaQuantity})
+      this.setState({items: items})
+      this.updateTotalCount();
       return;
     }
 
     newQuantity = parseInt(newQuantity)
     if (!isNaN(newQuantity)) {
-      let deltaQuantity = newQuantity - itemData[1]; // amount increased by, to recalculate the total sum
       itemData[1] = newQuantity;
       items.set(barcode, itemData);
-      this.setState({items: items, itemsInCart: this.state.itemsInCart+deltaQuantity})
+      this.setState({items: items})
     }
+    this.updateTotalCount();
   }
 
   deleteItem = (barcode) => {
@@ -182,7 +184,8 @@ class Cart extends React.Component {
         return
     }
     items.delete(barcode);
-    this.setState({items: items, itemsInCart: this.state.itemsInCart - itemData[1]})
+    this.setState({items: items})
+    this.updateTotalCount();
   
     // focus back on the barcode field
     document.getElementById("barcode").focus();
