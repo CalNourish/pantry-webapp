@@ -369,7 +369,7 @@ class Cart extends React.Component {
         <div className="flex flex-col h-full lg:flex-row">
           {/* Left-hand column */}
           <div className="flex-none lg:w-64">
-            <Sidebar className="py-4">
+            <Sidebar className="sm:min-h-0 lg:min-h-screen">
             
               {/* Barcode & Quantity Form */}
               <form id="checkout-item-form" onSubmit={(e) => this.itemFormSubmit(e)}>
@@ -438,7 +438,7 @@ class Cart extends React.Component {
                       
           {/*Right-hand Column*/}
           <div className="flex-none lg:w-64">
-            <Sidebar className="py-4">
+            <Sidebar className="sm:min-h-0 lg:min-h-screen">
             {/* Editing the information */}
             {!this.state.isEditing && <button className='text-blue-700 hover:text-blue-500'
               onClick={() => this.setState({isEditing:true})}>
