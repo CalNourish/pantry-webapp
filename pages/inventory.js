@@ -495,7 +495,7 @@ export default function Inventory() {
         <div className="flex">
           {!(user && user.authorized === "true") ? "" :
               <div className="w-64 items-center">
-                <Sidebar className="py-4">
+                <Sidebar>
                   <h1 className="text-3xl font-semibold mb-2">Inventory</h1>
                   <div className="my-4">
                     <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowAddItem(true)}>Add new item</button>
