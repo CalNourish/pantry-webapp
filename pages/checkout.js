@@ -8,6 +8,8 @@ import { useUser } from '../context/userContext'
 import ReactMarkdown from 'react-markdown';
 import { markdownStyle } from '../utils/markdownStyle';
 
+const MAX_ITEM_QUANTITY = 100000;
+
 function fetcher(...urls) {
   const f = (u) =>
     fetch(u, {
@@ -77,11 +79,19 @@ class Cart extends React.Component {
     /* default quantity is 1 if no quantity, or quantity is not a number */
     let quantity = parseInt(_quantity)
     if (isNaN(quantity)) {
-        quantity = 1;
+      quantity = 1
+    }
+    else if (quantity > MAX_ITEM_QUANTITY) {
+      this.showError(`Quantity '${quantity}' is too high. Using default quantity 1.`, 20000);
+      quantity = 1;
     }
 
     if (items.has(barcode)) { /* if item already in table, just increment count */
       var itemData = items.get(barcode)
+      if (itemData[1] + quantity > MAX_ITEM_QUANTITY) {
+        this.showError(`New quantity '${itemData[1] + quantity}' is too high.`, 20000);
+        return;
+      }
       itemData[1] += quantity
       items.set(barcode, itemData)
     } else { /* otherwise, create new row in table */
@@ -116,6 +126,9 @@ class Cart extends React.Component {
     if (!itemData) {
       this.showError("Data corruption: please retry or refresh page", 20000)
       return
+    } else if (itemData[1] + 1 > MAX_ITEM_QUANTITY) {
+      this.showError(`Quantity '${itemData[1]+1}' is too high.`, 20000);
+      return;
     }
     itemData[1] += 1;
     items.set(barcode, itemData);
@@ -134,12 +147,9 @@ class Cart extends React.Component {
       return
     }
 
-    /* Can't decrease item quantity to negative
-    *  note: can start with negative quantity using left column form
-    *  - possibly in case someone accidentally checked out too much?
-    */
+    /* Can't decrease item quantity to negative */
     if (itemData[1] <= 0) {
-        return;
+      return;
     }
 
     itemData[1] -= 1;
@@ -168,12 +178,18 @@ class Cart extends React.Component {
     }
 
     newQuantity = parseInt(newQuantity)
-    if (!isNaN(newQuantity)) {
+    if (isNaN(newQuantity)) {
+      this.showError(`Quantity '${newQuantity}' is not a number.`, 20000);
+    }
+    else if (newQuantity > MAX_ITEM_QUANTITY) {
+      this.showError(`Quantity '${newQuantity}' is too high.`, 20000);
+    }
+    else {
       itemData[1] = newQuantity;
       items.set(barcode, itemData);
-      this.setState({items: items})
+      this.setState({items: items});
+      this.updateTotalCount();
     }
-    this.updateTotalCount();
   }
 
   deleteItem = (barcode) => {
@@ -196,8 +212,8 @@ class Cart extends React.Component {
     let barcode = e.target.barcode.value.trim()
     let item = this.data[barcode]
     if (item && item.barcode) {
-      this.addItem(item, e.target.quantity.value)
       this.setState({error: null, success: null})
+      this.addItem(item, e.target.quantity.value)
       
       e.target.barcode.value = null;
       e.target.quantity.value = null;
