@@ -10,7 +10,7 @@ export default function OrderDetails({children}) {
   const cartDispatch = useContext(DispatchCartContext)
   let { cart, personal } = useContext(StateCartContext)
   const [searchFilter, setSearchFilter] = useState("");
-  const [hideOOS, setHideOOS] = useState(false); // whether to hide out-of-stock items
+  const [hideOOS, setHideOOS] = useState(true); // whether to hide out-of-stock items
   let { data: items, error: itemError } = useSWR('/api/inventory/GetAllItems', fetcher)
   let { data: categories, error: categoryError } = useSWR('/api/categories/ListCategories', fetcher)
   
@@ -38,7 +38,8 @@ export default function OrderDetails({children}) {
     }
 
     // if not max order size, set to infinity
-    const maxQuantity = parseInt(items[key].maxOrderSize) || parseInt(items[key].count)
+    let maxQuantity = parseInt(items[key].maxOrderSize) || parseInt(items[key].count)
+    maxQuantity = Math.max(maxQuantity, 0)
     // let invalid_quantity = cart[key] && cart[key].quantity > maxQuantity
     let inputId = `item-${items[key].barcode}`
     let itemInput = (
@@ -146,7 +147,7 @@ Or leave other notes for pantry staff."
         <label htmlFor="toggle-oos" className='text-sm text-gray-600'>
           <input id="toggle-oos" type="checkbox" value={hideOOS} onChange={() => setHideOOS(!hideOOS)}
             className="mr-2"/>
-          <span>{hideOOS ? "show" : "hide"} out of stock</span>
+          <span>show out of stock</span>
         </label>
           <div className="sticky top-0">
             <div className="pt-2">
@@ -168,7 +169,7 @@ Or leave other notes for pantry staff."
           </div>
         </div>
 
-        <div className=' mr-8'>
+        <div className='mr-8 flex-grow'>
           {/* Items search bar */}
           <div className='sticky py-4 z-10 bg-white top-0 flex'>
             <div className="block w-full">
