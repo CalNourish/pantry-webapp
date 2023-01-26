@@ -40,6 +40,8 @@ export default function SearchModal(props) {
 
   return (
     <div className="modal-wrapper p-5 h-full flex flex-col">
+      <div id="modalExit" className="text-4xl absolute top-0 right-0 cursor-pointer hover:text-gray-500" onClick={props.onCloseHandler}>&times; &nbsp;</div>
+
       <div className="modal-header text-3xl font-bold mb-5">
         Add Item By Name
       </div>
