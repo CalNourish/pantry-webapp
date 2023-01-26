@@ -36,8 +36,6 @@ const AUTH_SIGNEDIN_ROUTES = [
   { title: "Bag Packing", route: "/orders"}
 ]
 
-const token = cookie.get("firebaseToken")
-
 export default function Navbar() {
   const linkStyle = "w-full relative inline-block py-2 pr-3 pl-3 text-white rounded hover:bg-pantry-blue-400 " +
     "xl:ml-4 xl:px-3 xl:py-2 xl:text-sm xl:font-medium xl:hover:bg-pantry-blue-500"
@@ -56,17 +54,18 @@ export default function Navbar() {
 
   // if they're signed in 
   if (user) {
+    console.log("User Data:", user)
     name = user.displayName;
     routes = UNAUTH_SIGNEDIN_ROUTES
     // if they're an admin
-    if (user.authorized === "true") {
+    if (user.authorized) {
       routes = AUTH_SIGNEDIN_ROUTES;
       userType = "Administrator";
 
       // update numNewOrders
       if (numNewOrders === false) {
         fetch(`${server}/api/orders/GetOrdersByStatus?status=open`, { method: 'GET',
-          headers: {'Content-Type': "application/json", 'Authorization': token}
+          headers: {'Content-Type': "application/json", 'Authorization': user.authToken}
         })
         .then(resp => resp.json())
         .then(newOrders => {

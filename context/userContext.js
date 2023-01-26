@@ -1,6 +1,7 @@
 import { useState, useEffect, createContext, useContext } from 'react'
 import firebase from '../firebase/clientApp'
 import 'firebase/auth'
+import { getAuth, signInWithPopup } from "firebase/auth";
 import cookie from 'js-cookie';
 
 export const UserContext = createContext()
@@ -34,36 +35,54 @@ const UserProvider = ({ children }) => {
     })
   }
 
+  let authorizeLogin = (userEmail) => {
+    return new Promise((resolve) => {
+      firebase.database().ref('authorizedUser').once('value')
+      .then((data) => {
+        var authorizedUsersFromDb = data.val();
+        for (const email of Object.values(authorizedUsersFromDb)) {
+          if (email == userEmail) return resolve(true);
+        }
+        return resolve(false);
+      })
+      .catch(function(error) {
+        console.log("Login Error:", error)
+        return resolve(false);
+      })
+    })
+  }
+
   // Checks that user state has changed and then creates or destroys cookie with Firebase token.
   // note that the user here is different from the user retrieved from useState, this one is from Google
   // the useState user is updated with setUser
   const onAuthStateChange = () => {
-    return firebase.auth().onAuthStateChanged(async (user) => {
-      if (user) {
-        // check against firebase and see if this is an admin authorized user
-        var authorizeLogin = firebase
-        .functions()
-        .httpsCallable('authorizeLogin');
-
-        let authorized = (await authorizeLogin({})
-          .catch(error => {
-            console.log(error)
-            return {"authorized": "false"}
-          })
-          .then(result => {
-            return result.data;
-        }))?.authorized; 
-
-        setUser({"displayName": user.displayName, "photoURL": user.photoURL, "authorized": authorized, "googleUser": user});
-        
-        if (authorized === "true") {
-          const token = await user.getIdToken();
-          console.log("Giving them a token");
-          cookie.set(tokenName, token, { expires: 14, sameSite: 'strict', secure: true });
-        }
+    return firebase.auth().onAuthStateChanged(async (userAuth) => {
+      if (userAuth) {
+        console.log("user email:", userAuth.email)
+        authorizeLogin(userAuth.email).then((isAuthorized) => {
+          setUser({});
+          if (isAuthorized) {
+            userAuth.getIdToken().then((tok) => {
+              console.log("Giving them a token:", tok);
+              setUser({
+                "displayName": userAuth.displayName,
+                "photoURL": userAuth.photoURL,
+                "authorized": isAuthorized,
+                "googleUser": userAuth,
+                "authToken": tok
+              });
+            });
+          } else {
+            setUser({
+              "displayName": userAuth.displayName,
+              "photoURL": userAuth.photoURL,
+              "authorized": isAuthorized,
+              "googleUser": userAuth
+            });
+          }
+        })
       } else {
-        console.log("Not giving them a token");
-        cookie.remove(tokenName);
+        console.log("No user found.");
       }
     });
   };
