@@ -221,6 +221,8 @@ class Cart extends React.Component {
       if (!barcode) {
         this.showError("Please enter a barcode in the field to the left.")
       } else {
+        e.target.barcode.value = null;
+        e.target.quantity.value = null;
         this.showError(`Not a valid barcode (${barcode})`, 10000)
       }
     }
