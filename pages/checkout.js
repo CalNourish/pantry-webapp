@@ -115,6 +115,7 @@ class Cart extends React.Component {
   getDefaultCart = () => {
     this.addItem(this.data["fruit"], 0, true)
     this.addItem(this.data["vegetable"], 0, true)
+    this.addItem(this.data["eggs"], 0, true)
     this.addItem(this.data["spices"], 0, true)
     this.addItem(this.data["bread"], 0, true)
     this.addItem(this.data["potato"], 0, true)
