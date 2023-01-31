@@ -86,6 +86,7 @@ function writeLog(log) {
         if(itemLog.quantity < 1){
             continue;
         }
+        
         input.push([row1, row1, barcode, itemLog.quantity, itemLog.itemName, itemLog.newQuantity])
         row1 = "";
       }
