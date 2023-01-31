@@ -191,7 +191,7 @@ function writeToSheets(body, itemNames) {
                 calID,
                 orderId,
                 email,
-                pickup ? "Pickup" : `${deliveryDay} ${deliveryWindow}`,
+                pickup ? "Pickup" : `${deliveryMMDD} ${deliveryDay} ${deliveryWindow}`,
                 pickup ? pickupNotes : "(" + altDelivery + ")"] //each inner array is a row if we specify ROWS as majorDim
             ] 
           } ,
