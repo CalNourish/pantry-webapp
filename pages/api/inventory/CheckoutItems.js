@@ -83,6 +83,10 @@ function writeLog(log) {
 
       // create payload to write to sheet. only first row of checkout should have timestamp
       for (let barcode in log) {
+        if (itemLog.quantity <= 0){
+          continue;
+        }
+
         let itemLog = log[barcode]
         input.push([date, time, barcode, itemLog.quantity, itemLog.itemName, itemLog.newQuantity])
         date = "";
