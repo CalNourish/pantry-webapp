@@ -120,6 +120,7 @@ class Cart extends React.Component {
     this.addItem(this.data["bread"], 0, true)
     this.addItem(this.data["potato"], 0, true)
     this.addItem(this.data["onion"], 0, true)
+    this.addItem(this.data["apple juice"], 0, true)
     this.addItem(this.data["berry juice"], 0, true)
   }
 
