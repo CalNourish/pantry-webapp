@@ -78,7 +78,7 @@ function writeLog(log) {
       let now = new Date();
 
       let input = []
-      let date = now.toLocaleDateString('en-US', { weekday: 'long', month: 'numeric', day: 'numeric' });
+      let date = now.toLocaleDateString('en-US', { weekday: 'long', month: 'numeric', day: 'numeric' }).replace(',', '');
       let time = now.toLocaleTimeString('en-US', { hour12: false, hour: "numeric", minute: "numeric" });
 
       // create payload to write to sheet. only first row of checkout should have timestamp
@@ -114,8 +114,8 @@ function writeLog(log) {
           spreadsheetId: spreadsheetId,
           resource: {
             requests: [
-              requestFormat([0, 3], { type: "TEXT" }),                   // column 1-3 (date, time, barcode)
-              requestFormat([3, 6]),                                     // column 4-6 (quantity, name, new quantity)
+              // requestFormat([0, 3], { type: "TEXT" }),                   // column 1-3 (date, time, barcode)
+              requestFormat([0, 6]),                                     // column 4-6 (quantity, name, new quantity)
             ]
           }
         }
