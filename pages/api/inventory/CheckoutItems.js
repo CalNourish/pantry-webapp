@@ -118,8 +118,8 @@ function writeLog(log) {
           spreadsheetId: spreadsheetId,
           resource: {
             requests: [
-              // requestFormat([0, 3], { type: "TEXT" }),                   // column 1-3 (date, time, barcode)
-              requestFormat([0, 6]),                                     // column 4-6 (quantity, name, new quantity)
+              requestFormat([0, 3], { type: "TEXT" }),                   // column 1-3 (date, time, barcode)
+              requestFormat([3, 6]),                                     // column 4-6 (quantity, name, new quantity)
             ]
           }
         }
