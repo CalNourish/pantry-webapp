@@ -73,7 +73,7 @@ export default async function (req, res) {
         "lowStock": body.lowStock ? body.lowStock.toString() : "-1",
         "packSize": body.packSize ? body.packSize.toString() : "1",
         "displayPublic": body.displayPublic !== undefined ? body.displayPublic : true, // default true
-         "defaultCart": body.defaultCart !== undefined ? body.defaultCart : false // default false
+        "defaultCart": body.defaultCart !== undefined ? body.defaultCart : false // default false
       };
 
       // check that all the categories are valid
