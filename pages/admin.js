@@ -1,6 +1,5 @@
 import Layout from '../components/Layout'
 import useSWR from 'swr'
-import cookie from 'js-cookie';
 
 import { useState } from 'react'
 import { useUser } from '../context/userContext'
@@ -388,8 +387,7 @@ function DeliveryTimes(props) {
 
 export default function Admin() {
   const { user } = useUser();
-  const token = cookie.get("firebaseToken");
-  let authToken = (user && user.authorized === "true") ? token : null;
+  let authToken = (user && user.authorized) ? user.authToken : null;
 
   if (!authToken) {
     return (

@@ -1,6 +1,5 @@
 import Layout from "../components/Layout";
 import useSWR from "swr";
-import cookie from "js-cookie";
 import { useRouter } from "next/router";
 import React from "react";
 import {
@@ -9,9 +8,8 @@ import {
   ORDER_STATUS_PROCESSING,
 } from "../utils/orderStatuses";
 
-const token = cookie.get("firebaseToken");
 
-function fetcher(...urls) {
+function fetcher(token, ...urls) {
   const f = (u) =>
     fetch(u, {
       headers: { "Content-Type": "application/json", Authorization: token },
@@ -27,6 +25,7 @@ class PackingOrder extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      user: props.user,
       orderId: props.data[0].orderId,
       delivery_date: props.data[0].deliveryDate,
       dependents: props.data[0].dependents,
@@ -54,7 +53,7 @@ class PackingOrder extends React.Component {
         orderId: this.state.orderId,
         message: this.state.pantryNote,
       }),
-      headers: { "Content-Type": "application/json", Authorization: token },
+      headers: { "Content-Type": "application/json", Authorization: this.state.user.authToken },
     }).then(() => {
       this.setState({ success: "Saved pantry note successfully!" });
       setTimeout(() => this.setState({ success: null }), 1000);
@@ -83,7 +82,7 @@ class PackingOrder extends React.Component {
         orderId: this.state.orderId,
         status: newStatus,
       }),
-      headers: { "Content-Type": "application/json", Authorization: token },
+      headers: { "Content-Type": "application/json", Authorization: this.state.user.authToken },
     }).then(() => {
       this.setState({ success: "Changed order status successfully!" });
       setTimeout(() => this.setState({ success: null }), 1000);
@@ -100,7 +99,7 @@ class PackingOrder extends React.Component {
         itemId: barcode,
         isPacked: this.state.items[barcode].isPacked,
       }),
-      headers: { "Content-Type": "application/json", Authorization: token },
+      headers: { "Content-Type": "application/json", Authorization: this.state.user.authToken },
     }).then(() => {});
   }
 
@@ -329,6 +328,17 @@ class PackingOrder extends React.Component {
 }
 
 export default function PackingDetailed() {
+  const { user } = useUser();
+  let authToken = (user && user.authorized) ? user.authToken : null;
+
+  if (!authToken) {
+    return (
+      <Layout pageName="Orders">
+          <h1 className='text-xl m-6'>Sorry, you are not authorized to view this page.</h1>
+      </Layout>
+    )
+  }
+
   const router = useRouter();
   var orderId = router.query.orderid;
   if (orderId == null) {
@@ -339,6 +349,7 @@ export default function PackingDetailed() {
     );
   }
   const { data } = useSWR(
+    authToken,
     ["/api/orders/GetOrder/" + orderId, "/api/inventory/GetAllItems"],
     fetcher
   );
@@ -349,6 +360,6 @@ export default function PackingDetailed() {
       </Layout>
     );
   } else {
-    return <PackingOrder data={data}></PackingOrder>;
+    return <PackingOrder user={user} data={data}></PackingOrder>;
   }
 }

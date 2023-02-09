@@ -2,7 +2,6 @@ import { useRouter } from "next/router";
 import { useUser } from '../context/userContext'
 import { useState } from 'react'
 import { server } from '../pages/_app.js'
-import cookie from 'js-cookie';
 
 const DISABLE_PUBLIC_INVENTORY = true;
 
@@ -42,7 +41,7 @@ export default function Navbar() {
   const activeLink = `${linkStyle} text-white`;
   const inactiveLink = `${linkStyle} text-gray-300 hover:text-white`;
   const router = useRouter();
-  const { loadingUser, user } = useUser()
+  const { user } = useUser()
   
   const [showUserInfo, setShowUserInfo] = useState(false)
   const [showTabs, setShowTabs] = useState(false)
@@ -54,7 +53,6 @@ export default function Navbar() {
 
   // if they're signed in 
   if (user) {
-    console.log("User Data:", user)
     name = user.displayName;
     routes = UNAUTH_SIGNEDIN_ROUTES
     // if they're an admin

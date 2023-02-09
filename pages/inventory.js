@@ -8,14 +8,14 @@ import { server } from './_app.js'
 
 import Modal from 'react-modal'
 import React, { useState, useReducer } from 'react';
-import cookie from 'js-cookie';
 import firebase from '../firebase/clientApp';
 
 /* For hiding inventory to the public */
 const DISABLE_PUBLIC_INVENTORY = true;
 
 export default function Inventory() {
-  const token = cookie.get("firebaseToken")
+  const { user } = useUser();
+  let authToken = (user && user.authorized) ? user.authToken : null;
 
   const emptyItem =  {
     itemName: "",
@@ -182,7 +182,7 @@ export default function Inventory() {
 
     fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
       body: payload,
-      headers: {'Content-Type': "application/json", 'Authorization': token}})
+      headers: {'Content-Type': "application/json", 'Authorization': authToken}})
     .then((response) => response.json())
     .then(json => {
       if (json.error) {
@@ -195,7 +195,7 @@ export default function Inventory() {
     if (confirm(`Deleting item with barcode ${barcode}. Are you sure?`)){
       fetch(`${server}/api/inventory/DeleteItem`, { method: 'POST',
         body: JSON.stringify({barcode: barcode}),
-        headers: {'Content-Type': "application/json", 'Authorization': token}})
+        headers: {'Content-Type': "application/json", 'Authorization': authToken}})
       .then(() => {
         // remove something from dataState
         let { [barcode]: deletedItem, ...newDataState } = dataState
@@ -284,7 +284,7 @@ export default function Inventory() {
     
     fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
       body: payload,
-      headers: {'Content-Type': "application/json", 'Authorization': token}})
+      headers: {'Content-Type': "application/json", 'Authorization': authToken}})
     .then((response) => response.json())
     .then(json => {
       if (json.error) {
@@ -309,7 +309,7 @@ export default function Inventory() {
   function resetInventory() {
     if (window.confirm("Reset Inventory?")) {
     fetch(`${server}/api/inventory/ResetInventory`, { method: 'POST',
-      headers: {'Content-Type': "application/json", 'Authorization': token}})
+      headers: {'Content-Type': "application/json", 'Authorization': authToken}})
     .then((response) => response.json())
     .then(json => {
       if (json.error) {
@@ -359,7 +359,7 @@ export default function Inventory() {
 
     fetch(`${server}/api/inventory/AddItem`, { method: 'POST', 
       body: JSON.stringify(payload),
-      headers: {'Content-Type': "application/json", 'Authorization': token}})
+      headers: {'Content-Type': "application/json", 'Authorization': authToken}})
     .then((response) => {
       if (response.status == 500) {
         setStatusError("Internal server error (make sure you're logged in)");
@@ -419,9 +419,6 @@ export default function Inventory() {
       ...status, loading: false, error: ""
     })
   }
-
-  const { loadingUser, user } = useUser();
-  let authToken = (user && user.authorized === "true") ? token : null;
 
   if (DISABLE_PUBLIC_INVENTORY && !authToken) {
     return (
