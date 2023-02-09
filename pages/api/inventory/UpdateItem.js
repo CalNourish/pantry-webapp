@@ -16,7 +16,7 @@ export const config = {
 }
 
 // list of item fields that can be updated
-const UPDATABLE_FIELDS = ["categoryName", "count", "itemName", "lowStock", "packSize", "displayPublic"];
+const UPDATABLE_FIELDS = ["categoryName", "count", "itemName", "lowStock", "packSize", "displayPublic","defaultCart"];
 
 export default async function(req,res) {   
   // verify this request is legit

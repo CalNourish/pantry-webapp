@@ -26,6 +26,7 @@ class Cart extends React.Component {
   constructor(props) {
     super(props);
     this.data = props.data[1];
+    this.defaultCart = props.data["defaultCart"];
     this.state = {
       user: props.data.user,
       items: new Map([]),   /* entries are {barcode: [itemStruct, quantity]} */
@@ -113,15 +114,9 @@ class Cart extends React.Component {
   }
 
   getDefaultCart = () => {
-    this.addItem(this.data["fruit"], 0, true)
-    this.addItem(this.data["vegetable"], 0, true)
-    this.addItem(this.data["eggs"], 0, true)
-    this.addItem(this.data["spices"], 0, true)
-    this.addItem(this.data["bread"], 0, true)
-    this.addItem(this.data["potato"], 0, true)
-    this.addItem(this.data["onion"], 0, true)
-    this.addItem(this.data["apple juice"], 0, true)
-    this.addItem(this.data["berry juice"], 0, true)
+    for (let defaultItemBarcode of this.defaultCart) {
+      this.addItem(this.data[defaultItemBarcode], 0 ,true)
+    }
   }
 
   upItemQuantity = (barcode, refocusBarcode=false) => {
@@ -539,6 +534,12 @@ export default function Checkout() {
     )
   } else {
     data["user"] = user
+    data["defaultCart"] = []
+    for (let item in data[1]) {
+      if (data[1][item]["defaultCart"]) {
+        data["defaultCart"].push(data[1][item]["barcode"])
+      }
+    }
     return (<Cart data={data}></Cart>)
   }
 }
