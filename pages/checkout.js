@@ -278,7 +278,7 @@ class Cart extends React.Component {
 
   displayCartRow = (barcode, value) => {
     return (
-      <tr class="h-10 even:bg-gray-50" key={barcode}>
+      <tr className="h-10 even:bg-gray-50" key={barcode}>
         <td className="text-left pr-10">{value[0].itemName}</td>
         <td>
           {/* number spinner [-| 1 |+] */}
