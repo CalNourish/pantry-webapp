@@ -4,12 +4,11 @@ import useSWR from 'swr';
 import React from 'react';
 import Modal from 'react-modal'
 import SearchModal from '../components/SearchModal'
-import cookie from 'js-cookie';
 import { useUser } from '../context/userContext'
 import ReactMarkdown from 'react-markdown';
 import { markdownStyle } from '../utils/markdownStyle';
 
-
+const MAX_ITEM_QUANTITY = 100000;
 
 function fetcher(...urls) {
   const f = (u) =>
@@ -80,11 +79,19 @@ class Cart extends React.Component {
     /* default quantity is 1 if no quantity, or quantity is not a number */
     let quantity = parseInt(_quantity)
     if (isNaN(quantity)) {
-        quantity = 1;
+      quantity = 1
+    }
+    else if (quantity > MAX_ITEM_QUANTITY) {
+      this.showError(`Quantity '${quantity}' is too high. Using default quantity 1.`, 20000);
+      quantity = 1;
     }
 
     if (items.has(barcode)) { /* if item already in table, just increment count */
       var itemData = items.get(barcode)
+      if (itemData[1] + quantity > MAX_ITEM_QUANTITY) {
+        this.showError(`New quantity '${itemData[1] + quantity}' is too high.`, 20000);
+        return;
+      }
       itemData[1] += quantity
       items.set(barcode, itemData)
     } else { /* otherwise, create new row in table */
@@ -94,20 +101,27 @@ class Cart extends React.Component {
     if (!defaultCart) {
       // focus back on the barcode field
       document.getElementById("barcode").focus();
-      this.setState({
-        items: items,
-        itemsInCart: this.state.itemsInCart + quantity,
-      });
+      this.setState({items: items});
+      this.updateTotalCount();
     }
+  }
 
+  updateTotalCount = () => {
+    let newCount = 0;
+    this.state.items.forEach((val, _) => { newCount += val[1] })
+    this.setState({itemsInCart: newCount})
   }
 
   getDefaultCart = () => {
     this.addItem(this.data["fruit"], 0, true)
     this.addItem(this.data["vegetable"], 0, true)
+    this.addItem(this.data["eggs"], 0, true)
+    this.addItem(this.data["spices"], 0, true)
     this.addItem(this.data["bread"], 0, true)
     this.addItem(this.data["potato"], 0, true)
     this.addItem(this.data["onion"], 0, true)
+    this.addItem(this.data["apple juice"], 0, true)
+    this.addItem(this.data["berry juice"], 0, true)
   }
 
   upItemQuantity = (barcode, refocusBarcode=false) => {
@@ -116,10 +130,14 @@ class Cart extends React.Component {
     if (!itemData) {
       this.showError("Data corruption: please retry or refresh page", 20000)
       return
+    } else if (itemData[1] + 1 > MAX_ITEM_QUANTITY) {
+      this.showError(`Quantity '${itemData[1]+1}' is too high.`, 20000);
+      return;
     }
     itemData[1] += 1;
     items.set(barcode, itemData);
-    this.setState({items: items, itemsInCart: this.state.itemsInCart + 1})
+    this.setState({items: items})
+    this.updateTotalCount();
   
     // focus back on the barcode field
     if (refocusBarcode) document.getElementById("barcode").focus();
@@ -133,17 +151,15 @@ class Cart extends React.Component {
       return
     }
 
-    /* Can't decrease item quantity to negative
-    *  note: can start with negative quantity using left column form
-    *  - possibly in case someone accidentally checked out too much?
-    */
+    /* Can't decrease item quantity to negative */
     if (itemData[1] <= 0) {
-        return;
+      return;
     }
 
     itemData[1] -= 1;
     items.set(barcode, itemData);
-    this.setState({items: items, itemsInCart: this.state.itemsInCart - 1})
+    this.setState({items: items})
+    this.updateTotalCount();
   
     // focus back on the barcode field
     if (refocusBarcode) document.getElementById("barcode").focus();
@@ -158,19 +174,25 @@ class Cart extends React.Component {
     }
 
     if (newQuantity === "") {
-      let deltaQuantity = -itemData[1];
       itemData[1] = 0;
       items.set(barcode, itemData);
-      this.setState({items: items, itemsInCart: this.state.itemsInCart+deltaQuantity})
+      this.setState({items: items})
+      this.updateTotalCount();
       return;
     }
 
     newQuantity = parseInt(newQuantity)
-    if (!isNaN(newQuantity)) {
-      let deltaQuantity = newQuantity - itemData[1]; // amount increased by, to recalculate the total sum
+    if (isNaN(newQuantity)) {
+      this.showError(`Quantity '${newQuantity}' is not a number.`, 20000);
+    }
+    else if (newQuantity > MAX_ITEM_QUANTITY) {
+      this.showError(`Quantity '${newQuantity}' is too high.`, 20000);
+    }
+    else {
       itemData[1] = newQuantity;
       items.set(barcode, itemData);
-      this.setState({items: items, itemsInCart: this.state.itemsInCart+deltaQuantity})
+      this.setState({items: items});
+      this.updateTotalCount();
     }
   }
 
@@ -182,7 +204,8 @@ class Cart extends React.Component {
         return
     }
     items.delete(barcode);
-    this.setState({items: items, itemsInCart: this.state.itemsInCart - itemData[1]})
+    this.setState({items: items})
+    this.updateTotalCount();
   
     // focus back on the barcode field
     document.getElementById("barcode").focus();
@@ -193,8 +216,8 @@ class Cart extends React.Component {
     let barcode = e.target.barcode.value.trim()
     let item = this.data[barcode]
     if (item && item.barcode) {
-      this.addItem(item, e.target.quantity.value)
       this.setState({error: null, success: null})
+      this.addItem(item, e.target.quantity.value)
       
       e.target.barcode.value = null;
       e.target.quantity.value = null;
@@ -202,6 +225,8 @@ class Cart extends React.Component {
       if (!barcode) {
         this.showError("Please enter a barcode in the field to the left.")
       } else {
+        e.target.barcode.value = null;
+        e.target.quantity.value = null;
         this.showError(`Not a valid barcode (${barcode})`, 10000)
       }
     }
@@ -366,7 +391,7 @@ class Cart extends React.Component {
         <div className="flex flex-col h-full lg:flex-row">
           {/* Left-hand column */}
           <div className="flex-none lg:w-64">
-            <Sidebar className="py-4">
+            <Sidebar className="sm:min-h-0 lg:min-h-screen">
             
               {/* Barcode & Quantity Form */}
               <form id="checkout-item-form" onSubmit={(e) => this.itemFormSubmit(e)}>
@@ -435,7 +460,7 @@ class Cart extends React.Component {
                       
           {/*Right-hand Column*/}
           <div className="flex-none lg:w-64">
-            <Sidebar className="py-4">
+            <Sidebar className="sm:min-h-0 lg:min-h-screen">
             {/* Editing the information */}
             {!this.state.isEditing && <button className='text-blue-700 hover:text-blue-500'
               onClick={() => this.setState({isEditing:true})}>
