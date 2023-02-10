@@ -40,10 +40,9 @@ export default function OrderDetails({children}) {
     // if not max order size, set to infinity
     let maxQuantity = parseInt(items[key].maxOrderSize) || parseInt(items[key].count)
     maxQuantity = Math.max(maxQuantity, 0)
-    // let invalid_quantity = cart[key] && cart[key].quantity > maxQuantity
     let inputId = `item-${items[key].barcode}`
     let itemInput = (
-      <div className={`itemrow-${items[key].barcode} py-4 ${maxQuantity == 0 && hideOOS ? 'hidden' : ''}`} key={items[key].barcode}>
+      <div className={`itemrow-${items[key].barcode} py-4 ${maxQuantity <= 0 && hideOOS ? 'hidden' : ''}`} key={items[key].barcode}>
         <div className='flex items-center justify-between'>
           <div className="text-left mr-4">{items[key].itemName}</div>
           <div>
