@@ -2,6 +2,8 @@ import Layout from "../components/Layout";
 import useSWR from "swr";
 import { useRouter } from "next/router";
 import React from "react";
+import { useUser } from '../context/userContext'
+
 import {
   ORDER_STATUS_COMPLETE,
   ORDER_STATUS_OPEN,
@@ -13,17 +15,23 @@ function fetcher(token, ...urls) {
   const f = (u) =>
     fetch(u, {
       headers: { "Content-Type": "application/json", Authorization: token },
-    }).then((r) => r.json());
+    }).then((r) => {
+      console.log("fetcher:", u, r)
+      return r.json()
+    });
 
   if (urls.length > 1) {
     return Promise.all(urls.map(f));
   }
+
+  console.log("Fetcher created.")
   return f(urls);
 }
 
 class PackingOrder extends React.Component {
   constructor(props) {
     super(props);
+    console.log("ORDER DATA:", props.data)
     this.state = {
       user: props.user,
       orderId: props.data[0].orderId,
@@ -331,6 +339,14 @@ export default function PackingDetailed() {
   const { user } = useUser();
   let authToken = (user && user.authorized) ? user.authToken : null;
 
+  const router = useRouter();
+  var orderId = router.query.orderid;
+
+  const { data } = useSWR(
+    [authToken, "/api/orders/GetOrder/" + orderId, "/api/inventory/GetAllItems"],
+    fetcher
+  );
+
   if (!authToken) {
     return (
       <Layout pageName="Orders">
@@ -339,8 +355,6 @@ export default function PackingDetailed() {
     )
   }
 
-  const router = useRouter();
-  var orderId = router.query.orderid;
   if (orderId == null) {
     return (
       <Layout pageName="Orders">
@@ -348,11 +362,7 @@ export default function PackingDetailed() {
       </Layout>
     );
   }
-  const { data } = useSWR(
-    authToken,
-    ["/api/orders/GetOrder/" + orderId, "/api/inventory/GetAllItems"],
-    fetcher
-  );
+
   if (!data) {
     return (
       <Layout pageName="Orders">

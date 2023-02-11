@@ -1,12 +1,12 @@
 import Layout from "../components/Layout";
 import useSWR from "swr";
 import React from "react";
+import { useUser } from '../context/userContext'
 
 const fetcher = (url, token) =>
   fetch(url, {
     headers: { "Content-Type": "application/json", Authorization: token },
   }).then((res) => res.json());
-
 
 class PackingOrders extends React.Component {
   constructor(props) {
@@ -169,6 +169,7 @@ const createOrderObjects = (results) => {
 export default function PackingOverview() {
   const { user } = useUser();
   let authToken = (user && user.authorized) ? user.authToken : null;
+  const { data } = useSWR(["/api/orders/GetAllOrders/", authToken], fetcher);
 
   if (!authToken) {
     return (
@@ -178,7 +179,6 @@ export default function PackingOverview() {
     )
   }
   
-  const { data } = useSWR(["/api/orders/GetAllOrders/", authToken], fetcher);
   if (!data) {
     return <PackingOrders user={user} data={[]} key="emptyTable" />;
   } else {
