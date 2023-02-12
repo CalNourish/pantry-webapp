@@ -525,8 +525,16 @@ export default function Checkout() {
     ["/api/admin/GetCheckoutInfo", "/api/inventory/GetAllItems"],
     fetcher
   );
-  const { user } = useUser();
+  const { user, loadingUser } = useUser();
 
+  if (loadingUser) {
+    return (
+      <Layout pageName="Checkout">
+          <h1 className='text-xl m-6'>Loading...</h1>
+      </Layout>
+    )
+  }
+  
   if (!data || !user) {
     return (
       <Layout pageName="Checkout">

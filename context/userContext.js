@@ -6,6 +6,7 @@ export const UserContext = createContext()
 
 const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null)
+  const [loadingUser, setLoading] = useState(true)
   // Google identity prvider.
   const googleLogin = async () => {
     var provider = new firebase.auth.GoogleAuthProvider();
@@ -50,6 +51,7 @@ const UserProvider = ({ children }) => {
   // note that the user here is different from the user retrieved from useState, this one is from Google
   // the useState user is updated with setUser
   const onAuthStateChange = () => {
+    setLoading(true);
     return firebase.auth().onAuthStateChanged(async (userAuth) => {
       if (userAuth) {
         authorizeLogin(userAuth.email).then((isAuthorized) => {
@@ -63,6 +65,7 @@ const UserProvider = ({ children }) => {
                 "googleUser": userAuth,
                 "authToken": tok
               });
+              setLoading(false);
             });
           } else {
             setUser({
@@ -71,10 +74,12 @@ const UserProvider = ({ children }) => {
               "authorized": false,
               "googleUser": userAuth
             });
+            setLoading(false);
           }
         })
       } else {
         console.log("No user found.");
+        setLoading(false);
       }
     });
   };
@@ -86,7 +91,7 @@ const UserProvider = ({ children }) => {
     };
   }, []);
 
-  return <UserContext.Provider value={{ user, setUser, googleLogin, logout }}>{children}</UserContext.Provider>;
+  return <UserContext.Provider value={{ user, setUser, googleLogin, logout, loadingUser }}>{children}</UserContext.Provider>;
 };
 
 export default UserProvider;
