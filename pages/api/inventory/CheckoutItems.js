@@ -77,11 +77,12 @@ function writeLog(log) {
     .then(({ spreadsheetId, sheetName, pageId }) => {
       let now = new Date();
 
-      let input = []
-      let date = now.toLocaleDateString('en-US', { weekday: 'long', month: 'numeric', day: 'numeric' }).replace(',', '');
-      let time = now.toLocaleTimeString('en-US', { hour12: false, hour: "numeric", minute: "numeric" });
+      // Add single quote to force text format
+      let date = "'" + now.toLocaleDateString('en-US', { weekday: 'long', month: 'numeric', day: 'numeric', timeZone: 'America/Los_Angeles' }).replace(',', '');
+      let time = "'" + now.toLocaleTimeString('en-US', { hour12: false, hour: "numeric", minute: "numeric", timeZone: 'America/Los_Angeles' });
 
       // create payload to write to sheet. only first row of checkout should have timestamp
+      let input = []
       for (let barcode in log) {
         let itemLog = log[barcode]
         if (itemLog.quantity <= 0){
