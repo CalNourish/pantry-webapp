@@ -12,26 +12,28 @@ import {
 
 
 function fetcher(token, ...urls) {
-  const f = (u) =>
-    fetch(u, {
+  const f = async (u) => {
+    const res = await fetch(u, {
       headers: { "Content-Type": "application/json", Authorization: token },
-    }).then((r) => {
-      console.log("fetcher:", u, r)
-      return r.json()
     });
+  
+    return res.json().then((resp) => {
+      if (!res.ok) {
+        return Promise.reject(resp)
+      }
+      return Promise.resolve(resp)
+    });
+  }
 
   if (urls.length > 1) {
     return Promise.all(urls.map(f));
   }
-
-  console.log("Fetcher created.")
   return f(urls);
 }
 
 class PackingOrder extends React.Component {
   constructor(props) {
     super(props);
-    console.log("ORDER DATA:", props.data)
     this.state = {
       user: props.user,
       orderId: props.data[0].orderId,
@@ -342,31 +344,31 @@ export default function PackingDetailed() {
   const router = useRouter();
   var orderId = router.query.orderid;
 
-  const { data } = useSWR(
+  const { data, error } = useSWR(
     [authToken, "/api/orders/GetOrder/" + orderId, "/api/inventory/GetAllItems"],
     fetcher
   );
 
-  if (!authToken) {
+  if (orderId == null || orderId == "") {
     return (
       <Layout pageName="Orders">
-          <h1 className='text-xl m-6'>Sorry, you are not authorized to view this page.</h1>
-      </Layout>
-    )
-  }
-
-  if (orderId == null) {
-    return (
-      <Layout pageName="Orders">
-        <div>No Order Id provided</div>
+        <h1 className='text-xl m-6'>No Order Id provided</h1>
       </Layout>
     );
+  }
+
+  if (error) {
+    return (
+      <Layout pageName="Orders">
+          <h1 className='text-xl m-6'>{error.error}</h1>
+      </Layout>
+    )
   }
 
   if (!data) {
     return (
       <Layout pageName="Orders">
-        <div>Loading...</div>
+        <h1 className='text-xl m-6'>Loading...</h1>
       </Layout>
     );
   } else {

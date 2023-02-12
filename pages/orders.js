@@ -3,10 +3,16 @@ import useSWR from "swr";
 import React from "react";
 import { useUser } from '../context/userContext'
 
-const fetcher = (url, token) =>
-  fetch(url, {
+const fetcher = async (url, token) => {
+  const res = await fetch(url, {
     headers: { "Content-Type": "application/json", Authorization: token },
-  }).then((res) => res.json());
+  });
+
+  if (res.status == 401) {
+    return Promise.reject("Sorry, you are not authorized to view this page.")
+  }
+  return res.json();
+}
 
 class PackingOrders extends React.Component {
   constructor(props) {
@@ -169,12 +175,12 @@ const createOrderObjects = (results) => {
 export default function PackingOverview() {
   const { user } = useUser();
   let authToken = (user && user.authorized) ? user.authToken : null;
-  const { data } = useSWR(["/api/orders/GetAllOrders/", authToken], fetcher);
+  const { data, error } = useSWR(["/api/orders/GetAllOrders/", authToken], fetcher);
 
-  if (!authToken) {
+  if (error) {
     return (
       <Layout pageName="Orders">
-          <h1 className='text-xl m-6'>Sorry, you are not authorized to view this page.</h1>
+          <h1 className='text-xl m-6'>{error}</h1>
       </Layout>
     )
   }

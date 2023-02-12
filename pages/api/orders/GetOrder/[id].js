@@ -23,6 +23,12 @@ export default async function (req, res) {
       query: { id },
     } = req;
 
+    console.log("ID:", typeof(id))
+    if (id === undefined || id === "") {
+      res.status(400).json({ error: "missing order ID" });
+      return resolve();
+    }
+
     validateFunc(token).then(() => {
       firebase.auth().signInAnonymously()
       .then(() => {
