@@ -249,7 +249,7 @@ class Cart extends React.Component {
       this.setState({loading: false})
       return;
     }
-//before fetch disable button, after fetch is successful or fails enable button again
+    
     fetch('/api/inventory/CheckoutItems', { method: 'POST',
       body: reqbody,
       headers: {'Content-Type': "application/json", 'Authorization': token}
