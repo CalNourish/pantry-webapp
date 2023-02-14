@@ -278,7 +278,7 @@ class Cart extends React.Component {
 
   displayCartRow = (barcode, value) => {
     return (
-      <tr className="h-10" key={barcode}>
+      <tr className="h-10 even:bg-gray-50" key={barcode}>
         <td className="text-left pr-10">{value[0].itemName}</td>
         <td>
           {/* number spinner [-| 1 |+] */}
@@ -445,7 +445,7 @@ class Cart extends React.Component {
               </thead>
               <tbody className="divide-y">
                 {Array.from( this.state.items ).map(([barcode, value]) => (this.displayCartRow(barcode, value)))}
-                <tr className="bg-gray-50 h-10 m-3" key="totals">
+                <tr className="bg-blue-50 h-10 m-3" key="totals">
                   <td className="text-lg font-medium text-right pr-10">Total Items</td>
                   <td>
                     <div className="w-32 text-center font-medium">{this.state.itemsInCart}</div>
