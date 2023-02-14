@@ -35,7 +35,8 @@ class Cart extends React.Component {
       showSearch: false,
       checkoutInfo:props.data[0].markdown,
       isEditing: false,
-      showPreview: false
+      showPreview: false,
+      loading: false
     }
     this.getDefaultCart()
   }
@@ -238,15 +239,17 @@ class Cart extends React.Component {
 
   submitCart = async (e) => {
     e.preventDefault();
+    this.setState({loading: true})
     let token = await this.state.user.googleUser.getIdToken()
 
     let reqbody = this.makeReq();
     this.showSuccess("Submitting cart...", 10000)
     if (this.state.itemsInCart == 0) {
       this.showError("Cannot submit: Cart is empty");
+      this.setState({loading: false})
       return;
     }
-
+    
     fetch('/api/inventory/CheckoutItems', { method: 'POST',
       body: reqbody,
       headers: {'Content-Type': "application/json", 'Authorization': token}
@@ -273,6 +276,7 @@ class Cart extends React.Component {
       } else {
         this.showSuccess("Cart submitted successfully", 10000)
       }
+      this.setState({loading: false})
     });
   }
 
@@ -453,7 +457,7 @@ class Cart extends React.Component {
                 </tr>
               </tbody>
             </table>
-            <button className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" onClick={(e) => this.submitCart(e)}>
+            <button className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" onClick={(e) => this.submitCart(e)} disabled={this.state.loading}>
               Checkout <span className="font-normal hidden lg:inline-block">(Shift+Enter)</span>
             </button>
           </div>
