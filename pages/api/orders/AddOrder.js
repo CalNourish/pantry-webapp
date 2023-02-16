@@ -162,7 +162,7 @@ function writeToSheets(body, itemNames) {
       }
   
       let d = new Date();
-      let daysToAdd = dayOfWeekIdx + 7 - d.getDay() % 7;
+      let daysToAdd = dayOfWeekIdx - d.getDay() % 7;
       if (daysToAdd < 2) {
         daysToAdd = daysToAdd + 7;
       }
