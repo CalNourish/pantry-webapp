@@ -135,31 +135,12 @@ class Checkin extends React.Component {
       return
     }
     token = await this.state.user.googleUser.getIdToken()
-    fetch('/api/admin/CheckPreviousVisit', { method: 'POST',
-      body: JSON.stringify({calID: e.target.calID.value, isGrad:false}),
+    fetch('/api/categories/AddCategory', { method: 'POST',
+      body: JSON.stringify({displayName: "chicken"}),
       headers: {'Content-Type': "application/json", 'Authorization': token}
     })
     .then((result) => {
-      result.json()
-      .then((lastVisitedTimes) => {
-        if (lastVisitedTimes.error) {
-          this.showError(lastVisitedTimes.error)
-        }
-        else {
-          this.setState({lastScannedID:e.target.calID.value, visitsLastWeek:lastVisitedTimes, lastScannedTime:new Date().toLocaleTimeString()})
-          if (lastVisitedTimes.length == 0) {
-            this.writeIDtoSheet(e.target.calID.value)
-          }
-          else {
-            this.showError("Failed scanning ID: " + e.target.calID.value + ". This visitor has visited already.",3000)
-          }
-          document.getElementById("calID").value = null;
-          document.getElementById("calID").focus();
-        }
-      })
-      .catch((err) => {
-        this.showError("Failed scanning ID: " + e.target.calID.value + err,3000)
-      });
+
     })
     .catch((err) => {
       this.showError("Failed scanning ID: " + e.target.calID.value + err,300)

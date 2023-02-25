@@ -3,7 +3,7 @@ import { validateFunc } from '../validate'
 
 /*
 * /api/inventory/AddCategory
-* req.body = {string displayName, string iconName}
+* req.body = {string displayName}
 * both fields are required
 */
 
@@ -17,10 +17,10 @@ export const config = {
 
 // checks paramters are alright, return true if ok
 function requireParams(body, res) {
-  // require displayname and iconname
-  if (!body.displayName || !body.iconName) {
+  // require displayname 
+  if (!body.displayName ) {
     res.status(400);
-    res.json({ error: "missing DisplayName||IconName in request" });
+    res.json({ error: "missing DisplayName" });
     return false;
   }
   return true;
@@ -42,7 +42,6 @@ export default async function (req, res) {
 
       // construct parameters 
       let displayName = body.displayName;
-      let iconName = body.iconName;
 
       // check if this category exists yet based on displayName
       firebase.database().ref('/category')
@@ -61,8 +60,8 @@ export default async function (req, res) {
           dbref.once('value')
           .then(() => {
             // first generate a random ID to use as a key
-            let key = makeid(10);
-            let val = { "displayName": displayName, "iconName": iconName };
+            let key = makeid(10); //make display name but lowercase
+            let val = { "displayName": displayName};
             let cat = {};
             cat[key] = val;
 
