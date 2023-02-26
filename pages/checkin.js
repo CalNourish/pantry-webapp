@@ -135,13 +135,13 @@ class Checkin extends React.Component {
       return
     }
     token = await this.state.user.googleUser.getIdToken()
-    fetch('/api/categories/AddCategory', { method: 'POST',
-      body: JSON.stringify({displayName: "chicken"}),
+    fetch('/api/categories/DeleteCategory', { method: 'POST',
+      body: JSON.stringify({displayName: "snacks"}),
       headers: {'Content-Type': "application/json", 'Authorization': token}
     })
-    .then((result) => {
+    // .then((result) => {
 
-    })
+    // })
     .catch((err) => {
       this.showError("Failed scanning ID: " + e.target.calID.value + err,300)
     })

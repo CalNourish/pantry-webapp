@@ -8,7 +8,7 @@ import { server } from './_app.js'
 
 import { daysInOrder } from './hours';
 import firebase from '../firebase/clientApp';
-
+// keep track of these variables that can change throughout this program
 function AddAdmin(props) {
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
@@ -39,8 +39,6 @@ function AddAdmin(props) {
       result.json().then((res) => {
         if (result.ok) {
           showSuccess();
-          setUserName("")
-          setUserEmail("")
         } else {
           setSubmitStatus("error");
           setSubmitStatusMsg(res.error);
@@ -99,16 +97,19 @@ function SheetLinks(props) {
   const [submitStatus, setSubmitStatus] = useState({});
   const [statusTimer, setStatusTimer] = useState(null);
   const [formData, setFormData] = useState({});
-
+  
   const fetcher = (url) => fetch(url, {
     method:'GET', headers: {'Content-Type': "application/json", 'Authorization': props.authToken}
   }).then((res) => res.json());
-
+  // useSWR is a React hook that passes in the data from the API ink to fetcher, a function that reads this data returns a Promise that resolves with the result of parsing the data as JSON
+  // JSON: format for storing and transporting data
+  // how does the fetcher method account for an error? based on the code below, I'm assuming that the error variable will have some value if an error exists 
   const { data, error } = useSWR(`${server}/api/admin/GetSheetLinks`, fetcher);
 
   if (error) {
     console.log("Error fetching google sheet links:", error)
     return (
+      // where are these classes? Oh, is it tailwind css?
       <div className='m-8'>
         <div className='font-semibold text-3xl mb-4'>Google Sheets Links</div>
         <div className='m-4'>Error! See console log for details.</div>
@@ -131,6 +132,7 @@ function SheetLinks(props) {
   }
 
   let showSuccess = (tag, t = 5000) => {
+    // does this comment mean "success" text? also, what's the point of the timer? why not just call the setSubmitStatus function?
     /* show error banner with error text for 5 seconds, or custom time */
     setSubmitStatus({[tag]: "success"})
     clearTimeout(statusTimer);
@@ -250,6 +252,7 @@ function DeliveryTimes(props) {
       </div>
     )
   }
+  // does this mean if the data has not existed yet and is still loading? 
   if (!data) {
     return (
       <div className='m-8'>
@@ -258,7 +261,7 @@ function DeliveryTimes(props) {
       </div>
     )
   }
-
+  // if the formData is empty, we call the set function to update it?
   if (Object.keys(formData).length == 0 && Object.keys(data).length > 0) {
     // TODO: might need to change this?
     setFormData(data)
@@ -266,7 +269,10 @@ function DeliveryTimes(props) {
 
   /* do this once, after formData is set */
   const ref = firebase.database().ref('/deliveryTimes')
+
+  // does this mean if the there is at least one row of data in formData?
   if (Object.keys(formData).length > 0) {
+    // what is ref.on?
     ref.on('child_added', snapshot => {
       let data = snapshot.val()
       if (!formData[data.tag]) {
@@ -279,12 +285,15 @@ function DeliveryTimes(props) {
 
   let deleteTime = (tag) => {
     let {[tag]: _, ...newData} = formData; // remove tag for newData
+    // do we have to create a "DeleteCategory", something similar to fetch?
     fetch(`${server}/api/admin/DeleteDeliveryTime`, { method: 'POST',
       body: JSON.stringify({"tag": tag}),
       headers: {'Content-Type': "application/json", 'Authorization': props.authToken}
     })
     .then((result) => {
+      // returns a promise that resolves to a javascript object
       result.json()
+      // what is the difference between result and res here? 
       .then((res) => {
         setSubmitStatus(res.error)
       })
@@ -325,7 +334,8 @@ function DeliveryTimes(props) {
       })
     })
   }
-
+  // by returning, do we execute all this code and not run anything below it? 
+  // I understand that this is the HTML code for what appears on the website
   return (
     <div className='m-8'>
       <div className='font-semibold text-3xl mb-4'>Delivery Time Windows</div>
@@ -333,7 +343,7 @@ function DeliveryTimes(props) {
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-3">
           {submitStatus}</div>
       }
-
+      
       <div className='space-y-4 sm:space-y-0 sm:flex sm:flex-row sm:space-x-8'>
         {/* Existing times */}
         <div className='border border-gray-400 p-4'>
@@ -342,8 +352,10 @@ function DeliveryTimes(props) {
             <span className='text-gray-500 italic'>No options</span> :
             <table className='mb-4'>
               <tbody>
+                 {/* does formData have key-value pairs? what is the key in formData? What the line below mapping each key to? */}
                 {Object.keys(formData).map((key) => <tr key={key}>
                   <td className='pr-10'>{formData[key].display}</td>
+                  {/* we call the deleteTime method to delete a specific element of formData (key) once we click on the trash cam image*/}
                   <td><img className="w-4 h-4 items-center hover:cursor-pointer" src="/images/trash-can.svg" onClick={() => deleteTime(key)}></img></td>
                 </tr>)}
               </tbody>
@@ -358,6 +370,7 @@ function DeliveryTimes(props) {
             <div className='mb-2'>
               <span className='font-semibold mr-2'>Date:</span>
               <select id="date">
+                {/* is this selecting a range of days and making it uppercase*/}
                 {daysInOrder.map((day) => <option key={day}>{day.charAt(0).toUpperCase() + day.slice(1)}</option>)}
               </select>
             </div>
@@ -379,7 +392,7 @@ function DeliveryTimes(props) {
                 <option>PM</option>
               </select>
             </div>
-
+            {/* how does this add a new time tho?*/}
             <button type='submit' className='btn btn-outline p-2'>Add!</button>
           </form>
         </div>
@@ -409,4 +422,3 @@ export default function Admin() {
     </Layout>
   )
 }
-
