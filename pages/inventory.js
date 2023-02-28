@@ -110,6 +110,7 @@ export default function Inventory() {
   // Manage modal show/don't show State
   const [showAddItem, setShowAddItem] = useState(false);
   const [showEditItem, setShowEditItem] = useState(false);
+  const [showEditBarcode, setShowEditBarcode] = useState(false);
   const [showTakeInventory, setShowTakeInventory] = useState(false);
   const [showAddInventory, setShowAddInventory] = useState(false);
   const [errors, setErrors] = useState(emptyErrors);
@@ -204,6 +205,9 @@ export default function Inventory() {
       })
     }
   }
+  function editBarcode(barcode){
+    console.log("Opening edit barcode page!")
+  }
 
   // When a barcode is scanned in the edit-item-lookup modal, look up this barcode in Firebase.
   function handleBarcodeEdit(barcode) {
@@ -296,6 +300,36 @@ export default function Inventory() {
       }
     })
   }
+  function handleUpdateBarcodeSubmit(e) {
+    e.preventDefault();
+    setStatusLoading();
+
+    const barcode = state.barcode;                                                                          // required
+    const itemName = state.itemName;                                                                        // required                                                 // defaults to -1
+    const categories = Object.keys(state.categoryName).length ? state.categoryName : undefined;             // defaults to "no change"
+    const displayPublic = Boolean(state.displayPublic)                                                      // defaults to true
+
+    const payload = JSON.stringify({
+      "barcode": barcode,
+      "itemName": itemName,
+      "categoryName": categories,
+      "displayPublic": displayPublic
+    });
+    
+    fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
+      body: payload,
+      headers: {'Content-Type': "application/json", 'Authorization': token}})
+    .then((response) => response.json())
+    .then(json => {
+      if (json.error) {
+        setStatusError(json.error);
+      } else {
+        dispatch({type: 'reset'});
+        closeUpdateItem();
+        setStatusSuccess(`successfully updated: ${itemName} (${barcode})`);
+      }
+    })
+  }
 
   function displayUpdatedInventory() {
     const ref = firebase.database().ref('/inventory')
@@ -344,6 +378,9 @@ export default function Inventory() {
       });
       setStatusError("missing field(s)")
       return
+    }
+    function handleEditBarcode(e) {
+      return null;
     }
 
     const payload = {
@@ -394,6 +431,14 @@ export default function Inventory() {
   }
 
   function closeAddInventory() {
+    setShowAddInventory(false); 
+    setErrors(emptyErrors);
+    dispatch({type:'reset'});
+    setStatus({
+      ...status, loading: false, error: ""
+    })
+  }
+  function closeUpdateBarcode() {
     setShowAddInventory(false); 
     setErrors(emptyErrors);
     dispatch({type:'reset'});
@@ -489,6 +534,18 @@ export default function Inventory() {
                 status={status}
                 />
             </Modal>
+            {/*  Edit Barcode Modal  */}
+            <Modal id="edit-barcode-modal" isOpen={showEditBarcode} onRequestClose={closeUpdateBarcode} ariaHideApp={false}>
+              <InventoryModal
+                  onSubmitHandler={handleUpdateBarcodeSubmit} 
+                  onCloseHandler={closeUpdateBarcode}
+                  dispatch={dispatch}
+                  parentState={state}
+                  isAdd={false}
+                  barcodeLookup={handleBarcodeEdit}
+                  errors={errors}
+                  status={status}/>
+            </Modal>
           </>
         }
         
@@ -500,6 +557,7 @@ export default function Inventory() {
                   <div className="my-4">
                     <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowAddItem(true)}>Add new item</button>
                     <button className="my-1 btn-outline w-56 rounded-md p-1" onClick={() => setShowEditItem(true)}>Edit existing item</button>
+                    <button className="my-1 btn-outline w-56 rounded-md p-1" onClick={() => setShowEditBarcode(true)}>Edit barcode</button>
                     <hr className="my-2 border-gray-400 border-1"/>
                     <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowTakeInventory(true)}>Take Inventory</button>
                     <button className="my-1 btn-outline w-56 rounded-md p-1" onClick={() => setShowAddInventory(true)}>Add Inventory</button>
@@ -513,7 +571,7 @@ export default function Inventory() {
             {status.success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded relative mb-3">{status.success}</div>}
             {Object.keys(dataState).length > 0
               ? <Table className="table-auto my-1" data={dataState} categories={categoryState} authToken={authToken}
-                       editItemFunc={editItem} deleteItemFunc={deleteItem} showHideItemFunc={showHideItem}></Table>
+                       editItemFunc={editItem} deleteItemFunc={deleteItem} editBarcodeFunc={editBarcode} showHideItemFunc={showHideItem}></Table>
               : "Loading inventory..."}
           </div>
         </div>
