@@ -154,7 +154,7 @@ function writeToSheet(data, sheetInfo, formatting, sheets, sheets_auth) {
       }
     })
     .catch((error) => {
-      return reject("Error writing to google sheets: " + error);
+      return reject("Cannot write to google sheets. " + error);
     })
   })
 }
@@ -370,7 +370,7 @@ export default async function(req, res) {
           return resolve();
         })
         .catch((error) => {
-          res.status(500).json({error: `Error adding order: ${error}\n Please try to submit the order again or refresh the page.`});
+          res.status(500).json({error: `Error adding order: ${error}. Please try to submit the order again or refresh the page.`});
           return resolve();
         })
       }
