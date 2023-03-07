@@ -37,11 +37,7 @@ export default function Table(props) {
         }
         var defaultCart = props.data[barcode].defaultCart;
         if (success && defaultCartFilter) {
-            if (defaultCart == true) {
-                success = true;
-            } else {
-                success = false
-            }
+            success = defaultCart
         }
             
         return success;
@@ -150,7 +146,8 @@ export default function Table(props) {
                     </div>
                 </div>
                 <div>
-                    <label><input type="checkbox" id="default-cart-checkbox" checked={defaultCartFilter} onChange={(e) => setdefaultCartFilter(e.target.checked)}/> Show Default Cart Items</label>
+                    <input type="checkbox" id="default-cart-checkbox" checked={defaultCartFilter} onChange={(e) => setdefaultCartFilter(e.target.checked)}/>
+                    <label htmlFor="default-cart-checkbox" className="text-gray-600"> Show Default Cart Items</label>
 
                 </div>
             </div>
