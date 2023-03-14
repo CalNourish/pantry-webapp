@@ -361,6 +361,7 @@ function writeToSheets(body, itemNames) {
       newOrder["dietaryRestriction"] = dietaryRestrictions;
       newOrder["firstName"] = firstName;
       newOrder["lastInitial"] = lastName.slice(0, 1);
+      newOrder["numBags"] = numberOfBags
   
       firebase.auth().signInAnonymously()
       .then(() => {

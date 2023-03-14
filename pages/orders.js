@@ -158,7 +158,7 @@ const createOrderObjects = (results) => {
     orderObj.deliveryWindow = value.deliveryWindow
       ? value.deliveryWindow
       : "N/A";
-    orderObj.numBags = value.num_bags ? value.num_bags : 1;
+    orderObj.numBags = value.numBags ? value.numBags : 1;
     orderObj.status = value.status ? value.status : "No status available";
     orderObj.url = "/packingDetailed?orderid=" + key;
     orderObjects.push(orderObj);
