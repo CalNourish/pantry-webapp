@@ -11,7 +11,6 @@ export default function Table(props) {
     const [categoryFilter, setCategoryFilter] = useState("");
     const [searchFilter, setSearchFilter] = useState("");
     const [sortBy, setSortBy] = useState("status");
-    const [defaultCartFilter, setdefaultCartFilter] = useState(false)
 
     if (!props.data || !categoryData) {
         return null
@@ -35,11 +34,6 @@ export default function Table(props) {
                 success = false;
             }
         }
-        var defaultCart = props.data[barcode].defaultCart;
-        if (success && defaultCartFilter) {
-            success = defaultCart
-        }
-            
         return success;
     }
 
@@ -144,11 +138,6 @@ export default function Table(props) {
                     <div className="my-auto ml-3 cursor-pointer text-gray-500 hover:text-gray-400" onClick={() => {setCategoryFilter(""); setSearchFilter(""); setSortBy("");}}>
                         {categoryFilter || searchFilter || sortBy ? "clear filters" : ""}
                     </div>
-                </div>
-                <div>
-                    <input type="checkbox" id="default-cart-checkbox" checked={defaultCartFilter} onChange={(e) => setdefaultCartFilter(e.target.checked)}/>
-                    <label htmlFor="default-cart-checkbox" className="text-gray-600"> Show Default Cart Items</label>
-
                 </div>
             </div>
             <div className="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
