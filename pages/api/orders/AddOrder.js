@@ -119,14 +119,20 @@ function getOrderSheets() {
 function writeToSheet(data, sheetInfo, formatting, sheets, sheets_auth) {
   /* sheetInfo: {spreadsheetId, sheetName, pageId} */
   return new Promise((resolve, reject) => {
+    if (!data?.length) {
+      return reject("Order is missing or empty.")
+    }
+
+    const endCol = String.fromCharCode(data.length + 64);
+
     const writeRequest = {
       spreadsheetId: sheetInfo.spreadsheetId,
-      range: sheetInfo.sheetName + "!A:F", // TODO: get correct columns
-      valueInputOption: "USER_ENTERED", 
+      range: sheetInfo.sheetName + "!A:" + endCol,
+      valueInputOption: "USER_ENTERED",
       insertDataOption: "INSERT_ROWS",
       auth: sheets_auth,
       resource: {
-        "range": sheetInfo.sheetName + "!A:F", // TODO: get correct columns
+        "range": sheetInfo.sheetName + "!A:" + endCol,
         "majorDimension": "ROWS",
         "values": [
           data
@@ -296,25 +302,27 @@ function writeOrder(body, itemNames) {
   
       Promise.all(statuses).then(() => {
         /* Add order to firebase */
-        let newOrder = {};
-        newOrder["orderId"] = orderId;
-        newOrder["status"] = ORDER_STATUS_OPEN;
+        let newOrder = {
+          orderId: orderId,
+          status: ORDER_STATUS_OPEN,
+          deliveryDate: pickup ? "Pickup" : deliveryMMDD,
+          dependents: dependents,
+          guestNote: additionalRequests,
+          dietaryRestriction: dietaryRestrictions,
+          firstName: firstName,
+          lastInitial: lastName.slice(0, 1),
+        };
 
-        newOrder["deliveryDate"] = pickup ? "Pickup" : deliveryMMDD;
-        if (!pickup || pickupNotes)
-          newOrder["deliveryWindow"] = pickup ? pickupNotes : deliveryWindow;
+        if (!pickup)
+          newOrder["deliveryWindow"] = deliveryWindow;
+
+        // TODO: do we want to save pickup notes to firebase?
 
         // add the isPacked entry to match order schema
-        newOrder["items"] = {}
+        newOrder["items"] = {};
         Object.keys(items).forEach((bcode) => {
           newOrder["items"][bcode] = {quantity: items[bcode], isPacked: false}
         })
-
-        newOrder["dependents"] = dependents;
-        newOrder["guestNote"] = additionalRequests;
-        newOrder["dietaryRestriction"] = dietaryRestrictions;
-        newOrder["firstName"] = firstName;
-        newOrder["lastInitial"] = lastName.slice(0, 1);
 
         firebase.auth().signInAnonymously()
         .then(() => {
