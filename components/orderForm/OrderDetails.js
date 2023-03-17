@@ -119,7 +119,7 @@ export default function OrderDetails({children}) {
     <>
       <h2 className="h-10 text-lg mb-2 block tracking-wide text-gray-600 font-bold">Order Details</h2>
       <div className="flex flex-row mb-3 space-x-5"> 
-        {inventoryInfo.map(infoStr => <ReactMarkdown className="mb-4 text-zinc-900 flex-grow border p-2 border-black rounded" components={smallMarkdownStyle} children={infoStr}></ReactMarkdown>)}
+        {inventoryInfo?.map(infoStr => <ReactMarkdown className="mb-4 text-zinc-900 flex-grow border p-2 border-black rounded" components={smallMarkdownStyle} children={infoStr}></ReactMarkdown>)}
       </div>
       {/* Notes */}
       <div className='flex flex-row mb-3'>
