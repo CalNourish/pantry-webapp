@@ -22,7 +22,6 @@ export default function OrderDetails({children}) {
 
   if (inventoryInfo && inventoryInfo.markdown) {
     inventoryInfo = inventoryInfo.markdown.split(/(?=####)/g)
-
     inventoryInfo = inventoryInfo.filter(x => x !== "")
   }
   
