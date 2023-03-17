@@ -20,6 +20,12 @@ export default function OrderDetails({children}) {
   if (itemError || categoryError) return <div>failed to load</div>
   if (!items || !categories) return <div>loading...</div>
 
+  if (inventoryInfo && inventoryInfo.markdown) {
+    inventoryInfo = inventoryInfo.markdown.split(/(?=####)/g)
+
+    inventoryInfo = inventoryInfo.filter(x => x !== "")
+  }
+  
   // Reassign because destructuring wasn't working when fetching the data...
   categories = categories.categories
 
@@ -38,12 +44,6 @@ export default function OrderDetails({children}) {
     if (!items[key].displayPublic) {
       // Skip item if not displayPublic
       return
-    }
-
-    if (inventoryInfo && inventoryInfo.markdown) {
-      inventoryInfo = inventoryInfo.markdown.split(/(?=####)/g)
-
-      inventoryInfo = inventoryInfo.filter(x => x !== "")
     }
 
     // if not max order size, set to infinity
