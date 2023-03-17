@@ -116,7 +116,26 @@ function getOrderSheets() {
   })
 }
 
-function writeToSheet(data, sheetInfo, formatting, sheets, sheets_auth) {
+function formatSheet(formatting, writeResult, sheetInfo, sheets) {
+  return new Promise((resolve, reject) => {
+    let generateFormatRequest = setupFormatColumns(writeResult, sheetInfo.pageId)
+    const formatRequests = formatting.map(formatData => generateFormatRequest(...formatData))
+
+    // reformat the cells written
+    const sheetFormat = {
+      spreadsheetId: sheetInfo.spreadsheetId,
+      resource: {
+        requests: formatRequests
+      }
+    }
+
+    sheets.spreadsheets.batchUpdate(sheetFormat)
+    .then(() => resolve())
+    .catch((error) => reject("Error formatting write. " + error))
+  })
+}
+
+function writeToSheet(data, sheetInfo, sheets, sheets_auth) {
   /* sheetInfo: {spreadsheetId, sheetName, pageId} */
   return new Promise((resolve, reject) => {
     if (!data?.length) {
@@ -143,18 +162,7 @@ function writeToSheet(data, sheetInfo, formatting, sheets, sheets_auth) {
     sheets.spreadsheets.values.append(writeRequest)
     .then(result => {
       if (result.status == 200) {
-        let generateFormatRequest = setupFormatColumns(result, sheetInfo.pageId)
-        const formatRequests = formatting.map(formatData => generateFormatRequest(...formatData))
-
-        // reformat the cells written
-        const sheetFormat = {
-          spreadsheetId: sheetInfo.spreadsheetId,
-          resource: {
-            requests: formatRequests
-          }
-        }
-
-        sheets.spreadsheets.batchUpdate(sheetFormat).then(() => resolve())
+        return resolve()
       } else {
         throw result.statusText
       }
@@ -185,7 +193,8 @@ function writeOrder(body, itemNames) {
       );
   
       const sheets = google.sheets({ version: 'v4', auth: sheets_auth });
-      let statuses = []; // 
+      var sheetStatuses = []; // for tracking completion of writeToSheet calls
+
       /* --- Sheet 1: pantryMaster --- */
       /* Food pantry master data sheet for tracking calIDs.
        * [timestamp, calID, orderID, email, deliveryDate(, alternate dates)] */
@@ -239,8 +248,9 @@ function writeOrder(body, itemNames) {
         [ [1,6] ] // default formatting is fine, we just want non-bold text
       ]
 
-      let pantryStatus = writeToSheet(pantryPayload, sheetsInfo["pantryMaster"], pantryFormatting, sheets, sheets_auth);
-      statuses.push(pantryStatus);
+      let pantryStatus = writeToSheet(pantryPayload, sheetsInfo["pantryMaster"], sheets, sheets_auth);
+      let formatStatus = pantryStatus.then((result) => formatSheet(pantryFormatting, result, sheetsInfo["pantryMaster"], sheets))
+      sheetStatuses.append(formatStatus);
 
       /* --- Sheet 2: bagPacking --- */
       /* [confirmed date (delivery date), first name + last initial, delivery window, # of bags,
@@ -276,8 +286,10 @@ function writeOrder(body, itemNames) {
         [ [1, 10] ] // default formatting is fine, we just want non-bold text
       ]
 
-      let bagPackingStatus = writeToSheet(bagPackingPayload, sheetsInfo["bagPacking"], bagPackingFormatting, sheets, sheets_auth);
-      statuses.push(bagPackingStatus);
+      let bagPackingStatus = pantryStatus.then(
+        () => writeToSheet(bagPackingPayload, sheetsInfo["bagPacking"], bagPackingFormatting, sheets, sheets_auth)
+      )
+      sheetStatus = bagPackingStatus;
     
       /* --- Sheet 3: doordash (if not PICKUP) --- */
       /* [..., deliveryDate, delivery window start, end, timezone, first name, last name,
@@ -296,11 +308,14 @@ function writeOrder(body, itemNames) {
           [ [6, 26] ]
         ]
 
-        let doordashStatus = writeToSheet(doordashPayload, sheetsInfo["doordash"], doordashFormatting, sheets, sheets_auth);
-        statuses.push(doordashStatus);
+        let doordashStatus = bagPackingStatus.then(
+          () => writeToSheet(doordashPayload, sheetsInfo["doordash"], doordashFormatting, sheets, sheets_auth)
+        )
+
+        sheetStatus = doordashStatus;
       }
   
-      Promise.all(statuses).then(() => {
+      sheetStatus.then(() => {
         /* Add order to firebase */
         let newOrder = {
           orderId: orderId,
