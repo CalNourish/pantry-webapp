@@ -116,25 +116,6 @@ function getOrderSheets() {
   })
 }
 
-function formatSheet(formatting, writeResult, sheetInfo, sheets) {
-  return new Promise((resolve, reject) => {
-    let generateFormatRequest = setupFormatColumns(writeResult, sheetInfo.pageId)
-    const formatRequests = formatting.map(formatData => generateFormatRequest(...formatData))
-
-    // reformat the cells written
-    const sheetFormat = {
-      spreadsheetId: sheetInfo.spreadsheetId,
-      resource: {
-        requests: formatRequests
-      }
-    }
-
-    sheets.spreadsheets.batchUpdate(sheetFormat)
-    .then(() => resolve())
-    .catch((error) => reject("Error formatting write. " + error))
-  })
-}
-
 function writeToSheet(data, sheetInfo, sheets, sheets_auth) {
   /* sheetInfo: {spreadsheetId, sheetName, pageId} */
   return new Promise((resolve, reject) => {
@@ -162,7 +143,7 @@ function writeToSheet(data, sheetInfo, sheets, sheets_auth) {
     sheets.spreadsheets.values.append(writeRequest)
     .then(result => {
       if (result.status == 200) {
-        return resolve()
+        return resolve(result)
       } else {
         throw result.statusText
       }
@@ -170,6 +151,25 @@ function writeToSheet(data, sheetInfo, sheets, sheets_auth) {
     .catch((error) => {
       return reject("Cannot write to google sheets. " + error);
     })
+  })
+}
+
+function formatSheet(formatting, writeResult, sheetInfo, sheets) {
+  return new Promise((resolve, reject) => {
+    let generateFormatRequest = setupFormatColumns(writeResult, sheetInfo.pageId)
+    const formatRequests = formatting.map(formatData => generateFormatRequest(...formatData))
+
+    // reformat the cells written
+    const sheetFormat = {
+      spreadsheetId: sheetInfo.spreadsheetId,
+      resource: {
+        requests: formatRequests
+      }
+    }
+
+    sheets.spreadsheets.batchUpdate(sheetFormat)
+    .then(() => resolve())
+    .catch((error) => reject("Error formatting write. " + error))
   })
 }
 
@@ -249,8 +249,10 @@ function writeOrder(body, itemNames) {
       ]
 
       let pantryStatus = writeToSheet(pantryPayload, sheetsInfo["pantryMaster"], sheets, sheets_auth);
-      let formatStatus = pantryStatus.then((result) => formatSheet(pantryFormatting, result, sheetsInfo["pantryMaster"], sheets))
-      sheetStatuses.append(formatStatus);
+      let formatStatus = pantryStatus.then(
+        (result) => formatSheet(pantryFormatting, result, sheetsInfo["pantryMaster"], sheets)
+      )
+      sheetStatuses.push(formatStatus);
 
       /* --- Sheet 2: bagPacking --- */
       /* [confirmed date (delivery date), first name + last initial, delivery window, # of bags,
@@ -287,9 +289,12 @@ function writeOrder(body, itemNames) {
       ]
 
       let bagPackingStatus = pantryStatus.then(
-        () => writeToSheet(bagPackingPayload, sheetsInfo["bagPacking"], bagPackingFormatting, sheets, sheets_auth)
+        () => writeToSheet(bagPackingPayload, sheetsInfo["bagPacking"], sheets, sheets_auth)
       )
-      sheetStatus = bagPackingStatus;
+      formatStatus = bagPackingStatus.then(
+        (result) => formatSheet(bagPackingFormatting, result, sheetsInfo["bagPacking"], sheets)
+      )
+      sheetStatuses.push(formatStatus);
     
       /* --- Sheet 3: doordash (if not PICKUP) --- */
       /* [..., deliveryDate, delivery window start, end, timezone, first name, last name,
@@ -309,13 +314,15 @@ function writeOrder(body, itemNames) {
         ]
 
         let doordashStatus = bagPackingStatus.then(
-          () => writeToSheet(doordashPayload, sheetsInfo["doordash"], doordashFormatting, sheets, sheets_auth)
+          () => writeToSheet(doordashPayload, sheetsInfo["doordash"], sheets, sheets_auth)
         )
-
-        sheetStatus = doordashStatus;
+        formatStatus = doordashStatus.then(
+          (result) => formatSheet(doordashFormatting, result, sheetsInfo["doordash"], sheets)
+        )
+        sheetStatuses.push(formatStatus);
       }
   
-      sheetStatus.then(() => {
+      Promise.all(sheetStatuses).then(() => {
         /* Add order to firebase */
         let newOrder = {
           orderId: orderId,
