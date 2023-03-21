@@ -21,7 +21,7 @@ export default function OrderDetails({children}) {
   if (!items || !categories) return <div>loading...</div>
 
   if (inventoryInfo && inventoryInfo.markdown) {
-    inventoryInfo = inventoryInfo.markdown.split(/(?=####)/g)
+    inventoryInfo = inventoryInfo.markdown.split(/^(?=#+ )/mg)
     inventoryInfo = inventoryInfo.filter(x => x !== "")
   }
   
