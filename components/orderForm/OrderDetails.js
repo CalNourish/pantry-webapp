@@ -24,6 +24,9 @@ export default function OrderDetails({children}) {
     inventoryInfo = inventoryInfo.markdown.split(/^(?=#+ )/mg)
     inventoryInfo = inventoryInfo.filter(x => x !== "")
   }
+  else {
+    inventoryInfo = []
+  }
   
   // Reassign because destructuring wasn't working when fetching the data...
   categories = categories.categories
