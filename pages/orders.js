@@ -67,8 +67,6 @@ class PackingOrders extends React.Component {
               <a href={order.url}>{order.name}</a>
             </td>
             <td className="w-auto">{order.numBags}</td>
-            <td className="w-auto">{order.deliveryDate}</td>
-            <td className="w-auto">{order.deliveryWindow}</td>
             <td className="w-auto">{order.status}</td>
             <td className="w-auto">
               <button
@@ -98,7 +96,7 @@ class PackingOrders extends React.Component {
                     <th className="w-1/5 text-left">Number of Bags</th>
                     <th className="w-1/5 text-left">Delivery Date</th>
                     <th className="w-1/5 text-left">Delivery Window</th>
-                    <th className="w-1/5 text-left">Delivery Status</th>
+                    <th className="w-1/5 text-left">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -113,10 +111,8 @@ class PackingOrders extends React.Component {
                 <thead>
                   <tr className="border-b-2">
                     <th className="w-1/5 text-left">Name</th>
-                    <th className="w-1/5 text-left">Number of Bags</th>
-                    <th className="w-1/5 text-left">Delivery Date</th>
-                    <th className="w-1/5 text-left">Delivery Window</th>
-                    <th className="w-1/5 text-left">Delivery Status</th>
+                    <th className="w-3/5 text-left">Number of Bags</th>
+                    <th className="w-1/5 text-left">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
