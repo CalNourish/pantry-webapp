@@ -1,6 +1,8 @@
 import useSWR from 'swr'
 import { useContext, useState } from 'react';
 import { DispatchCartContext, StateCartContext } from '../../context/cartContext'
+import ReactMarkdown from 'react-markdown';
+import { smallMarkdownStyle } from '../../utils/markdownStyle'
 
 // Form stage #3
 
@@ -13,10 +15,19 @@ export default function OrderDetails({children}) {
   const [hideOOS, setHideOOS] = useState(true); // whether to hide out-of-stock items
   let { data: items, error: itemError } = useSWR('/api/inventory/GetAllItems', fetcher)
   let { data: categories, error: categoryError } = useSWR('/api/categories/ListCategories', fetcher)
+  let { data: inventoryInfo, error: infoError } = useSWR('/api/admin/GetCheckoutInfo', fetcher)
   
   if (itemError || categoryError) return <div>failed to load</div>
   if (!items || !categories) return <div>loading...</div>
 
+  if (inventoryInfo && inventoryInfo.markdown) {
+    inventoryInfo = inventoryInfo.markdown.split(/^(?=#+ )/mg)
+    inventoryInfo = inventoryInfo.filter(x => x !== "")
+  }
+  else {
+    inventoryInfo = []
+  }
+  
   // Reassign because destructuring wasn't working when fetching the data...
   categories = categories.categories
 
@@ -109,7 +120,9 @@ export default function OrderDetails({children}) {
   return (
     <>
       <h2 className="h-10 text-lg mb-2 block tracking-wide text-gray-600 font-bold">Order Details</h2>
-
+      <div className="flex flex-row mb-3 space-x-5"> 
+        {inventoryInfo.map(infoStr => <ReactMarkdown className="mb-4 text-zinc-900 flex-grow border p-2 border-black rounded" components={smallMarkdownStyle} children={infoStr}></ReactMarkdown>)}
+      </div>
       {/* Notes */}
       <div className='flex flex-row mb-3'>
         {/* Dietary Restrictions */}
