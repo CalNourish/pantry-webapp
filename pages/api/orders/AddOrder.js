@@ -161,16 +161,28 @@ function writeToSheets(body, itemNames) {
         dayOfWeekIdx = dayNameToIndex[deliveryDay]
       }
   
-      let d = new Date();
-      let daysToAdd = dayOfWeekIdx - d.getDay() % 7;
-      if (daysToAdd < 2) {
-        daysToAdd = daysToAdd + 7;
+      // let d = new Date();
+
+      // let daysToAdd = dayOfWeekIdx - d.getDay() % 7;
+      // if (daysToAdd < 2) {
+      //   daysToAdd = daysToAdd + 7;
+      // }
+      // let deliveryMMDD = new Date(
+      //   d.setDate(
+      //     d.getDate() + daysToAdd
+      //   )
+      // );
+
+      //REMOVE CODE SECTION BELOW AND UNCOMMENT ABOVE WHEN DONE
+      let deliveryMMDD;
+      if (dayOfWeekIdx == 2) {
+        deliveryMMDD = new Date("April 11, 2023");
       }
-      let deliveryMMDD = new Date(
-        d.setDate(
-          d.getDate() + daysToAdd
-        )
-      );
+      else if (dayOfWeekIdx == 3) {
+        deliveryMMDD = new Date("April 12, 2023");
+      }
+      //END OF REMOVAL 
+
       deliveryMMDD = (deliveryMMDD.getMonth() + 1) + "/" + deliveryMMDD.getDate()
   
       let deliveryWindow = `${deliveryWindowStart} - ${deliveryWindowEnd}`
