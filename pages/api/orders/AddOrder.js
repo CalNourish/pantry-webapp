@@ -116,8 +116,65 @@ function getOrderSheets() {
   })
 }
 
+function writeToSheet(data, sheetInfo, sheets, sheets_auth) {
+  /* sheetInfo: {spreadsheetId, sheetName, pageId} */
+  return new Promise((resolve, reject) => {
+    if (!data?.length) {
+      return reject("Order is missing or empty.")
+    }
+
+    const endCol = String.fromCharCode(data.length + 64);
+
+    const writeRequest = {
+      spreadsheetId: sheetInfo.spreadsheetId,
+      range: sheetInfo.sheetName + "!A:" + endCol,
+      valueInputOption: "USER_ENTERED",
+      insertDataOption: "INSERT_ROWS",
+      auth: sheets_auth,
+      resource: {
+        "range": sheetInfo.sheetName + "!A:" + endCol,
+        "majorDimension": "ROWS",
+        "values": [
+          data
+        ]
+      }
+    }
+
+    sheets.spreadsheets.values.append(writeRequest)
+    .then(result => {
+      if (result.status == 200) {
+        return resolve(result)
+      } else {
+        throw result.statusText
+      }
+    })
+    .catch((error) => {
+      return reject("Cannot write to google sheets. " + error);
+    })
+  })
+}
+
+function formatSheet(formatting, writeResult, sheetInfo, sheets) {
+  return new Promise((resolve, reject) => {
+    let generateFormatRequest = setupFormatColumns(writeResult, sheetInfo.pageId)
+    const formatRequests = formatting.map(formatData => generateFormatRequest(...formatData))
+
+    // reformat the cells written
+    const sheetFormat = {
+      spreadsheetId: sheetInfo.spreadsheetId,
+      resource: {
+        requests: formatRequests
+      }
+    }
+
+    sheets.spreadsheets.batchUpdate(sheetFormat)
+    .then(() => resolve())
+    .catch((error) => reject("Error formatting write. " + error))
+  })
+}
+
 /* Write order to three google sheets (pantry, bag-packing, doordash), and add order to firebase. */
-function writeToSheets(body, itemNames) {
+function writeOrder(body, itemNames) {
   let { firstName, lastName, address, address2, city, zip,
         frequency, dependents, dietaryRestrictions, additionalRequests,
         calID, items, deliveryDay, deliveryWindowStart, deliveryWindowEnd, altDelivery,
@@ -136,7 +193,8 @@ function writeToSheets(body, itemNames) {
       );
   
       const sheets = google.sheets({ version: 'v4', auth: sheets_auth });
-  
+      var sheetStatuses = []; // for tracking completion of writeToSheet calls
+
       /* --- Sheet 1: pantryMaster --- */
       /* Food pantry master data sheet for tracking calIDs.
        * [timestamp, calID, orderID, email, deliveryDate(, alternate dates)] */
@@ -188,53 +246,26 @@ function writeToSheets(body, itemNames) {
       let deliveryWindow = `${deliveryWindowStart} - ${deliveryWindowEnd}`
       
       // Schema is [current date, CalID (encrypted), unique order id, email, deliveryDate, alternateDates]
-      const pantryInfo = sheetsInfo["pantryMaster"]
-      const pantry_master_req = {
-        spreadsheetId: pantryInfo.spreadsheetId,
-        range: pantryInfo.sheetName + "!A:F",
-        valueInputOption: "USER_ENTERED", 
-        insertDataOption: "INSERT_ROWS",
-        resource: {
-            "range": pantryInfo.sheetName + "!A:F",
-            "majorDimension": "ROWS",
-            "values": [
-              [
-                currentDate,
-                calID,
-                orderId,
-                email,
-                pickup ? "Pickup" : `${deliveryMMDD} ${deliveryDay} ${deliveryWindow}`,
-                pickup ? pickupNotes : "(" + altDelivery + ")"] //each inner array is a row if we specify ROWS as majorDim
-            ] 
-          } ,
-        auth: sheets_auth
-      }
-  
-      sheets.spreadsheets.values.append(pantry_master_req)
-      .then(result => {
-        if (result.status == 200) {
-          let generateFormatRequest = setupFormatColumns(result, pantryInfo.pageId)
+      const pantryPayload = [
+        currentDate,
+        calID,
+        orderId,
+        email,
+        pickup ? "Pickup" : `${deliveryMMDD} ${deliveryDay} ${deliveryWindow}`,
+        pickup ? pickupNotes : "(" + altDelivery + ")"
+      ]
 
-          // reformat the cells written
-          const sheetFormat1 = {
-            spreadsheetId: pantryInfo.spreadsheetId,
-            resource: {
-              requests: [
-                generateFormatRequest(0, {type:"DATE", pattern:"m/dd h:mm"}),
-                generateFormatRequest([1,6]) // default formatting is fine, we just want non-bold text
-              ]
-            }
-          }
+      const pantryFormatting = [
+        [ 0, { type: "DATE", pattern: "m/dd h:mm" } ],
+        [ [1,6] ] // default formatting is fine, we just want non-bold text
+      ]
 
-          sheets.spreadsheets.batchUpdate(sheetFormat1).then(() => resolve())
-        } else {
-          throw result.statusText
-        }
-      })
-      .catch((error) => {
-        return reject("error writing to Pantry data sheet: " + error);
-      })
-  
+      let pantryStatus = writeToSheet(pantryPayload, sheetsInfo["pantryMaster"], sheets, sheets_auth);
+      let formatStatus = pantryStatus.then(
+        (result) => formatSheet(pantryFormatting, result, sheetsInfo["pantryMaster"], sheets)
+      )
+      sheetStatuses.push(formatStatus);
+
       /* --- Sheet 2: bagPacking --- */
       /* [confirmed date (delivery date), first name + last initial, delivery window, # of bags,
        *  frequency, # of dependents, dietary restrictions, additional requests, order id, items] */
@@ -251,161 +282,114 @@ function writeToSheets(body, itemNames) {
         numberOfBags = 3;
       }
 
-      const bagPackingInfo = sheetsInfo["bagPacking"]
-      const bag_packing_req = {
-        spreadsheetId: bagPackingInfo.spreadsheetId,
-        range: bagPackingInfo.sheetName + "!A:J",
-        valueInputOption: "USER_ENTERED", 
-        insertDataOption: "INSERT_ROWS",
-        resource: {
-            "range": bagPackingInfo.sheetName + "!A:J",
-            "majorDimension": "ROWS",
-            "values": [
-              [
-                pickup ? "Pickup" : deliveryMMDD,
-                firstName + " " + lastName.slice(0,1),
-                pickup ? pickupNotes : deliveryWindow,
-                numberOfBags,
-                frequency,
-                dependents,
-                dietaryRestrictions,
-                additionalRequests,
-                orderId, 
-                JSON.stringify(itemNames)]
-            ] 
-          }
-      }
-  
-      sheets.spreadsheets.values.append(bag_packing_req)
-      .then(result => {
-        if (result.status == 200) {
-          let generateFormatRequest = setupFormatColumns(result, bagPackingInfo.pageId)
+      const bagPackingPayload = [
+        pickup ? "Pickup" : deliveryMMDD,
+        firstName + " " + lastName.slice(0,1),
+        pickup ? pickupNotes : deliveryWindow,
+        numberOfBags,
+        frequency,
+        dependents,
+        dietaryRestrictions,
+        additionalRequests,
+        orderId,
+        JSON.stringify(itemNames)
+      ] 
 
-          // reformat the cells written
-          const sheetFormat2 = {
-            spreadsheetId: bagPackingInfo.spreadsheetId,
-            resource: {
-              requests: [
-                generateFormatRequest(0, {type:"DATE", pattern:"m/dd"}),
-                generateFormatRequest([1,10]) // default formatting is fine, we just want non-bold text
-              ]
-            }
-          }
+      const bagPackingFormatting = [
+        [ 0, { type: "DATE", pattern: "m/dd" } ],
+        [ [1, 10] ] // default formatting is fine, we just want non-bold text
+      ]
 
-          sheets.spreadsheets.batchUpdate(sheetFormat2).then(() => resolve())
-        } else {
-          throw result.statusText
-        }
-      })
-      .catch((error) => {
-        return reject("error writing to bag-packing data sheet: " + error);
-      })
+      let bagPackingStatus = pantryStatus.then(
+        () => writeToSheet(bagPackingPayload, sheetsInfo["bagPacking"], sheets, sheets_auth)
+      )
+      formatStatus = bagPackingStatus.then(
+        (result) => formatSheet(bagPackingFormatting, result, sheetsInfo["bagPacking"], sheets)
+      )
+      sheetStatuses.push(formatStatus);
     
       /* --- Sheet 3: doordash (if not PICKUP) --- */
       /* [..., deliveryDate, delivery window start, end, timezone, first name, last name,
        * address, apt, city, state, zip, phone, # of bags (must be <= 3), delivery instructions, ... ] */
       if (!pickup) {
-        const doordashInfo = sheetsInfo["doordash"]
-        const doordash_req = {
-          spreadsheetId: doordashInfo.spreadsheetId,
-          range: doordashInfo.sheetName + "!A:U",
-          valueInputOption: "USER_ENTERED",
-          insertDataOption: "INSERT_ROWS",
-          resource: {
-              "range": doordashInfo.sheetName + "!A:U",
-              "majorDimension": "ROWS",
-              "values": [
-                [
-                  "UCB BNC Food Pantry", "VENTURA-01", "F", deliveryMMDD, deliveryWindowStart, deliveryWindowEnd,
-                  "US/Pacific", firstName, lastName, address, address2, city, "CA", zip, phone, numberOfBags,
-                  dropoffInstructions, "UCB BNC Food Pantry"
-                ] 
-              ] 
-            } 
-        }
-        
-        sheets.spreadsheets.values.append(doordash_req)
-        .then(result => {
-          if (result.status == 200) {
-            let generateFormatRequest = setupFormatColumns(result, doordashInfo.pageId)
-  
-            // reformat the cells written
-            const sheetFormat3 = {
-              spreadsheetId: doordashInfo.spreadsheetId,
-              resource: {
-                requests: [
-                  generateFormatRequest([0,3]),
-                  generateFormatRequest(3, {type:"DATE", pattern:"m/dd/yyyy"}),
-                  generateFormatRequest([4,6], {type:"TIME", pattern:"h:mm am/pm"}),
-                  generateFormatRequest([6,26])
-                ]
-              }
-            }
-  
-            sheets.spreadsheets.batchUpdate(sheetFormat3).then(() => resolve())
-          } else {
-            throw result.statusText
-          }
-        })
-        .catch((error) => {
-          return reject("error writing to Doordash data sheet: " + error);
-        })  
+        const doordashPayload = [
+          "UCB BNC Food Pantry", "VENTURA-01", "F", deliveryMMDD, deliveryWindowStart, deliveryWindowEnd,
+          "US/Pacific", firstName, lastName, address, address2, city, "CA", zip, phone, numberOfBags,
+          dropoffInstructions, "UCB BNC Food Pantry"
+        ]
+
+        const doordashFormatting = [
+          [ [0, 3] ],
+          [ 3, { type: "DATE", pattern: "m/dd/yyyy" } ],
+          [ [4, 6], {type: "TIME", pattern: "h:mm am/pm"} ],
+          [ [6, 26] ]
+        ]
+
+        let doordashStatus = bagPackingStatus.then(
+          () => writeToSheet(doordashPayload, sheetsInfo["doordash"], sheets, sheets_auth)
+        )
+        formatStatus = doordashStatus.then(
+          (result) => formatSheet(doordashFormatting, result, sheetsInfo["doordash"], sheets)
+        )
+        sheetStatuses.push(formatStatus);
       }
   
-      /* Add order to firebase */
-      let newOrder = {};
-      newOrder["orderId"] = orderId;
-      newOrder["status"] = ORDER_STATUS_OPEN;
-  
-      // TODO: need to handle the multiple delivery options somewhere
-      newOrder["deliveryDate"] = pickup ? "Pickup" : deliveryMMDD;
-      if (!pickup || pickupNotes)
-        newOrder["deliveryWindow"] = pickup ? pickupNotes : deliveryWindow;
-  
-      // add the isPacked entry to match order schema
-      newOrder["items"] = {}
-      Object.keys(items).forEach((bcode) => {
-        newOrder["items"][bcode] = {quantity: items[bcode], isPacked: false}
-      })
+      Promise.all(sheetStatuses).then(() => {
+        /* Add order to firebase */
+        let newOrder = {
+          orderId: orderId,
+          status: ORDER_STATUS_OPEN,
+          deliveryDate: pickup ? "Pickup" : deliveryMMDD,
+          dependents: dependents,
+          guestNote: additionalRequests,
+          dietaryRestriction: dietaryRestrictions,
+          firstName: firstName,
+          lastInitial: lastName.slice(0, 1),
+        };
 
-      newOrder["dependents"] = dependents;
-      newOrder["guestNote"] = additionalRequests;
-      newOrder["dietaryRestriction"] = dietaryRestrictions;
-      newOrder["firstName"] = firstName;
-      newOrder["lastInitial"] = lastName.slice(0, 1);
-      newOrder["numBags"] = numberOfBags
-  
-      firebase.auth().signInAnonymously()
-      .then(() => {
-        let itemRef = firebase.database().ref('/order/' + orderId);
-  
-        itemRef.once('value')
-        .then(function(resp){
-          var dbItem = resp.val();
-          // can't add order if orderID already in use
-          if (dbItem != null) {
-              return reject(`${orderId} already exists`);
-          }
-          // otherwise the item doesn't exist and we can create it
-          itemRef.update(newOrder)
-          .then(() => {
-              return resolve(orderId);
+        if (!pickup)
+          newOrder["deliveryWindow"] = deliveryWindow;
+
+        // TODO: do we want to save pickup notes to firebase?
+
+        // add the isPacked entry to match order schema
+        newOrder["items"] = {};
+        Object.keys(items).forEach((bcode) => {
+          newOrder["items"][bcode] = {quantity: items[bcode], isPacked: false}
+        })
+
+        firebase.auth().signInAnonymously()
+        .then(() => {
+          let itemRef = firebase.database().ref('/order/' + orderId);
+
+          itemRef.once('value')
+          .then(function(resp){
+            var dbItem = resp.val();
+            // can't add order if orderID already in use
+            if (dbItem != null) {
+                return reject(`${orderId} already exists`);
+            }
+            // otherwise the item doesn't exist and we can create it
+            itemRef.update(newOrder)
+            .then(() => {
+                return resolve(orderId);
+            })
+            .catch(error => {
+                return reject("Error updating firebase:" + error);
+            });
           })
           .catch(error => {
-              return reject("Error updating firebase:" + error);
+            return reject("Unable to access reference in DB:" + error);
           });
         })
-        .catch(error => {
-          return reject("Unable to access reference in DB:" + error);
+        .catch(error =>{
+          return reject("Error signing in to firebase: " + error);
         });
       })
-      .catch(error =>{
-        return reject("Error signing in to firebase: " + error);
-      });
-    })
-    .catch(error => {
-      return reject(error);
-    })
+      .catch(error => {
+        return reject(error);
+      })
+    });
   })
 } 
   
@@ -423,12 +407,12 @@ export default async function(req, res) {
     firebase.auth().signInAnonymously()
     .then(() => {
       updateFirebase(body.items).then((itemNames) => {
-        writeToSheets(body, itemNames).then((orderId) => {
+        writeOrder(body, itemNames).then((orderId) => {
           res.status(200).json({success: `Successfully added order! Order ID: ${orderId}`});
           return resolve();
         })
         .catch((error) => {
-          res.status(500).json({error:`Error adding order: ${error}`});
+          res.status(500).json({error: `Error adding order: ${error}. Please try to submit the order again or refresh the page.`});
           return resolve();
         })
       }
