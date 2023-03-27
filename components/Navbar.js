@@ -3,6 +3,8 @@ import { useUser } from '../context/userContext'
 import { useState } from 'react'
 import { server } from '../pages/_app.js'
 
+import { signIn, signOut, useSession } from "next-auth/react"
+
 const DISABLE_PUBLIC_INVENTORY = true;
 
 let UNAUTH_ROUTES = [
@@ -94,7 +96,18 @@ export default function Navbar() {
 
       {/* User Info */}
       <div className='flex-grow mr-3 xl:order-2 xl:flex-grow-0'>
-        {!user ? <a className="bg-gray-50 text-gray-600 rounded px-3 py-1 float-right" href="/signin">Sign In</a> :
+        {!user ?
+          <a
+            className="bg-gray-50 text-gray-600 rounded px-3 py-1 float-right"
+            href="/api/auth/signin"
+            onClick={(e) => {
+              e.preventDefault()
+              signIn()
+            }}
+          >
+            Sign In
+          </a>
+          :
           <div className="flex flex-col float-right">
             {/* circle with user initials */}
             <button className="focus:outline-none w-8 h-8 rounded-full bg-gray-50 text-gray-600 font-semibold truncate" onClick={toggleUserDropdown}>

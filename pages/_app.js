@@ -22,10 +22,11 @@ export default function MyApp({ Component, pageProps }) {
 MyApp.getInitialProps = async (appContext) => {
   const { ctx } = appContext;
   // Calls `getInitialProps` and fills `appProps.pageProps`
-  let error;
   const appProps = await App.getInitialProps(appContext);
 
-  const { firebaseToken } = cookies(ctx);
+  const firebaseToken = ""
+  // console.log("Context:", ctx)
+  // console.log("UserProvider:", UserProvider)
 
   // If token exists run Firebase validation on server side before rendering.
   if (firebaseToken) {
