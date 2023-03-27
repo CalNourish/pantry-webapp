@@ -5,29 +5,27 @@ export const validateFunc = async (token) => {
   return new Promise((resolve, reject) => {
     // apparently getting headers that don't exist return "undefined" the string ¯\_(ツ)_/¯
     if (token === "undefined" || typeof token === "undefined") {
-      reject("No token provided")
-      return false
+      return reject("No token provided")
     }
     // get list of authorized users
-    admin.database().ref('/authorizedUser') 
+    admin.database().ref('/authorizedUser')
     .once('value', snapshot => {
       // check if the token is valid
       return admin.auth().verifyIdToken(token, true)
-      .catch(error => {
-        reject(error)
-        return false
-      })
       .then(decoded => {
         // the ID token is valid
         // now check if the user pulled from the token is authorized
         var vals = snapshot.val()
         for (const key in vals) {
           if (vals[key] === decoded.email && decoded.email_verified) {
-            resolve(true)
+            return resolve(true)
           }
         }
-        reject("Valid token but unallowed email")
-      })      
+        return reject("Valid token but unallowed email")
+      })
+      .catch(error => {
+        return reject(error)
+      })
     });
   })
 };
