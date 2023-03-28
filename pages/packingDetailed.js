@@ -13,16 +13,19 @@ import {
 
 function fetcher(token, ...urls) {
   const f = async (u) => {
-    const res = await fetch(u, {
-      headers: { "Content-Type": "application/json", Authorization: token },
-    });
-  
-    return res.json().then((resp) => {
-      if (!res.ok) {
-        return Promise.reject(resp)
-      }
-      return Promise.resolve(resp)
-    });
+    if (token) {
+      const res = await fetch(u, {
+        headers: { "Content-Type": "application/json", Authorization: token },
+      });
+
+      return res.json().then((resp) => {
+        if (!res.ok) {
+          return Promise.reject(resp)
+        }
+        return Promise.resolve(resp)
+      });
+    }
+    return Promise.resolve({})
   }
 
   if (urls.length > 1) {
@@ -51,7 +54,6 @@ class PackingOrder extends React.Component {
       error: null,
       success: null,
     };
-    
   }
 
   savePantryNote = (newPantryNote = this.state.pantryNote) => {
@@ -237,10 +239,15 @@ class PackingOrder extends React.Component {
     if (Object.entries(this.state.items).length > 0) {
       return (
         <tbody className="divide-y">
-          {Object.entries(this.state.items).map(([barcode, value]) =>
-            this.state.items[barcode].isPacked
+          {Object.entries(this.state.items).map(([barcode, value]) => {
+            if (this.state.items[barcode] == null) {
+              return null;
+            }
+
+            return this.state.items[barcode].isPacked
               ? this.displayPackedItemRow(barcode, value)
               : this.displayUnpackedItemRow(barcode, value)
+          }
           )}
         </tbody>
       );
@@ -338,7 +345,7 @@ class PackingOrder extends React.Component {
 }
 
 export default function PackingDetailed() {
-  const { user } = useUser();
+  const { user, loadingUser } = useUser();
   let authToken = (user && user.authorized) ? user.authToken : null;
 
   const router = useRouter();
@@ -355,6 +362,14 @@ export default function PackingDetailed() {
         <h1 className='text-xl m-6'>No Order Id provided</h1>
       </Layout>
     );
+  }
+
+  if (loadingUser) {
+    return (
+      <Layout pageName="Inventory">
+          <h1 className='text-xl m-6'>Loading...</h1>
+      </Layout>
+    )
   }
 
   if (error) {
