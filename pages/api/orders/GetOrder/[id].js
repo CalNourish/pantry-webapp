@@ -23,7 +23,6 @@ export default async function (req, res) {
       query: { id },
     } = req;
 
-    console.log("ID:", typeof(id))
     if (id === undefined || id === "") {
       res.status(400).json({ error: "missing order ID" });
       return resolve();
@@ -37,6 +36,7 @@ export default async function (req, res) {
         .then(function (resp) {
           // the version of the order in the database
           var dbItem = resp.val();
+
           // this order was not found
           if (dbItem === null) {
             res.status(404);
