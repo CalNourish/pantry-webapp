@@ -5,19 +5,19 @@ import { server } from './_app.js'
 import { useState } from "react";
 import ReactMarkdown from 'react-markdown';
 import { markdownStyle } from "../utils/markdownStyle";
-import cookie from "js-cookie";
 
 export default function Home() {
   // Our custom hook to get context values
   const { user } = useUser();
-  const token = cookie.get("firebaseToken");
 
-  console.log("User:", user);
-  let authToken = (user && user.authorized === "true") ? token : null;
+  let authToken = (user && user.authorized) ? user.authToken : null;
 
   const [info, setInfo] = useState(false);
   const [isEditingInfo, setIsEditingInfo] = useState(false);
   const [showPreviewInfo, setShowPreview] = useState(false);
+
+  console.log("VERCEL_URL:", process.env.VERCEL_URL)
+  console.log("NEXT_PUBLIC_VERCEL_URL:", process.env.NEXT_PUBLIC_VERCEL_URL)
 
   let getInfo = () => {
     fetch(`${server}/api/admin/GetHomeInfo`)
@@ -55,7 +55,7 @@ export default function Home() {
             setIsEditingInfo(false);
             fetch('/api/admin/SetHomeInfo', { method: 'POST',
               body: JSON.stringify({markdown: info}),
-              headers: {'Content-Type': "application/json", 'Authorization': token}
+              headers: {'Content-Type': "application/json", 'Authorization': authToken}
             }).then((res) => {
               if (!res.ok) {
                 res.json().then(err => console.log("SetHomeInfo error: " + err.error))
