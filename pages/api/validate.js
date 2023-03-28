@@ -32,7 +32,7 @@ export const validateFunc = async (token) => {
   })
 };
 
-export default async (req, res) => {
+export default (req, res) => {
   // Check if there is a token and if not return undefined.
   const { token } = JSON.parse(req.headers.authorization || '{}');
 

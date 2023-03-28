@@ -25,9 +25,9 @@ function fetcher(...urls) {
 class Cart extends React.Component {
   constructor(props) {
     super(props);
+    this.user = props.user;
     this.data = props.data[1];
     this.state = {
-      user: props.data.user,
       items: new Map([]),   /* entries are {barcode: [itemStruct, quantity]} */
       itemsInCart: 0,
       error: null,
@@ -234,7 +234,7 @@ class Cart extends React.Component {
 
   submitCart = async (e) => {
     e.preventDefault();
-    let token = await this.state.user.googleUser.getIdToken()
+    let token = await this.user.googleUser.getIdToken()
 
     let reqbody = this.makeReq();
     this.showSuccess("Submitting cart...", 10000)
@@ -480,7 +480,7 @@ class Cart extends React.Component {
             {/* save edit */}
             {this.state.isEditing && <button className='ml-5 text-blue-700 hover:text-blue-500'
                 onClick={async () => {
-                let token = await this.state.user.googleUser.getIdToken()
+                let token = await this.user.googleUser.getIdToken()
                 this.setState({isEditing:false});
                 fetch('/api/admin/SetCheckoutInfo', { method: 'POST',
                   body: JSON.stringify({markdown: this.state.checkoutInfo}),
@@ -542,7 +542,6 @@ export default function Checkout() {
       </Layout>
     )
   } else {
-    data["user"] = user
-    return (<Cart data={data}></Cart>)
+    return (<Cart data={data} user={user}></Cart>)
   }
 }
