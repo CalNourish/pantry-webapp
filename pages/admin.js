@@ -388,8 +388,17 @@ function DeliveryTimes(props) {
 }
 
 export default function Admin() {
-  const { user } = useUser();
+  const { user, loadingUser } = useUser();
+
   let authToken = (user && user.authorized) ? user.authToken : null;
+
+  if (loadingUser) {
+    return (
+      <Layout pageName="Checkout">
+          <h1 className='text-xl m-6'>Loading...</h1>
+      </Layout>
+    )
+  }
 
   if (!authToken) {
     return (

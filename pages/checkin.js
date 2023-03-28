@@ -213,8 +213,17 @@ class Checkin extends React.Component {
 
 
 export default function checkin() {
+  const { user, loadingUser } = useUser();
+
   /* Display loading message */
-  const { user } = useUser();
+  if (loadingUser) {
+    return (
+      <Layout pageName="Checkout">
+        <h1 className='text-xl m-6'>Loading...</h1>
+      </Layout>
+    )
+  }
+
   let authToken = (user && user.authorized) ? user.authToken : null;
   if (!authToken) {
     return (

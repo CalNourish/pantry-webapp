@@ -173,9 +173,18 @@ const createOrderObjects = (results) => {
 };
 
 export default function PackingOverview() {
-  const { user } = useUser();
+  const { user, loadingUser } = useUser();
+
   let authToken = (user && user.authorized) ? user.authToken : null;
   const { data, error } = useSWR(["/api/orders/GetAllOrders/", authToken], fetcher);
+
+  if (loadingUser) {
+    return (
+      <Layout pageName="Checkout">
+          <h1 className='text-xl m-6'>Loading...</h1>
+      </Layout>
+    )
+  }
 
   if (error) {
     return (

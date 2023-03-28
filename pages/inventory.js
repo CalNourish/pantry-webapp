@@ -14,7 +14,8 @@ import firebase from '../firebase/clientApp';
 const DISABLE_PUBLIC_INVENTORY = true;
 
 export default function Inventory() {
-  const { user } = useUser();
+  const { user, loadingUser } = useUser();
+
   let authToken = (user && user.authorized) ? user.authToken : null;
 
   const emptyItem =  {
@@ -433,10 +434,18 @@ export default function Inventory() {
     })
   }
 
+  if (loadingUser) {
+    return (
+      <Layout pageName="Inventory">
+          <h1 className='text-xl m-6'>Loading...</h1>
+      </Layout>
+    )
+  }
+
   if (DISABLE_PUBLIC_INVENTORY && !authToken) {
     return (
       <Layout pageName="Inventory">
-        <div className='m-4'>Inventory is currently not publically available.</div>
+        <div className='text-xl m-6'>Inventory is currently not publically available.</div>
       </Layout>
     )
   }
