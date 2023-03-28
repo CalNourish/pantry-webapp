@@ -27,6 +27,7 @@ class Cart extends React.Component {
     super(props);
     this.user = props.user;
     this.data = props.data[1];
+    this.defaultCart = props.data["defaultCart"];
     this.state = {
       items: new Map([]),   /* entries are {barcode: [itemStruct, quantity]} */
       itemsInCart: 0,
@@ -35,7 +36,8 @@ class Cart extends React.Component {
       showSearch: false,
       checkoutInfo:props.data[0].markdown,
       isEditing: false,
-      showPreview: false
+      showPreview: false,
+      loading: false
     }
     this.getDefaultCart()
   }
@@ -113,11 +115,9 @@ class Cart extends React.Component {
   }
 
   getDefaultCart = () => {
-    this.addItem(this.data["fruit"], 0, true)
-    this.addItem(this.data["vegetable"], 0, true)
-    this.addItem(this.data["bread"], 0, true)
-    this.addItem(this.data["potato"], 0, true)
-    this.addItem(this.data["onion"], 0, true)
+    for (let defaultItemBarcode of this.defaultCart) {
+      this.addItem(this.data[defaultItemBarcode], 0 ,true)
+    }
   }
 
   upItemQuantity = (barcode, refocusBarcode=false) => {
@@ -234,15 +234,17 @@ class Cart extends React.Component {
 
   submitCart = async (e) => {
     e.preventDefault();
+    this.setState({loading: true})
     let token = await this.user.googleUser.getIdToken()
 
     let reqbody = this.makeReq();
     this.showSuccess("Submitting cart...", 10000)
     if (this.state.itemsInCart == 0) {
       this.showError("Cannot submit: Cart is empty");
+      this.setState({loading: false})
       return;
     }
-
+    
     fetch('/api/inventory/CheckoutItems', { method: 'POST',
       body: reqbody,
       headers: {'Content-Type': "application/json", 'Authorization': token}
@@ -269,12 +271,13 @@ class Cart extends React.Component {
       } else {
         this.showSuccess("Cart submitted successfully", 10000)
       }
+      this.setState({loading: false})
     });
   }
 
   displayCartRow = (barcode, value) => {
     return (
-      <tr className="h-10" key={barcode}>
+      <tr className="h-10 even:bg-gray-50" key={barcode}>
         <td className="text-left pr-10">{value[0].itemName}</td>
         <td>
           {/* number spinner [-| 1 |+] */}
@@ -441,7 +444,7 @@ class Cart extends React.Component {
               </thead>
               <tbody className="divide-y">
                 {Array.from( this.state.items ).map(([barcode, value]) => (this.displayCartRow(barcode, value)))}
-                <tr className="bg-gray-50 h-10 m-3" key="totals">
+                <tr className="bg-blue-50 h-10 m-3" key="totals">
                   <td className="text-lg font-medium text-right pr-10">Total Items</td>
                   <td>
                     <div className="w-32 text-center font-medium">{this.state.itemsInCart}</div>
@@ -449,7 +452,7 @@ class Cart extends React.Component {
                 </tr>
               </tbody>
             </table>
-            <button className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" onClick={(e) => this.submitCart(e)}>
+            <button className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" onClick={(e) => this.submitCart(e)} disabled={this.state.loading}>
               Checkout <span className="font-normal hidden lg:inline-block">(Shift+Enter)</span>
             </button>
           </div>

@@ -38,6 +38,8 @@ function AddAdmin(props) {
       result.json().then((res) => {
         if (result.ok) {
           showSuccess();
+          setUserName("")
+          setUserEmail("")
         } else {
           setSubmitStatus("error");
           setSubmitStatusMsg(res.error);

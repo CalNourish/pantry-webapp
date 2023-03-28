@@ -1,6 +1,8 @@
 import useSWR from 'swr'
 import { useContext, useState } from 'react';
 import { DispatchCartContext, StateCartContext } from '../../context/cartContext'
+import ReactMarkdown from 'react-markdown';
+import { smallMarkdownStyle } from '../../utils/markdownStyle'
 
 // Form stage #3
 
@@ -10,13 +12,22 @@ export default function OrderDetails({children}) {
   const cartDispatch = useContext(DispatchCartContext)
   let { cart, personal } = useContext(StateCartContext)
   const [searchFilter, setSearchFilter] = useState("");
-  const [hideOOS, setHideOOS] = useState(false); // whether to hide out-of-stock items
+  const [hideOOS, setHideOOS] = useState(true); // whether to hide out-of-stock items
   let { data: items, error: itemError } = useSWR('/api/inventory/GetAllItems', fetcher)
   let { data: categories, error: categoryError } = useSWR('/api/categories/ListCategories', fetcher)
+  let { data: inventoryInfo, error: infoError } = useSWR('/api/admin/GetCheckoutInfo', fetcher)
   
   if (itemError || categoryError) return <div>failed to load</div>
   if (!items || !categories) return <div>loading...</div>
 
+  if (inventoryInfo && inventoryInfo.markdown) {
+    inventoryInfo = inventoryInfo.markdown.split(/^(?=#+ )/mg)
+    inventoryInfo = inventoryInfo.filter(x => x !== "")
+  }
+  else {
+    inventoryInfo = []
+  }
+  
   // Reassign because destructuring wasn't working when fetching the data...
   categories = categories.categories
 
@@ -38,11 +49,11 @@ export default function OrderDetails({children}) {
     }
 
     // if not max order size, set to infinity
-    const maxQuantity = parseInt(items[key].maxOrderSize) || parseInt(items[key].count)
-    // let invalid_quantity = cart[key] && cart[key].quantity > maxQuantity
+    let maxQuantity = parseInt(items[key].maxOrderSize) || parseInt(items[key].count)
+    maxQuantity = Math.max(maxQuantity, 0)
     let inputId = `item-${items[key].barcode}`
     let itemInput = (
-      <div className={`itemrow-${items[key].barcode} py-4 ${maxQuantity == 0 && hideOOS ? 'hidden' : ''}`} key={items[key].barcode}>
+      <div className={`itemrow-${items[key].barcode} py-4 ${maxQuantity <= 0 && hideOOS ? 'hidden' : ''}`} key={items[key].barcode}>
         <div className='flex items-center justify-between'>
           <div className="text-left mr-4">{items[key].itemName}</div>
           <div>
@@ -109,7 +120,9 @@ export default function OrderDetails({children}) {
   return (
     <>
       <h2 className="h-10 text-lg mb-2 block tracking-wide text-gray-600 font-bold">Order Details</h2>
-
+      <div className="flex flex-row mb-3 space-x-5"> 
+        {inventoryInfo.map(infoStr => <ReactMarkdown className="mb-4 text-zinc-900 flex-grow border p-2 border-black rounded" components={smallMarkdownStyle} children={infoStr}></ReactMarkdown>)}
+      </div>
       {/* Notes */}
       <div className='flex flex-row mb-3'>
         {/* Dietary Restrictions */}
@@ -146,7 +159,7 @@ Or leave other notes for pantry staff."
         <label htmlFor="toggle-oos" className='text-sm text-gray-600'>
           <input id="toggle-oos" type="checkbox" value={hideOOS} onChange={() => setHideOOS(!hideOOS)}
             className="mr-2"/>
-          <span>{hideOOS ? "show" : "hide"} out of stock</span>
+          <span>show out of stock</span>
         </label>
           <div className="sticky top-0">
             <div className="pt-2">
@@ -168,7 +181,7 @@ Or leave other notes for pantry staff."
           </div>
         </div>
 
-        <div className=' mr-8'>
+        <div className='mr-8 flex-grow'>
           {/* Items search bar */}
           <div className='sticky py-4 z-10 bg-white top-0 flex'>
             <div className="block w-full">
