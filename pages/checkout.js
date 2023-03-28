@@ -545,6 +545,12 @@ export default function Checkout() {
       </Layout>
     )
   } else {
+    data["defaultCart"] = []
+    for (let item in data[1]) {
+      if (data[1][item]["defaultCart"]) {
+        data["defaultCart"].push(data[1][item]["barcode"])
+      }
+    }
     return (<Cart data={data} user={user}></Cart>)
   }
 }
