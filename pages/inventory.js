@@ -431,7 +431,7 @@ export default function Inventory() {
   return (
     <>
       <Layout pageName="Inventory">
-        {!authToken ? "" :
+        { authToken &&
           <>
             {/* Add Item Modal */}
             <Modal id="add-item-modal" isOpen={showAddItem} onRequestClose={closeAddItem} ariaHideApp={false}>
@@ -490,7 +490,7 @@ export default function Inventory() {
         }
         
         <div className="flex">
-          {!(user && user.authorized === "true") ? "" :
+          {!(user && authToken) ? "" :
               <div className="w-64 items-center">
                 <Sidebar>
                   <h1 className="text-3xl font-semibold mb-2">Inventory</h1>
