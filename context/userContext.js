@@ -47,9 +47,7 @@ const UserProvider = ({ children }) => {
     })
   }
 
-  // Checks that user state has changed and then creates or destroys cookie with Firebase token.
-  // note that the user here is different from the user retrieved from useState, this one is from Google
-  // the useState user is updated with setUser
+  // updates user state variable when authorization state changes (i.e. someone logs in with google)
   const onAuthStateChange = () => {
     setLoading(true);
     return firebase.auth().onAuthStateChanged(async (userAuth) => {
@@ -60,7 +58,6 @@ const UserProvider = ({ children }) => {
             userAuth.getIdToken().then((tok) => {
               setUser({
                 "displayName": userAuth.displayName,
-                "photoURL": userAuth.photoURL,
                 "authorized": isAuthorized,
                 "googleUser": userAuth,
                 "authToken": tok
