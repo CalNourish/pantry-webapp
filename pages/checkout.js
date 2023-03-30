@@ -235,6 +235,7 @@ class Cart extends React.Component {
   submitCart = async (e) => {
     e.preventDefault();
     this.setState({loading: true})
+    let token = this.user.googleUser.getIdToken()
 
     let reqbody = this.makeReq();
     this.showSuccess("Submitting cart...", 10000)
@@ -246,7 +247,7 @@ class Cart extends React.Component {
     
     fetch('/api/inventory/CheckoutItems', { method: 'POST',
       body: reqbody,
-      headers: {'Content-Type': "application/json", 'Authorization': this.user.authToken}
+      headers: {'Content-Type': "application/json", 'Authorization': token}
     })
     .then(resp => {
       if (resp.ok) {
@@ -482,10 +483,11 @@ class Cart extends React.Component {
             {/* save edit */}
             {this.state.isEditing && <button className='ml-5 text-blue-700 hover:text-blue-500'
                 onClick={async () => {
+                let token = await this.user.googleUser.getIdToken()
                 this.setState({isEditing:false});
                 fetch('/api/admin/SetCheckoutInfo', { method: 'POST',
                   body: JSON.stringify({markdown: this.state.checkoutInfo}),
-                  headers: {'Content-Type': "application/json", 'Authorization': this.user.authToken}
+                  headers: {'Content-Type': "application/json", 'Authorization': token}
                 }).then((res) => {
                 })
               }}>
