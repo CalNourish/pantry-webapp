@@ -228,10 +228,15 @@ class PackingOrder extends React.Component {
     if (Object.entries(this.state.items).length > 0) {
       return (
         <tbody className="divide-y">
-          {Object.entries(this.state.items).map(([barcode, value]) =>
-            this.state.items[barcode].isPacked
+          {Object.entries(this.state.items).map(([barcode, value]) => {
+            if (this.state.items[barcode] == null) {
+              return null;
+            }
+
+            return this.state.items[barcode].isPacked
               ? this.displayPackedItemRow(barcode, value)
               : this.displayUnpackedItemRow(barcode, value)
+          }
           )}
         </tbody>
       );
