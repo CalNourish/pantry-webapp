@@ -67,6 +67,28 @@ class PackingOrder extends React.Component {
     }
   };
 
+  saveDeliveryDate = (newDeliveryDate = this.state.pantryNote) => {
+    this.state.pantryNote = newPantryNote;
+    this.setState({ pantryNote: this.state.pantryNote });
+    fetch("/api/orders/SetPantryNote", {
+      method: "POST",
+      body: JSON.stringify({
+        orderId: this.state.orderId,
+        message: this.state.pantryNote,
+      }),
+      headers: { "Content-Type": "application/json", Authorization: token },
+    }).then(() => {
+      this.setState({ success: "Saved pantry note successfully!" });
+      setTimeout(() => this.setState({ success: null }), 1000);
+    });
+  };
+
+  cancelPantryNote = () => {
+    if (this.state.pantryNote !== undefined) {
+      document.getElementById("pantry_note").value = this.state.pantryNote;
+    }
+  };
+
   changeOrderStatus = () => {
     var newStatus = "";
     if (this.state.status == ORDER_STATUS_OPEN) {
@@ -264,6 +286,35 @@ class PackingOrder extends React.Component {
                 rows="4"
                 placeholder="Leave a note here for other pantry workers!"
                 defaultValue={this.state.pantryNote}
+              >
+              </textarea>
+              <div>
+                <React.Fragment>
+                  <button
+                    className="btn btn-pantry-blue mr-2"
+                    onClick={() =>
+                      this.savePantryNote(
+                        document.getElementById("pantry_note").value
+                      )
+                    }
+                  >
+                    Save
+                  </button>
+                  <button
+                    className="btn btn-outline"
+                    onClick={() => this.cancelPantryNote()}
+                  >
+                    Cancel
+                  </button>
+                </React.Fragment>
+              </div>
+              <h1 className="text-xl">Delivery Date</h1>
+              <textarea
+                className="form-control w-full text-base font-normal text-gray-600 bg-white bg-clip-padding border border-solid border-gray-200 rounded transition ease-in-out m-0 focus:text-gray-600 focus:bg-white focus:border-blue-600 focus:outline-none"
+                id="pantry_note"
+                rows="4"
+                placeholder="Leave a note here for other pantry workers!"
+                defaultValue={this.state.delivery_date}
               >
               </textarea>
               <div>
