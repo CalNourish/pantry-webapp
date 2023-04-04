@@ -2,6 +2,7 @@ import Layout from '../components/Layout'
 import Sidebar from '../components/Sidebar'
 import Table from '../components/Table'
 import InventoryModal from '../components/InventoryModal'
+import EditBarcodeModal from '../components/EditBarcodeModal'
 import TakeInventoryModal from '../components/TakeInventoryModal'
 import { useUser } from '../context/userContext'
 import { server } from './_app.js'
@@ -10,6 +11,10 @@ import Modal from 'react-modal'
 import React, { useState, useReducer } from 'react';
 import cookie from 'js-cookie';
 import firebase from '../firebase/clientApp';
+;
+
+
+
 
 /* For hiding inventory to the public */
 const DISABLE_PUBLIC_INVENTORY = true;
@@ -205,8 +210,8 @@ export default function Inventory() {
       })
     }
   }
-  function editBarcode(barcode){
-    console.log("Opening edit barcode page!")
+  function editBarcode(barcode, newBarcode){
+    
   }
 
   // When a barcode is scanned in the edit-item-lookup modal, look up this barcode in Firebase.
@@ -446,6 +451,15 @@ export default function Inventory() {
       ...status, loading: false, error: ""
     })
   }
+  function closeEditBarcode() {
+    setShowEditBarcode(false); 
+    setErrors(emptyErrors);
+    dispatch({type:'reset'});
+    setStatus({
+      ...status, loading: false, error: ""
+    })
+  }
+
 
   function closeAddItem() {
     setShowAddItem(false); 
@@ -535,10 +549,10 @@ export default function Inventory() {
                 />
             </Modal>
             {/*  Edit Barcode Modal  */}
-            <Modal id="edit-barcode-modal" isOpen={showEditBarcode} onRequestClose={closeUpdateBarcode} ariaHideApp={false}>
-              <InventoryModal
+            <Modal id="edit-barcode-modal" isOpen={showEditBarcode} onRequestClose={null} ariaHideApp={false}>
+              <EditBarcodeModal
                   onSubmitHandler={handleUpdateBarcodeSubmit} 
-                  onCloseHandler={closeUpdateBarcode}
+                  onCloseHandler={closeEditBarcode}
                   dispatch={dispatch}
                   parentState={state}
                   isAdd={false}

@@ -1,15 +1,41 @@
-import React from 'react';
+import React, { useState } from 'react';
 import useSWR from 'swr';
 import { server } from "../pages/_app.js"
+import firebase from '../firebase/clientApp';
+import {getDatabase, ref, child, get, set, push, update, onValue, remove} from "firebase/database";
+import Select from 'react-select';
+
+
+
+const database = getDatabase();
+
+const dbRef = ref(getDatabase())
+
+let optionMap;
+
 
 
 /* category checkboxes, used in add/edit item modal */
 class CheckboxGrid extends React.Component {
     constructor(props) {
         super(props);
-        this.options = props.categories;
+        //this.options = props.categories;
         this.dispatch = props.dispatch;
+        this.state = {
+            oldCount: props.parentState.count,
+            items: props.data,
+            numCases: 0,
+            newQuantity: 0,
+          };
+        optionMap = Object.keys(this.state.items).map((key) => {
+            return {
+              value: this.state.items[key].barcode,
+              label: this.state.items[key].itemName,
+            };
+        });
     }
+    
+
 
     markCategory(idx) {
         let toggleCategory = this.options[idx];
@@ -45,10 +71,13 @@ class CheckboxGrid extends React.Component {
             </div>
         )
     }
+    
+
 }
 
 /* Add/Edit item modal used on the authenticated version of the inventory page */
 export default function InventoryModal(props) {
+
     const fetcher = (url) => fetch(url).then((res) => res.json());
     const { data, error } = useSWR(`${server}/api/categories/ListCategories`, fetcher);
     if (error) return <div>Failed to load Modal</div>
@@ -57,6 +86,7 @@ export default function InventoryModal(props) {
     // A reducer to get the categories from firebase in a format that is react-select friendly.
     const categoryOptions = data.categories;
 
+
     document.onkeydown = (e) => {
         /* don't submit modal immediately after scanning barcode */
         if (document.activeElement.id == 'barcode' && e.key == "Enter") {
@@ -64,7 +94,45 @@ export default function InventoryModal(props) {
             document.getElementById("itemName").focus()
         }
     }
+    function submitBarcode(){
+        console.log("Editing Barcode!")
+        const currBarcode = document.getElementById('barcode').value;
+        const newBarcode = document.getElementById('newBarcode').value;
+        console.log(currBarcode);
+        console.log(newBarcode);
+        const db = getDatabase();
+        const inventoryRef = child(dbRef, 'inventory');
+        const code = child(inventoryRef, currBarcode)
+        
+        get(code).then((snapshot) => {
+        if (snapshot.exists()){
+            const snap = snapshot.val()
+            //update(code,{'barcode' : newBarcode});
+            console.log("Updated Barcode!");
+            set(ref(db, 'inventory/' + newBarcode),
+                {
+                    "barcode": newBarcode,
+                    "categoryName": snap['categoryName'],
+                    "count": snap['count'],
+                    "defaultCart": true,
+                    "displayPublic": true,
+                    "itemName": snap['itemName'],
+                    "lowStock": snap['lowStock'],
+                    "packSize": snap['packSize']
+            });
+            set(ref(db, 'inventory/' + currBarcode), null)
+            //clear form
+            document.getElementById('modal-form11').reset();
+        } else {
+            console.log("No data available");
+        }
+    }).catch((error) => {
+      console.error(error);
+    });
+    }
 
+
+      
     return (
         <div className="modal-wrapper p-3">
             <div id="modalExit" className="text-4xl absolute top-0 right-0 cursor-pointer hover:text-gray-500" onClick={props.onCloseHandler}>&times; &nbsp;</div>
@@ -76,7 +144,7 @@ export default function InventoryModal(props) {
                 {props.status.error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded relative mb-3">
                     Error: <span className="font-mono font-bold">{props.status.error}</span></div>}                
                 <div className="modal-body">
-                    <form id="modal-form" className="bg-white rounded mb-4" onSubmit={(e) => props.onSubmitHandler(e)}>
+                    <form id="modal-form11" className="bg-white rounded mb-4" onSubmit={(e) => props.onSubmitHandler(e)}>
                         <div className='mb-4'>
                             <label className='mr-2' htmlFor="display-public">Display in public inventory:</label>
                             <input type="checkbox" checked={props.parentState.displayPublic} id="display-public" className='w-4 h-4 align-middle'
@@ -84,6 +152,20 @@ export default function InventoryModal(props) {
                                     props.dispatch({type: 'editItemDisplayPublic', value: e.currentTarget.checked})
                                 }}>
                             </input>
+                        </div>
+
+                        {/* Item Search Select */}
+                        <div className="mb-5">
+                        <Select
+                            options=  {optionMap}
+                            id="search-select"
+                            placeholder={
+                            <span className="text-sm text-gray-400">Search item name</span>
+                            }
+                            
+                            onChange={(e) => this.selectItem(e.value)}
+                            autoFocus
+                        />
                         </div>
 
                         {/* Item Barcode */}
@@ -100,64 +182,18 @@ export default function InventoryModal(props) {
                             {props.errors.barcode && <div className="mt-2 text-sm text-red-600">{props.errors.barcode}</div>}
                         </div>
 
-                        {/* Item Name */}
+                        
+                        {/* New Barcode */}
                         <div className="mb-4">
                             <label className="block text-gray-600 text-sm font-bold mb-2">
-                                Item Name
+                                New Barcode
                             </label>
-                            <input type="text" id="itemName" autoComplete="off"
-                                className={"shadow appearance-none border rounded w-full py-2 px-3 text-gray-600 leading-tight focus:outline-none focus:shadow-outline" + (props.errors.itemName && " border-red-500")}
-                                placeholder="item name" value={props.parentState.itemName} 
-                                onChange={(e) => {props.dispatch({type: 'editItemName', value: e.currentTarget.value})}} />
-                            {props.errors.itemName && <div className="mt-2 text-sm text-red-600">{props.errors.itemName}</div>}
+                            <input type="text" id="newBarcode" autoComplete="off" autoFocus
+                                className={"shadow appearance-none border rounded w-full py-2 px-3 text-gray-600 leading-tight focus:outline-none focus:shadow-outline" + (props.errors.barcode && " border-2 border-red-500")}
+                                placeholder="scan or type item barcode"/>
+                            {props.errors.barcode && <div className="mt-2 text-sm text-red-600">{props.errors.barcode}</div>}
                         </div>
-
-                        {/* Count */}
-                        <div className="mb-4">
-                            <label className="block text-gray-600 text-sm font-bold mb-2">
-                                Quantity in Stock
-                            </label>
-                            <div className="flex relative items-stretch">
-                                <input type="number" id="count" autoComplete="off"
-                                    className={"shadow appearance-none border rounded w-full py-2 px-3 text-gray-600 leading-tight focus:outline-none focus:shadow-outline" + (props.errors.count && " border-red-500")}
-                                    placeholder="default: 0" value={props.parentState.count}
-                                    onChange={(e) => {props.dispatch({type: 'editItemCount', value: e.currentTarget.value})}}/>
-                                <select className="ml-5" id="packOption" defaultValue="individual">
-                                    <option value="individual">Individual Items</option>
-                                    <option value="packs">Packs</option>
-                                </select>
-                            </div>
-                            {props.errors.count && <div className="mt-2 text-sm text-red-600">{props.errors.count}</div>}
-                        </div>
-
-                        {/* PackSize, Lowstock */}
-                        <div className="mb-4">
-                            <div className="flex relative items-stretch">
-                                <div className="mr-3">
-                                    <label className="block text-gray-600 text-sm font-bold mb-2">
-                                        Quantity per Pack
-                                    </label>
-                                    <input type="number" id="packSize" autoComplete="off"
-                                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-600 leading-tight focus:outline-none focus:shadow-outline"
-                                        placeholder="default: 1" value={props.parentState.packSize} 
-                                        onChange={(e) => {props.dispatch({type: 'editItemPackSize', value: e.currentTarget.value})}} />
-                                </div>
-                                <div className="ml-3">
-                                    <label className="block text-gray-600 text-sm font-bold mb-2">
-                                        Low Stock Threshold
-                                    </label>
-                                    <input type="number" id="lowStock" autoComplete="off"
-                                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-600 leading-tight focus:outline-none focus:shadow-outline"
-                                        placeholder="default: 10" value={props.parentState.lowStock} 
-                                        onChange={(e) => {props.dispatch({type: 'editItemLowStock', value: e.currentTarget.value})}} />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Categories */}
-                        <CheckboxGrid categories={categoryOptions} parentState={props.parentState} dispatch={props.dispatch} error={props.errors.categoryName} />
-
-                        <button type="submit" className="btn-pantry-blue py-2 px-4 mr-3 rounded-md">Submit</button>
+                        <button onClick={submitBarcode} type="submit" className="btn-pantry-blue py-2 px-4 mr-3 rounded-md">Submit</button>
                         <button onClick={props.onCloseHandler} type="close" className="btn-outline py-2 px-4 rounded-md">Close</button>
                     </form>
                 </div>
