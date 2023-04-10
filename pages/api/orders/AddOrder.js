@@ -333,6 +333,7 @@ function writeOrder(body, itemNames) {
           dependents: dependents,
           guestNote: additionalRequests,
           dietaryRestriction: dietaryRestrictions,
+          numBags: numberOfBags,
           firstName: firstName,
           lastInitial: lastName.slice(0, 1),
         };
