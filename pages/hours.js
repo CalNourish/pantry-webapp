@@ -1,13 +1,10 @@
 import Layout from '../components/Layout'
-import { useEffect, useState } from 'react'
-import cookie from 'js-cookie';
+import { useState } from 'react'
 
 import { useUser } from '../context/userContext'
 import { server } from './_app.js'
 
 export const daysInOrder = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
-
-const token = cookie.get("firebaseToken")
 
 export default function Hours() {
 
@@ -46,7 +43,7 @@ export default function Hours() {
     )
   }
 
-  let authToken = (user && user.authorized === "true") ? token : null;
+  let authToken = (user && user.authorized) ? user.authToken : null;
 
   let saveHours = (day, event) => {
     event.preventDefault();
@@ -58,7 +55,7 @@ export default function Hours() {
           "day": day,
           "hours": hourString,
       }),
-      headers: { 'Content-Type': "application/json", 'Authorization': token }
+      headers: { 'Content-Type': "application/json", 'Authorization': authToken }
     })
     .then(response => {
       if (response.ok) {

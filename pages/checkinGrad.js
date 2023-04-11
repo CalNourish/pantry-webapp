@@ -1,5 +1,4 @@
 import Layout from '../components/Layout'
-import cookie from 'js-cookie';
 import React from 'react';
 
 import { useUser } from '../context/userContext'
@@ -7,7 +6,6 @@ import { server } from './_app.js'
 
 const fetcher = (url) => fetch(url).then((res) => res.json())
 
-var token = cookie.get("firebaseToken")
 
 class Checkin extends React.Component {
   constructor(props) {
@@ -118,7 +116,7 @@ class Checkin extends React.Component {
   writeIDtoSheet = async (id) => {
     fetch('/api/admin/WriteCheckIn', { method: 'POST',
     body: JSON.stringify({calID: id, isGrad:true}),
-    headers: {'Content-Type': "application/json", 'Authorization': token}
+    headers: {'Content-Type': "application/json", 'Authorization': this.state.user.authToken}
     })
     .then(() => {
       this.showSuccess("Sucessfully logged ID: " + id,1000)
@@ -133,10 +131,9 @@ class Checkin extends React.Component {
       this.showError("Can't submit blank ID: " + e.target.calID.value,1000)
       return
     }
-    token = await this.state.user.googleUser.getIdToken()
     fetch('/api/admin/CheckPreviousVisit', { method: 'POST',
       body: JSON.stringify({calID: e.target.calID.value, isGrad:true}),
-      headers: {'Content-Type': "application/json", 'Authorization': token}
+      headers: {'Content-Type': "application/json", 'Authorization': this.state.user.authToken}
     })
     .then((result) => {
       result.json()
@@ -215,13 +212,22 @@ class Checkin extends React.Component {
 
 
 export default function checkinGrad() {
+  const { user, loadingUser } = useUser();
+
   /* Display loading message */
-  const { user } = useUser();
-  let authToken = (user && user.authorized === "true") ? token : null;
+  if (loadingUser) {
+    return (
+      <Layout pageName="Checkout">
+        <h1 className='text-xl m-6'>Loading...</h1>
+      </Layout>
+    )
+  }
+
+  let authToken = (user && user.authorized) ? user.authToken : null;
   if (!authToken) {
     return (
       <Layout pageName="Grad Check-In">
-          <h1 className='text-xl m-6'>Sorry, you are not authorized to view this page.</h1>
+        <h1 className='text-xl m-6'>Sorry, you are not authorized to view this page.</h1>
       </Layout>
     )
   }

@@ -1,21 +1,32 @@
 import Layout from "../components/Layout";
 import useSWR from "swr";
-import cookie from "js-cookie";
 import { useRouter } from "next/router";
 import React from "react";
+import { useUser } from '../context/userContext'
+
 import {
   ORDER_STATUS_COMPLETE,
   ORDER_STATUS_OPEN,
   ORDER_STATUS_PROCESSING,
 } from "../utils/orderStatuses";
 
-const token = cookie.get("firebaseToken");
 
-function fetcher(...urls) {
-  const f = (u) =>
-    fetch(u, {
-      headers: { "Content-Type": "application/json", Authorization: token },
-    }).then((r) => r.json());
+function fetcher(token, ...urls) {
+  const f = async (u) => {
+    if (token) {
+      const res = await fetch(u, {
+        headers: { "Content-Type": "application/json", Authorization: token },
+      });
+
+      return res.json().then((resp) => {
+        if (!res.ok) {
+          return Promise.reject(resp)
+        }
+        return Promise.resolve(resp)
+      });
+    }
+    return Promise.resolve({})
+  }
 
   if (urls.length > 1) {
     return Promise.all(urls.map(f));
@@ -27,6 +38,7 @@ class PackingOrder extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      user: props.user,
       orderId: props.data[0].orderId,
       delivery_date: props.data[0].deliveryDate,
       dependents: props.data[0].dependents,
@@ -42,7 +54,6 @@ class PackingOrder extends React.Component {
       error: null,
       success: null,
     };
-    
   }
 
   savePantryNote = (newPantryNote = this.state.pantryNote) => {
@@ -54,7 +65,7 @@ class PackingOrder extends React.Component {
         orderId: this.state.orderId,
         message: this.state.pantryNote,
       }),
-      headers: { "Content-Type": "application/json", Authorization: token },
+      headers: { "Content-Type": "application/json", Authorization: this.state.user.authToken },
     }).then(() => {
       this.setState({ success: "Saved pantry note successfully!" });
       setTimeout(() => this.setState({ success: null }), 1000);
@@ -83,7 +94,7 @@ class PackingOrder extends React.Component {
         orderId: this.state.orderId,
         status: newStatus,
       }),
-      headers: { "Content-Type": "application/json", Authorization: token },
+      headers: { "Content-Type": "application/json", Authorization: this.state.user.authToken },
     }).then(() => {
       this.setState({ success: "Changed order status successfully!" });
       setTimeout(() => this.setState({ success: null }), 1000);
@@ -100,7 +111,7 @@ class PackingOrder extends React.Component {
         itemId: barcode,
         isPacked: this.state.items[barcode].isPacked,
       }),
-      headers: { "Content-Type": "application/json", Authorization: token },
+      headers: { "Content-Type": "application/json", Authorization: this.state.user.authToken },
     }).then(() => {});
   }
 
@@ -332,26 +343,48 @@ class PackingOrder extends React.Component {
 }
 
 export default function PackingDetailed() {
+  const { user, loadingUser } = useUser();
+  let authToken = (user && user.authorized) ? user.authToken : null;
+
   const router = useRouter();
   var orderId = router.query.orderid;
-  if (orderId == null) {
+
+  const { data, error } = useSWR(
+    [authToken, "/api/orders/GetOrder/" + orderId, "/api/inventory/GetAllItems"],
+    fetcher
+  );
+
+  if (orderId == null || orderId == "") {
     return (
       <Layout pageName="Orders">
-        <div>No Order Id provided</div>
+        <h1 className='text-xl m-6'>No Order Id provided</h1>
       </Layout>
     );
   }
-  const { data } = useSWR(
-    ["/api/orders/GetOrder/" + orderId, "/api/inventory/GetAllItems"],
-    fetcher
-  );
+
+  if (loadingUser) {
+    return (
+      <Layout pageName="Inventory">
+          <h1 className='text-xl m-6'>Loading...</h1>
+      </Layout>
+    )
+  }
+
+  if (error) {
+    return (
+      <Layout pageName="Orders">
+          <h1 className='text-xl m-6'>{error.error}</h1>
+      </Layout>
+    )
+  }
+
   if (!data) {
     return (
       <Layout pageName="Orders">
-        <div>Loading...</div>
+        <h1 className='text-xl m-6'>Loading...</h1>
       </Layout>
     );
   } else {
-    return <PackingOrder data={data}></PackingOrder>;
+    return <PackingOrder user={user} data={data}></PackingOrder>;
   }
 }
