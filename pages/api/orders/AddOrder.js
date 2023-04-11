@@ -219,22 +219,11 @@ function writeOrder(body, itemNames) {
         dayOfWeekIdx = dayNameToIndex[deliveryDay]
       }
   
-      // let d = new Date();
+      let d = new Date();
 
-      // let daysToAdd = dayOfWeekIdx - d.getDay() % 7;
-      // if (daysToAdd < 2) {
-      //   daysToAdd = daysToAdd + 7;
-      // }
-      // let deliveryMMDD = new Date(
-      //   d.setDate(
-      //     d.getDate() + daysToAdd
-      //   )
-      // );
-
-      //REMOVE CODE SECTION BELOW AND UNCOMMENT ABOVE WHEN DONE
-      let deliveryMMDD;
-      if (dayOfWeekIdx == 2) {
-        deliveryMMDD = new Date("April 11, 2023");
+      let daysToAdd = dayOfWeekIdx - d.getDay() % 7;
+      if (daysToAdd < 2) {
+        daysToAdd = daysToAdd + 7;
       }
       else if (dayOfWeekIdx == 3) {
         deliveryMMDD = new Date("April 12, 2023");
@@ -348,6 +337,7 @@ function writeOrder(body, itemNames) {
           dependents: dependents,
           guestNote: additionalRequests,
           dietaryRestriction: dietaryRestrictions,
+          numBags: numberOfBags,
           firstName: firstName,
           lastInitial: lastName.slice(0, 1),
         };
