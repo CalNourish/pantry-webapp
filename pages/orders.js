@@ -39,7 +39,8 @@ class PackingOrders extends React.Component {
   }
 
   displayOrderRow(order, delivery) {
-    if (delivery && order.deliveryDate != "Pickup") {
+    console.log(order.isPickup)
+    if (delivery && !order.isPickup) {
       return (
         <tr className="h-10" key={order.id}>
           <td className="w-auto">
@@ -60,7 +61,7 @@ class PackingOrders extends React.Component {
           </td>
         </tr>
       );
-    } else if (!delivery && order.deliveryDate == "Pickup") {
+    } else if (!delivery && order.isPickup) {
         return (
           <tr className="h-10" key={order.id}>
             <td className="w-auto">
@@ -153,6 +154,7 @@ const createOrderObjects = (results) => {
     }
 
     orderObj.deliveryDate = value.deliveryDate ? value.deliveryDate : "N/A";
+    orderObj.isPickup = value.isPickup;
     orderObj.deliveryWindow = value.deliveryWindow
       ? value.deliveryWindow
       : "N/A";

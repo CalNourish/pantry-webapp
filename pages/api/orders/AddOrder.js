@@ -240,8 +240,12 @@ function writeOrder(body, itemNames) {
         deliveryMMDD = new Date("April 12, 2023");
       }
       //END OF REMOVAL 
-
-      deliveryMMDD = (deliveryMMDD.getMonth() + 1) + "/" + deliveryMMDD.getDate()
+      if (pickup) {
+        deliveryMMDD = ""
+      }
+      else {
+        deliveryMMDD = (deliveryMMDD.getMonth() + 1) + "/" + deliveryMMDD.getDate()
+      }
   
       let deliveryWindow = `${deliveryWindowStart} - ${deliveryWindowEnd}`
       
@@ -339,7 +343,8 @@ function writeOrder(body, itemNames) {
         let newOrder = {
           orderId: orderId,
           status: ORDER_STATUS_OPEN,
-          deliveryDate: pickup ? "Pickup" : deliveryMMDD,
+          deliveryDate: pickup ? "" : deliveryMMDD,
+          isPickup: pickup,
           dependents: dependents,
           guestNote: additionalRequests,
           dietaryRestriction: dietaryRestrictions,

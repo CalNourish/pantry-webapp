@@ -29,6 +29,7 @@ class PackingOrder extends React.Component {
     this.state = {
       orderId: props.data[0].orderId,
       delivery_date: props.data[0].deliveryDate,
+      isPickup: props.data[0].pickup,
       dependents: props.data[0].dependents,
       dietaryRestriction: props.data[0].dietaryRestriction ? props.data[0].dietaryRestriction : "N/A",
       pantryNote: props.data[0].pantryNote,
@@ -274,6 +275,7 @@ class PackingOrder extends React.Component {
       </div>
     );
 
+    console.log(this.state.isPickup)
     return (
       <>
         <Layout pageName={`${this.state.firstName} ${this.state.lastInitial}'s Order`}>
@@ -308,7 +310,7 @@ class PackingOrder extends React.Component {
                   </button>
                 </React.Fragment>
               </div>
-              <h1 className="text-xl">Delivery Date</h1>
+              <h1 className="text-xl">{this.state.isPickup ? "Pickup Date" : "Delivery Date"}</h1>
               <textarea
                 className="form-control w-full text-base font-normal text-gray-600 bg-white bg-clip-padding border border-solid border-gray-200 rounded transition ease-in-out m-0 focus:text-gray-600 focus:bg-white focus:border-blue-600 focus:outline-none"
                 id="pantry_note"
