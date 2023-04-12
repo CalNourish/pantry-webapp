@@ -235,7 +235,7 @@ class Cart extends React.Component {
   submitCart = async (e) => {
     e.preventDefault();
     this.setState({loading: true})
-    let token = this.user.googleUser.getIdToken()
+    let token = await this.user.googleUser.getIdToken()
 
     let reqbody = this.makeReq();
     this.showSuccess("Submitting cart...", 10000)
