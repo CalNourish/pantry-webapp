@@ -47,10 +47,10 @@ const UserProvider = ({ children }) => {
     })
   }
 
-  // updates user state variable when authorization state changes (i.e. someone logs in with google)
-  const onAuthStateChange = () => {
+  // updates user state variable when authorization state changes (on sign-in, sign-out, and token timeout)
+  const onIdTokenChange = () => {
     setLoading(true);
-    return firebase.auth().onAuthStateChanged(async (userAuth) => {
+    return firebase.auth().onIdTokenChanged(async (userAuth) => {
       if (userAuth) {
         authorizeLogin(userAuth.email).then((isAuthorized) => {
           setUser({});
@@ -82,7 +82,7 @@ const UserProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChange();
+    const unsubscribe = onIdTokenChange();
     return () => {
       unsubscribe();
     };
