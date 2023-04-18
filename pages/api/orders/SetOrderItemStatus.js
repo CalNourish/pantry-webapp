@@ -3,7 +3,7 @@ import { validateFunc } from '../validate'
 
 /*
 * /api/orders/SetOrderItemStatus
-* req.body = { string orderId, string itemId, boolean isPacked = true | false}
+* req.body = { string orderId, string itemId, boolean isPacked = true | false, boolean decreaseItemCount = true | false, int quantity}
 */
 
 function requireParams(body, res) {
@@ -38,26 +38,31 @@ function getAllItems() {
   })
 }
 
-function updateFirebase(barcode, quantity, decreaseItemCount) {
+function updateFirebaseInventory(barcode, quantity, decreaseItemCount) {
   let multipler = decreaseItemCount ? -1 : 1
   return new Promise((resolve, reject) => {
-    getAllItems().then((inventoryJson) => {
+    getAllItems()
+    .then((inventoryJson) => {
       const inventoryUpdate = {}
       // make sure we have enough in inventory for order
       if (inventoryJson[barcode]) { 
-        console.log(barcode * quantity)         
         inventoryUpdate['/inventory/' + barcode + "/count"] = firebase.database.ServerValue.increment(multipler * quantity);        
       }
       else {
         return reject("Error updating firebase inventory: Invalid barcode");
       }
-      firebase.database().ref().update(inventoryUpdate).then(() => {
+      firebase.database().ref().update(inventoryUpdate)
+      .then(() => {
         return resolve("Succes in updating inventory!");
       })
       .catch((error) => {
         return reject("Error updating firebase inventory: " + error);
       })
     })
+    .catch((error) => {
+      return reject("Error getting items from inventory: " + error);
+    })
+
   })
 }
 
@@ -102,7 +107,7 @@ export default async function (req, res) {
             res.json({ error: `unable to find given order ${orderId} or item ${itemId}` })
             return resolve();
           }
-          updateFirebase(itemId, quantity, decreaseItemCount)
+          updateFirebaseInventory(itemId, quantity, decreaseItemCount)
           .then(() => {
             orderItemRef.update({ "isPacked": isPacked })
             .catch(function (error) {
@@ -118,7 +123,7 @@ export default async function (req, res) {
           })
           .catch(function (error) {
             res.status(500);
-            res.json({ error: "error updating status of order" + orderId, errorstack: error });
+            res.json({ error: "error updating item quantity" + orderId, errorstack: error });
             return resolve();
           })
 
