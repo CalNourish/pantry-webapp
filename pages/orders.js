@@ -47,7 +47,7 @@ class PackingOrders extends React.Component {
             <a href={order.url}>{order.name}</a>
           </td>
           <td className="w-auto">{order.numBags}</td>
-          <td className="w-auto">{order.deliveryDate}</td>
+          <td className="w-auto">{order.date}</td>
           <td className="w-auto">{order.deliveryWindow}</td>
           <td className="w-auto">{order.status}</td>
           <td className="w-auto">
@@ -68,7 +68,7 @@ class PackingOrders extends React.Component {
               <a href={order.url}>{order.name}</a>
             </td>
             <td className="w-auto">{order.numBags}</td>
-            <td className="w-auto">{order.deliveryDate}</td>
+            <td className="w-auto">{order.date}</td>
             <td className="w-auto">{order.status}</td>
             <td className="w-auto">
               <button
@@ -153,7 +153,7 @@ const createOrderObjects = (results) => {
       orderObj.name = "N/A";
     }
 
-    orderObj.deliveryDate = value.deliveryDate ? value.deliveryDate : "N/A";
+    orderObj.date = value.date ? value.date : "N/A";
     orderObj.isPickup = value.isPickup;
     orderObj.deliveryWindow = value.deliveryWindow
       ? value.deliveryWindow
@@ -173,6 +173,7 @@ export default function PackingOverview() {
     return <PackingOrders data={[]} key="emptyTable" />;
   } else {
     const orderObjects = createOrderObjects(data);
+    console.log(orderObjects)
     return <PackingOrders data={orderObjects} key="nonemptyTable" />;
   }
 }

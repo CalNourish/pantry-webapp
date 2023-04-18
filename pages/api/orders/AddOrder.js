@@ -229,6 +229,12 @@ function writeOrder(body, itemNames) {
         deliveryMMDD = new Date("April 12, 2023");
       }
       //END OF REMOVAL 
+      let deliveryMMDD = new Date(
+        d.setDate(
+          d.getDate() + daysToAdd
+        )
+      );
+      
       if (pickup) {
         deliveryMMDD = ""
       }
@@ -245,7 +251,7 @@ function writeOrder(body, itemNames) {
         orderId,
         email,
         pickup ? "Pickup" : `${deliveryMMDD} ${deliveryDay} ${deliveryWindow}`,
-        pickup ? pickupNotes : "(" + altDelivery + ")"
+        pickup ? pickupNotes : (altDelivery? "(" + altDelivery + ")" : "")
       ]
 
       const pantryFormatting = [
@@ -332,7 +338,7 @@ function writeOrder(body, itemNames) {
         let newOrder = {
           orderId: orderId,
           status: ORDER_STATUS_OPEN,
-          deliveryDate: pickup ? "" : deliveryMMDD,
+          date: pickup ? "" : deliveryMMDD,
           isPickup: pickup,
           dependents: dependents,
           guestNote: additionalRequests,
