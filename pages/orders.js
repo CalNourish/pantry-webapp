@@ -1,14 +1,18 @@
 import Layout from "../components/Layout";
 import useSWR from "swr";
-import cookie from "js-cookie";
 import React from "react";
+import { useUser } from '../context/userContext'
 
-const fetcher = (url, token) =>
-  fetch(url, {
+const fetcher = async (url, token) => {
+  const res = await fetch(url, {
     headers: { "Content-Type": "application/json", Authorization: token },
-  }).then((res) => res.json());
+  });
 
-const token = cookie.get("firebaseToken");
+  if (res.status == 401) {
+    return Promise.reject("Sorry, you are not authorized to view this page.")
+  }
+  return res.json();
+}
 
 class PackingOrders extends React.Component {
   constructor(props) {
@@ -16,6 +20,7 @@ class PackingOrders extends React.Component {
 
     this.state = {
       orders: props.data,
+      user: props.user
     };
   }
 
@@ -27,7 +32,7 @@ class PackingOrders extends React.Component {
         body: JSON.stringify({
           orderId: orderId,
         }),
-        headers: { "Content-Type": "application/json", Authorization: token },
+        headers: { "Content-Type": "application/json", Authorization: this.state.user.authToken },
       }).then(() => {
         this.setState({
           orders: this.state.orders.filter(function (order) {
@@ -168,11 +173,31 @@ const createOrderObjects = (results) => {
 };
 
 export default function PackingOverview() {
-  const { data } = useSWR(["/api/orders/GetAllOrders/", token], fetcher);
+  const { user, loadingUser } = useUser();
+
+  let authToken = (user && user.authorized) ? user.authToken : null;
+  const { data, error } = useSWR(["/api/orders/GetAllOrders/", authToken], fetcher);
+
+  if (loadingUser) {
+    return (
+      <Layout pageName="Checkout">
+          <h1 className='text-xl m-6'>Loading...</h1>
+      </Layout>
+    )
+  }
+
+  if (error) {
+    return (
+      <Layout pageName="Orders">
+          <h1 className='text-xl m-6'>{error}</h1>
+      </Layout>
+    )
+  }
+  
   if (!data) {
-    return <PackingOrders data={[]} key="emptyTable" />;
+    return <PackingOrders user={user} data={[]} key="emptyTable" />;
   } else {
     const orderObjects = createOrderObjects(data);
-    return <PackingOrders data={orderObjects} key="nonemptyTable" />;
+    return <PackingOrders user={user} data={orderObjects} key="nonemptyTable" />;
   }
 }

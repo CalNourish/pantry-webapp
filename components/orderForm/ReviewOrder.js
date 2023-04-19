@@ -50,6 +50,7 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
       dropoffInstructions: delivery.notes
     }
 
+    setSubmitStatus({loading: true})
     fetch('/api/orders/AddOrder',
       { method: 'POST',
         body: JSON.stringify(orderBody),
@@ -57,7 +58,6 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
       }
     ).then(resp => resp.json())
     .then((json) => {
-      console.log(json)
       setSubmitStatus(json)
       if (json.error) {
         setDisable(false)
@@ -72,8 +72,9 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
 
   return (
     <>
-      {submitStatus.success ? <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-3">{submitStatus.success}</div> :
-        submitStatus.error ? <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-3">{submitStatus.error}</div> : "" } 
+      { submitStatus.loading && <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative mb-3">Processing order...</div> }
+      { submitStatus.success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-3">{submitStatus.success}</div> }
+      { submitStatus.error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-3">{submitStatus.error}</div> } 
     
       <h2 className="h-10 text-lg mb-2 block tracking-wide text-gray-600 font-bold">Review Order</h2>
       <div className="flex">
