@@ -11,7 +11,6 @@ class Checkin extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      user:props.user,
       error: null,
       success: null,
       lastScannedID: "N/A",
@@ -116,7 +115,7 @@ class Checkin extends React.Component {
   writeIDtoSheet = async (id) => {
     fetch('/api/admin/WriteCheckIn', { method: 'POST',
     body: JSON.stringify({calID: id, isGrad:true}),
-    headers: {'Content-Type': "application/json", 'Authorization': this.state.user.authToken}
+    headers: {'Content-Type': "application/json", 'Authorization': this.props.user.authToken}
     })
     .then(() => {
       this.showSuccess("Sucessfully logged ID: " + id,1000)
@@ -133,7 +132,7 @@ class Checkin extends React.Component {
     }
     fetch('/api/admin/CheckPreviousVisit', { method: 'POST',
       body: JSON.stringify({calID: e.target.calID.value, isGrad:true}),
-      headers: {'Content-Type': "application/json", 'Authorization': this.state.user.authToken}
+      headers: {'Content-Type': "application/json", 'Authorization': this.props.user.authToken}
     })
     .then((result) => {
       result.json()

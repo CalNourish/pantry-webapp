@@ -41,7 +41,6 @@ class Cart extends React.Component {
     for (let item in props.inventory) {
       if (props.inventory[item]["defaultCart"]) {
         defaultCart.push(props.inventory[item]["barcode"])
-        console.log(item)
       }
     }
     this.defaultCart = defaultCart
