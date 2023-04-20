@@ -25,20 +25,26 @@ function fetcher(...urls) {
 class Cart extends React.Component {
   constructor(props) {
     super(props);
-    this.user = props.user;
-    this.data = props.data[1];
-    this.defaultCart = props.data["defaultCart"];
     this.state = {
       items: new Map([]),   /* entries are {barcode: [itemStruct, quantity]} */
       itemsInCart: 0,
       error: null,
       success: null,
       showSearch: false,
-      checkoutInfo:props.data[0].markdown,
+      checkoutInfo: props.checkoutInfo,
       isEditing: false,
       showPreview: false,
       loading: false
     }
+
+    let defaultCart = []
+    for (let item in props.inventory) {
+      if (props.inventory[item]["defaultCart"]) {
+        defaultCart.push(props.inventory[item]["barcode"])
+        console.log(item)
+      }
+    }
+    this.defaultCart = defaultCart
     this.getDefaultCart()
   }
 
@@ -116,7 +122,7 @@ class Cart extends React.Component {
 
   getDefaultCart = () => {
     for (let defaultItemBarcode of this.defaultCart) {
-      this.addItem(this.data[defaultItemBarcode], 0 ,true)
+      this.addItem(this.props.inventory[defaultItemBarcode], 0 ,true)
     }
   }
 
@@ -210,7 +216,7 @@ class Cart extends React.Component {
   itemFormSubmit = (e) => {
     e.preventDefault();
     let barcode = e.target.barcode.value.trim()
-    let item = this.data[barcode]
+    let item = this.props.inventory[barcode]
     if (item && item.barcode) {
       this.setState({error: null, success: null})
       this.addItem(item, e.target.quantity.value)
@@ -235,7 +241,7 @@ class Cart extends React.Component {
   submitCart = async (e) => {
     e.preventDefault();
     this.setState({loading: true})
-    let token = await this.user.authToken
+    let token = this.props.user.authToken
 
     let reqbody = this.makeReq();
     this.showSuccess("Submitting cart...", 10000)
@@ -384,7 +390,7 @@ class Cart extends React.Component {
     return (
       <Layout pageName="Checkout">
         <Modal id="search-modal" isOpen={this.state.showSearch} ariaHideApp={false} onRequestClose={this.closeModal}>
-          <SearchModal items={this.data} addItemFunc={this.addItem} onCloseHandler={this.closeModal} submitHotkey={searchSubmitHotkey}/>
+          <SearchModal items={this.props.inventory} addItemFunc={this.addItem} onCloseHandler={this.closeModal} submitHotkey={searchSubmitHotkey}/>
         </Modal>
 
         <div className="flex flex-col h-full lg:flex-row">
@@ -483,7 +489,7 @@ class Cart extends React.Component {
             {/* save edit */}
             {this.state.isEditing && <button className='ml-5 text-blue-700 hover:text-blue-500'
                 onClick={async () => {
-                let token = await this.user.authToken
+                let token = this.props.user.authToken
                 this.setState({isEditing:false});
                 fetch('/api/admin/SetCheckoutInfo', { method: 'POST',
                   body: JSON.stringify({markdown: this.state.checkoutInfo}),
@@ -545,12 +551,6 @@ export default function Checkout() {
       </Layout>
     )
   } else {
-    data["defaultCart"] = []
-    for (let item in data[1]) {
-      if (data[1][item]["defaultCart"]) {
-        data["defaultCart"].push(data[1][item]["barcode"])
-      }
-    }
-    return (<Cart data={data} user={user}></Cart>)
+    return (<Cart inventory={data[1]} checkoutInfo={data[0].markdown} user={user}></Cart>)
   }
 }
