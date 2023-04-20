@@ -180,7 +180,7 @@ export default function PackingOverview() {
 
   if (loadingUser) {
     return (
-      <Layout pageName="Checkout">
+      <Layout pageName="Bag Packing">
           <h1 className='text-xl m-6'>Loading...</h1>
       </Layout>
     )
@@ -188,7 +188,7 @@ export default function PackingOverview() {
 
   if (error) {
     return (
-      <Layout pageName="Orders">
+      <Layout pageName="Bag Packing">
           <h1 className='text-xl m-6'>{error}</h1>
       </Layout>
     )
