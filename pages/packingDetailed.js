@@ -115,7 +115,6 @@ class PackingOrder extends React.Component {
       headers: { "Content-Type": "application/json", Authorization: this.props.user.authToken },
     })
     .then(() => {
-      setTimeout(() => this.setState({ success: null }), 1000);
     })
     .catch((error) => {
       this.setState({ error: "Error packing item: " + error});
