@@ -100,7 +100,7 @@ class PackingOrder extends React.Component {
     });
   };
 
-  changeStatusOfItem(barcode) {
+  changeStatusOfItem(barcode, quantity, decreaseItemCount = false) {
     this.state.items[barcode].isPacked = !this.state.items[barcode].isPacked;
     this.setState({ items: this.state.items });
     fetch("/api/orders/SetOrderItemStatus", {
@@ -109,51 +109,64 @@ class PackingOrder extends React.Component {
         orderId: this.state.orderId,
         itemId: barcode,
         isPacked: this.state.items[barcode].isPacked,
+        decreaseItemCount: decreaseItemCount,
+        quantity: quantity
       }),
       headers: { "Content-Type": "application/json", Authorization: this.props.user.authToken },
-    }).then(() => {});
+    })
+    .then(() => {
+      setTimeout(() => this.setState({ success: null }), 1000);
+    })
+    .catch((error) => {
+      this.setState({ error: "Error packing item: " + error});
+      setTimeout(() => this.setState({ error: null }), 1000);
+    });
   }
 
   displayUnpackedItemRow(barcode, value) {
     var itemName = this.state.itemMap[barcode]?.itemName;
-    return (
-      <tr className="h-10" key={barcode}>
-        <td className="">
-          <div className="float-left">
-            <button
-              className="font-bold text-xl"
-              onClick={() => this.changeStatusOfItem(barcode)}
-            >
-              {itemName}
-            </button>
-          </div>
-        </td>
-        <td>
-          <h2 className="float-left text-xl">{value.quantity}</h2>
-        </td>
-      </tr>
-    );
+    if (itemName) {
+      return (
+        <tr className="h-10" key={barcode}>
+          <td className="">
+            <div className="float-left">
+              <button
+                className="font-bold text-xl"
+                onClick={() => this.changeStatusOfItem(barcode, value.quantity, true)}
+              >
+                {itemName}
+              </button>
+            </div>
+          </td>
+          <td>
+            <h2 className="float-left text-xl">{value.quantity}</h2>
+          </td>
+        </tr>
+      );
+    }
   }
 
   displayPackedItemRow(barcode, value) {
     var itemName = this.state.itemMap[barcode]?.itemName;
-    return (
-      <tr className="h-10" key={barcode}>
-        <td className="">
-          <div className="float-left">
-            <button
-              className="font-bold text-xl line-through"
-              onClick={() => this.changeStatusOfItem(barcode)}
-            >
-              {itemName}
-            </button>
-          </div>
-        </td>
-        <td>
-          <h2 className="line-through float-left text-xl">{value.quantity}</h2>
-        </td>
-      </tr>
-    );
+    if (itemName) {
+      return (
+        <tr className="h-10" key={barcode}>
+          <td className="">
+            <div className="float-left">
+              <button
+                className="font-bold text-xl line-through"
+                onClick={() => this.changeStatusOfItem(barcode, value.quantity, true)}
+              >
+                {itemName}
+              </button>
+            </div>
+          </td>
+          <td>
+            <h2 className="line-through float-left text-xl">{value.quantity}</h2>
+          </td>
+        </tr>
+      );
+    }
   }
 
   displayOrderStatus() {
