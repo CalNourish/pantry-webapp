@@ -38,7 +38,6 @@ class PackingOrder extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      user: props.user,
       orderId: props.data[0].orderId,
       delivery_date: props.data[0].deliveryDate,
       dependents: props.data[0].dependents,
@@ -65,7 +64,7 @@ class PackingOrder extends React.Component {
         orderId: this.state.orderId,
         message: this.state.pantryNote,
       }),
-      headers: { "Content-Type": "application/json", Authorization: this.state.user.authToken },
+      headers: { "Content-Type": "application/json", Authorization: this.props.user.authToken },
     }).then(() => {
       this.setState({ success: "Saved pantry note successfully!" });
       setTimeout(() => this.setState({ success: null }), 1000);
@@ -94,7 +93,7 @@ class PackingOrder extends React.Component {
         orderId: this.state.orderId,
         status: newStatus,
       }),
-      headers: { "Content-Type": "application/json", Authorization: this.state.user.authToken },
+      headers: { "Content-Type": "application/json", Authorization: this.props.user.authToken },
     }).then(() => {
       this.setState({ success: "Changed order status successfully!" });
       setTimeout(() => this.setState({ success: null }), 1000);
@@ -111,7 +110,7 @@ class PackingOrder extends React.Component {
         itemId: barcode,
         isPacked: this.state.items[barcode].isPacked,
       }),
-      headers: { "Content-Type": "application/json", Authorization: this.state.user.authToken },
+      headers: { "Content-Type": "application/json", Authorization: this.props.user.authToken },
     }).then(() => {});
   }
 

@@ -19,8 +19,7 @@ class PackingOrders extends React.Component {
     super(props);
 
     this.state = {
-      orders: props.data,
-      user: props.user
+      orders: props.orders
     };
   }
 
@@ -32,10 +31,10 @@ class PackingOrders extends React.Component {
         body: JSON.stringify({
           orderId: orderId,
         }),
-        headers: { "Content-Type": "application/json", Authorization: this.state.user.authToken },
+        headers: { "Content-Type": "application/json", Authorization: this.props.user.authToken },
       }).then(() => {
         this.setState({
-          orders: this.state.orders.filter(function (order) {
+          orders: this.props.orders.filter(function (order) {
             return order.id !== orderId;
           }),
         });
@@ -107,7 +106,7 @@ class PackingOrders extends React.Component {
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {this.state.orders.map((order) =>
+                  {this.props.orders.map((order) =>
                     this.displayOrderRow(order, true)
                   )}
                 </tbody>
@@ -125,7 +124,7 @@ class PackingOrders extends React.Component {
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {this.state.orders.map((order) =>
+                  {this.props.orders.map((order) =>
                     this.displayOrderRow(order, false)
                   )}
                 </tbody>
@@ -195,9 +194,9 @@ export default function PackingOverview() {
   }
   
   if (!data) {
-    return <PackingOrders user={user} data={[]} key="emptyTable" />;
+    return <PackingOrders user={user} orders={[]} key="emptyTable" />;
   } else {
     const orderObjects = createOrderObjects(data);
-    return <PackingOrders user={user} data={orderObjects} key="nonemptyTable" />;
+    return <PackingOrders user={user} orders={orderObjects} key="nonemptyTable" />;
   }
 }
