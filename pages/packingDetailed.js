@@ -116,7 +116,6 @@ class PackingOrder extends React.Component {
       headers: { "Content-Type": "application/json", Authorization: this.state.user.authToken },
     })
     .then(() => {
-      this.setState({ success: "Succesfully modified quantity for " + this.state.itemMap[barcode]?.itemName +"!" });
       setTimeout(() => this.setState({ success: null }), 1000);
     })
     .catch((error) => {
