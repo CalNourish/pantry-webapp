@@ -1,6 +1,5 @@
 import Layout from '../components/Layout'
 import { useEffect, useState } from 'react'
-import cookie from 'js-cookie';
 import React from 'react';
 
 import { useUser } from '../context/userContext'
@@ -8,13 +7,11 @@ import { server } from './_app.js'
 
 const fetcher = (url) => fetch(url).then((res) => res.json())
 
-var token = cookie.get("firebaseToken")
 
 class Checkin extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      user:props.user,
       error: null,
       success: null,
       lastScannedID: "N/A",
@@ -119,7 +116,7 @@ class Checkin extends React.Component {
   writeIDtoSheet = async (id) => {
     fetch('/api/admin/WriteCheckIn', { method: 'POST',
     body: JSON.stringify({calID: id, isGrad:false}),
-    headers: {'Content-Type': "application/json", 'Authorization': token}
+    headers: {'Content-Type': "application/json", 'Authorization': this.props.user.authToken}
     })
     .then(() => {
       this.showSuccess("Sucessfully logged ID: " + id,1000)
@@ -134,10 +131,9 @@ class Checkin extends React.Component {
       this.showError("Can't submit blank ID: " + e.target.calID.value,1000)
       return
     }
-    token = await this.state.user.googleUser.getIdToken()
     fetch('/api/admin/CheckPreviousVisit', { method: 'POST',
       body: JSON.stringify({calID: e.target.calID.value, isGrad:false}),
-      headers: {'Content-Type': "application/json", 'Authorization': token}
+      headers: {'Content-Type': "application/json", 'Authorization': this.props.user.authToken}
     })
     .then((result) => {
       result.json()
@@ -216,9 +212,18 @@ class Checkin extends React.Component {
 
 
 export default function checkin() {
+  const { user, loadingUser } = useUser();
+
   /* Display loading message */
-  const { user } = useUser();
-  let authToken = (user && user.authorized === "true") ? token : null;
+  if (loadingUser) {
+    return (
+      <Layout pageName="Checkout">
+        <h1 className='text-xl m-6'>Loading...</h1>
+      </Layout>
+    )
+  }
+
+  let authToken = (user && user.authorized) ? user.authToken : null;
   if (!authToken) {
     return (
       <Layout pageName="Check-In">
