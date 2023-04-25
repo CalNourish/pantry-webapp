@@ -4,6 +4,7 @@ import { server } from "../pages/_app.js"
 import firebase from '../firebase/clientApp';
 import {getDatabase, ref, child, get, set, push, update, onValue, remove} from "firebase/database";
 import Select from 'react-select';
+import Script from 'next/script.js';
 
 
 
@@ -15,38 +16,31 @@ let optionMap;
 
 
 
+
 /* category checkboxes, used in add/edit item modal */
-class CheckboxGrid extends React.Component {
+class EditBarcodeDropdown extends React.Component {
     constructor(props) {
         super(props);
         //this.options = props.categories;
         this.dispatch = props.dispatch;
         this.state = {
-            oldCount: props.parentState.count,
+            //oldCount: props.parentState.count,
             items: props.data,
             numCases: 0,
             newQuantity: 0,
           };
-        optionMap = Object.keys(this.state.items).map((key) => {
+        this.options = Object.keys(this.state.items).map((key) => {
             return {
               value: this.state.items[key].barcode,
               label: this.state.items[key].itemName,
             };
         });
+        console.log("map: ", optionMap)
+        
     }
     
 
 
-    markCategory(idx) {
-        let toggleCategory = this.options[idx];
-        let itemCategories = this.props.parentState.categoryName;
-        if (toggleCategory.id in itemCategories) {
-            delete this.props.parentState.categoryName[toggleCategory.id];
-        } else {
-            itemCategories[toggleCategory.id] = toggleCategory.id;
-        }
-        this.dispatch({type: "editCategories", value: this.props.parentState.categoryName})
-    }
 
     render() {
         let opt = this.options;
@@ -76,16 +70,20 @@ class CheckboxGrid extends React.Component {
 }
 
 /* Add/Edit item modal used on the authenticated version of the inventory page */
-export default function InventoryModal(props) {
+export default function EditBarcodeModal(props) {
 
     const fetcher = (url) => fetch(url).then((res) => res.json());
-    const { data, error } = useSWR(`${server}/api/categories/ListCategories`, fetcher);
+    const { data, error } = useSWR(`${server}/api/inventory/GetAllItems`, fetcher);
     if (error) return <div>Failed to load Modal</div>
     if (!data) return <div>Loading...</div>
-
-    // A reducer to get the categories from firebase in a format that is react-select friendly.
-    const categoryOptions = data.categories;
-
+    console.log(data);
+    var optionsTemp = Object.keys(data).map((key) => {
+        return {
+          value: data[key].barcode,
+          label: data[key].itemName,
+        };
+      });
+    console.log(optionsTemp)
 
     document.onkeydown = (e) => {
         /* don't submit modal immediately after scanning barcode */
@@ -93,6 +91,11 @@ export default function InventoryModal(props) {
             e.preventDefault()
             document.getElementById("itemName").focus()
         }
+    }
+    function fillBarcode(itemMap){
+        var barcode = itemMap.value;
+        document.getElementById("barcode").value = barcode;
+
     }
     function submitBarcode(){
         console.log("Editing Barcode!")
@@ -157,17 +160,16 @@ export default function InventoryModal(props) {
                         {/* Item Search Select */}
                         <div className="mb-5">
                         <Select
-                            options=  {optionMap}
+                            options=  {optionsTemp}
                             id="search-select"
                             placeholder={
                             <span className="text-sm text-gray-400">Search item name</span>
                             }
                             
-                            onChange={(e) => this.selectItem(e.value)}
+                            onChange={(e) => fillBarcode(e)}
                             autoFocus
                         />
                         </div>
-
                         {/* Item Barcode */}
                         <div className="mb-4">
                             <label className="block text-gray-600 text-sm font-bold mb-2">

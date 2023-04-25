@@ -18,6 +18,7 @@ class TakeInventory extends React.Component {
         label: this.state.items[key].itemName,
       };
     });
+    console.log(this.options);
   }
 
   updateQuantity(e) {
