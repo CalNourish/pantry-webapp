@@ -318,7 +318,7 @@ class PackingOrder extends React.Component {
                 className="form-control w-full text-base font-normal text-gray-600 bg-white bg-clip-padding border border-solid border-gray-200 rounded transition ease-in-out m-0 focus:text-gray-600 focus:bg-white focus:border-blue-600 focus:outline-none"
                 id="date"
                 rows="4"
-                placeholder="Leave a note here for other pantry workers!"
+                placeholder="Enter order delivery/pickup date here!"
                 defaultValue={this.state.date}
               >
               </textarea>

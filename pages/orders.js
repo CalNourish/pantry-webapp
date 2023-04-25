@@ -39,7 +39,6 @@ class PackingOrders extends React.Component {
   }
 
   displayOrderRow(order, delivery) {
-    console.log(order.isPickup)
     if (delivery && !order.isPickup) {
       return (
         <tr className="h-10" key={order.id}>
@@ -173,7 +172,6 @@ export default function PackingOverview() {
     return <PackingOrders data={[]} key="emptyTable" />;
   } else {
     const orderObjects = createOrderObjects(data);
-    console.log(orderObjects)
     return <PackingOrders data={orderObjects} key="nonemptyTable" />;
   }
 }

@@ -225,10 +225,7 @@ function writeOrder(body, itemNames) {
       if (daysToAdd < 2) {
         daysToAdd = daysToAdd + 7;
       }
-      else if (dayOfWeekIdx == 3) {
-        deliveryMMDD = new Date("April 12, 2023");
-      }
-      //END OF REMOVAL 
+      
       let deliveryMMDD = new Date(
         d.setDate(
           d.getDate() + daysToAdd
