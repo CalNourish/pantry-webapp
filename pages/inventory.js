@@ -9,7 +9,6 @@ import { server } from './_app.js'
 
 import Modal from 'react-modal'
 import React, { useState, useReducer } from 'react';
-import cookie from 'js-cookie';
 import firebase from '../firebase/clientApp';
 ;
 
@@ -20,7 +19,9 @@ import firebase from '../firebase/clientApp';
 const DISABLE_PUBLIC_INVENTORY = true;
 
 export default function Inventory() {
-  const token = cookie.get("firebaseToken")
+  const { user, loadingUser } = useUser();
+
+  let authToken = (user && user.authorized) ? user.authToken : null;
 
   const emptyItem =  {
     itemName: "",
@@ -30,6 +31,7 @@ export default function Inventory() {
     categoryName: {},
     lowStock: "",
     displayPublic: true,
+    defaultCart: false,
   };
 
   const emptyErrors = {
@@ -71,6 +73,12 @@ export default function Inventory() {
         return {
           ...state,
           displayPublic: action.value
+        }
+      }
+      case 'editItemDefaultCart': {
+        return {
+          ...state,
+          defaultCart: action.value
         }
       }
       case 'editItemCount': {
@@ -188,7 +196,7 @@ export default function Inventory() {
 
     fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
       body: payload,
-      headers: {'Content-Type': "application/json", 'Authorization': token}})
+      headers: {'Content-Type': "application/json", 'Authorization': authToken}})
     .then((response) => response.json())
     .then(json => {
       if (json.error) {
@@ -201,7 +209,7 @@ export default function Inventory() {
     if (confirm(`Deleting item with barcode ${barcode}. Are you sure?`)){
       fetch(`${server}/api/inventory/DeleteItem`, { method: 'POST',
         body: JSON.stringify({barcode: barcode}),
-        headers: {'Content-Type': "application/json", 'Authorization': token}})
+        headers: {'Content-Type': "application/json", 'Authorization': authToken}})
       .then(() => {
         // remove something from dataState
         let { [barcode]: deletedItem, ...newDataState } = dataState
@@ -241,7 +249,8 @@ export default function Inventory() {
         packSize: data.packSize,
         lowStock: data.lowStock,
         categoryName: categories,
-        displayPublic: data.displayPublic
+        displayPublic: data.displayPublic,
+        defaultCart: data.defaultCart
       };
       dispatch({type:'itemLookup', value: payload});
     })
@@ -280,6 +289,8 @@ export default function Inventory() {
     const lowStock = state.lowStock ? state.lowStock : -1;                                                  // defaults to -1
     const categories = Object.keys(state.categoryName).length ? state.categoryName : undefined;             // defaults to "no change"
     const displayPublic = Boolean(state.displayPublic)                                                      // defaults to true
+    const defaultCart = Boolean(state.defaultCart)                                                          // defaults to false
+
 
     const payload = JSON.stringify({
       "barcode": barcode,
@@ -288,12 +299,13 @@ export default function Inventory() {
       "count": quantity,
       "lowStock": lowStock,
       "categoryName": categories,
-      "displayPublic": displayPublic
+      "displayPublic": displayPublic,
+      "defaultCart": defaultCart
     });
     
     fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
       body: payload,
-      headers: {'Content-Type': "application/json", 'Authorization': token}})
+      headers: {'Content-Type': "application/json", 'Authorization': authToken}})
     .then((response) => response.json())
     .then(json => {
       if (json.error) {
@@ -348,7 +360,7 @@ export default function Inventory() {
   function resetInventory() {
     if (window.confirm("Reset Inventory?")) {
     fetch(`${server}/api/inventory/ResetInventory`, { method: 'POST',
-      headers: {'Content-Type': "application/json", 'Authorization': token}})
+      headers: {'Content-Type': "application/json", 'Authorization': authToken}})
     .then((response) => response.json())
     .then(json => {
       if (json.error) {
@@ -371,6 +383,7 @@ export default function Inventory() {
     const count = state.count * (document.getElementById("packOption").value == "packs" ? packSize : 1)     // defaults to 0
     const lowStock = state.lowStock ? state.lowStock : -1;                                                  // defaults to -1
     const displayPublic = Boolean(state.displayPublic);                                                     // defaults to true
+    const defaultCart = Boolean(state.defaultCart);                                                         // defaults to false
     const categories = state.categoryName;                                                                  // required
     let catNum = Object.keys(categories).length;
 
@@ -395,13 +408,14 @@ export default function Inventory() {
       "count": count,
       "categoryName": categories,
       "lowStock": lowStock,
-      "displayPublic": displayPublic
+      "displayPublic": displayPublic,
+      "defaultCart": defaultCart
       /* created by? */
     };
 
     fetch(`${server}/api/inventory/AddItem`, { method: 'POST', 
       body: JSON.stringify(payload),
-      headers: {'Content-Type': "application/json", 'Authorization': token}})
+      headers: {'Content-Type': "application/json", 'Authorization': authToken}})
     .then((response) => {
       if (response.status == 500) {
         setStatusError("Internal server error (make sure you're logged in)");
@@ -479,13 +493,18 @@ export default function Inventory() {
     })
   }
 
-  const { loadingUser, user } = useUser();
-  let authToken = (user && user.authorized === "true") ? token : null;
+  if (loadingUser) {
+    return (
+      <Layout pageName="Inventory">
+          <h1 className='text-xl m-6'>Loading...</h1>
+      </Layout>
+    )
+  }
 
   if (DISABLE_PUBLIC_INVENTORY && !authToken) {
     return (
       <Layout pageName="Inventory">
-        <div className='m-4'>Inventory is currently not publically available.</div>
+        <div className='text-xl m-6'>Inventory is currently not publically available.</div>
       </Layout>
     )
   }
@@ -493,7 +512,7 @@ export default function Inventory() {
   return (
     <>
       <Layout pageName="Inventory">
-        {!authToken ? "" :
+        { authToken &&
           <>
             {/* Add Item Modal */}
             <Modal id="add-item-modal" isOpen={showAddItem} onRequestClose={closeAddItem} ariaHideApp={false}>
@@ -564,7 +583,7 @@ export default function Inventory() {
         }
         
         <div className="flex">
-          {!(user && user.authorized === "true") ? "" :
+          {!(user && authToken) ? "" :
               <div className="w-64 items-center">
                 <Sidebar>
                   <h1 className="text-3xl font-semibold mb-2">Inventory</h1>

@@ -25,18 +25,25 @@ function fetcher(...urls) {
 class Cart extends React.Component {
   constructor(props) {
     super(props);
-    this.data = props.data[1];
     this.state = {
-      user: props.data.user,
       items: new Map([]),   /* entries are {barcode: [itemStruct, quantity]} */
       itemsInCart: 0,
       error: null,
       success: null,
       showSearch: false,
-      checkoutInfo:props.data[0].markdown,
+      checkoutInfo: props.checkoutInfo,
       isEditing: false,
-      showPreview: false
+      showPreview: false,
+      loading: false
     }
+
+    let defaultCart = []
+    for (let item in props.inventory) {
+      if (props.inventory[item]["defaultCart"]) {
+        defaultCart.push(props.inventory[item]["barcode"])
+      }
+    }
+    this.defaultCart = defaultCart
     this.getDefaultCart()
   }
 
@@ -113,15 +120,9 @@ class Cart extends React.Component {
   }
 
   getDefaultCart = () => {
-    this.addItem(this.data["fruit"], 0, true)
-    this.addItem(this.data["vegetable"], 0, true)
-    this.addItem(this.data["eggs"], 0, true)
-    this.addItem(this.data["spices"], 0, true)
-    this.addItem(this.data["bread"], 0, true)
-    this.addItem(this.data["potato"], 0, true)
-    this.addItem(this.data["onion"], 0, true)
-    this.addItem(this.data["apple juice"], 0, true)
-    this.addItem(this.data["berry juice"], 0, true)
+    for (let defaultItemBarcode of this.defaultCart) {
+      this.addItem(this.props.inventory[defaultItemBarcode], 0 ,true)
+    }
   }
 
   upItemQuantity = (barcode, refocusBarcode=false) => {
@@ -214,7 +215,7 @@ class Cart extends React.Component {
   itemFormSubmit = (e) => {
     e.preventDefault();
     let barcode = e.target.barcode.value.trim()
-    let item = this.data[barcode]
+    let item = this.props.inventory[barcode]
     if (item && item.barcode) {
       this.setState({error: null, success: null})
       this.addItem(item, e.target.quantity.value)
@@ -238,15 +239,17 @@ class Cart extends React.Component {
 
   submitCart = async (e) => {
     e.preventDefault();
-    let token = await this.state.user.googleUser.getIdToken()
+    this.setState({loading: true})
+    let token = this.props.user.authToken
 
     let reqbody = this.makeReq();
     this.showSuccess("Submitting cart...", 10000)
     if (this.state.itemsInCart == 0) {
       this.showError("Cannot submit: Cart is empty");
+      this.setState({loading: false})
       return;
     }
-
+    
     fetch('/api/inventory/CheckoutItems', { method: 'POST',
       body: reqbody,
       headers: {'Content-Type': "application/json", 'Authorization': token}
@@ -273,6 +276,7 @@ class Cart extends React.Component {
       } else {
         this.showSuccess("Cart submitted successfully", 10000)
       }
+      this.setState({loading: false})
     });
   }
 
@@ -385,7 +389,7 @@ class Cart extends React.Component {
     return (
       <Layout pageName="Checkout">
         <Modal id="search-modal" isOpen={this.state.showSearch} ariaHideApp={false} onRequestClose={this.closeModal}>
-          <SearchModal items={this.data} addItemFunc={this.addItem} onCloseHandler={this.closeModal} submitHotkey={searchSubmitHotkey}/>
+          <SearchModal items={this.props.inventory} addItemFunc={this.addItem} onCloseHandler={this.closeModal} submitHotkey={searchSubmitHotkey}/>
         </Modal>
 
         <div className="flex flex-col h-full lg:flex-row">
@@ -453,7 +457,7 @@ class Cart extends React.Component {
                 </tr>
               </tbody>
             </table>
-            <button className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" onClick={(e) => this.submitCart(e)}>
+            <button className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" onClick={(e) => this.submitCart(e)} disabled={this.state.loading}>
               Checkout <span className="font-normal hidden lg:inline-block">(Shift+Enter)</span>
             </button>
           </div>
@@ -484,7 +488,7 @@ class Cart extends React.Component {
             {/* save edit */}
             {this.state.isEditing && <button className='ml-5 text-blue-700 hover:text-blue-500'
                 onClick={async () => {
-                let token = await this.state.user.googleUser.getIdToken()
+                let token = this.props.user.authToken
                 this.setState({isEditing:false});
                 fetch('/api/admin/SetCheckoutInfo', { method: 'POST',
                   body: JSON.stringify({markdown: this.state.checkoutInfo}),
@@ -529,8 +533,16 @@ export default function Checkout() {
     ["/api/admin/GetCheckoutInfo", "/api/inventory/GetAllItems"],
     fetcher
   );
-  const { user } = useUser();
+  const { user, loadingUser } = useUser();
 
+  if (loadingUser) {
+    return (
+      <Layout pageName="Checkout">
+          <h1 className='text-xl m-6'>Loading...</h1>
+      </Layout>
+    )
+  }
+  
   if (!data || !user) {
     return (
       <Layout pageName="Checkout">
@@ -538,7 +550,6 @@ export default function Checkout() {
       </Layout>
     )
   } else {
-    data["user"] = user
-    return (<Cart data={data}></Cart>)
+    return (<Cart inventory={data[1]} checkoutInfo={data[0].markdown} user={user}></Cart>)
   }
 }

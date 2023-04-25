@@ -85,6 +85,14 @@ export default function InventoryModal(props) {
                                 }}>
                             </input>
                         </div>
+                        <div className='mb-4'>
+                            <label className='mr-2' htmlFor="display-public">Make part of default cart:</label>
+                            <input type="checkbox" checked={props.parentState.defaultCart} id="display-public" className='w-4 h-4 align-middle'
+                                onChange={(e) => {
+                                    props.dispatch({type: 'editItemDefaultCart', value: e.currentTarget.checked})
+                                }}>
+                            </input>
+                        </div>
 
                         {/* Item Barcode */}
                         <div className="mb-4">

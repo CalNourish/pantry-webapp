@@ -5,15 +5,12 @@ import { server } from './_app.js'
 import { useState } from "react";
 import ReactMarkdown from 'react-markdown';
 import { markdownStyle } from "../utils/markdownStyle";
-import cookie from "js-cookie";
 
 export default function Home() {
   // Our custom hook to get context values
   const { user } = useUser();
-  const token = cookie.get("firebaseToken");
 
-  console.log("User:", user);
-  let authToken = (user && user.authorized === "true") ? token : null;
+  let authToken = (user && user.authorized) ? user.authToken : null;
 
   const [info, setInfo] = useState(false);
   const [isEditingInfo, setIsEditingInfo] = useState(false);
@@ -55,7 +52,7 @@ export default function Home() {
             setIsEditingInfo(false);
             fetch('/api/admin/SetHomeInfo', { method: 'POST',
               body: JSON.stringify({markdown: info}),
-              headers: {'Content-Type': "application/json", 'Authorization': token}
+              headers: {'Content-Type': "application/json", 'Authorization': authToken}
             }).then((res) => {
               if (!res.ok) {
                 res.json().then(err => console.log("SetHomeInfo error: " + err.error))

@@ -53,11 +53,18 @@ export default async function (req, res) {
               })
               .catch((error) => {
                 res.status(500);
-                res.json({ message: "Error updating firebase inventory:" });
+                res.json({ message: "Error updating firebase inventory" });
                 return resolve("Error updating firebase inventory: " + error);
               });
+          }).catch((error) => {
+            res.status(500);
+            res.json({ message: "Error fetching inventory" });
+            return resolve("Error fetching inventory: " + error);
           })
         );
+    }).catch(() => {
+      res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an administrator account." })
+      return resolve();
     });
   });
 }

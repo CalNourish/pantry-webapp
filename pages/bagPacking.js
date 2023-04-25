@@ -1,21 +1,25 @@
 import Layout from "../components/Layout";
 import useSWR from "swr";
-import cookie from "js-cookie";
 import React from "react";
+import { useUser } from '../context/userContext'
 
-const fetcher = (url, token) =>
-  fetch(url, {
+const fetcher = async (url, token) => {
+  const res = await fetch(url, {
     headers: { "Content-Type": "application/json", Authorization: token },
-  }).then((res) => res.json());
+  });
 
-const token = cookie.get("firebaseToken");
+  if (res.status == 401) {
+    return Promise.reject("Sorry, you are not authorized to view this page.")
+  }
+  return res.json();
+}
 
 class PackingOrders extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      orders: props.data,
+      orders: props.orders
     };
   }
 
@@ -27,10 +31,10 @@ class PackingOrders extends React.Component {
         body: JSON.stringify({
           orderId: orderId,
         }),
-        headers: { "Content-Type": "application/json", Authorization: token },
+        headers: { "Content-Type": "application/json", Authorization: this.props.user.authToken },
       }).then(() => {
         this.setState({
-          orders: this.state.orders.filter(function (order) {
+          orders: this.props.orders.filter(function (order) {
             return order.id !== orderId;
           }),
         });
@@ -102,7 +106,7 @@ class PackingOrders extends React.Component {
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {this.state.orders.map((order) =>
+                  {this.props.orders.map((order) =>
                     this.displayOrderRow(order, true)
                   )}
                 </tbody>
@@ -120,7 +124,7 @@ class PackingOrders extends React.Component {
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {this.state.orders.map((order) =>
+                  {this.props.orders.map((order) =>
                     this.displayOrderRow(order, false)
                   )}
                 </tbody>
@@ -158,7 +162,7 @@ const createOrderObjects = (results) => {
     orderObj.deliveryWindow = value.deliveryWindow
       ? value.deliveryWindow
       : "N/A";
-    orderObj.numBags = value.num_bags ? value.num_bags : 1;
+    orderObj.numBags = value.numBags ? value.numBags : 1;
     orderObj.status = value.status ? value.status : "No status available";
     orderObj.url = "/packingDetailed?orderid=" + key;
     orderObjects.push(orderObj);
@@ -168,11 +172,31 @@ const createOrderObjects = (results) => {
 };
 
 export default function PackingOverview() {
-  const { data } = useSWR(["/api/orders/GetAllOrders/", token], fetcher);
+  const { user, loadingUser } = useUser();
+
+  let authToken = (user && user.authorized) ? user.authToken : null;
+  const { data, error } = useSWR(["/api/orders/GetAllOrders/", authToken], fetcher);
+
+  if (loadingUser) {
+    return (
+      <Layout pageName="Bag Packing">
+          <h1 className='text-xl m-6'>Loading...</h1>
+      </Layout>
+    )
+  }
+
+  if (error) {
+    return (
+      <Layout pageName="Bag Packing">
+          <h1 className='text-xl m-6'>{error}</h1>
+      </Layout>
+    )
+  }
+  
   if (!data) {
-    return <PackingOrders data={[]} key="emptyTable" />;
+    return <PackingOrders user={user} orders={[]} key="emptyTable" />;
   } else {
     const orderObjects = createOrderObjects(data);
-    return <PackingOrders data={orderObjects} key="nonemptyTable" />;
+    return <PackingOrders user={user} orders={orderObjects} key="nonemptyTable" />;
   }
 }
