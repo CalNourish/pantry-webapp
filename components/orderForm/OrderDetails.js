@@ -114,7 +114,7 @@ export default function OrderDetails({children}) {
     )
     
     // Add item to category
-    items[key].categoryName.forEach(name => itemsByCategory[name].push(itemInput))
+    items[key].categoryName.forEach(name => itemsByCategory[name]?.push(itemInput))
   })
 
   return (

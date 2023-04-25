@@ -207,13 +207,19 @@ function writeOrder(body, itemNames) {
       if (daysToAdd < 2) {
         daysToAdd = daysToAdd + 7;
       }
+      
       let deliveryMMDD = new Date(
         d.setDate(
           d.getDate() + daysToAdd
         )
       );
-
-      deliveryMMDD = (deliveryMMDD.getMonth() + 1) + "/" + deliveryMMDD.getDate()
+      
+      if (pickup) {
+        deliveryMMDD = ""
+      }
+      else {
+        deliveryMMDD = (deliveryMMDD.getMonth() + 1) + "/" + deliveryMMDD.getDate()
+      }
   
       let deliveryWindow = `${deliveryWindowStart} - ${deliveryWindowEnd}`
       
@@ -224,7 +230,7 @@ function writeOrder(body, itemNames) {
         orderId,
         email,
         pickup ? "Pickup" : `${deliveryMMDD} ${deliveryDay} ${deliveryWindow}`,
-        pickup ? pickupNotes : "(" + altDelivery + ")"
+        pickup ? pickupNotes : (altDelivery? "(" + altDelivery + ")" : "")
       ]
 
       const pantryFormatting = [
@@ -311,7 +317,8 @@ function writeOrder(body, itemNames) {
         let newOrder = {
           orderId: orderId,
           status: ORDER_STATUS_OPEN,
-          deliveryDate: pickup ? "Pickup" : deliveryMMDD,
+          date: pickup ? "" : deliveryMMDD,
+          isPickup: pickup,
           dependents: dependents,
           guestNote: additionalRequests,
           dietaryRestriction: dietaryRestrictions,

@@ -39,7 +39,8 @@ class PackingOrder extends React.Component {
     super(props);
     this.state = {
       orderId: props.data[0].orderId,
-      delivery_date: props.data[0].deliveryDate,
+      date: props.data[0].date,
+      isPickup: props.data[0].isPickup,
       dependents: props.data[0].dependents,
       dietaryRestriction: props.data[0].dietaryRestriction ? props.data[0].dietaryRestriction : "N/A",
       pantryNote: props.data[0].pantryNote,
@@ -74,6 +75,28 @@ class PackingOrder extends React.Component {
   cancelPantryNote = () => {
     if (this.state.pantryNote !== undefined) {
       document.getElementById("pantry_note").value = this.state.pantryNote;
+    }
+  };
+
+  saveDate = (newDate = this.state.date) => {
+    this.state.date = newDate;
+    this.setState({ date: this.state.date });
+    fetch("/api/orders/SetDate", {
+      method: "POST",
+      body: JSON.stringify({
+        orderId: this.state.orderId,
+        message: this.state.date,
+      }),
+      headers: { "Content-Type": "application/json", Authorization: token },
+    }).then(() => {
+      this.setState({ success: "Saved date successfully!" });
+      setTimeout(() => this.setState({ success: null }), 1000);
+    });
+  };
+
+  cancelDate = () => {
+    if (this.state.date !== undefined) {
+      document.getElementById("date").value = this.state.date;
     }
   };
 
@@ -311,6 +334,35 @@ class PackingOrder extends React.Component {
                   </button>
                 </React.Fragment>
               </div>
+              <h1 className="text-xl mt-4">{this.state.isPickup ? "Pickup Date" : "Delivery Date"}</h1>
+              <textarea
+                className="form-control w-full text-base font-normal text-gray-600 bg-white bg-clip-padding border border-solid border-gray-200 rounded transition ease-in-out m-0 focus:text-gray-600 focus:bg-white focus:border-blue-600 focus:outline-none"
+                id="date"
+                rows="4"
+                placeholder="Enter order delivery/pickup date here!"
+                defaultValue={this.state.date}
+              >
+              </textarea>
+              <div>
+                <React.Fragment>
+                  <button
+                    className="btn btn-pantry-blue mr-2"
+                    onClick={() =>
+                      this.saveDate(
+                        document.getElementById("date").value
+                      )
+                    }
+                  >
+                    Save
+                  </button>
+                  <button
+                    className="btn btn-outline"
+                    onClick={() => this.cancelDate()}
+                  >
+                    Cancel
+                  </button>
+                </React.Fragment>
+              </div>
             </div>
             <div className="w-3/4 m-5 space-x-10 space-y-5">
               {this.state.error ? errorBanner : null}
@@ -318,6 +370,10 @@ class PackingOrder extends React.Component {
               <h1 className="inline text-2xl font-medium mb-2">
                 {this.state.firstName + " " + this.state.lastInitial}{" "}
               </h1>
+              <div className="inline ml-4">
+                <p className="inline font-medium">Type: </p>
+                <p className="inline">{this.state.isPickup? "Pickup" : "Delivery"}</p>
+              </div>
               <div className="inline items-center space-x-4">
                 {this.displayOrderStatus()}
                 {this.displayChangeOrderStatus()}

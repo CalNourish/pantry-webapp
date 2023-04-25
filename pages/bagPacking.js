@@ -43,14 +43,14 @@ class PackingOrders extends React.Component {
   }
 
   displayOrderRow(order, delivery) {
-    if (delivery && order.deliveryDate != "Pickup") {
+    if (delivery && !order.isPickup) {
       return (
         <tr className="h-10" key={order.id}>
           <td className="w-auto">
             <a href={order.url}>{order.name}</a>
           </td>
           <td className="w-auto">{order.numBags}</td>
-          <td className="w-auto">{order.deliveryDate}</td>
+          <td className="w-auto">{order.date}</td>
           <td className="w-auto">{order.deliveryWindow}</td>
           <td className="w-auto">{order.status}</td>
           <td className="w-auto">
@@ -64,15 +64,14 @@ class PackingOrders extends React.Component {
           </td>
         </tr>
       );
-    } else if (!delivery && order.deliveryDate == "Pickup") {
+    } else if (!delivery && order.isPickup) {
         return (
           <tr className="h-10" key={order.id}>
             <td className="w-auto">
               <a href={order.url}>{order.name}</a>
             </td>
             <td className="w-auto">{order.numBags}</td>
-            <td className="w-auto">{order.deliveryDate}</td>
-            <td className="w-auto">{order.deliveryWindow}</td>
+            <td className="w-auto">{order.date}</td>
             <td className="w-auto">{order.status}</td>
             <td className="w-auto">
               <button
@@ -102,7 +101,7 @@ class PackingOrders extends React.Component {
                     <th className="w-1/5 text-left">Number of Bags</th>
                     <th className="w-1/5 text-left">Delivery Date</th>
                     <th className="w-1/5 text-left">Delivery Window</th>
-                    <th className="w-1/5 text-left">Delivery Status</th>
+                    <th className="w-1/5 text-left">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -118,9 +117,8 @@ class PackingOrders extends React.Component {
                   <tr className="border-b-2">
                     <th className="w-1/5 text-left">Name</th>
                     <th className="w-1/5 text-left">Number of Bags</th>
-                    <th className="w-1/5 text-left">Delivery Date</th>
-                    <th className="w-1/5 text-left">Delivery Window</th>
-                    <th className="w-1/5 text-left">Delivery Status</th>
+                    <th className="w-2/5 text-left">Pickup Date</th>
+                    <th className="w-1/5 text-left">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -158,7 +156,8 @@ const createOrderObjects = (results) => {
       orderObj.name = "N/A";
     }
 
-    orderObj.deliveryDate = value.deliveryDate ? value.deliveryDate : "N/A";
+    orderObj.date = value.date ? value.date : "N/A";
+    orderObj.isPickup = value.isPickup;
     orderObj.deliveryWindow = value.deliveryWindow
       ? value.deliveryWindow
       : "N/A";
