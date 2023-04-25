@@ -300,7 +300,6 @@ class PackingOrder extends React.Component {
       </div>
     );
 
-    console.log(this.state.isPickup)
     return (
       <>
         <Layout pageName={`${this.state.firstName} ${this.state.lastInitial}'s Order`}>
