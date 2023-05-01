@@ -136,7 +136,7 @@ class Checkin extends React.Component {
     }
     token = await this.state.user.googleUser.getIdToken()
     fetch('/api/categories/DeleteCategory', { method: 'POST',
-      body: JSON.stringify({displayName: "snacks"}),
+      body: JSON.stringify({displayName: "rhCZvi0hp4"}),
       headers: {'Content-Type': "application/json", 'Authorization': token}
     })
     // .then((result) => {

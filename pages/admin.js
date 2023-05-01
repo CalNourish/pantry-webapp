@@ -8,7 +8,7 @@ import { server } from './_app.js'
 
 import { daysInOrder } from './hours';
 import firebase from '../firebase/clientApp';
-// keep track of these variables that can change throughout this program
+
 function AddAdmin(props) {
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
@@ -101,15 +101,13 @@ function SheetLinks(props) {
   const fetcher = (url) => fetch(url, {
     method:'GET', headers: {'Content-Type': "application/json", 'Authorization': props.authToken}
   }).then((res) => res.json());
-  // useSWR is a React hook that passes in the data from the API ink to fetcher, a function that reads this data returns a Promise that resolves with the result of parsing the data as JSON
-  // JSON: format for storing and transporting data
-  // how does the fetcher method account for an error? based on the code below, I'm assuming that the error variable will have some value if an error exists 
+
   const { data, error } = useSWR(`${server}/api/admin/GetSheetLinks`, fetcher);
 
   if (error) {
     console.log("Error fetching google sheet links:", error)
     return (
-      // where are these classes? Oh, is it tailwind css?
+     
       <div className='m-8'>
         <div className='font-semibold text-3xl mb-4'>Google Sheets Links</div>
         <div className='m-4'>Error! See console log for details.</div>
@@ -126,13 +124,12 @@ function SheetLinks(props) {
     )
   }
 
-  // initialize form info if empty
   if (Object.keys(formData).length == 0) {
     setFormData(data)
   }
 
   let showSuccess = (tag, t = 5000) => {
-    // does this comment mean "success" text? also, what's the point of the timer? why not just call the setSubmitStatus function?
+    
     /* show error banner with error text for 5 seconds, or custom time */
     setSubmitStatus({[tag]: "success"})
     clearTimeout(statusTimer);
@@ -143,7 +140,7 @@ function SheetLinks(props) {
   }
 
   let generateForm = (tag) => {
-    let tagData = formData[tag]; // should be another map...
+    let tagData = formData[tag]; 
     if (!tagData) {
       return (
         <div key={`missing-sheet-${tag}`} className='p-4 border border-red-400 bg-red-50'>
@@ -201,7 +198,6 @@ function SheetLinks(props) {
                 if (result.ok) {
                   showSuccess(tag);
                 } else {
-                  // error response from API
                   setSubmitStatus({[tag]: "error", [tag+"-msg"]: res.error})
                   return;
                 }
@@ -252,7 +248,6 @@ function DeliveryTimes(props) {
       </div>
     )
   }
-  // does this mean if the data has not existed yet and is still loading? 
   if (!data) {
     return (
       <div className='m-8'>
@@ -261,18 +256,14 @@ function DeliveryTimes(props) {
       </div>
     )
   }
-  // if the formData is empty, we call the set function to update it?
   if (Object.keys(formData).length == 0 && Object.keys(data).length > 0) {
-    // TODO: might need to change this?
     setFormData(data)
   }
 
   /* do this once, after formData is set */
   const ref = firebase.database().ref('/deliveryTimes')
 
-  // does this mean if the there is at least one row of data in formData?
   if (Object.keys(formData).length > 0) {
-    // what is ref.on?
     ref.on('child_added', snapshot => {
       let data = snapshot.val()
       if (!formData[data.tag]) {
@@ -284,16 +275,13 @@ function DeliveryTimes(props) {
   }
 
   let deleteTime = (tag) => {
-    let {[tag]: _, ...newData} = formData; // remove tag for newData
-    // do we have to create a "DeleteCategory", something similar to fetch?
+    let {[tag]: _, ...newData} = formData; 
     fetch(`${server}/api/admin/DeleteDeliveryTime`, { method: 'POST',
       body: JSON.stringify({"tag": tag}),
       headers: {'Content-Type': "application/json", 'Authorization': props.authToken}
     })
     .then((result) => {
-      // returns a promise that resolves to a javascript object
       result.json()
-      // what is the difference between result and res here? 
       .then((res) => {
         setSubmitStatus(res.error)
       })
@@ -334,8 +322,6 @@ function DeliveryTimes(props) {
       })
     })
   }
-  // by returning, do we execute all this code and not run anything below it? 
-  // I understand that this is the HTML code for what appears on the website
   return (
     <div className='m-8'>
       <div className='font-semibold text-3xl mb-4'>Delivery Time Windows</div>
@@ -352,10 +338,8 @@ function DeliveryTimes(props) {
             <span className='text-gray-500 italic'>No options</span> :
             <table className='mb-4'>
               <tbody>
-                 {/* does formData have key-value pairs? what is the key in formData? What the line below mapping each key to? */}
-                {Object.keys(formData).map((key) => <tr key={key}>
+                {Object.keys(formData).map((key) => <tr key={key}> 
                   <td className='pr-10'>{formData[key].display}</td>
-                  {/* we call the deleteTime method to delete a specific element of formData (key) once we click on the trash cam image*/}
                   <td><img className="w-4 h-4 items-center hover:cursor-pointer" src="/images/trash-can.svg" onClick={() => deleteTime(key)}></img></td>
                 </tr>)}
               </tbody>
@@ -392,13 +376,164 @@ function DeliveryTimes(props) {
                 <option>PM</option>
               </select>
             </div>
-            {/* how does this add a new time tho?*/}
             <button type='submit' className='btn btn-outline p-2'>Add!</button>
           </form>
         </div>
       </div>
     </div>
+
+    
   )
+}
+
+function Categories(props) {
+  const [formData, setFormData] = useState({});
+  const [submitStatus, setSubmitStatus] = useState("");
+
+
+  const fetcher = (url) => fetch(url).then((res) => res.json())
+  let { data, error } = useSWR('/api/categories/ListCategories', fetcher)
+  
+  
+  if (error) {
+    console.log("Error fetching categories:", error)
+    return (
+      <div className='m-8'>
+        <div className='font-semibold text-3xl mb-4'>Categories</div>
+        <div className='m-4'>Error! See console log for details.</div>
+      </div>
+    )
+  }
+
+  if (!data) {
+    return (
+      <div className='m-8'>
+        <div className='font-semibold text-3xl mb-4'>Categories</div>
+        <div className='m-4'>Loading...</div>
+      </div>
+    )
+  }
+
+  if (Object.keys(formData).length == 0 && Object.keys(data).length > 0) {
+    setFormData(data)
+  }
+
+  const ref = firebase.database().ref('/category')
+
+  if (Object.keys(formData).length > 0) {
+    ref.on('child_added', snapshot => {
+      let data = snapshot.val()
+      if (!formData[data.tag]) {
+        setFormData({
+          ...formData, [data.tag]: data
+        });
+      }
+    });
+  }
+
+  let deleteCategory = (tag) => {
+    console.log(formData)
+    console.log(formData["categories"])
+    console.log(formData["categories"][0]["id"])
+    // console.log(tag)
+    let {[tag]: _, ...newData} = formData;
+    // console.log(newData)
+    fetch(`${server}/api/categories/DeleteCategory`, { method: 'POST',
+      body: JSON.stringify({"tag": tag}),
+      headers: {'Content-Type': "application/json", 'Authorization': props.authToken}
+    })
+    .then((result) => {
+      console.log(999)
+      result.json()
+      .then((res) => {
+        setSubmitStatus(res.error)
+      })
+      setFormData(newData)
+    })
+  }
+
+  let submitForm = (e) => {
+    e.preventDefault();
+
+    const category = e.target.category.value;
+
+    const data = {
+      displayName: category
+
+    }
+    
+    fetch(`${server}/api/categories/AddCategory`, { method: 'POST',
+      
+      body: JSON.stringify(data),
+      headers: {'Content-Type': "application/json", 'Authorization': props.authToken}
+    })
+    .then((result) => {
+      result.json()
+      .then((res) => {
+        if (result.ok) {
+          document.getElementById("deliveryTimeForm").reset()
+        } else {
+          console.log("Error adding time window:", res.error)
+        }
+        setSubmitStatus(res.error)
+      })
+    })
+  }
+
+  return (
+    <div className='m-8'>
+      <div className='font-semibold text-3xl mb-4'>Categories</div>
+      { submitStatus &&
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-3">
+          {submitStatus}</div>
+      }
+      <div className='space-y-4 sm:space-y-0 sm:flex sm:flex-row sm:space-x-8'>
+        <div className='border border-gray-400 p-4'>
+        {
+            Object.keys(formData).length == 0 ?
+            <span className='text-gray-500 italic'>No options</span> :
+            <table className='mb-4'>
+              <tbody>
+                {Object.keys(formData["categories"]).map((key) => <tr key={key}> 
+                  <td className='pr-10'>{formData["categories"][key]["displayName"]}</td>
+                  <td><img className="w-4 h-4 items-center hover:cursor-pointer" src="/images/trash-can.svg" onClick={() => deleteCategory(formData["categories"][key]["id"])}></img></td>
+                </tr>)}
+              </tbody>
+            </table>
+          }
+        </div>
+
+        
+        <div className='border border-gray-400 bg-gray-50 p-4'>
+        <form id="deliveryTimeForm" onSubmit={(e) => submitForm(e)}>
+        <div className='font-semibold text-xl mb-2'>Add a new category:</div>
+          <div className='mb-2'>
+            <span className='font-semibold mr-2'>Category:</span>
+            <input type="text" id="category"></input>
+            <br></br>
+            <br></br>
+            <button type='submit' className='btn btn-outline p-2'>Add!</button>
+        </div>
+
+
+
+        </form>
+
+        
+
+        </div>
+      </div>
+
+
+
+    </div>
+    // <div className='m-8'>
+
+
+  )
+
+
+
 }
 
 export default function Admin() {
@@ -419,6 +554,7 @@ export default function Admin() {
       <SheetLinks authToken={authToken}/>
       <AddAdmin authToken={authToken}/>
       <DeliveryTimes authToken={authToken}/>
+      <Categories authToken={authToken}/>
     </Layout>
   )
 }
