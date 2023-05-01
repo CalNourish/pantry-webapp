@@ -57,18 +57,22 @@ class PackingOrder extends React.Component {
   }
 
   savePantryNote = (newPantryNote = this.state.pantryNote) => {
-    this.state.pantryNote = newPantryNote;
     this.setState({ pantryNote: this.state.pantryNote });
     fetch("/api/orders/SetPantryNote", {
       method: "POST",
       body: JSON.stringify({
         orderId: this.state.orderId,
-        message: this.state.pantryNote,
+        message: newPantryNote,
       }),
       headers: { "Content-Type": "application/json", Authorization: this.props.user.authToken },
-    }).then(() => {
-      this.setState({ success: "Saved pantry note successfully!" });
-      setTimeout(() => this.setState({ success: null }), 1000);
+    }).then((res) => {
+      if (res.ok) {
+        this.setState({ success: "Saved pantry note successfully!" });
+        setTimeout(() => this.setState({ success: null }), 1000);
+      } else {
+        this.setState({ error: "Error saving pantry note. Please refresh and try again." });
+        setTimeout(() => this.setState({ error: null }), 1000);
+      }
     });
   };
 
@@ -79,18 +83,22 @@ class PackingOrder extends React.Component {
   };
 
   saveDate = (newDate = this.state.date) => {
-    this.state.date = newDate;
-    this.setState({ date: this.state.date });
+    this.setState({ date: newDate });
     fetch("/api/orders/SetDate", {
       method: "POST",
       body: JSON.stringify({
         orderId: this.state.orderId,
-        message: this.state.date,
+        date: newDate,
       }),
-      headers: { "Content-Type": "application/json", Authorization: token },
-    }).then(() => {
-      this.setState({ success: "Saved date successfully!" });
-      setTimeout(() => this.setState({ success: null }), 1000);
+      headers: { "Content-Type": "application/json", Authorization: this.props.user.authToken },
+    }).then((res) => {
+      if (res.ok) {
+        this.setState({ success: "Saved date successfully!" });
+        setTimeout(() => this.setState({ success: null }), 1000);
+      } else {
+        this.setState({ error: "Error saving date. Please refresh and try again." });
+        setTimeout(() => this.setState({ error: null }), 1000);
+      }
     });
   };
 
