@@ -2,7 +2,6 @@ import { useRouter } from "next/router";
 import { useUser } from '../context/userContext'
 import { useState } from 'react'
 import { server } from '../pages/_app.js'
-import cookie from 'js-cookie';
 
 const DISABLE_PUBLIC_INVENTORY = true;
 
@@ -33,10 +32,8 @@ const AUTH_SIGNEDIN_ROUTES = [
   { title: "Check in", route: "/checkin"},
   { title: "Grad Check in", route: "/checkinGrad"},
   { title: "Checkout", route: "/checkout"},
-  { title: "Bag Packing", route: "/orders"}
+  { title: "Bag Packing", route: "/bagPacking"}
 ]
-
-const token = cookie.get("firebaseToken")
 
 export default function Navbar() {
   const linkStyle = "w-full relative inline-block py-2 pr-3 pl-3 text-white rounded hover:bg-pantry-blue-400 " +
@@ -44,7 +41,7 @@ export default function Navbar() {
   const activeLink = `${linkStyle} text-white`;
   const inactiveLink = `${linkStyle} text-gray-300 hover:text-white`;
   const router = useRouter();
-  const { loadingUser, user } = useUser()
+  const { user, loadingUser } = useUser()
   
   const [showUserInfo, setShowUserInfo] = useState(false)
   const [showTabs, setShowTabs] = useState(false)
@@ -59,14 +56,14 @@ export default function Navbar() {
     name = user.displayName;
     routes = UNAUTH_SIGNEDIN_ROUTES
     // if they're an admin
-    if (user.authorized === "true") {
+    if (user.authorized) {
       routes = AUTH_SIGNEDIN_ROUTES;
       userType = "Administrator";
 
       // update numNewOrders
       if (numNewOrders === false) {
         fetch(`${server}/api/orders/GetOrdersByStatus?status=open`, { method: 'GET',
-          headers: {'Content-Type': "application/json", 'Authorization': token}
+          headers: {'Content-Type': "application/json", 'Authorization': user.authToken}
         })
         .then(resp => resp.json())
         .then(newOrders => {
@@ -97,7 +94,9 @@ export default function Navbar() {
 
       {/* User Info */}
       <div className='flex-grow mr-3 xl:order-2 xl:flex-grow-0'>
-        {!user ? <a className="bg-gray-50 text-gray-600 rounded px-3 py-1 float-right" href="/signin">Sign In</a> :
+        {!user ?
+          !loadingUser && <a className="bg-gray-50 text-gray-600 rounded px-3 py-1 float-right" href="/signin">Sign In</a>
+          :
           <div className="flex flex-col float-right">
             {/* circle with user initials */}
             <button className="focus:outline-none w-8 h-8 rounded-full bg-gray-50 text-gray-600 font-semibold truncate" onClick={toggleUserDropdown}>

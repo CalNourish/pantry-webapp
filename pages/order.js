@@ -11,7 +11,6 @@ import { server } from './_app.js'
 import { useState, useContext } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { markdownStyle } from '../utils/markdownStyle';
-import cookie from 'js-cookie';
 
 export default function Order() {
   let { cart, personal, delivery } = useContext(StateCartContext)
@@ -167,8 +166,7 @@ export default function Order() {
   }
 
   const { user } = useUser();
-  const token = cookie.get("firebaseToken")
-  let authToken = (user && user.authorized === "true") ? token : null;
+  let authToken = (user && user.authorized) ? user.authToken : null;
 
   let infoDiv = <div className='py-8 px-16 xl:w-1/2 max-w-2xl rounded'>
     {/* Editing the information */}
@@ -192,7 +190,7 @@ export default function Order() {
         setIsEditingInfo(false);
         fetch('/api/orders/SetEligibilityInfo', { method: 'POST',
           body: JSON.stringify({markdown: info}),
-          headers: {'Content-Type': "application/json", 'Authorization': token}
+          headers: {'Content-Type': "application/json", 'Authorization': authToken}
         }).then((res) => {
           console.log(res)
         })

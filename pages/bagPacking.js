@@ -1,21 +1,25 @@
 import Layout from "../components/Layout";
 import useSWR from "swr";
-import cookie from "js-cookie";
 import React from "react";
+import { useUser } from '../context/userContext'
 
-const fetcher = (url, token) =>
-  fetch(url, {
+const fetcher = async (url, token) => {
+  const res = await fetch(url, {
     headers: { "Content-Type": "application/json", Authorization: token },
-  }).then((res) => res.json());
+  });
 
-const token = cookie.get("firebaseToken");
+  if (res.status == 401) {
+    return Promise.reject("Sorry, you are not authorized to view this page.")
+  }
+  return res.json();
+}
 
 class PackingOrders extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      orders: props.data,
+      orders: props.orders
     };
   }
 
@@ -27,10 +31,10 @@ class PackingOrders extends React.Component {
         body: JSON.stringify({
           orderId: orderId,
         }),
-        headers: { "Content-Type": "application/json", Authorization: token },
+        headers: { "Content-Type": "application/json", Authorization: this.props.user.authToken },
       }).then(() => {
         this.setState({
-          orders: this.state.orders.filter(function (order) {
+          orders: this.props.orders.filter(function (order) {
             return order.id !== orderId;
           }),
         });
@@ -39,14 +43,14 @@ class PackingOrders extends React.Component {
   }
 
   displayOrderRow(order, delivery) {
-    if (delivery && order.deliveryDate != "Pickup") {
+    if (delivery && !order.isPickup) {
       return (
         <tr className="h-10" key={order.id}>
           <td className="w-auto">
             <a href={order.url}>{order.name}</a>
           </td>
           <td className="w-auto">{order.numBags}</td>
-          <td className="w-auto">{order.deliveryDate}</td>
+          <td className="w-auto">{order.date}</td>
           <td className="w-auto">{order.deliveryWindow}</td>
           <td className="w-auto">{order.status}</td>
           <td className="w-auto">
@@ -60,15 +64,14 @@ class PackingOrders extends React.Component {
           </td>
         </tr>
       );
-    } else if (!delivery && order.deliveryDate == "Pickup") {
+    } else if (!delivery && order.isPickup) {
         return (
           <tr className="h-10" key={order.id}>
             <td className="w-auto">
               <a href={order.url}>{order.name}</a>
             </td>
             <td className="w-auto">{order.numBags}</td>
-            <td className="w-auto">{order.deliveryDate}</td>
-            <td className="w-auto">{order.deliveryWindow}</td>
+            <td className="w-auto">{order.date}</td>
             <td className="w-auto">{order.status}</td>
             <td className="w-auto">
               <button
@@ -98,11 +101,11 @@ class PackingOrders extends React.Component {
                     <th className="w-1/5 text-left">Number of Bags</th>
                     <th className="w-1/5 text-left">Delivery Date</th>
                     <th className="w-1/5 text-left">Delivery Window</th>
-                    <th className="w-1/5 text-left">Delivery Status</th>
+                    <th className="w-1/5 text-left">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {this.state.orders.map((order) =>
+                  {this.props.orders.map((order) =>
                     this.displayOrderRow(order, true)
                   )}
                 </tbody>
@@ -114,13 +117,12 @@ class PackingOrders extends React.Component {
                   <tr className="border-b-2">
                     <th className="w-1/5 text-left">Name</th>
                     <th className="w-1/5 text-left">Number of Bags</th>
-                    <th className="w-1/5 text-left">Delivery Date</th>
-                    <th className="w-1/5 text-left">Delivery Window</th>
-                    <th className="w-1/5 text-left">Delivery Status</th>
+                    <th className="w-2/5 text-left">Pickup Date</th>
+                    <th className="w-1/5 text-left">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {this.state.orders.map((order) =>
+                  {this.props.orders.map((order) =>
                     this.displayOrderRow(order, false)
                   )}
                 </tbody>
@@ -154,7 +156,8 @@ const createOrderObjects = (results) => {
       orderObj.name = "N/A";
     }
 
-    orderObj.deliveryDate = value.deliveryDate ? value.deliveryDate : "N/A";
+    orderObj.date = value.date ? value.date : "N/A";
+    orderObj.isPickup = value.isPickup;
     orderObj.deliveryWindow = value.deliveryWindow
       ? value.deliveryWindow
       : "N/A";
@@ -168,11 +171,31 @@ const createOrderObjects = (results) => {
 };
 
 export default function PackingOverview() {
-  const { data } = useSWR(["/api/orders/GetAllOrders/", token], fetcher);
+  const { user, loadingUser } = useUser();
+
+  let authToken = (user && user.authorized) ? user.authToken : null;
+  const { data, error } = useSWR(["/api/orders/GetAllOrders/", authToken], fetcher);
+
+  if (loadingUser) {
+    return (
+      <Layout pageName="Bag Packing">
+          <h1 className='text-xl m-6'>Loading...</h1>
+      </Layout>
+    )
+  }
+
+  if (error) {
+    return (
+      <Layout pageName="Bag Packing">
+          <h1 className='text-xl m-6'>{error}</h1>
+      </Layout>
+    )
+  }
+  
   if (!data) {
-    return <PackingOrders data={[]} key="emptyTable" />;
+    return <PackingOrders user={user} orders={[]} key="emptyTable" />;
   } else {
     const orderObjects = createOrderObjects(data);
-    return <PackingOrders data={orderObjects} key="nonemptyTable" />;
+    return <PackingOrders user={user} orders={orderObjects} key="nonemptyTable" />;
   }
 }

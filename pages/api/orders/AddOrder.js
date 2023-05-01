@@ -72,34 +72,16 @@ function requireParams(body, res) {
     return true;
 }
 
-/* decrement inventory amounts in firebase */
-function updateFirebase(items) {
+function getItemNames(items) {
   let itemNames = {};
 
   return new Promise((resolve, reject) => {
     getAllItems().then((inventoryJson) => {
       const inventoryUpdates = {}
       for (let item in items) {
-        // make sure we have enough in inventory for order
-        if (inventoryJson[item]['count'] >= items[item]) {
-
-          // TODO: require quantities to be positive and within range
-          // this is enforced in frontend, but should maybe enforce on backend as well for security?
-          
-          inventoryUpdates['/inventory/' + item + "/count"] = firebase.database.ServerValue.increment(-1 * items[item]);
-          itemNames[inventoryJson[item]['itemName']] = items[item];
-        }
-        else {
-          return reject(`Requested count for "${inventoryJson[item]["itemName"]}" exceeds current stock (${inventoryJson[item]['count']})`);
-        }
+        itemNames[inventoryJson[item]['itemName']] = items[item];
       }
-
-      firebase.database().ref().update(inventoryUpdates).then(() => {
-        return resolve(itemNames);
-      })
-      .catch((error) => {
-        return reject("Error updating firebase inventory: " + error);
-      })
+      return resolve(itemNames);
     })
   })
 }
@@ -225,13 +207,19 @@ function writeOrder(body, itemNames) {
       if (daysToAdd < 2) {
         daysToAdd = daysToAdd + 7;
       }
+      
       let deliveryMMDD = new Date(
         d.setDate(
           d.getDate() + daysToAdd
         )
       );
-
-      deliveryMMDD = (deliveryMMDD.getMonth() + 1) + "/" + deliveryMMDD.getDate()
+      
+      if (pickup) {
+        deliveryMMDD = ""
+      }
+      else {
+        deliveryMMDD = (deliveryMMDD.getMonth() + 1) + "/" + deliveryMMDD.getDate()
+      }
   
       let deliveryWindow = `${deliveryWindowStart} - ${deliveryWindowEnd}`
       
@@ -242,7 +230,7 @@ function writeOrder(body, itemNames) {
         orderId,
         email,
         pickup ? "Pickup" : `${deliveryMMDD} ${deliveryDay} ${deliveryWindow}`,
-        pickup ? pickupNotes : "(" + altDelivery + ")"
+        pickup ? pickupNotes : (altDelivery? "(" + altDelivery + ")" : "")
       ]
 
       const pantryFormatting = [
@@ -329,7 +317,8 @@ function writeOrder(body, itemNames) {
         let newOrder = {
           orderId: orderId,
           status: ORDER_STATUS_OPEN,
-          deliveryDate: pickup ? "Pickup" : deliveryMMDD,
+          date: pickup ? "" : deliveryMMDD,
+          isPickup: pickup,
           dependents: dependents,
           guestNote: additionalRequests,
           dietaryRestriction: dietaryRestrictions,
@@ -397,7 +386,7 @@ export default async function(req, res) {
 
     firebase.auth().signInAnonymously()
     .then(() => {
-      updateFirebase(body.items).then((itemNames) => {
+      getItemNames(body.items).then((itemNames) => {
         writeOrder(body, itemNames).then((orderId) => {
           res.status(200).json({success: `Successfully added order! Order ID: ${orderId}`});
           return resolve();

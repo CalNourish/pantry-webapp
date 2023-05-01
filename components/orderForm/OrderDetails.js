@@ -114,20 +114,7 @@ export default function OrderDetails({children}) {
     )
     
     // Add item to category
-    // if (items[key].categoryName === null) {
-
-    // }
-    //console.log(key)
-    //console.log(items[key])
-    //console.log(items[key].categoryName)
-    console.log(items[key].categoryName)
-    // console.log(999)
-    // items[key].categoryName.forEach(name => console.log(name))
-    // console.log(555)
-    // items[key].categoryName.forEach(name => console.log(itemsByCategory[name]))
-    
-
-    //items[key].categoryName.forEach(name => itemsByCategory[name].push(itemInput))
+    items[key].categoryName.forEach(name => itemsByCategory[name]?.push(itemInput))
   })
 
   return (

@@ -1,6 +1,5 @@
 import Layout from '../components/Layout'
 import useSWR from 'swr'
-import cookie from 'js-cookie';
 
 import { useState } from 'react'
 import { useUser } from '../context/userContext'
@@ -537,9 +536,17 @@ function Categories(props) {
 }
 
 export default function Admin() {
-  const { user } = useUser();
-  const token = cookie.get("firebaseToken");
-  let authToken = (user && user.authorized === "true") ? token : null;
+  const { user, loadingUser } = useUser();
+
+  let authToken = (user && user.authorized) ? user.authToken : null;
+
+  if (loadingUser) {
+    return (
+      <Layout pageName="Checkout">
+          <h1 className='text-xl m-6'>Loading...</h1>
+      </Layout>
+    )
+  }
 
   if (!authToken) {
     return (

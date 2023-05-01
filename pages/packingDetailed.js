@@ -1,21 +1,32 @@
 import Layout from "../components/Layout";
 import useSWR from "swr";
-import cookie from "js-cookie";
 import { useRouter } from "next/router";
 import React from "react";
+import { useUser } from '../context/userContext'
+
 import {
   ORDER_STATUS_COMPLETE,
   ORDER_STATUS_OPEN,
   ORDER_STATUS_PROCESSING,
 } from "../utils/orderStatuses";
 
-const token = cookie.get("firebaseToken");
 
-function fetcher(...urls) {
-  const f = (u) =>
-    fetch(u, {
-      headers: { "Content-Type": "application/json", Authorization: token },
-    }).then((r) => r.json());
+function fetcher(token, ...urls) {
+  const f = async (u) => {
+    if (token) {
+      const res = await fetch(u, {
+        headers: { "Content-Type": "application/json", Authorization: token },
+      });
+
+      return res.json().then((resp) => {
+        if (!res.ok) {
+          return Promise.reject(resp)
+        }
+        return Promise.resolve(resp)
+      });
+    }
+    return Promise.resolve({})
+  }
 
   if (urls.length > 1) {
     return Promise.all(urls.map(f));
@@ -28,7 +39,8 @@ class PackingOrder extends React.Component {
     super(props);
     this.state = {
       orderId: props.data[0].orderId,
-      delivery_date: props.data[0].deliveryDate,
+      date: props.data[0].date,
+      isPickup: props.data[0].isPickup,
       dependents: props.data[0].dependents,
       dietaryRestriction: props.data[0].dietaryRestriction ? props.data[0].dietaryRestriction : "N/A",
       pantryNote: props.data[0].pantryNote,
@@ -42,28 +54,57 @@ class PackingOrder extends React.Component {
       error: null,
       success: null,
     };
-    
   }
 
   savePantryNote = (newPantryNote = this.state.pantryNote) => {
-    this.state.pantryNote = newPantryNote;
     this.setState({ pantryNote: this.state.pantryNote });
     fetch("/api/orders/SetPantryNote", {
       method: "POST",
       body: JSON.stringify({
         orderId: this.state.orderId,
-        message: this.state.pantryNote,
+        message: newPantryNote,
       }),
-      headers: { "Content-Type": "application/json", Authorization: token },
-    }).then(() => {
-      this.setState({ success: "Saved pantry note successfully!" });
-      setTimeout(() => this.setState({ success: null }), 1000);
+      headers: { "Content-Type": "application/json", Authorization: this.props.user.authToken },
+    }).then((res) => {
+      if (res.ok) {
+        this.setState({ success: "Saved pantry note successfully!" });
+        setTimeout(() => this.setState({ success: null }), 1000);
+      } else {
+        this.setState({ error: "Error saving pantry note. Please refresh and try again." });
+        setTimeout(() => this.setState({ error: null }), 1000);
+      }
     });
   };
 
   cancelPantryNote = () => {
     if (this.state.pantryNote !== undefined) {
       document.getElementById("pantry_note").value = this.state.pantryNote;
+    }
+  };
+
+  saveDate = (newDate = this.state.date) => {
+    this.setState({ date: newDate });
+    fetch("/api/orders/SetDate", {
+      method: "POST",
+      body: JSON.stringify({
+        orderId: this.state.orderId,
+        date: newDate,
+      }),
+      headers: { "Content-Type": "application/json", Authorization: this.props.user.authToken },
+    }).then((res) => {
+      if (res.ok) {
+        this.setState({ success: "Saved date successfully!" });
+        setTimeout(() => this.setState({ success: null }), 1000);
+      } else {
+        this.setState({ error: "Error saving date. Please refresh and try again." });
+        setTimeout(() => this.setState({ error: null }), 1000);
+      }
+    });
+  };
+
+  cancelDate = () => {
+    if (this.state.date !== undefined) {
+      document.getElementById("date").value = this.state.date;
     }
   };
 
@@ -83,14 +124,14 @@ class PackingOrder extends React.Component {
         orderId: this.state.orderId,
         status: newStatus,
       }),
-      headers: { "Content-Type": "application/json", Authorization: token },
+      headers: { "Content-Type": "application/json", Authorization: this.props.user.authToken },
     }).then(() => {
       this.setState({ success: "Changed order status successfully!" });
       setTimeout(() => this.setState({ success: null }), 1000);
     });
   };
 
-  changeStatusOfItem(barcode) {
+  changeStatusOfItem(barcode, quantity, decreaseItemCount = false) {
     this.state.items[barcode].isPacked = !this.state.items[barcode].isPacked;
     this.setState({ items: this.state.items });
     fetch("/api/orders/SetOrderItemStatus", {
@@ -99,51 +140,63 @@ class PackingOrder extends React.Component {
         orderId: this.state.orderId,
         itemId: barcode,
         isPacked: this.state.items[barcode].isPacked,
+        decreaseItemCount: decreaseItemCount,
+        quantity: quantity
       }),
-      headers: { "Content-Type": "application/json", Authorization: token },
-    }).then(() => {});
+      headers: { "Content-Type": "application/json", Authorization: this.props.user.authToken },
+    })
+    .then(() => {
+    })
+    .catch((error) => {
+      this.setState({ error: "Error packing item: " + error});
+      setTimeout(() => this.setState({ error: null }), 1000);
+    });
   }
 
   displayUnpackedItemRow(barcode, value) {
     var itemName = this.state.itemMap[barcode]?.itemName;
-    return (
-      <tr className="h-10" key={barcode}>
-        <td className="">
-          <div className="float-left">
-            <button
-              className="font-bold text-xl"
-              onClick={() => this.changeStatusOfItem(barcode)}
-            >
-              {itemName}
-            </button>
-          </div>
-        </td>
-        <td>
-          <h2 className="float-left text-xl">{value.quantity}</h2>
-        </td>
-      </tr>
-    );
+    if (itemName) {
+      return (
+        <tr className="h-10" key={barcode}>
+          <td className="">
+            <div className="float-left">
+              <button
+                className="font-bold text-xl"
+                onClick={() => this.changeStatusOfItem(barcode, value.quantity, true)}
+              >
+                {itemName}
+              </button>
+            </div>
+          </td>
+          <td>
+            <h2 className="float-left text-xl">{value.quantity}</h2>
+          </td>
+        </tr>
+      );
+    }
   }
 
   displayPackedItemRow(barcode, value) {
     var itemName = this.state.itemMap[barcode]?.itemName;
-    return (
-      <tr className="h-10" key={barcode}>
-        <td className="">
-          <div className="float-left">
-            <button
-              className="font-bold text-xl line-through"
-              onClick={() => this.changeStatusOfItem(barcode)}
-            >
-              {itemName}
-            </button>
-          </div>
-        </td>
-        <td>
-          <h2 className="line-through float-left text-xl">{value.quantity}</h2>
-        </td>
-      </tr>
-    );
+    if (itemName) {
+      return (
+        <tr className="h-10" key={barcode}>
+          <td className="">
+            <div className="float-left">
+              <button
+                className="font-bold text-xl line-through"
+                onClick={() => this.changeStatusOfItem(barcode, value.quantity, true)}
+              >
+                {itemName}
+              </button>
+            </div>
+          </td>
+          <td>
+            <h2 className="line-through float-left text-xl">{value.quantity}</h2>
+          </td>
+        </tr>
+      );
+    }
   }
 
   displayOrderStatus() {
@@ -289,6 +342,35 @@ class PackingOrder extends React.Component {
                   </button>
                 </React.Fragment>
               </div>
+              <h1 className="text-xl mt-4">{this.state.isPickup ? "Pickup Date" : "Delivery Date"}</h1>
+              <textarea
+                className="form-control w-full text-base font-normal text-gray-600 bg-white bg-clip-padding border border-solid border-gray-200 rounded transition ease-in-out m-0 focus:text-gray-600 focus:bg-white focus:border-blue-600 focus:outline-none"
+                id="date"
+                rows="4"
+                placeholder="Enter order delivery/pickup date here!"
+                defaultValue={this.state.date}
+              >
+              </textarea>
+              <div>
+                <React.Fragment>
+                  <button
+                    className="btn btn-pantry-blue mr-2"
+                    onClick={() =>
+                      this.saveDate(
+                        document.getElementById("date").value
+                      )
+                    }
+                  >
+                    Save
+                  </button>
+                  <button
+                    className="btn btn-outline"
+                    onClick={() => this.cancelDate()}
+                  >
+                    Cancel
+                  </button>
+                </React.Fragment>
+              </div>
             </div>
             <div className="w-3/4 m-5 space-x-10 space-y-5">
               {this.state.error ? errorBanner : null}
@@ -296,6 +378,10 @@ class PackingOrder extends React.Component {
               <h1 className="inline text-2xl font-medium mb-2">
                 {this.state.firstName + " " + this.state.lastInitial}{" "}
               </h1>
+              <div className="inline ml-4">
+                <p className="inline font-medium">Type: </p>
+                <p className="inline">{this.state.isPickup? "Pickup" : "Delivery"}</p>
+              </div>
               <div className="inline items-center space-x-4">
                 {this.displayOrderStatus()}
                 {this.displayChangeOrderStatus()}
@@ -332,26 +418,48 @@ class PackingOrder extends React.Component {
 }
 
 export default function PackingDetailed() {
+  const { user, loadingUser } = useUser();
+  let authToken = (user && user.authorized) ? user.authToken : null;
+
   const router = useRouter();
   var orderId = router.query.orderid;
-  if (orderId == null) {
+
+  const { data, error } = useSWR(
+    [authToken, "/api/orders/GetOrder/" + orderId, "/api/inventory/GetAllItems"],
+    fetcher
+  );
+
+  if (orderId == null || orderId == "") {
     return (
       <Layout pageName="Orders">
-        <div>No Order Id provided</div>
+        <h1 className='text-xl m-6'>No Order Id provided</h1>
       </Layout>
     );
   }
-  const { data } = useSWR(
-    ["/api/orders/GetOrder/" + orderId, "/api/inventory/GetAllItems"],
-    fetcher
-  );
+
+  if (loadingUser) {
+    return (
+      <Layout pageName="Inventory">
+          <h1 className='text-xl m-6'>Loading...</h1>
+      </Layout>
+    )
+  }
+
+  if (error) {
+    return (
+      <Layout pageName="Orders">
+          <h1 className='text-xl m-6'>{error.error}</h1>
+      </Layout>
+    )
+  }
+
   if (!data) {
     return (
       <Layout pageName="Orders">
-        <div>Loading...</div>
+        <h1 className='text-xl m-6'>Loading...</h1>
       </Layout>
     );
   } else {
-    return <PackingOrder data={data}></PackingOrder>;
+    return <PackingOrder user={user} data={data}></PackingOrder>;
   }
 }
