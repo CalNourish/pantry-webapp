@@ -1,6 +1,6 @@
 import firebase from '../../../firebase/clientApp'    
 import {validateFunc} from '../validate'
-import { server } from './_app.js'
+import { server } from '../../_app.js'
 
 
 export const config = {
@@ -55,13 +55,18 @@ export default async function(req,res) {
             if (categoryArr.length == 0) {
               categoryArr.push('uncategorized')
 
+              console.log(categoryArr)
+
               const payload = {
                 "barcode" : inventoryJson[item].barcode,
                 "categoryName" : categoryArr
               }
+
+              console.log(inventoryJson[item].barcode);
+              console.log(JSON.stringify(payload))
               
               fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
-              body: payload,
+              body: JSON.stringify(payload),
               headers: {'Content-Type': "application/json", 'Authorization': token}})
               .then((response) => response.json())
               .then(json => {
