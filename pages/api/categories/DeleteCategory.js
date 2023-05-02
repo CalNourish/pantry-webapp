@@ -38,15 +38,12 @@ export default async function(req,res) {
 
       getAllItems().then((inventoryJson) => { 
         const allItems = Object.keys(inventoryJson);
-        console.log(targetCategoryRef)
         // iterate over each item and remove any mention of the deleted category ID in the attribute categoryName
         for (const item of allItems) {
           const categoryArr = inventoryJson[item].categoryName
           //console.log(categoryArr)
-          console.log(inventoryJson[item])
           const targetIndex = categoryArr.indexOf(targetCategoryRef)
           // if targetIndex is -1, the item doesn't mention the deleted category ID
-          console.log(targetIndex)
           if (targetIndex != -1) {
             // remove the deleted category ID from the item
             categoryArr.splice(targetIndex, 1)
@@ -54,37 +51,22 @@ export default async function(req,res) {
             // if the item falls under no more categories, append the 'uncategorized' category ID so item has a category
             if (categoryArr.length == 0) {
               categoryArr.push('uncategorized')
-
-              console.log(categoryArr)
-
-              const payload = {
-                "barcode" : inventoryJson[item].barcode,
-                "categoryName" : categoryArr
-              }
-
-              console.log(inventoryJson[item].barcode);
-              console.log(JSON.stringify(payload))
-              
-              fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
-              body: JSON.stringify(payload),
-              headers: {'Content-Type': "application/json", 'Authorization': token}})
-              .then((response) => response.json())
-              .then(json => {
-                if (json.error) {
-                  console.log(json.error);
-                }
-              })
-              //   .then((result) => {
-              //     console.log(999)
-              //     result.json()
-              //     .then((res) => {
-              //       setSubmitStatus(res.error)
-              //     })
-              //     setFormData(newData)
-              //   })
-              // }
-
             }
+            
+            const payload = {
+              "barcode" : inventoryJson[item].barcode,
+              "categoryName" : categoryArr
+            }
+            
+            fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
+            body: JSON.stringify(payload),
+            headers: {'Content-Type': "application/json", 'Authorization': token}})
+            .then((response) => response.json())
+            .then(json => {
+              if (json.error) {
+                console.log(json.error);
+              }
+            })
           }
         }  
       })
