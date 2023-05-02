@@ -261,12 +261,15 @@ export default function Order() {
   //START
   return (
     <Layout pageName="Order">
-      <div className='text-xl m-6'>Pantry Deliveries are currently on pause while we seek out funding. Please see 
-      <a href="https://foodnow.net/do-you-need-food-delivered-to-your-home/" class="font-medium text-blue-600 dark:text-blue-500 hover:underline"> foodnow.net/do-you-need-food-delivered-to-your-home </a>
-      for pantry food delivery while we are on break.</div>
+      <p className='text-xl m-6'>Pantry Deliveries are currently on pause while we seek out funding.</p>
+      <p className='text-xl m-6'>Please see
+      <a href="https://foodnow.net/do-you-need-food-delivered-to-your-home/" className="font-medium text-blue-600 dark:text-blue-500 hover:underline"> foodnow.net/do-you-need-food-delivered-to-your-home </a>
+      for pantry food delivery while we are on break.</p>
+      <p className='text-xl m-6'>If you have any questions or concerns, you can email us at 
+      <a href="mailto: foodpantry@berkeley.edu" className="font-medium text-blue-600 dark:text-blue-500 hover:underline"> foodpantry@berkeley.edu</a>
+      .</p>
     </Layout>
   )
-  //
   //END
 
   //Uncomment this code once orders enabled again
