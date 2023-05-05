@@ -114,11 +114,14 @@ class Checkin extends React.Component {
   };
 
   writeIDtoSheet = async (id) => {
+    var start = Date.now();
     fetch('/api/admin/WriteCheckIn', { method: 'POST',
     body: JSON.stringify({calID: id, isGrad:false}),
     headers: {'Content-Type': "application/json", 'Authorization': this.props.user.authToken}
     })
     .then(() => {
+      var end = Date.now();
+      console.log(`Execution time numero 2: ${end - start} ms`);
       this.showSuccess("Sucessfully logged ID: " + id,1000)
     })
   }
@@ -131,11 +134,14 @@ class Checkin extends React.Component {
       this.showError("Can't submit blank ID: " + e.target.calID.value,1000)
       return
     }
+    var start = Date.now();
     fetch('/api/admin/CheckPreviousVisit', { method: 'POST',
       body: JSON.stringify({calID: e.target.calID.value, isGrad:false}),
       headers: {'Content-Type': "application/json", 'Authorization': this.props.user.authToken}
     })
     .then((result) => {
+      var end = Date.now();
+      console.log(`Execution time: ${end - start} ms`);
       result.json()
       .then((lastVisitedTimes) => {
         if (lastVisitedTimes.error) {
