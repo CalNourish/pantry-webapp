@@ -23,7 +23,10 @@ export default async function(req,res) {
       const {body} = req
 
       // require barcode
-      
+      if (!body.barcode) {
+        res.status(400).json({error: "missing barcode in request"});
+        return resolve();
+      }
 
       let barcode = body.barcode.toString();
       

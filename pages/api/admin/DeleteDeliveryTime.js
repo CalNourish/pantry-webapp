@@ -37,8 +37,6 @@ export default async function (req, res) {
     
     validateFunc(token).then(() => {
       const { body } = req
-      console.log(body)
-
       // perform the write
       firebase.auth().signInAnonymously()
       .then(() => {

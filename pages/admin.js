@@ -38,6 +38,8 @@ function AddAdmin(props) {
       result.json().then((res) => {
         if (result.ok) {
           showSuccess();
+          setUserName("")
+          setUserEmail("")
         } else {
           setSubmitStatus("error");
           setSubmitStatusMsg(res.error);
@@ -122,13 +124,12 @@ function SheetLinks(props) {
       </div>
     )
   }
-
+  // initialize form info if empty
   if (Object.keys(formData).length == 0) {
     setFormData(data)
   }
 
   let showSuccess = (tag, t = 5000) => {
-    
     /* show error banner with error text for 5 seconds, or custom time */
     setSubmitStatus({[tag]: "success"})
     clearTimeout(statusTimer);
@@ -139,7 +140,7 @@ function SheetLinks(props) {
   }
 
   let generateForm = (tag) => {
-    let tagData = formData[tag]; 
+    let tagData = formData[tag]; // should be another map...
     if (!tagData) {
       return (
         <div key={`missing-sheet-${tag}`} className='p-4 border border-red-400 bg-red-50'>
@@ -197,6 +198,7 @@ function SheetLinks(props) {
                 if (result.ok) {
                   showSuccess(tag);
                 } else {
+                  // error response from API
                   setSubmitStatus({[tag]: "error", [tag+"-msg"]: res.error})
                   return;
                 }
@@ -255,13 +257,14 @@ function DeliveryTimes(props) {
       </div>
     )
   }
+
   if (Object.keys(formData).length == 0 && Object.keys(data).length > 0) {
+    // TODO: might need to change this?
     setFormData(data)
   }
 
   /* do this once, after formData is set */
   const ref = firebase.database().ref('/deliveryTimes')
-
   if (Object.keys(formData).length > 0) {
     ref.on('child_added', snapshot => {
       let data = snapshot.val()
@@ -274,7 +277,7 @@ function DeliveryTimes(props) {
   }
 
   let deleteTime = (tag) => {
-    let {[tag]: _, ...newData} = formData; 
+    let {[tag]: _, ...newData} = formData; // remove tag for newData
     fetch(`${server}/api/admin/DeleteDeliveryTime`, { method: 'POST',
       body: JSON.stringify({"tag": tag}),
       headers: {'Content-Type': "application/json", 'Authorization': props.authToken}
@@ -321,6 +324,7 @@ function DeliveryTimes(props) {
       })
     })
   }
+
   return (
     <div className='m-8'>
       <div className='font-semibold text-3xl mb-4'>Delivery Time Windows</div>
@@ -328,7 +332,7 @@ function DeliveryTimes(props) {
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-3">
           {submitStatus}</div>
       }
-      
+
       <div className='space-y-4 sm:space-y-0 sm:flex sm:flex-row sm:space-x-8'>
         {/* Existing times */}
         <div className='border border-gray-400 p-4'>
@@ -353,7 +357,6 @@ function DeliveryTimes(props) {
             <div className='mb-2'>
               <span className='font-semibold mr-2'>Date:</span>
               <select id="date">
-                {/* is this selecting a range of days and making it uppercase*/}
                 {daysInOrder.map((day) => <option key={day}>{day.charAt(0).toUpperCase() + day.slice(1)}</option>)}
               </select>
             </div>
@@ -375,13 +378,12 @@ function DeliveryTimes(props) {
                 <option>PM</option>
               </select>
             </div>
+
             <button type='submit' className='btn btn-outline p-2'>Add!</button>
           </form>
         </div>
       </div>
     </div>
-
-    
   )
 }
 
@@ -431,18 +433,12 @@ function Categories(props) {
   }
 
   let deleteCategory = (tag) => {
-    console.log(formData)
-    console.log(formData["categories"])
-    console.log(formData["categories"][0]["id"])
-    // console.log(tag)
     let {[tag]: _, ...newData} = formData;
-    // console.log(newData)
     fetch(`${server}/api/categories/DeleteCategory`, { method: 'POST',
       body: JSON.stringify({"tag": tag}),
       headers: {'Content-Type': "application/json", 'Authorization': props.authToken}
     })
     .then((result) => {
-      console.log(999)
       result.json()
       .then((res) => {
         setSubmitStatus(res.error)
@@ -453,16 +449,11 @@ function Categories(props) {
 
   let submitForm = (e) => {
     e.preventDefault();
-
     const category = e.target.category.value;
-
     const data = {
       displayName: category
-
     }
-    
     fetch(`${server}/api/categories/AddCategory`, { method: 'POST',
-      
       body: JSON.stringify(data),
       headers: {'Content-Type': "application/json", 'Authorization': props.authToken}
     })
@@ -478,7 +469,6 @@ function Categories(props) {
       })
     })
   }
-
   return (
     <div className='m-8'>
       <div className='font-semibold text-3xl mb-4'>Categories</div>
@@ -501,8 +491,6 @@ function Categories(props) {
             </table>
           }
         </div>
-
-        
         <div className='border border-gray-400 bg-gray-50 p-4'>
         <form id="deliveryTimeForm" onSubmit={(e) => submitForm(e)}>
         <div className='font-semibold text-xl mb-2'>Add a new category:</div>
@@ -513,26 +501,11 @@ function Categories(props) {
             <br></br>
             <button type='submit' className='btn btn-outline p-2'>Add!</button>
         </div>
-
-
-
         </form>
-
-        
-
         </div>
       </div>
-
-
-
     </div>
-    // <div className='m-8'>
-
-
   )
-
-
-
 }
 
 export default function Admin() {

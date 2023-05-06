@@ -30,14 +30,9 @@ export default async function (req, res) {
 
   const token = req.headers.authorization
 
-  console.log(token)
-  console.log(333)
-
-
   return new Promise((resolve) => {
     validateFunc(token).then(() => {
       const { body } = req
-      console.log(body)
       // verify parameters
       let ok = requireParams(body, res);
       if (!ok) {

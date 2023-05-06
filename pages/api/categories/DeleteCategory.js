@@ -13,13 +13,7 @@ export default async function(req,res) {
     // verify this request is legit
     const token = req.headers.authorization;
 
-    // we need to parse through all the items' categoryNames to check if the deleted category's ID appears 
-    // in any of them. If so, delete that ID from the categoryNames list.
-
-    
-  
     return new Promise((resolve) => {
-      
       function getAllItems() {
         return new Promise((resolve, reject) => {
           firebase.database().ref('/inventory/').once('value')
@@ -35,29 +29,24 @@ export default async function(req,res) {
       }
       const {body} = req;
       let targetCategoryRef = body.tag
-
       getAllItems().then((inventoryJson) => { 
         const allItems = Object.keys(inventoryJson);
         // iterate over each item and remove any mention of the deleted category ID in the attribute categoryName
         for (const item of allItems) {
           const categoryArr = inventoryJson[item].categoryName
-          //console.log(categoryArr)
           const targetIndex = categoryArr.indexOf(targetCategoryRef)
           // if targetIndex is -1, the item doesn't mention the deleted category ID
           if (targetIndex != -1) {
             // remove the deleted category ID from the item
             categoryArr.splice(targetIndex, 1)
-
             // if the item falls under no more categories, append the 'uncategorized' category ID so item has a category
             if (categoryArr.length == 0) {
               categoryArr.push('uncategorized')
             }
-            
             const payload = {
               "barcode" : inventoryJson[item].barcode,
               "categoryName" : categoryArr
             }
-            
             fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
             body: JSON.stringify(payload),
             headers: {'Content-Type': "application/json", 'Authorization': token}})
@@ -70,13 +59,11 @@ export default async function(req,res) {
           }
         }  
       })
-
       validateFunc(token).then(() => {
         const {body} = req;
-        
-        
+      
         // category display name to be deleted typed in check-in box
-        let key = body.tag; // changed from body.displayName
+        let key = body.tag;
         
         firebase.auth().signInAnonymously()
         .then(() => {  
@@ -94,7 +81,6 @@ export default async function(req,res) {
               res.status(404).json({error: "unable to find category " + key})
               return resolve();
             }
-            
             // otherwise the category exists and we can delete it
             CategoryRef.remove()
             .catch(function(error) {
