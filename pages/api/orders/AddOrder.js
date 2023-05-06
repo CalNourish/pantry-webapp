@@ -375,6 +375,13 @@ function writeOrder(body, itemNames) {
   
 export default async function(req, res) {   
   const {body} = req //unpacks the request object   
+
+  //Delete when ordering is enabled
+  //
+  //START
+  return Promise.resolve();
+  //END
+
   return new Promise((resolve) => {
     if (!body.frequency) {
       body.frequency = "one-time";
