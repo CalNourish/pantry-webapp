@@ -1,12 +1,7 @@
 import Layout from '../components/Layout'
-import { useEffect, useState } from 'react'
 import React from 'react';
 
 import { useUser } from '../context/userContext'
-import { server } from './_app.js'
-
-const fetcher = (url) => fetch(url).then((res) => res.json())
-
 
 class Checkin extends React.Component {
   constructor(props) {
