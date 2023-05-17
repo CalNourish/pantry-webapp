@@ -119,30 +119,26 @@ class Checkin extends React.Component {
   }
 
   validateCalId = (calIdValue) => {
-    const isStudentRegex = /^(30\d{8}|[1278]\d{7})$/;
-    const isEmployeeOrAffiliateRegex = /^(01\d{6}|10\d{6})$/;
-    const isValidEncrypted = /^810:\d{8}$/;
-    const isCommunity = /^1$/;
-
-    if (calIdValue.length == 0 || calIdValue == null) {
-      this.showError("Can't submit blank ID: " + calIdValue, 1000)
-      return false
-    } else if (isValidEncrypted.test(calIdValue)) {
-      console.log('Valid encrypted ID')
-      return true
-    }else if (isStudentRegex.test(calIdValue)) {
-      console.log('Valid student ID')
-      return true
-    } else if (isEmployeeOrAffiliateRegex.test(calIdValue)) {
-      console.log('Valid staffer ID')
-      return true
-    } else if (isCommunity.test(calIdValue)) {
-      console.log('Valid community member ID')
-      return true
-    } else {
-      this.showError("Invalid ID. Please try again.")
-      return false
+    const regexes = { 
+      'isStudent': /^(30\d{8}|[1278]\d{7})$/,
+      'isEmployeeOrAffiliate': /^(01\d{6}|10\d{6})$/,
+      'isValidEncrypted': /^810:\d{8}$/,
+      'isCommunity': /^1$/
+    };
+  
+    if (calIdValue.trim() === '') {
+      this.showError("Can't submit blank ID: " + calIdValue, 1000);
+      return false;
     }
+  
+    for (const regex in regexes) {
+      if (regexes[regex].test(calIdValue)) {
+        return true;
+      }
+    }
+  
+    this.showError("Invalid ID. Please try again.");
+    return false;
   }
    
   handleScanSubmit = async (e) => {
