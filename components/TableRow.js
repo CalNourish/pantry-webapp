@@ -90,12 +90,24 @@ export default function TableRow(props) {
         </td>
 
         {/* Quantity */}
-        { authToken ? <td className="px-3 py-3 border-b border-gray-100 bg-white text-sm text-center"
-            onDoubleClick={() => authToken ? setEditing("count") : null}>
-            <p className="text-gray-900 whitespace-nowrap font-bold">
-                {editing=="count" ? editCountInput : count}
-            </p>
-        </td> : null}
+        { authToken ? (
+            <>
+                <td className="px-3 py-3 border-b border-gray-100 bg-white text-sm text-center"
+                    onDoubleClick={() => authToken ? setEditing("count") : null}>
+                    <p className="text-gray-900 whitespace-nowrap font-bold">
+                        {editing=="count" ? editCountInput : count}
+                    </p>
+                </td>
+                <td className="px-3 py-3 border-b border-gray-100 bg-white text-sm text-center">
+                    <p className="text-gray-900 whitespace-nowrap font-bold">
+                        {((parseInt(props.itemPackSize) !== 1) && (parseInt(count) > 1))
+                            ? parseInt(count) / parseInt(props.itemPackSize)
+                            : 'N/A'
+                        }
+                    </p>
+                </td>
+            </>
+        ) : null}
 
         {/* Status (InStock, LowStock, OutOfStock) */}
         <td className="px-3 py-3 border-b border-gray-100 bg-white text-sm">
