@@ -393,9 +393,7 @@ function Categories(props) {
 
 
   const fetcher = (url) => fetch(url).then((res) => res.json())
-  let { data, error } = useSWR('/api/categories/ListCategories', fetcher)
-  
-  
+  let { data, error } = useSWR('/api/categories/GetCategories', fetcher)  
   if (error) {
     console.log("Error fetching categories:", error)
     return (
@@ -461,7 +459,7 @@ function Categories(props) {
       result.json()
       .then((res) => {
         if (result.ok) {
-          document.getElementById("deliveryTimeForm").reset()
+          document.getElementById("categoryForm").reset()
         } else {
           console.log("Error adding time window:", res.error)
         }
@@ -483,16 +481,16 @@ function Categories(props) {
             <span className='text-gray-500 italic'>No options</span> :
             <table className='mb-4'>
               <tbody>
-                {Object.keys(formData["categories"]).map((key) => <tr key={key}> 
-                  <td className='pr-10'>{formData["categories"][key]["displayName"]}</td>
-                  <td><img className="w-4 h-4 items-center hover:cursor-pointer" src="/images/trash-can.svg" onClick={() => deleteCategory(formData["categories"][key]["id"])}></img></td>
+                {Object.keys(formData).map((key) => <tr key={key}> 
+                  <td className='pr-10'>{formData[key].displayName}</td>
+                  <td><img className="w-4 h-4 items-center hover:cursor-pointer" src="/images/trash-can.svg" onClick={() => deleteCategory(key)}></img></td>
                 </tr>)}
               </tbody>
             </table>
           }
         </div>
         <div className='border border-gray-400 bg-gray-50 p-4'>
-        <form id="deliveryTimeForm" onSubmit={(e) => submitForm(e)}>
+        <form id="categoryForm" onSubmit={(e) => submitForm(e)}>
         <div className='font-semibold text-xl mb-2'>Add a new category:</div>
           <div className='mb-2'>
             <span className='font-semibold mr-2'>Category:</span>

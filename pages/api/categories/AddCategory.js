@@ -60,7 +60,8 @@ export default async function (req, res) {
           .then(() => {
             // first generate a random ID to use as a key
             let key = makeid(10); //make display name but lowercase
-            let val = { "displayName": displayName};
+            let val = { "displayName": displayName, 
+                        "tag" : key};
             let cat = {};
             cat[key] = val;
 
@@ -103,5 +104,3 @@ function makeid(length) {
   }
   return result;
 }
-
-//  console.log(makeid(5));
