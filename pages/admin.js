@@ -432,17 +432,19 @@ function Categories(props) {
 
   let deleteCategory = (tag) => {
     let {[tag]: _, ...newData} = formData;
-    fetch(`${server}/api/categories/DeleteCategory`, { method: 'POST',
-      body: JSON.stringify({"tag": tag}),
-      headers: {'Content-Type': "application/json", 'Authorization': props.authToken}
-    })
-    .then((result) => {
-      result.json()
-      .then((res) => {
-        setSubmitStatus(res.error)
+    if (tag != "uncategorized") {
+        fetch(`${server}/api/categories/DeleteCategory`, { method: 'POST',
+        body: JSON.stringify({"tag": tag}),
+        headers: {'Content-Type': "application/json", 'Authorization': props.authToken}
       })
-      setFormData(newData)
-    })
+      .then((result) => {
+        result.json()
+        .then((res) => {
+          setSubmitStatus(res.error)
+        })
+        setFormData(newData)
+      })
+    }
   }
 
   let submitForm = (e) => {
