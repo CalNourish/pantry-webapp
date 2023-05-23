@@ -463,7 +463,7 @@ function Categories(props) {
         if (result.ok) {
           document.getElementById("deliveryTimeForm").reset()
         } else {
-          console.log("Error adding time window:", res.error)
+          console.log("Error adding category:", res.error)
         }
         setSubmitStatus(res.error)
       })
