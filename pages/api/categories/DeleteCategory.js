@@ -35,7 +35,6 @@ export default async function(req,res) {
         for (const item of allItems) {
           const categoryArr = inventoryJson[item].categoryName   
           const targetIndex = categoryArr.indexOf(targetCategoryRef)
-          
           // if targetIndex is -1, the item doesn't mention the deleted category ID
           if (targetIndex != -1) {
             // remove the deleted category ID from the item
