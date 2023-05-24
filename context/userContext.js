@@ -1,6 +1,7 @@
 import { useState, useEffect, createContext, useContext } from 'react'
-import firebase from '../firebase/clientApp'
-import 'firebase/auth'
+import { auth } from '../firebase/clientApp';
+// import firebase from '../firebase/clientApp'
+// import 'firebase/auth'
 
 export const UserContext = createContext()
 
@@ -9,7 +10,7 @@ const UserProvider = ({ children }) => {
   const [loadingUser, setLoading] = useState(true)
   // Google identity prvider.
   const googleLogin = async () => {
-    var provider = new firebase.auth.GoogleAuthProvider();
+    var provider = new auth.GoogleAuthProvider();
 
     await firebase.auth().signInWithPopup(provider).then(function(result) {
         // go back home
@@ -22,7 +23,7 @@ const UserProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    var provider = new firebase.auth.GoogleAuthProvider();
+    var provider = new auth.GoogleAuthProvider();
     await firebase.auth().signOut()
     .then(() => {
       // go back home
@@ -50,7 +51,7 @@ const UserProvider = ({ children }) => {
   // updates user state variable when authorization state changes (on sign-in, sign-out, and token timeout)
   const onIdTokenChange = () => {
     setLoading(true);
-    return firebase.auth().onIdTokenChanged(async (userAuth) => {
+    return auth.onIdTokenChanged(async (userAuth) => {
       if (userAuth) {
         authorizeLogin(userAuth.email).then((isAuthorized) => {
           setUser({});
