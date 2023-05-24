@@ -100,10 +100,7 @@ export default function TableRow(props) {
                 </td>
                 <td className="px-3 py-3 border-b border-gray-100 bg-white text-sm text-center">
                     <p className="text-gray-900 whitespace-nowrap font-bold">
-                        {((parseInt(props.itemPackSize) !== 1) && (parseInt(count) > 1))
-                            ? parseInt(count) / parseInt(props.itemPackSize)
-                            : 'N/A'
-                        }
+                        {props.itemCaseCount}
                     </p>
                 </td>
             </>

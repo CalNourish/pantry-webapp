@@ -150,7 +150,12 @@ export default function Inventory() {
     ref.once("value")
     .then(function(resp) {
       let res = resp.val();
-      console.log('INVENTORY', res)
+      // Insert new col "Case Count"
+      for (const key in res) {
+        res[key].caseCount = ((parseInt(res[key].packSize) !== 1) && (parseInt(res[key].count) > 1))
+          ? parseInt(res[key].count) / parseInt(res[key].packSize)
+          : null
+      }
       changeData(res);
     })
   }
