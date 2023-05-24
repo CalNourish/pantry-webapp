@@ -150,6 +150,7 @@ export default function Inventory() {
     ref.once("value")
     .then(function(resp) {
       let res = resp.val();
+      console.log('INVENTORY', res)
       changeData(res);
     })
   }
