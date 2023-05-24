@@ -213,7 +213,6 @@ export default function Table(props) {
                                         barcode={item.barcode}
                                         itemName={item.itemName}
                                         itemCount={item.count}
-                                        itemPackSize={item.packSize}
                                         itemCaseCount={item.caseCount}
                                         itemCategories={item.categoryName}
                                         itemLowStock={item.lowStock}
