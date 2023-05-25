@@ -1,12 +1,7 @@
 import Layout from '../components/Layout'
-import { useEffect, useState } from 'react'
 import React from 'react';
 
 import { useUser } from '../context/userContext'
-import { server } from './_app.js'
-
-const fetcher = (url) => fetch(url).then((res) => res.json())
-
 
 class Checkin extends React.Component {
   constructor(props) {
@@ -122,17 +117,43 @@ class Checkin extends React.Component {
       this.showSuccess("Sucessfully logged ID: " + id,1000)
     })
   }
+
+  validateCalId = (calIdValue) => {
+    const regexes = { 
+      'isStudent': /^(30\d{8}|[1278]\d{7})$/,
+      'isEmployeeOrAffiliate': /^(01\d{6}|10\d{6})$/,
+      'isValidEncrypted': /^810:\d{8}$/,
+      'isCommunity': /^1$/
+    };
+  
+    if (calIdValue.trim() === '') {
+      this.showError("Can't submit blank ID: " + calIdValue, 1000);
+      return false;
+    }
+  
+    for (const regex in regexes) {
+      if (regexes[regex].test(calIdValue)) {
+        return true;
+      }
+    }
+  
+    this.showError("Invalid ID. Please try again.");
+    return false;
+  }
    
   handleScanSubmit = async (e) => {
     var fieldset = document.getElementById("calIDFieldset")
     fieldset.disabled = true
     e.preventDefault();
-    if (e.target.calID.value.length == 0 || e.target.calID.value == null) {
-      this.showError("Can't submit blank ID: " + e.target.calID.value,1000)
+
+    const { value: calIdValue } = e.target.calID;
+    if (!this.validateCalId(calIdValue)) {
       return
     }
-    fetch('/api/admin/CheckPreviousVisit', { method: 'POST',
-      body: JSON.stringify({calID: e.target.calID.value, isGrad:false}),
+
+    fetch('/api/admin/CheckPreviousVisit', {
+      method: 'POST',
+      body: JSON.stringify({calID: calIdValue, isGrad:false}),
       headers: {'Content-Type': "application/json", 'Authorization': this.props.user.authToken}
     })
     .then((result) => {
@@ -142,23 +163,23 @@ class Checkin extends React.Component {
           this.showError(lastVisitedTimes.error)
         }
         else {
-          this.setState({lastScannedID:e.target.calID.value, visitsLastWeek:lastVisitedTimes, lastScannedTime:new Date().toLocaleTimeString()})
+          this.setState({lastScannedID:calIdValue, visitsLastWeek:lastVisitedTimes, lastScannedTime:new Date().toLocaleTimeString()})
           if (lastVisitedTimes.length == 0) {
-            this.writeIDtoSheet(e.target.calID.value)
+            this.writeIDtoSheet(calIdValue)
           }
           else {
-            this.showError("Failed scanning ID: " + e.target.calID.value + ". This visitor has visited already.",3000)
+            this.showError("Failed scanning ID: " + calIdValue + ". This visitor has visited already.",3000)
           }
           document.getElementById("calID").value = null;
           document.getElementById("calID").focus();
         }
       })
       .catch((err) => {
-        this.showError("Failed scanning ID: " + e.target.calID.value + err,3000)
+        this.showError("Failed scanning ID: " + calIdValue + err,3000)
       });
     })
     .catch((err) => {
-      this.showError("Failed scanning ID: " + e.target.calID.value + err,300)
+      this.showError("Failed scanning ID: " + calIdValue + err,300)
     })
     
   
