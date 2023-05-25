@@ -432,7 +432,8 @@ function Categories(props) {
 
   let deleteCategory = (tag) => {
     let {[tag]: _, ...newData} = formData;
-    if (tag != "uncategorized") {
+    var approval = confirm("Are you sure you want to delete the " + formData[tag]["displayName"] + " category?");
+    if (tag != "uncategorized" && approval) {
         fetch(`${server}/api/categories/DeleteCategory`, { method: 'POST',
         body: JSON.stringify({"tag": tag}),
         headers: {'Content-Type': "application/json", 'Authorization': props.authToken}
