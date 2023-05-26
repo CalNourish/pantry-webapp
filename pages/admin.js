@@ -98,7 +98,7 @@ function SheetLinks(props) {
   const [submitStatus, setSubmitStatus] = useState({});
   const [statusTimer, setStatusTimer] = useState(null);
   const [formData, setFormData] = useState({});
-
+  
   const fetcher = (url) => fetch(url, {
     method:'GET', headers: {'Content-Type': "application/json", 'Authorization': props.authToken}
   }).then((res) => res.json());
@@ -108,6 +108,7 @@ function SheetLinks(props) {
   if (error) {
     console.log("Error fetching google sheet links:", error)
     return (
+     
       <div className='m-8'>
         <div className='font-semibold text-3xl mb-4'>Google Sheets Links</div>
         <div className='m-4'>Error! See console log for details.</div>
@@ -123,7 +124,6 @@ function SheetLinks(props) {
       </div>
     )
   }
-
   // initialize form info if empty
   if (Object.keys(formData).length == 0) {
     setFormData(data)
@@ -341,7 +341,7 @@ function DeliveryTimes(props) {
             <span className='text-gray-500 italic'>No options</span> :
             <table className='mb-4'>
               <tbody>
-                {Object.keys(formData).map((key) => <tr key={key}>
+                {Object.keys(formData).map((key) => <tr key={key}> 
                   <td className='pr-10'>{formData[key].display}</td>
                   <td><img className="w-4 h-4 items-center hover:cursor-pointer" src="/images/trash-can.svg" onClick={() => deleteTime(key)}></img></td>
                 </tr>)}
@@ -387,6 +387,128 @@ function DeliveryTimes(props) {
   )
 }
 
+function Categories(props) {
+  const [formData, setFormData] = useState({});
+  const [submitStatus, setSubmitStatus] = useState("");
+
+
+  const fetcher = (url) => fetch(url).then((res) => res.json())
+  let { data, error } = useSWR('/api/categories/GetCategories', fetcher)  
+  if (error) {
+    console.log("Error fetching categories:", error)
+    return (
+      <div className='m-8'>
+        <div className='font-semibold text-3xl mb-4'>Categories</div>
+        <div className='m-4'>Error! See console log for details.</div>
+      </div>
+    )
+  }
+
+  if (!data) {
+    return (
+      <div className='m-8'>
+        <div className='font-semibold text-3xl mb-4'>Categories</div>
+        <div className='m-4'>Loading...</div>
+      </div>
+    )
+  }
+
+  if (Object.keys(formData).length == 0 && Object.keys(data).length > 0) {
+    setFormData(data)
+  }
+
+  const ref = firebase.database().ref('/category')
+
+  if (Object.keys(formData).length > 0) {
+    ref.on('child_added', snapshot => {
+      let data = snapshot.val()
+      if (!formData[data.tag]) {
+        setFormData({
+          ...formData, [data.tag]: data
+        });
+      }
+    });
+  }
+
+  let deleteCategory = (tag) => {
+    let {[tag]: _, ...newData} = formData;
+    var approval = confirm("Are you sure you want to delete the " + formData[tag]["displayName"] + " category?");
+    if (tag != "uncategorized" && approval) {
+        fetch(`${server}/api/categories/DeleteCategory`, { method: 'POST',
+        body: JSON.stringify({"tag": tag}),
+        headers: {'Content-Type': "application/json", 'Authorization': props.authToken}
+      })
+      .then((result) => {
+        result.json()
+        .then((res) => {
+          setSubmitStatus(res.error)
+        })
+        setFormData(newData)
+      })
+    }
+  }
+
+  let submitForm = (e) => {
+    e.preventDefault();
+    const category = e.target.category.value;
+    const data = {
+      displayName: category
+    }
+    fetch(`${server}/api/categories/AddCategory`, { method: 'POST',
+      body: JSON.stringify(data),
+      headers: {'Content-Type': "application/json", 'Authorization': props.authToken}
+    })
+    .then((result) => {
+      result.json()
+      .then((res) => {
+        if (result.ok) {
+          document.getElementById("categoryForm").reset()
+        } else {
+          console.log("Error adding category:", res.error)
+        }
+        setSubmitStatus(res.error)
+      })
+    })
+  }
+  return (
+    <div className='m-8'>
+      <div className='font-semibold text-3xl mb-4'>Categories</div>
+      { submitStatus &&
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-3">
+          {submitStatus}</div>
+      }
+      <div className='space-y-4 sm:space-y-0 sm:flex sm:flex-row sm:space-x-8'>
+        <div className='border border-gray-400 p-4'>
+        {
+            Object.keys(formData).length == 0 ?
+            <span className='text-gray-500 italic'>No options</span> :
+            <table className='mb-4'>
+              <tbody>
+                {Object.keys(formData).map((key) => <tr key={key}> 
+                  <td className='pr-10'>{formData[key].displayName}</td>
+                  <td><img className="w-4 h-4 items-center hover:cursor-pointer" src="/images/trash-can.svg" onClick={() => deleteCategory(key)}></img></td>
+                </tr>)}
+              </tbody>
+            </table>
+          }
+        </div>
+        <div className='border border-gray-400 bg-gray-50 p-4'>
+        <form id="categoryForm" onSubmit={(e) => submitForm(e)}>
+        <div className='font-semibold text-xl mb-2'>Add a new category:</div>
+          <div className='mb-2'>
+            <span className='font-semibold mr-2'>Category:</span>
+            <input type="text" id="category"></input>
+            <br></br>
+            <br></br>
+            <button type='submit' className='btn btn-outline p-2'>Add!</button>
+        </div>
+        </form>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Admin() {
   const { user, loadingUser } = useUser();
 
@@ -413,7 +535,7 @@ export default function Admin() {
       <SheetLinks authToken={authToken}/>
       <AddAdmin authToken={authToken}/>
       <DeliveryTimes authToken={authToken}/>
+      <Categories authToken={authToken}/>
     </Layout>
   )
 }
-
