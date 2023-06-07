@@ -16,7 +16,6 @@ export default function SignIn() {
       // Sign in with credential from the Google user.
       signInWithCredential(auth, credential)
         .then((result) => {
-          console.log(result)
           router.push('/')
         })
         .catch((error) => {
