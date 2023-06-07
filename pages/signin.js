@@ -1,67 +1,56 @@
 import { useEffect } from 'react'
-import { useAuthState } from "react-firebase-hooks/auth";
-import { useUser } from '../context/userContext'
-import Layout from '../components/Layout'
+import Script from 'next/script';
 import { useRouter } from "next/router";
-import { auth, signInWithGoogle } from '../firebase/clientApp'
-import firebase from 'firebase/compat/app'
+import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
+import Layout from '../components/Layout'
+import { auth } from '../firebase/clientApp'
 
 export default function SignIn() {
-    const [user, loading, error] = useAuthState(auth);
     const router = useRouter()
+
+    const handleCredentialResponse = (response) => {
+      // Build Firebase credential with the Google ID token.
+      const idToken = response.credential;
+      const credential = GoogleAuthProvider.credential(idToken);
+    
+      // Sign in with credential from the Google user.
+      signInWithCredential(auth, credential)
+        .then((result) => {
+          console.log(result)
+          router.push('/')
+        })
+        .catch((error) => {
+          // Handle Errors here.
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          // The email of the user's account used.
+          const email = error.email;
+          // The credential that was used.
+          const credential = GoogleAuthProvider.credentialFromError(error);
+          console.log("Unsuccessful authentication", errorCode, errorMessage, email, credential);
+        });
+    }
+
+    /** TODO: Follow instructions to get Google API client ID 
+     * and configure OAuth consent screen for ProdCalNourish 
+     * (https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid)
+     */
     useEffect(() => {
-
-    firebase.auth().getRedirectResult().then(function(result) {
-        if (result.credential) {
-          // This gives you a Google Access Token. You can use it to access the Google API.
-          var token = result.credential.accessToken;
-          document.getElementById('quickstart-oauthtoken').textContent = token;
-        } else {
-          document.getElementById('quickstart-oauthtoken').textContent = 'null';
-        }
-        // The signed-in user info.
-        var user = result.user;
-      }).catch(function(error) {
-        // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        // The email of the user's account used.
-        var email = error.email;
-        // The firebase.auth.AuthCredential type that was used.
-        var credential = error.credential;
-        if (errorCode === 'auth/account-exists-with-different-credential') {
-          alert('You have already signed up with a different auth provider for that email.');
-          // If you are using multiple auth providers on your app you should handle linking
-          // the user's accounts here.
-        } else {
-          console.error(error);
-        }
+      google.accounts.id.initialize({
+        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+        callback: handleCredentialResponse
       });
-    }, [])
+      google.accounts.id.renderButton(
+        document.getElementById("buttonDiv"),
+        { theme: "outline", size: "large" }  // customization attributes
+      );
+      google.accounts.id.prompt(); // also display the One Tap dialog
+    }, []);
 
-    // useEffect(() => {
-    //     console.log(user, loading, error)
-    //     if (loading) {
-    //     // maybe trigger a loading screen
-    //     return;
-    //     }
-    //     if (user) router.push("/");
-    // }, [user, loading]);
-
-    // const { user, setUser, googleLogin } = useUser();
-    // if(typeof window !=="undefined") {
-    //     window.onload = googleLogin()
-    // }
     return (
         <Layout pageName="Sign In">
-            <div className="quickstart-user-details-container">
-            Firebase sign-in status: <span id="quickstart-sign-in-status">Unknown</span>
-            <div>Firebase auth <code>currentUser</code> object value:</div>
-            <pre><code id="quickstart-account-details">null</code></pre>
-            <div>Google OAuth Access Token:</div>
-            <pre><code id="quickstart-oauthtoken">null</code></pre>
-          </div>
-            <button onClick={signInWithGoogle}>Sign In With Google</button>
+          <div id="buttonDiv"></div> 
+          <Script src="https://accounts.google.com/gsi/client" strategy='beforeInteractive' />
         </Layout>
     )
 }
