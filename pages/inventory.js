@@ -152,9 +152,14 @@ export default function Inventory() {
       let res = resp.val();
       // Insert new col "Case Count"
       for (const key in res) {
-        res[key].caseCount = ((parseInt(res[key].packSize) !== 1) && (parseInt(res[key].count) > 1))
-          ? parseInt(res[key].count) / parseInt(res[key].packSize)
-          : null
+        if (parseInt(res[key].packSize) === 1) {
+          res[key].caseCount = null
+        } else if (parseInt(res[key].count) < 0) {
+          // case count is zero
+          res[key].caseCount = 0
+        } else {
+          res[key].caseCount = Math.floor(parseInt(res[key].count) / parseInt(res[key].packSize))
+        }
       }
       changeData(res);
     })
