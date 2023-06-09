@@ -186,7 +186,7 @@ export default function Table(props) {
                                             <th onClick={() => {setSortBy(sortBy == "caseCount" ? "-caseCount" : "caseCount")}}
                                                 className={headerClass + " cursor-pointer"}>
                                                 <div className="flex">
-                                                    <div className="mr-3">Case Count (Unopened)</div>
+                                                    <div className="mr-3">Case Count</div>
                                                     <div className="ml-auto">{sortBy == "caseCount" ? "\u25BC" : sortBy == "-caseCount" ? "\u25B2" : ""}</div>
                                                 </div>
                                             </th>

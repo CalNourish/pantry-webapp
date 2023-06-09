@@ -158,7 +158,7 @@ export default function Inventory() {
           // case count is zero
           res[key].caseCount = 0
         } else {
-          res[key].caseCount = Math.floor(parseInt(res[key].count) / parseInt(res[key].packSize))
+          res[key].caseCount = parseInt(res[key].count) / parseInt(res[key].packSize)
         }
       }
       changeData(res);
