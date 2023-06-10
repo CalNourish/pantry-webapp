@@ -46,7 +46,6 @@ function requireParams(req, res) {
 export default async function (req, res) {
   // verify this request is legit
   const token = req.headers.authorization
-
   return new Promise((resolve) => {
     if (!requireParams(req, res)) {
       return resolve();
