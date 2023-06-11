@@ -83,6 +83,12 @@ export default function Table(props) {
                 // default count order is high -> low
                 array.sort(comparator("count", !reverse, props.authToken ? "barcode" : "itemName"));
                 break;
+            case "-caseCount":
+                reverse = true;
+            case "caseCount":
+                // default count order is high -> low
+                array.sort(comparator("caseCount", !reverse, props.authToken ? "barcode" : "itemName"));
+                break;
             case "-status":
                 reverse = true;
             case "status":
@@ -167,13 +173,27 @@ export default function Table(props) {
                                     className={headerClass}>
                                     Category
                                 </th>
-                                { props.authToken ? <th onClick={() => {setSortBy(sortBy == "count" ? "-count" : "count")}}
-                                    className={headerClass + " cursor-pointer"}>
-                                    <div className="flex">
-                                        <div className="mr-3">Count</div>
-                                        <div className="ml-auto">{sortBy == "count" ? "\u25BC" : sortBy == "-count" ? "\u25B2" : ""}</div>
-                                    </div>
-                                </th> : null}
+                                {props.authToken
+                                    ? (
+                                        <>
+                                            <th onClick={() => {setSortBy(sortBy == "count" ? "-count" : "count")}}
+                                                className={headerClass + " cursor-pointer"}>
+                                                <div className="flex">
+                                                    <div className="mr-3">Count</div>
+                                                    <div className="ml-auto">{sortBy == "count" ? "\u25BC" : sortBy == "-count" ? "\u25B2" : ""}</div>
+                                                </div>
+                                            </th>
+                                            <th onClick={() => {setSortBy(sortBy == "caseCount" ? "-caseCount" : "caseCount")}}
+                                                className={headerClass + " cursor-pointer"}>
+                                                <div className="flex">
+                                                    <div className="mr-3">Case Count</div>
+                                                    <div className="ml-auto">{sortBy == "caseCount" ? "\u25BC" : sortBy == "-caseCount" ? "\u25B2" : ""}</div>
+                                                </div>
+                                            </th>
+                                        </>
+                                    )
+                                    : null
+                                }
                                 <th onClick={() => {setSortBy(sortBy == "status" ? "-status" : "status")}}
                                     className={headerClass + " cursor-pointer"}>
                                     <div className="flex">
@@ -188,9 +208,21 @@ export default function Table(props) {
                         <tbody>
                             { itemData.map((item, idx) => {
                                 return (props.authToken || item.displayPublic) &&
-                                    <TableRow key={idx} barcode={item.barcode} itemName={item.itemName} itemCount={item.count} itemCategories={item.categoryName}
-                                              itemLowStock={item.lowStock} categoryData={categoryData} displayPublic={item.displayPublic} authToken={props.authToken}
-                                              editItemFunc={props.editItemFunc} deleteItemFunc={props.deleteItemFunc} showHideItemFunc={props.showHideItemFunc}/>
+                                    <TableRow
+                                        key={idx}
+                                        barcode={item.barcode}
+                                        itemName={item.itemName}
+                                        itemCount={item.count}
+                                        itemCaseCount={item.caseCount}
+                                        itemCategories={item.categoryName}
+                                        itemLowStock={item.lowStock}
+                                        categoryData={categoryData}
+                                        displayPublic={item.displayPublic}
+                                        authToken={props.authToken}
+                                        editItemFunc={props.editItemFunc}
+                                        deleteItemFunc={props.deleteItemFunc}
+                                        showHideItemFunc={props.showHideItemFunc}
+                                    />
                             }) 
                             }
                         </tbody>
