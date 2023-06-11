@@ -48,7 +48,6 @@ export default function SignIn() {
         document.getElementById("buttonDiv"),
         { theme: "outline", size: "large" }  // customization attributes
       );
-      google.accounts.id.prompt(); // also display the One Tap dialog
     }, []);
 
     return (

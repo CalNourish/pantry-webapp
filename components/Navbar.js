@@ -115,7 +115,7 @@ export default function Navbar() {
                 <a href="/admin" className="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-500 dark:text-gray-100 dark:hover:text-white">Admin Page</a>
               </li> : ""}
               <li>
-                <button onClick={logout} className="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-500 dark:text-gray-100 dark:hover:text-white">Sign out</button>
+                <button onClick={logout} className="block w-full py-2 px-4 text-left text-sm text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-500 dark:text-gray-100 dark:hover:text-white">Sign out</button>
               </li>
               </ul>
             </div>
