@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import Layout from '../components/Layout'
 import { auth } from '../firebase/clientApp'
+import { server } from './_app';
 
 export default function SignIn() {
     const [loading, setLoading] = useState(false);
@@ -42,7 +43,7 @@ export default function SignIn() {
         context: 'signin',
         itp_support: true,
         ux_mode: 'redirect',
-        login_uri: process.env.NEXT_PUBLIC_LOGIN_URI,
+        login_uri: `${server}/api/signin`,
       });
       google.accounts.id.renderButton(
         document.getElementById("buttonDiv"),
