@@ -4,7 +4,7 @@ import "../styles/index.css"
 import App from 'next/app'
 import cookies from 'next-cookies'
 
-export const server = process.env.NEXT_PUBLIC_VERCEL_URL ? ("https://" + process.env.NEXT_PUBLIC_VERCEL_URL) : "http://localhost:3000"
+export const server = process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL ? ("https://" + process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL) : "http://localhost:3000"
 
 // Custom App to wrap it with context provider
 export default function MyApp({ Component, pageProps }) {
