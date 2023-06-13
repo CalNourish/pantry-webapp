@@ -1,5 +1,6 @@
+import { getAuth, signInAnonymously } from 'firebase/auth';
 import firebase from '../../../firebase/clientApp'    
-import {validateFunc} from '../validate'
+import { validateFunc } from '../validate'
 
 /*
 * /api/orders/GetAllOrders
@@ -19,33 +20,34 @@ export default async function(req,res) {
 
     return new Promise((resolve) => {
       validateFunc(token)
-      .then(() => {
-        firebase.auth().signInAnonymously()
         .then(() => {
-          firebase.database().ref('/order/')
-          .once('value')
-          .then(function(resp){
-            // the version of the order in the database
-            var dbItem = resp.val();
-            res.status(200);
-            res.json(dbItem);
-            return resolve();
+          const auth = getAuth()
+          signInAnonymously(auth)
+          .then(() => {
+            firebase.database().ref('/order/')
+            .once('value')
+            .then(function(resp){
+              // the version of the order in the database
+              var dbItem = resp.val();
+              res.status(200);
+              res.json(dbItem);
+              return resolve();
+            })
+            .catch(function(error){
+              res.status(500);
+              res.json({error: "server error getting that order from the database", errorstack: error});
+              return resolve();
+            });
           })
-          .catch(function(error){
+          .catch(err => {
             res.status(500);
-            res.json({error: "server error getting that order from the database", errorstack: error});
-            return resolve();
-          });
+            res.json({ error: "error updating firebase: " + err });
+            return;
+          })
         })
-        .catch(err => {
-          res.status(500);
-          res.json({ error: "error updating firebase: " + err });
-          return;
-        })
-      })
-      .catch(() => {
-        res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an administrator account." });
-        return resolve();
-      });
+        .catch((err) => {
+          res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an administrator account." });
+          return resolve();
+        });
     })
 }

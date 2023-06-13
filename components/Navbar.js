@@ -51,7 +51,7 @@ export default function Navbar() {
   var name = "";
   var userType = "";
 
-  // if they're signed in 
+  // if they're signed in
   if (user) {
     name = user.displayName;
     routes = UNAUTH_SIGNEDIN_ROUTES

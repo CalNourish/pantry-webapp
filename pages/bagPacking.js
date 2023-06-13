@@ -173,9 +173,6 @@ const createOrderObjects = (results) => {
 export default function PackingOverview() {
   const { user, loadingUser } = useUser();
 
-  let authToken = (user && user.authorized) ? user.authToken : null;
-  const { data, error } = useSWR(["/api/orders/GetAllOrders/", authToken], fetcher);
-
   if (loadingUser) {
     return (
       <Layout pageName="Bag Packing">
@@ -183,6 +180,8 @@ export default function PackingOverview() {
       </Layout>
     )
   }
+
+  const { data, error } = useSWR(["/api/orders/GetAllOrders/", user?.authToken], fetcher);
 
   if (error) {
     return (
