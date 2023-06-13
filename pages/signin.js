@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
 import Script from 'next/script';
 import { useRouter } from "next/router";
-import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import Layout from '../components/Layout'
-import { auth } from '../firebase/clientApp'
 import { server } from './_app';
 
 export default function SignIn() {
@@ -15,6 +14,7 @@ export default function SignIn() {
     useEffect(() => {
       if (idToken) {
         setLoading(true)
+        const auth = getAuth()
         const credential = GoogleAuthProvider.credential(idToken);
         signInWithCredential(auth, credential)
           .then(() => {

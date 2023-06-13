@@ -1,7 +1,7 @@
 import { useState, useEffect, createContext, useContext } from 'react'
-import firebase from 'firebase/compat/app'
+import firebase from '../firebase/clientApp'
 import { useRouter } from 'next/router';
-import { auth } from '../firebase/clientApp';
+import { getAuth } from 'firebase/auth';
 
 const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null)
@@ -9,6 +9,7 @@ const UserProvider = ({ children }) => {
   const router = useRouter()
 
   const logout = async () => {
+    const auth = getAuth()
     await auth.signOut()
       .then(() => {
         // go back home
@@ -38,6 +39,7 @@ const UserProvider = ({ children }) => {
   // updates user state variable when authorization state changes (on sign-in, sign-out, and token timeout)
   const onIdTokenChange = () => {
     setLoading(true);
+    const auth = getAuth()
     return auth.onIdTokenChanged(async (userAuth) => {
       if (userAuth) {
         authorizeLogin(userAuth.email)

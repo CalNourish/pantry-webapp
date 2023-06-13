@@ -3,9 +3,6 @@ import 'firebase/compat/storage' // If you need it
 import 'firebase/compat/database' // We need it
 import 'firebase/compat/analytics' // If you need it
 import 'firebase/compat/functions'
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getDatabase } from 'firebase/database'
 
 const clientCredentials = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -16,10 +13,6 @@ const clientCredentials = {
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 }
-
-const app = initializeApp(clientCredentials);
-const auth = getAuth(app);
-const db = getDatabase(app);
 
 // Check that `window` is in scope for the analtics module!
 if (typeof window !== 'undefined' && !firebase.apps.length) {
@@ -32,8 +25,3 @@ if (typeof window !== 'undefined' && !firebase.apps.length) {
 }
 
 export default firebase
-
-export {
-  auth,
-  db,
-};
