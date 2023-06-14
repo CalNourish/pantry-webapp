@@ -4,6 +4,10 @@ import React from "react";
 import { useUser } from '../context/userContext'
 
 const fetcher = async (url, token) => {
+  if (!token) {
+    return Promise.reject("No token provided")
+  }
+
   const res = await fetch(url, {
     headers: { "Content-Type": "application/json", Authorization: token },
   });
@@ -172,6 +176,7 @@ const createOrderObjects = (results) => {
 
 export default function PackingOverview() {
   const { user, loadingUser } = useUser();
+  const { data, error } = useSWR(["/api/orders/GetAllOrders/", user?.authToken], fetcher);
 
   if (loadingUser) {
     return (
@@ -180,8 +185,6 @@ export default function PackingOverview() {
       </Layout>
     )
   }
-
-  const { data, error } = useSWR(["/api/orders/GetAllOrders/", user?.authToken], fetcher);
 
   if (error) {
     return (
