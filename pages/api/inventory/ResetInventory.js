@@ -1,3 +1,4 @@
+import { getAuth, signInAnonymously } from "firebase/auth";
 import firebase from "../../../firebase/clientApp";
 import { validateFunc } from "../validate";
 
@@ -31,9 +32,8 @@ export default async function (req, res) {
   const inventoryUpdates = {};
   return new Promise((resolve) => {
     validateFunc(token).then(() => {
-      firebase
-        .auth()
-        .signInAnonymously()
+      const auth = getAuth()
+      signInAnonymously(auth)
         .then(() =>
           getAllItems().then((inventoryJson) => {
             for (let item in inventoryJson) {

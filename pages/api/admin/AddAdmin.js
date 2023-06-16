@@ -1,3 +1,4 @@
+import { getAuth, signInAnonymously } from 'firebase/auth';
 import firebase from '../../../firebase/clientApp'
 import { validateFunc } from '../validate'
 
@@ -45,7 +46,8 @@ export default async function (req, res) {
       const email = body.email;
 
       // perform the write
-      firebase.auth().signInAnonymously()
+      const auth = getAuth
+      signInAnonymously(auth)
       .then(() => {
         let adminsRef = firebase.database().ref("/authorizedUser/");
         

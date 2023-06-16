@@ -2,6 +2,7 @@ import { google } from 'googleapis';
 import { service_info } from "../../../utils/decrypt.js";
 import { validateFunc } from '../validate';
 import firebase from '../../../firebase/clientApp';
+import { getAuth, signInAnonymously } from 'firebase/auth'
 
 /*
 * /api/admin/SetSheetInfo
@@ -78,7 +79,8 @@ export default async function(req, res) {
         })
       )
       .then(() => {
-        firebase.auth().signInAnonymously()
+        const auth = getAuth()
+        signInAnonymously(auth)
         .then(() => {
           let itemRef = firebase.database().ref('/sheetIDs/');
     
@@ -99,6 +101,7 @@ export default async function(req, res) {
       }).catch((errMsg) => {
         // can't find the sheetName in the specified spreadsheet,
         // or the sheet is private and the sheet-writer can't access it
+        console.log(errMsg)
         res.status(400).json({error: errMsg})
         return resolve();
       })

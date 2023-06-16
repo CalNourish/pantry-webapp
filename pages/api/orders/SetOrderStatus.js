@@ -2,6 +2,7 @@ import firebase from '../../../firebase/clientApp'
 import { validateFunc } from '../validate'
 
 import { ORDER_STATUS_OPEN, ORDER_STATUS_PROCESSING, ORDER_STATUS_COMPLETE } from "../../../utils/orderStatuses"
+import { getAuth, signInAnonymously } from 'firebase/auth';
 
 /*
 * /api/orders/SetOrderStatus
@@ -38,7 +39,8 @@ export default async function (req, res) {
 
   return new Promise((resolve) => {
     validateFunc(token).then(() => {
-      firebase.auth().signInAnonymously()
+      const auth = getAuth()
+      signInAnonymously(auth)
       .then(() => {
         var orderRef = firebase.database().ref("/order/" + orderId);
 

@@ -1,6 +1,7 @@
 import firebase from '../../../firebase/clientApp'    
 import {validateFunc} from '../validate'
 import { server } from '../../_app.js'
+import { getAuth, signInAnonymously } from 'firebase/auth';
 
 
 export const config = {
@@ -65,7 +66,8 @@ export default async function(req,res) {
         // category display name to be deleted typed in check-in box
         let key = body.tag;
         
-        firebase.auth().signInAnonymously()
+        const auth = getAuth()
+        signInAnonymously(auth)
         .then(() => {  
           let CategoryRef = firebase.database().ref('/category/' + key);
           CategoryRef.once('value')  

@@ -1,3 +1,4 @@
+import { getAuth, signInAnonymously } from 'firebase/auth'
 import firebase from '../../../firebase/clientApp'    
 import {validateFunc} from '../validate'
 
@@ -31,7 +32,8 @@ export default async function(req,res) {
       let barcode = body.barcode.toString();
       
       // is there throttling on anonymous sign ins?
-      firebase.auth().signInAnonymously()
+      const auth = getAuth()
+      signInAnonymously(auth)
       .then(() => {  
         let itemRef = firebase.database().ref('/inventory/' + barcode);
         itemRef.once('value')  

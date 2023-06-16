@@ -17,6 +17,7 @@ import { google } from 'googleapis';
 */
 
 import { service_info } from "../../../utils/decrypt.js"
+import { getAuth, signInAnonymously } from 'firebase/auth';
 
 const CHECKOUT_MAX = 1000;
 
@@ -151,7 +152,8 @@ export default async function (req, res) {
     const token = req.headers.authorization
     validateFunc(token)
     .then(() => {
-      firebase.auth().signInAnonymously()
+      const auth = getAuth()
+      signInAnonymously(auth)
       .then(() => {
         // update quantities for each item in inventory and get item info for logging
         Promise.all(
