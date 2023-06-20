@@ -1,3 +1,4 @@
+import { getAuth, signInAnonymously } from 'firebase/auth';
 import firebase from '../../../firebase/clientApp'
 import { validateFunc } from '../validate'
 
@@ -38,7 +39,8 @@ export default async function (req, res) {
     validateFunc(token).then(() => {
       const { body } = req
       // perform the write
-      firebase.auth().signInAnonymously()
+      const auth = getAuth()
+      signInAnonymously(auth)
       .then(() => {
         var windowRef = firebase.database().ref("/deliveryTimes/" + body.tag);
         windowRef.once('value')

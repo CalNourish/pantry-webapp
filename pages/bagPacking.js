@@ -4,15 +4,24 @@ import React from "react";
 import { useUser } from '../context/userContext'
 
 const fetcher = async (url, token) => {
-  const res = await fetch(url, {
-    headers: { "Content-Type": "application/json", Authorization: token },
-  });
-
-  if (res.status == 401) {
-    return Promise.reject("Sorry, you are not authorized to view this page.")
+  const NOT_AUTHORIZED_MESSAGE = "Sorry, you are not authorized to view this page."
+  if (!token) {
+    throw new Error(NOT_AUTHORIZED_MESSAGE);
   }
-  return res.json();
-}
+
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: token
+  };
+
+  const response = await fetch(url, { headers });
+
+  if (response.status === 401) {
+    throw new Error(NOT_AUTHORIZED_MESSAGE);
+  }
+
+  return response.json();
+};
 
 class PackingOrders extends React.Component {
   constructor(props) {
@@ -172,9 +181,7 @@ const createOrderObjects = (results) => {
 
 export default function PackingOverview() {
   const { user, loadingUser } = useUser();
-
-  let authToken = (user && user.authorized) ? user.authToken : null;
-  const { data, error } = useSWR(["/api/orders/GetAllOrders/", authToken], fetcher);
+  const { data, error } = useSWR(["/api/orders/GetAllOrders/", user?.authToken], fetcher);
 
   if (loadingUser) {
     return (

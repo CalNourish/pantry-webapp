@@ -4,6 +4,7 @@ import {ORDER_STATUS_OPEN} from "../../../utils/orderStatuses"
 
 import { service_info } from "../../../utils/decrypt";
 import { setupFormatColumns } from '../../../utils/sheets';
+import { getAuth, signInAnonymously } from 'firebase/auth';
 
 export const config = { // https://nextjs.org/docs/api-routes/api-middlewares
   api: {
@@ -337,8 +338,8 @@ function writeOrder(body, itemNames) {
         Object.keys(items).forEach((bcode) => {
           newOrder["items"][bcode] = {quantity: items[bcode], isPacked: false}
         })
-
-        firebase.auth().signInAnonymously()
+        const auth = getAuth()
+        signInAnonymously(auth)
         .then(() => {
           let itemRef = firebase.database().ref('/order/' + orderId);
 
@@ -391,7 +392,8 @@ export default async function(req, res) {
       return resolve();
     }
 
-    firebase.auth().signInAnonymously()
+    const auth = getAuth()
+    signInAnonymously(auth)
     .then(() => {
       getItemNames(body.items).then((itemNames) => {
         writeOrder(body, itemNames).then((orderId) => {

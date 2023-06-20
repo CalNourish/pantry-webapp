@@ -1,8 +1,8 @@
 import firebase from '../../../firebase/clientApp'
 import { validateFunc } from '../validate'
-
 import { ORDER_STATUS_OPEN, ORDER_STATUS_PROCESSING, ORDER_STATUS_COMPLETE } from "../../../utils/orderStatuses"
 
+import { getAuth, signInAnonymously } from 'firebase/auth';
 
 /*
 * /api/inventory/GetOrdersByStatus
@@ -40,21 +40,22 @@ export default async function (req, res) {
 
   return new Promise((resolve) => {
     validateFunc(token).then(() => {
-      firebase.auth().signInAnonymously()
-      .then(() => {
-        var ref = firebase.database().ref("/order");
-        ref.orderByChild("status").equalTo(query["status"]).once("value", snapshot => {
-          res.status(200).json(snapshot.toJSON());
+      const auth = getAuth()
+      signInAnonymously(auth)
+        .then(() => {
+          var ref = firebase.database().ref("/order");
+          ref.orderByChild("status").equalTo(query["status"]).once("value", snapshot => {
+            res.status(200).json(snapshot.toJSON());
+            return resolve();
+          })
+        })
+        .catch(err => {
+          res.status(500);
+          res.json({ error: "Error signing in to firebase: " + err });
           return resolve();
         })
-      })
-      .catch(err => {
-        res.status(500);
-        res.json({ error: "Error signing in to firebase: " + err });
-        return resolve();
-      })
     })
-    .catch(() => {
+    .catch((err) => {
       res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an administrator account." });
       return resolve();
     });

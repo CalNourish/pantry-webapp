@@ -1,3 +1,4 @@
+import { getAuth, signInAnonymously } from 'firebase/auth'
 import firebase from '../../../firebase/clientApp'
 import { validateFunc } from '../validate'
 
@@ -60,7 +61,8 @@ export default async function (req, res) {
       let end_AMPM = body.end_AMPM.toString()
 
       // perform the write
-      firebase.auth().signInAnonymously()
+      const auth = getAuth()
+      signInAnonymously(auth)
       .then(() => {
         let db_tag = day.substring(0,3).toLowerCase() + start + start_AMPM + "-" + end + end_AMPM
         let display = `${day} ${start}-${end} ${end_AMPM}`

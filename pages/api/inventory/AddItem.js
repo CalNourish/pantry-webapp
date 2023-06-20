@@ -1,3 +1,4 @@
+import { getAuth, signInAnonymously } from 'firebase/auth';
 import firebase from '../../../firebase/clientApp'
 import { validateFunc } from '../validate'
 
@@ -93,7 +94,8 @@ export default async function (req, res) {
       })
       .then(() => {
         // if no category issues, perform the write
-        firebase.auth().signInAnonymously()
+        const auth = getAuth()
+        signInAnonymously(auth)
         .then(() => {
           let itemRef = firebase.database().ref('/inventory/' + barcode);
 

@@ -1,3 +1,4 @@
+import { getAuth, signInAnonymously } from 'firebase/auth';
 import firebase from '../../../firebase/clientApp'
 import { validateFunc } from '../validate'
 
@@ -37,7 +38,8 @@ export default async function (req, res) {
 
   return new Promise((resolve) => {
     validateFunc(token).then(() => {
-      firebase.auth().signInAnonymously()
+      const auth = getAuth()
+      signInAnonymously(auth)
       .then(() => {
         var orderRef = firebase.database().ref("/order/" + orderId);
 

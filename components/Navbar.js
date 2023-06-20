@@ -41,7 +41,7 @@ export default function Navbar() {
   const activeLink = `${linkStyle} text-white`;
   const inactiveLink = `${linkStyle} text-gray-300 hover:text-white`;
   const router = useRouter();
-  const { user, loadingUser } = useUser()
+  const { user, loadingUser, logout } = useUser()
   
   const [showUserInfo, setShowUserInfo] = useState(false)
   const [showTabs, setShowTabs] = useState(false)
@@ -51,7 +51,7 @@ export default function Navbar() {
   var name = "";
   var userType = "";
 
-  // if they're signed in 
+  // if they're signed in
   if (user) {
     name = user.displayName;
     routes = UNAUTH_SIGNEDIN_ROUTES
@@ -115,7 +115,7 @@ export default function Navbar() {
                 <a href="/admin" className="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-500 dark:text-gray-100 dark:hover:text-white">Admin Page</a>
               </li> : ""}
               <li>
-                <a href="/signout" className="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-500 dark:text-gray-100 dark:hover:text-white">Sign out</a>
+                <button onClick={logout} className="block w-full py-2 px-4 text-left text-sm text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-500 dark:text-gray-100 dark:hover:text-white">Sign out</button>
               </li>
               </ul>
             </div>

@@ -1,6 +1,4 @@
 import firebase from 'firebase/compat/app'
-import 'firebase/compat/auth' // If you need it
-import 'firebase/compat/firestore' // If you need it
 import 'firebase/compat/storage' // If you need it
 import 'firebase/compat/database' // We need it
 import 'firebase/compat/analytics' // If you need it

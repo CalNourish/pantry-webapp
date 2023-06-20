@@ -1,6 +1,7 @@
 import firebase from '../../../firebase/clientApp'
 import { validateFunc } from '../validate'
 import { daysInOrder } from '../../hours';
+import { getAuth, signInAnonymously } from 'firebase/auth';
 
 /*
 * /api/admin/UpdateHours
@@ -53,7 +54,8 @@ export default async function (req, res) {
       let updatedTime = body.hours.toString();
 
       // perform the write
-      firebase.auth().signInAnonymously()
+      const auth = getAuth()
+      signInAnonymously(auth)
       .then(() => {
         let dayRef = firebase.database().ref('/hours/' + day);
         dayRef.update({ 'hours': updatedTime })

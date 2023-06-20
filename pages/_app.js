@@ -3,17 +3,21 @@ import CartProvider from '../context/cartContext'
 import "../styles/index.css"
 import App from 'next/app'
 import cookies from 'next-cookies'
+import Script from 'next/script'
 
 export const server = process.env.NEXT_PUBLIC_VERCEL_URL ? ("https://" + process.env.NEXT_PUBLIC_VERCEL_URL) : "http://localhost:3000"
 
 // Custom App to wrap it with context provider
 export default function MyApp({ Component, pageProps }) {
   return (
-    <UserProvider>
-      <CartProvider>
-        <Component {...pageProps} />
-      </CartProvider>
-    </UserProvider>
+    <>
+      {/* <Script src="https://accounts.google.com/gsi/client" async defer /> */}
+      <UserProvider>
+        <CartProvider>
+          <Component {...pageProps} />
+        </CartProvider>
+      </UserProvider>
+    </>
   )
 }
 
