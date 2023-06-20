@@ -33,10 +33,6 @@ export default function SignIn() {
       }
     }, [idToken]);
 
-    /** TODO: Follow instructions to get Google API client ID 
-     * and configure OAuth consent screen for ProdCalNourish 
-     * (https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid)
-     */
     useEffect(() => {
       google.accounts.id.initialize({
         client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,

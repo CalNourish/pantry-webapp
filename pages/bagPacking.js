@@ -4,19 +4,24 @@ import React from "react";
 import { useUser } from '../context/userContext'
 
 const fetcher = async (url, token) => {
+  const NOT_AUTHORIZED_MESSAGE = "Sorry, you are not authorized to view this page."
   if (!token) {
-    return Promise.reject("No token provided")
+    throw new Error(NOT_AUTHORIZED_MESSAGE);
   }
 
-  const res = await fetch(url, {
-    headers: { "Content-Type": "application/json", Authorization: token },
-  });
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: token
+  };
 
-  if (res.status == 401) {
-    return Promise.reject("Sorry, you are not authorized to view this page.")
+  const response = await fetch(url, { headers });
+
+  if (response.status === 401) {
+    throw new Error(NOT_AUTHORIZED_MESSAGE);
   }
-  return res.json();
-}
+
+  return response.json();
+};
 
 class PackingOrders extends React.Component {
   constructor(props) {
