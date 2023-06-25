@@ -169,10 +169,7 @@ export default function Table(props) {
                                         <div className="ml-auto">{sortBy == "itemName" ? "\u25BC" : sortBy == "-itemName" ? "\u25B2" : ""}</div>
                                     </div>
                                 </th>
-                                <th
-                                    className={headerClass}>
-                                    Category
-                                </th>
+                                
                                 {props.authToken
                                     ? (
                                         <>
@@ -200,6 +197,10 @@ export default function Table(props) {
                                         <div>Status</div>
                                         <div className="ml-auto">{sortBy == "status" ? "\u25BC" : sortBy == "-status" ? "\u25B2" : ""}</div>
                                     </div>
+                                </th>
+                                <th
+                                    className={headerClass}>
+                                    Category
                                 </th>
                                 { props.authToken ?
                                     <th className={headerClass + " w-28"}>Edit</th> : null}

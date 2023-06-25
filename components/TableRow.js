@@ -72,7 +72,7 @@ export default function TableRow(props) {
     )
 
     return <tr id={props.barcode}>
-
+        {/* Item Name */}
         <td className="px-5 py-5 border-b border-gray-100 bg-white text-sm">
             <div className="flex items-center" onDoubleClick={() => authToken ? setEditing("itemName") : null}>
                 <div className="ml-3">
@@ -84,12 +84,7 @@ export default function TableRow(props) {
             {authToken ? <div id={`barcode-${props.barcode}`} className="ml-3 text-gray-400">{props.barcode}</div> : ""}
         </td>
 
-        {/* Categories */}
-        <td className="px-5 py-5 border-b border-gray-100 bg-white text-sm">
-            <p className="text-gray-900 max-w-xs">{categoryDisplay(props.itemCategories)}</p>
-        </td>
-
-        {/* Quantity */}
+        {/* Count & Case Count */}
         { authToken ? (
             <>
                 <td className="px-3 py-3 border-b border-gray-100 bg-white text-sm text-center"
@@ -126,6 +121,11 @@ export default function TableRow(props) {
                     className="absolute inset-0 bg-red-200 opacity-50 rounded-full"></span>
                 <span className="relative overflow-hidden whitespace-nowrap">Out of Stock</span>
             </span>}
+        </td>
+
+        {/* Category */}
+        <td className="px-5 py-5 border-b border-gray-100 bg-white text-sm">
+            <p className="text-gray-900 max-w-xs">{categoryDisplay(props.itemCategories)}</p>
         </td>
 
         { /* Edit/Delete/ShowHide item shortcut buttons */
