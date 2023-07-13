@@ -109,14 +109,28 @@ class Checkin extends React.Component {
   };
 
   writeIDtoSheet = async (id) => {
-    fetch('/api/admin/WriteCheckIn', { method: 'POST',
-    body: JSON.stringify({calID: id, isGrad:false}),
-    headers: {'Content-Type': "application/json", 'Authorization': this.props.user.authToken}
+    fetch("/api/admin/WriteCheckIn", {
+      method: "POST",
+      body: JSON.stringify({ calID: id, isGrad: false }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: this.props.user.authToken,
+      },
     })
-    .then(() => {
-      this.showSuccess("Sucessfully logged ID: " + id,1000)
-    })
-  }
+      .then((resp) => {
+        resp.json().then((json) => {
+          if (json.error) {
+            this.showError(json.error);
+          } else {
+            this.showSuccess("Sucessfully logged ID: " + id, 1000);
+          }
+        });
+      })
+      .catch((err) => {
+        this.showError("Failed scanning ID: " + calIdValue + err, 3000);
+      });
+  };
+
 
   validateCalId = (calIdValue) => {
     const regexes = { 
