@@ -46,8 +46,12 @@ export default async function (req, res) {
       const email = body.email;
 
       // perform the write
-      const auth = getAuth
+      const auth = getAuth()
       signInAnonymously(auth)
+      .catch((err) => {
+        res.status(500).json({error: "Error signing in to firebase: " + err});
+        return resolve();
+      })
       .then(() => {
         let adminsRef = firebase.database().ref("/authorizedUser/");
         
@@ -71,7 +75,7 @@ export default async function (req, res) {
           });
         })
       })
-      .catch(() => {
+      .catch((err) => {
         res.status(500).json({error: "Error signing in to firebase: " + err});
         return resolve();
       })
