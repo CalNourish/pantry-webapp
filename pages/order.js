@@ -257,7 +257,6 @@ export default function Order() {
 
 
   // Uncomment this code to disable orders.
-  // test
   //
   //START
   // return (
