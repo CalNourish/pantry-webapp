@@ -229,7 +229,7 @@ export default function Order() {
           onChange={(e) => cartDispatch({ type: 'UPDATE_PERSONAL', payload: {eligibilityConf: e.target.checked}})}
         />
         <span className="text-base">
-          I confirm that I am currently quarantining due to COVID-19 or have been referred by the BNC Care Team.
+        I confirm that I have been referred by the BNC Care Team.
         </span>
       </label>
       
