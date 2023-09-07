@@ -380,7 +380,7 @@ export default async function(req, res) {
   //Delete when ordering is enabled
   //
   //START
-  return Promise.resolve();
+  //return Promise.resolve();
   //END
 
   return new Promise((resolve) => {
