@@ -289,7 +289,7 @@ export default function Inventory() {
     const packSize = state.packSize ? state.packSize : 1;                                                   // defaults to 1
     const quantity = state.count * (document.getElementById("packOption").value == "packs" ? packSize : 1)  // required
     const lowStock = state.lowStock ? state.lowStock : -1;                                                  // defaults to -1
-    const categories = Object.keys(state.categoryName).length ? state.categoryName : undefined;             // defaults to "no change"
+    const categories = Object.keys(state.categoryName).length ? Object.keys(state.categoryName) : undefined;// defaults to "no change"
     const displayPublic = Boolean(state.displayPublic)                                                      // defaults to true
     const defaultCart = Boolean(state.defaultCart)                                                          // defaults to false
 
