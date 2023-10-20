@@ -283,10 +283,13 @@ class Cart extends React.Component {
   displayCartRow = (barcode, value) => {
     return (
       <tr className="h-10 even:bg-gray-50" key={barcode}>
-        <td className="text-left pr-10">{value[0].itemName}</td>
         <td>
+          {/* Trash can symbol */}
+          <button className="align-middle py-1 focus:outline-none float-left mr-2" tabIndex="-1">
+            <img className="w-6 h-6" src="/images/trash-can.svg" onClick={() => this.deleteItem(barcode)}></img>
+          </button>
           {/* number spinner [-| 1 |+] */}
-          <div className="border border-solid border-gray-200 p-px w-32 h-8 flex flex-row float-left">
+          <div className="border border-solid border-gray-200 p-px w-32 h-8 flex flex-row">
             {/* minus */}
             <button className="font-light p-1 bg-gray-200 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.downItemQuantity(barcode, true)} tabIndex="-1">–</button>
             {/* quantity input */}
@@ -295,11 +298,8 @@ class Cart extends React.Component {
             {/* plus */}
             <button className="font-light p-1 bg-gray-200 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.upItemQuantity(barcode, true)} tabIndex="-1">+</button>
           </div>
-          {/* Trash can symbol */}
-          <button className="float-right align-middle py-1 focus:outline-none" tabIndex="-1">
-            <img className="w-6 h-6" src="/images/trash-can.svg" onClick={() => this.deleteItem(barcode)}></img>
-          </button>
         </td>
+        <td className="text-center pr-10">{value[0].itemName}</td>
       </tr>
     )
   }
@@ -439,11 +439,9 @@ class Cart extends React.Component {
             <table className="w-full my-5 table-fixed" id="mycart">
               <thead>
                 <tr className="border-b-2">
-                  <th className="w-auto text-left text-lg">Item</th>
+                  <th className="text-left text-lg pl-14">Quantity</th>
                   <th className="text-left w-48 text-lg">
-                    <div className="w-32 text-center">
-                      Quantity
-                    </div>
+                    <div className="w-32 text-center pl-5">Item</div>
                   </th>
                 </tr>
               </thead>
@@ -452,7 +450,7 @@ class Cart extends React.Component {
                 <tr className="bg-blue-50 h-10 m-3" key="totals">
                   <td className="text-lg font-medium text-right pr-10">Total Items</td>
                   <td>
-                    <div className="w-32 text-center font-medium">{this.state.itemsInCart}</div>
+                    <div className="w-32 text-center font-medium pl-5">{this.state.itemsInCart}</div>
                   </td>
                 </tr>
               </tbody>
