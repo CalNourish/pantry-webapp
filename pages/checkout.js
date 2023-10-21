@@ -282,24 +282,32 @@ class Cart extends React.Component {
 
   displayCartRow = (barcode, value) => {
     return (
-      <tr className="h-10 even:bg-gray-50" key={barcode}>
-        <td>
-          {/* Trash can symbol */}
-          <button className="align-middle py-1 focus:outline-none float-left mr-2" tabIndex="-1">
-            <img className="w-6 h-6" src="/images/trash-can.svg" onClick={() => this.deleteItem(barcode)}></img>
-          </button>
-          {/* number spinner [-| 1 |+] */}
-          <div className="border border-solid border-gray-200 p-px w-32 h-8 flex flex-row">
-            {/* minus */}
-            <button className="font-light p-1 bg-gray-200 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.downItemQuantity(barcode, true)} tabIndex="-1">–</button>
-            {/* quantity input */}
-            <input id={barcode + "-quantity"} className="quantity-input w-6 flex-grow mx-1 text-center focus:outline-none" autoComplete="off"
-              value={value[1]} onChange={e => this.updateItemQuantity(barcode, e.target.value)}/>
-            {/* plus */}
-            <button className="font-light p-1 bg-gray-200 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.upItemQuantity(barcode, true)} tabIndex="-1">+</button>
+      <tr className="h-auto even:bg-gray-50 w-1000" key={barcode}>
+        <div className='flex flex-row w-full'>
+          <div>
+            <td>
+                <div className='w-25'>
+                {/* Trash can symbol */}
+                <button className="align-middle py-1 focus:outline-none float-left mr-2" tabIndex="-1">
+                  <img className="w-6 h-6" src="/images/trash-can.svg" onClick={() => this.deleteItem(barcode)}></img>
+                </button>
+                {/* number spinner [-| 1 |+] */}
+                <div className="border border-solid border-gray-200 p-px w-32 h-8 flex flex-row">
+                  {/* minus */}
+                  <button className="font-light p-1 bg-gray-200 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.downItemQuantity(barcode, true)} tabIndex="-1">–</button>
+                  {/* quantity input */}
+                  <input id={barcode + "-quantity"} className="quantity-input w-6 flex-grow mx-1 text-center focus:outline-none" autoComplete="off"
+                    value={value[1]} onChange={e => this.updateItemQuantity(barcode, e.target.value)}/>
+                  {/* plus */}
+                  <button className="font-light p-1 bg-gray-200 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.upItemQuantity(barcode, true)} tabIndex="-1">+</button>
+                </div>
+              </div>
+            </td>
           </div>
-        </td>
-        <td className="text-center pr-10">{value[0].itemName}</td>
+          <div>
+            <td className="text-left pl-5 pt-1">{value[0].itemName}</td>
+          </div>
+        </div>
       </tr>
     )
   }
@@ -432,20 +440,27 @@ class Cart extends React.Component {
           </div>
 
           {/* Main body (Cart and Checkout Button) */}
-          <div className="p-4 container mx-3">
+          <div className="p-4 container mx-3 w-full">
             {this.state.error && errorBanner}
             {this.state.success && successBanner}
             <h1 className="text-3xl font-medium mb-2">Cart</h1>
-            <table className="w-full my-5 table-fixed" id="mycart">
+            <table className="w-full my-5" id="mycart">
               <thead>
                 <tr className="border-b-2">
-                  <th className="text-left text-lg pl-14">Quantity</th>
-                  <th className="text-left w-48 text-lg">
+                  <div className='flex flex-row'>
+                  <div>
+                  <th className="text-left text-lg pl-14 pr-8 w-auto">Quantity</th>
+                  </div>
+                  <div>
+                  <th className="text-left text-lg pl-5 w-auto grow">Item</th>
+                  {/* <th className="text-left w-48 text-lg">
                     <div className="w-32 text-center pl-5">Item</div>
-                  </th>
+                  </th> */}
+                  </div>
+                  </div>
                 </tr>
               </thead>
-              <tbody className="divide-y">
+              <tbody>
                 {Array.from( this.state.items ).map(([barcode, value]) => (this.displayCartRow(barcode, value)))}
                 <tr className="bg-blue-50 h-10 m-3" key="totals">
                   <td className="text-lg font-medium text-right pr-10">Total Items</td>
