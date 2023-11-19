@@ -32,7 +32,8 @@ const AUTH_SIGNEDIN_ROUTES = [
   { title: "Check in", route: "/checkin"},
   //{ title: "Grad Check in", route: "/checkinGrad"},
   { title: "Checkout", route: "/checkout"},
-  { title: "Bag Packing", route: "/bagPacking"}
+  { title: "Bag Packing", route: "/bagPacking"}, 
+  { title: "Visualizations", route: "/visualizations"}
 ]
 
 export default function Navbar() {
