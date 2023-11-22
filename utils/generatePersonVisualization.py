@@ -1,12 +1,9 @@
+import json
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import datetime
 import sys
-
-import base64
-import io
-my_stringIObytes = io.BytesIO()
 
 df = pd.read_csv('utils/Pantry Checkout Log - AY 22-23 (2).csv')
 df = df[df['Quantity'] != 4041570054161]
@@ -102,19 +99,9 @@ def ave_ppl_per_hour_vis(dataframe, day, week_num):
     grouped = grouped_by_hour_people.groupby(['hour']).size().reset_index(name='count')
     grouped["count"] = grouped["count"] / week_num
 
-    #Plotting
-    grouped.plot(x='hour', y='count', kind='bar', legend=False)
-    plt.title('Average People per Hour for the Past ' + str(week_num) + " Weeks on " + day)
-    plt.xlabel('Hour')
-    plt.ylabel('Average Number of People')
-    plt.xticks(rotation=0)
-    plt.tight_layout()
+    result = grouped.set_index('hour').to_dict()['count']
+    result = { str(k): v for k, v in result.items() }
+    return json.dumps(result)
 
-    plt.savefig(my_stringIObytes, format="jpg")
-    my_stringIObytes.seek(0)
-    my_base64_jpgData = base64.b64encode(my_stringIObytes.read()).decode()
-    return "data:image/png;base64," + my_base64_jpgData
-
-# TODO
 print(ave_ppl_per_hour_vis(df, sys.argv[2], int(sys.argv[1])))
 sys.stdout.flush()

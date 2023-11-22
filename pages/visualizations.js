@@ -1,6 +1,7 @@
 import React from 'react';
 import Layout from '../components/Layout'
 import Sidebar from '../components/Sidebar'
+import BarGraph from '../components/BarGraph'
 import useSWR from 'swr';
 
 const fetcher = (url) => {
@@ -106,7 +107,8 @@ class Visualization extends React.Component {
             return <p>Loading...</p>
         } else {
             return (
-                <img class="block h-full w-auto object-none" draggable="false" src={this.state.data.requested}></img>
+                // <img class="block h-full w-auto object-none" draggable="false" src={this.state.data.requested}></img>
+                <BarGraph data={this.state.data.requested} />
             )
         }
     }
@@ -182,7 +184,7 @@ class Visualization extends React.Component {
                         </div>
                     </Sidebar>
                 </div>
-                <div class="py-8 px-8">
+                <div class="py-8 px-8 h-screen flex justify-center">
                     { this.renderVisualization() }
                 </div>
             </div>
