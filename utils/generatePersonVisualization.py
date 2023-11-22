@@ -101,6 +101,7 @@ def ave_ppl_per_hour_vis(dataframe, day, week_num):
 
     result = grouped.set_index('hour').to_dict()['count']
     result = { str(k): v for k, v in result.items() }
+    result["title"] = f"Average People per Hour for the Past {str(week_num)} Weeks on {day}"
     return json.dumps(result)
 
 print(ave_ppl_per_hour_vis(df, sys.argv[2], int(sys.argv[1])))

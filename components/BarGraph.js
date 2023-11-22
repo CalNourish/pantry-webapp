@@ -34,7 +34,7 @@ export default function BarGraph({ data }) {
             },
             title: {
                 display: true,
-                text: 'Title',
+                text: data.title,
             },
         },
         scales: {
@@ -53,6 +53,8 @@ export default function BarGraph({ data }) {
             }, 
         }
     };
+
+    delete data.title
 
     const labels = Object.keys(data);
 

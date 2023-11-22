@@ -7,6 +7,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "chart.js": "^4.4.0",
     "cors": "^2.8.5",
     "firebase": "^9.0.0",
     "firebase-admin": "^10.3.0",
