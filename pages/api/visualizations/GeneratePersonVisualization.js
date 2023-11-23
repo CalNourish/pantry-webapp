@@ -16,16 +16,19 @@ export default async function (req, res) {
         })
 
         process.stdout.on("end", () => {
-            console.log("All data received")
-            res.status(200).json({ requested: finalData })
-            res.end()
+            return res.status(200).json({ requested: finalData })
         })
 
         process.stderr.on("data", (data) => {
-            res.status(200).json({ err: data.toString() })
-            res.end()
+            return res.status(200).json({ err: data.toString() })
         })
 
         resolve();
     })
+}
+
+export const config = {
+    api: {
+      externalResolver: true,
+    },
 }
