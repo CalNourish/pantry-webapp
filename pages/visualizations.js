@@ -184,7 +184,7 @@ class Visualization extends React.Component {
                         </div>
                     </Sidebar>
                 </div>
-                <div class="py-8 px-8 h-screen flex justify-center">
+                <div class="py-8 px-8 mx-auto">
                     { this.renderVisualization() }
                 </div>
             </div>

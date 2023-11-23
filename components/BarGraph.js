@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useRef } from "react"
 import {
     Chart,
     CategoryScale,
@@ -24,6 +24,24 @@ Chart.defaults.font.size = 14
 
 export default function BarGraph({ data }) {
     data = JSON.parse(data)
+    const chart = useRef(null)
+    const chartTitle = data.title
+
+    delete data.title
+
+    const labels = Object.keys(data);
+    const values = Object.values(data);
+
+    const exportVisualization = () => {
+        const chartInstance = chart.current
+        const base64Image = chartInstance.toBase64Image()
+        const a = document.createElement("a")
+
+        a.download = chartTitle
+        a.href = base64Image
+
+        a.click()
+    }
 
     const options = {
         responsive: true,
@@ -34,7 +52,7 @@ export default function BarGraph({ data }) {
             },
             title: {
                 display: true,
-                text: data.title,
+                text: chartTitle,
             },
         },
         scales: {
@@ -51,19 +69,19 @@ export default function BarGraph({ data }) {
                     text: "Average Number of People"
                 }
             }, 
-        }
+        },
+        animation: {
+            duration: 1250, 
+            easing: "easeOutQuad", 
+          }
     };
-
-    delete data.title
-
-    const labels = Object.keys(data);
 
     data = {
         labels,
         datasets: [
           {
             label: "Count",
-            data: Object.values(data),
+            data: values,
             backgroundColor: 'rgba(13, 50, 95, 0.75)',
           },
         ],
@@ -71,7 +89,10 @@ export default function BarGraph({ data }) {
 
     return (
         <div style={{ position: "relative", margin: "auto", width: "75vw" }}>
-            <Bar options={options} data={data} />
+            <Bar options={options} data={data} ref={chart} />
+            <button className="my-2 btn btn-pantry-blue w-full uppercase tracking-wide text-xs font-semibold focus:shadow-none w-24" onClick={() => exportVisualization()}>
+                Export
+            </button>
         </div>
     )
 }
