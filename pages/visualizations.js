@@ -100,11 +100,22 @@ class Visualization extends React.Component {
         this.selectedWeekday = weekday;
     }
 
+    cancelVisualization() {
+        this.state.showVisual = false
+    }
+
     renderVisualization() {
         if (!this.state.showVisual) {
             return 
         } else if (!this.state.data) {
-            return <p>Loading...</p>
+            return (
+                <>
+                <p className="text-center text-medium font-medium">Loading...</p>
+                <button className="my-2 mx-1 btn btn-pantry-blue w-full uppercase tracking-wide text-xs font-semibold focus:shadow-none w-24" onClick={() => this.cancelVisualization()}>
+                    Cancel
+                </button>
+                </>
+            )
         } else {
             return (
                 // <img class="block h-full w-auto object-none" draggable="false" src={this.state.data.requested}></img>
