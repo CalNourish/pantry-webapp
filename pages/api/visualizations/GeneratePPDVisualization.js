@@ -7,8 +7,7 @@ export default async function (req, res) {
 
         let process = spawn("python3", [
             "utils/generatePPDVisualization.py",
-            req.query.weekHistory,
-            req.query.onWeekday
+            req.query.weekHistory
         ])
 
         process.stdout.on("data", (data) => {

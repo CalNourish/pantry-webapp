@@ -41,6 +41,7 @@ class Visualization extends React.Component {
 
         this.state = {
             showVisual: false,
+            visualizationType: undefined,
             data: undefined
         }
     }
@@ -48,6 +49,7 @@ class Visualization extends React.Component {
     generateItemVisualization() {
         this.setState({
             showVisual: true,
+            visualizationType: 0,
             data: null
         })
 
@@ -65,13 +67,35 @@ class Visualization extends React.Component {
             });
     }
 
-    generatePersonVisualization() {
+    generatePPHVisualization() {
         this.setState({
             showVisual: true,
+            visualizationType: 1,
             data: null
         })
 
-        fetch("/api/visualizations/GeneratePersonVisualization?weekHistory=" + this.selectedWeekHistory + "&onWeekday=" + this.selectedWeekday, {
+        fetch("/api/visualizations/GeneratePPHVisualization?weekHistory=" + this.selectedWeekHistory + "&onWeekday=" + this.selectedWeekday, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            }).then((res) => {
+                console.log("API Call: /GeneratePersonVisualization")
+
+                res.json().then((data) => {
+                    this.setState({
+                        data: data
+                    })
+                })
+            });
+    }
+
+    generatePPDVisualization() {
+        this.setState({
+            showVisual: true,
+            visualizationType: 2,
+            data: null
+        })
+
+        fetch("/api/visualizations/GeneratePPDVisualization?weekHistory=" + this.selectedWeekHistory, {
             method: "GET",
             headers: { "Content-Type": "application/json" },
             }).then((res) => {
@@ -117,10 +141,13 @@ class Visualization extends React.Component {
                 </>
             )
         } else {
-            return (
-                // <img class="block h-full w-auto object-none" draggable="false" src={this.state.data.requested}></img>
-                <BarGraph data={this.state.data.requested} />
-            )
+            if (this.state.visualizationType == 0) {
+                return <BarGraph data={this.state.data.requested} xAxis="Day" yAxis="Item Count" />
+            } else if (this.state.visualizationType == 1) {
+                return <BarGraph data={this.state.data.requested} xAxis="Hour" yAxis="Average Number of People" />
+            } else if (this.state.visualizationType == 2) {
+                return <BarGraph data={this.state.data.requested} xAxis="Day" yAxis="Average Number of People" />
+            }
         }
     }
 
@@ -189,8 +216,29 @@ class Visualization extends React.Component {
                                     <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                                 </div>
                             </div>
-                            <button className="my-2 btn btn-pantry-blue w-full uppercase tracking-wide text-xs font-semibold focus:shadow-none" onClick={() => this.generatePersonVisualization()}>
+                            <button className="my-2 btn btn-pantry-blue w-full uppercase tracking-wide text-xs font-semibold focus:shadow-none" onClick={() => this.generatePPHVisualization()}>
                                 Generate People Per Hour Visualization
+                            </button>
+                            <hr className="my-2 border-gray-400 border-1"/>
+                            <label class="text-medium font-medium">How many weeks to go back</label>
+                            <div className="relative">
+                                <select className={inputAppearance + " w-56"}  onChange={(e) => this.setSelectedWeekHistory(e.target.value)}>
+                                    <option value="">-</option>
+                                    {
+                                        historyTimeFrame.map((item, index) => (
+                                            <option key={index} value={item}>
+                                                {item}
+                                            </option>
+                                            )
+                                        )
+                                    }
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-600">
+                                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
+                            </div>
+                            <button className="my-2 btn btn-pantry-blue w-full uppercase tracking-wide text-xs font-semibold focus:shadow-none" onClick={() => this.generatePPDVisualization()}>
+                                Generate People Per Day Visualization
                             </button>
                         </div>
                     </Sidebar>

@@ -22,8 +22,10 @@ Chart.register(
 Chart.defaults.font.family = "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif"
 Chart.defaults.font.size = 14
 
-export default function BarGraph({ data }) {
-    data = JSON.parse(data)
+export default function BarGraph(data) {
+    const xAxis = data.xAxis
+    const yAxis = data.yAxis
+    data = JSON.parse(data.data)
     const chart = useRef(null)
     const chartTitle = data.title
 
@@ -84,14 +86,14 @@ export default function BarGraph({ data }) {
             x: {
                 title: {
                     display: true,
-                    text: "Hour"
+                    text: xAxis
                 }
             }, 
             y: {
                 beginAtZero: true,
                 title: {
                     display: true,
-                    text: "Average Number of People"
+                    text: yAxis
                 }
             }, 
         },
