@@ -6,7 +6,7 @@ export default async function (req, res) {
         let finalData = ""
 
         let process = spawn("python3", [
-            "utils/generatePersonVisualization.py",
+            "utils/generatePPHVisualization.py",
             req.query.weekHistory,
             req.query.onWeekday
         ])
