@@ -36,7 +36,7 @@ class Cart extends React.Component {
       showPreview: false,
       loading: false,
     };
-
+    console.log(props);
     let defaultCart = [];
     for (let item in props.inventory) {
       if (props.inventory[item]["defaultCart"]) {
@@ -290,30 +290,58 @@ class Cart extends React.Component {
 
   displayCartRow = (barcode, value) => {
     return (
-      <tr className="h-auto even:bg-gray-50 w-1000" key={barcode}>
-        <div className='flex flex-row w-full'>
-          <div>
+      <tr className='h-auto even:bg-gray-50 w-1000' key={barcode}>
+        <div className='flex flex-row w-full gap-12'>
+          <div className=''>
             <td>
-                <div className='w-25 flex flex-row flex-nowrap'>
-                  {/* Trash can symbol */}
-                  <button className="align-middle py-1 focus:outline-none float-left mr-2 ml-1" tabIndex="-1">
-                    <img className="w-6 h-6" src="/images/trash-can.svg" onClick={() => this.deleteItem(barcode)}></img>
+              <div className='w-25 flex flex-row flex-nowrap'>
+                {/* number spinner [-| 1 |+] */}
+                <div className='border border-solid border-gray-200 p-px w-32 h-8 flex flex-row flex-nowrap'>
+                  {/* minus */}
+                  <button
+                    className='font-light p-1 bg-gray-200 w-8 h-full text-xl leading-3 focus:outline-none'
+                    onClick={() => this.downItemQuantity(barcode, true)}
+                    tabIndex='-1'
+                  >
+                    –
                   </button>
-                  {/* number spinner [-| 1 |+] */}
-                  <div className="border border-solid border-gray-200 p-px w-32 h-8 flex flex-row flex-nowrap">
-                    {/* minus */}
-                    <button className="font-light p-1 bg-gray-200 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.downItemQuantity(barcode, true)} tabIndex="-1">–</button>
-                    {/* quantity input */}
-                    <input id={barcode + "-quantity"} className="quantity-input w-6 flex-grow mx-1 text-center focus:outline-none" autoComplete="off"
-                      value={value[1]} onChange={e => this.updateItemQuantity(barcode, e.target.value)}/>
-                    {/* plus */}
-                    <button className="font-light p-1 bg-gray-200 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.upItemQuantity(barcode, true)} tabIndex="-1">+</button>
-                  </div>
+                  {/* quantity input */}
+                  <input
+                    id={barcode + "-quantity"}
+                    className='quantity-input w-6 flex-grow mx-1 text-center focus:outline-none'
+                    autoComplete='off'
+                    value={value[1]}
+                    onChange={(e) =>
+                      this.updateItemQuantity(barcode, e.target.value)
+                    }
+                  />
+                  {/* plus */}
+                  <button
+                    className='font-light p-1 bg-gray-200 w-8 h-full text-xl leading-3 focus:outline-none'
+                    onClick={() => this.upItemQuantity(barcode, true)}
+                    tabIndex='-1'
+                  >
+                    +
+                  </button>
+                </div>
               </div>
             </td>
           </div>
           <div>
-            <td className="text-left pl-5 pt-1">{value[0].itemName}</td>
+            <td className='text-left pl-5 pt-1 w-20'>{value[0].itemName}</td>
+          </div>
+          {/* Trash can symbol */}
+          <div>
+            <button
+              className='align-middle py-1 focus:outline-none float-left mr-2 ml-1'
+              tabIndex='-1'
+            >
+              <img
+                className='w-6 h-6'
+                src='/images/trash-can.svg'
+                onClick={() => this.deleteItem(barcode)}
+              ></img>
+            </button>
           </div>
         </div>
       </tr>
@@ -512,19 +540,23 @@ class Cart extends React.Component {
           </div>
 
           {/* Main body (Cart and Checkout Button) */}
-          <div className="p-4 mx-3 pr-5 w-full">
+          <div className='p-4 mx-3 pr-5 w-full'>
             {this.state.error && errorBanner}
             {this.state.success && successBanner}
-            <h1 className="text-3xl font-medium mb-2">Cart</h1>
-            <table className="w-full my-5" id="mycart">
+            <h1 className='text-3xl font-medium mb-2'>Cart</h1>
+            <table className='w-full my-5' id='mycart'>
               <thead>
-                <tr className="border-b-2">
+                <tr className='border-b-2'>
                   <div className='flex flex-row'>
                     <div>
-                      <th className="text-left text-lg pl-16 pr-0">Quantity</th>
+                      <th className='text-left text-lg pl-7 pr-11 pr-0'>
+                        Quantity
+                      </th>
                     </div>
                     <div>
-                      <th className="text-left text-lg pl-12 w-auto grow">Item</th>
+                      <th className='text-left text-lg pl-12 w-auto grow'>
+                        Item
+                      </th>
                       {/* <th className="text-left w-48 text-lg">
                         <div className="w-32 text-center pl-5">Item</div>
                       </th> */}
@@ -533,12 +565,18 @@ class Cart extends React.Component {
                 </tr>
               </thead>
               <tbody>
-                {Array.from( this.state.items ).map(([barcode, value]) => (this.displayCartRow(barcode, value)))}
-                <tr className="bg-blue-50 h-10 m-3" key="totals">
+                {Array.from(this.state.items).map(([barcode, value]) =>
+                  this.displayCartRow(barcode, value)
+                )}
+                <tr className='bg-blue-50 h-10 m-3' key='totals'>
                   <div className='flex flex-row pt-1'>
-                    <td className="text-lg font-medium text-left mr-7 ml-3">Total Items</td>
+                    <td className='text-lg font-medium text-left mr-7 ml-3'>
+                      Total Items
+                    </td>
                     <td>
-                      <div className="text-lg text-center font-medium">{this.state.itemsInCart}</div>
+                      <div className='text-lg text-center font-medium'>
+                        {this.state.itemsInCart}
+                      </div>
                     </td>
                   </div>
                 </tr>
@@ -557,9 +595,38 @@ class Cart extends React.Component {
           </div>
 
           {/*Right-hand Column*/}
-          <div className='flex-none lg:w-64'>
+          <div className='flex-none lg:w-90'>
             <Sidebar className='sm:min-h-0 lg:min-h-screen'>
               {/* Editing the information */}
+              <div className='w-full'>
+                <table className='w-full border-collapse'>
+                  <thead>
+                    <tr>
+                      <th>Limited Item</th>
+                      <th>No Dependents</th>
+                      <th>Dependents</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="pl-4">Milk:</td>
+                      <td className="pl-5">1</td>
+                      <td className="pl-4">2</td>
+                    </tr>
+
+                    <tr>
+                      <td className="pl-4">Protein:</td>
+                      <td className="pl-5">1</td>
+                      <td className="pl-4">2</td>
+                    </tr>
+                    <tr>
+                      <td className="pl-4">Eggs:</td>
+                      <td className="pl-5">1</td>
+                      <td className="pl-4">2</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
               {!this.state.isEditing && (
                 <button
                   className='text-blue-700 hover:text-blue-500'
