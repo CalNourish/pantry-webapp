@@ -7,6 +7,7 @@ import SearchModal from "../components/SearchModal";
 import { useUser } from "../context/userContext";
 import ReactMarkdown from "react-markdown";
 import { markdownStyle } from "../utils/markdownStyle";
+import { useState } from "react";
 
 const MAX_ITEM_QUANTITY = 100000;
 
@@ -35,6 +36,9 @@ class Cart extends React.Component {
       isEditing: false,
       showPreview: false,
       loading: false,
+      isEditingLimitedItem: false,
+      dependence: 0,
+      noDependence: 0,
     };
     console.log(props);
     let defaultCart = [];
@@ -609,20 +613,49 @@ class Cart extends React.Component {
                   </thead>
                   <tbody>
                     <tr>
-                      <td className="pl-4">Milk:</td>
-                      <td className="pl-5">1</td>
-                      <td className="pl-4">2</td>
-                    </tr>
-
-                    <tr>
-                      <td className="pl-4">Protein:</td>
-                      <td className="pl-5">1</td>
-                      <td className="pl-4">2</td>
-                    </tr>
-                    <tr>
-                      <td className="pl-4">Eggs:</td>
-                      <td className="pl-5">1</td>
-                      <td className="pl-4">2</td>
+                      <td className='pl-4'>Milk:</td>
+                      <td className='pl-5'>
+                        {this.state.isEditingLimitedItem ? (
+                          <input value={this.state.noDependence}></input>
+                        ) : (
+                          <span>{this.state.noDependence}</span>
+                        )}
+                      </td>
+                      <td className='pl-4'>
+                        {this.state.isEditingLimitedItem ? (
+                          <input value={this.state.dependence}></input>
+                        ) : (
+                          <span>{this.state.dependence}</span>
+                        )}
+                      </td>
+                      <td className='pl-4'>
+                        {this.state.isEditingLimitedItem ? (
+                          <>
+                            <button
+                              onClick={() =>
+                                this.setState({ isEditingLimitedItem: false })
+                              }
+                            >
+                              save
+                            </button>
+                            <button
+                              onClick={() =>
+                                this.setState({ isEditingLimitedItem: false })
+                              }
+                            >
+                              cancel
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={() =>
+                              this.setState({ isEditingLimitedItem: true })
+                            }
+                          >
+                            edit
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   </tbody>
                 </table>
