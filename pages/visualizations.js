@@ -42,7 +42,9 @@ class Visualization extends React.Component {
         this.state = {
             showVisual: false,
             visualizationType: undefined,
-            data: undefined
+            data: undefined,
+            searchResults: undefined,
+            selectedItem: undefined
         }
     }
 
@@ -109,8 +111,20 @@ class Visualization extends React.Component {
             });
     }
 
+    setSearch(item) {
+        console.log("Set search " + item)
+        // console.log(this.itemList.filter((str) => {return str.toLowerCase().includes(this.search)}))
+        this.setState({
+            searchResults: this.itemList.filter((str) => {return str.toLowerCase().includes(item)}).slice(0, 5)
+        })
+        this.search = item;
+    }
+
     setSelectedItem(item) {
-        console.log("Set selected item")
+        console.log("Set selected item " + item)
+        this.setState({
+            selectedItem: item
+        })
         this.selectedItem = item;
     }
 
@@ -161,8 +175,24 @@ class Visualization extends React.Component {
                     <Sidebar>
                         <h1 className="text-3xl font-semibold mb-2">Visualizations</h1>
                         <div className="my-4">
-                            <label class="text-medium font-medium">Item</label>
-                            <div className="relative">
+                            <label class="text-medium font-medium">Item {
+                                this.state.selectedItem
+                                ? (<>(Selected: {this.state.selectedItem})</>)
+                                : null
+                            }</label>
+                            <input placeholder="Search name" onChange={(e) => {this.setSearch(e.target.value)}}
+                                className="appearance-none rounded-r rounded-l sm:rounded-l-none border border-gray-300 border-b block pl-8 pr-6 py-2 w-full bg-white text-sm placeholder-gray-300 text-gray-600 focus:bg-white focus:placeholder-gray-500 focus:text-gray-600 focus:outline-none" />
+                            {
+                                this.search 
+                                ? this.state.searchResults.map((item, index) => (
+                                    <>
+                                        <p onClick={(e) => this.setSelectedItem(item)}>{item}</p>
+                                        <hr />
+                                    </>
+                                )) 
+                                : null
+                            }
+                            {/* <div className="relative">
                                 <select className={inputAppearance + " w-56"}  onChange={(e) => this.setSelectedItem(e.target.value)}>
                                     <option value="">-</option>
                                     {
@@ -177,7 +207,7 @@ class Visualization extends React.Component {
                                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-600">
                                     <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                                 </div>
-                            </div>
+                            </div> */}
                             <button className="my-2 btn btn-pantry-blue w-full uppercase tracking-wide text-xs font-semibold focus:shadow-none" onClick={() => this.generateItemVisualization()}>
                                 Generate Item Visualization
                             </button>
