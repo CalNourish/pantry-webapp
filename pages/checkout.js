@@ -304,6 +304,18 @@ class Cart extends React.Component {
     )
   }
 
+  removeItemTable = (itemId) => {
+ 
+  }
+
+  addItemTable = (itemId, noDependent, Dependent) => {
+
+  }
+
+  editItemTable = (itemId, newName, newNoDependent, newDependent) => {
+
+  }
+
   closeModal = () => {
     this.setState({showSearch: false});
     setTimeout(() => {
@@ -381,6 +393,8 @@ class Cart extends React.Component {
         }
       }
     }
+
+
 
     /* feedback banners */
     const errorBanner = <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-3">{this.state.error}</div>;
