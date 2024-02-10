@@ -55,7 +55,7 @@ class Visualization extends React.Component {
             data: null
         })
 
-        fetch("/api/visualizations/GenerateItemVisualization?item=" + this.selectedItem, {
+        fetch("/api/visualizations/GenerateItemVisualization?weekHistory=" + this.selectedWeekHistory + "&item=" + this.selectedItem, {
             method: "GET",
             headers: { "Content-Type": "application/json" },
             }).then((res) => {
@@ -175,9 +175,28 @@ class Visualization extends React.Component {
                     <Sidebar>
                         <h1 className="text-3xl font-semibold mb-2">Visualizations</h1>
                         <div className="my-4">
-                            <label class="text-medium font-medium">Item {
+                            <label class="text-medium font-medium">How many weeks to go back</label>
+                            <div className="relative">
+                                <select className={inputAppearance + " w-56"}  onChange={(e) => this.setSelectedWeekHistory(e.target.value)}>
+                                    <option value="">-</option>
+                                    {
+                                        historyTimeFrame.map((item, index) => (
+                                            <option key={index} value={item}>
+                                                {item}
+                                            </option>
+                                            )
+                                        )
+                                    }
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-600">
+                                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                                </div>
+                            </div>
+                            <label class="text-medium font-medium">Item</label>
+                            <br />
+                            <label class="text-sm font-normal">{
                                 this.state.selectedItem
-                                ? (<>(Selected: {this.state.selectedItem})</>)
+                                ? (<> Selected: {this.state.selectedItem}</>)
                                 : null
                             }</label>
                             <div className="block relative">
@@ -195,7 +214,7 @@ class Visualization extends React.Component {
                                 this.search 
                                 ? this.state.searchResults.map((item, index) => (
                                     <>
-                                        <p className="cursor-pointer" onClick={(e) => this.setSelectedItem(item)}>{item}</p>
+                                        <p className="cursor-pointer truncate" onClick={(e) => this.setSelectedItem(item)}>{item}</p>
                                         <hr />
                                     </>
                                 )) 

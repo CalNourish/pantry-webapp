@@ -7,6 +7,7 @@ export default async function (req, res) {
 
         let process = spawn("python3", [
             "utils/generateItemVisualization.py",
+            req.query.weekHistory,
             req.query.item
         ])
 
