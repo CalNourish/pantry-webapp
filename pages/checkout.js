@@ -448,7 +448,11 @@ class Cart extends React.Component {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {Array.from( this.state.items ).map(([barcode, value]) => (this.displayCartRow(barcode, value)))}
+                {Array.from(this.state.items)
+                .sort((a, b) =>
+                a[1][0].itemName.localeCompare(b[1][0].itemName)
+              )
+                .map(([barcode, value]) => (this.displayCartRow(barcode, value)))}
                 <tr className="bg-blue-50 h-10 m-3" key="totals">
                   <td className="text-lg font-medium text-right pr-10">Total Items</td>
                   <td>
