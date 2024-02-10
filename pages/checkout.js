@@ -318,11 +318,32 @@ class Cart extends React.Component {
   }
 
   addItemTable = (itemId, noDependent, Dependent) => {
-
+    let newLimitedItems = this.state.limitedItems
+    if (newLimitedItems.get(itemId)) {
+      this.showError('Item already exists', 20000)
+      return
+    }
+    newLimitedItems.set(itemId, [noDependent, Dependent])
+    this.setState({limitedItems : newLimitedItems})
   }
 
   editItemTable = (itemId, newName, newNoDependent, newDependent) => {
-
+    let newLimitedItems = this.state.limitedItems
+    let oldNoDependent = limitedItems.get(itemID)[0]
+    let oldDependent = limitedItems.get(itemID)[1]
+    if (newNoDependent != oldNoDependent) {
+      newLimitedItems.set(itemId, [newNoDependent, oldNoDependent])
+      this.setState({limitedItems : newLimitedItems})
+    }
+    if (newDependent != oldDependent) {
+      newLimitedItems.set(itemId, [oldDependent, newDependent])
+      this.setState({limitedItems : newLimitedItems})
+    }
+    if (newName) {
+      newLimitedItems.set(newName, limitedItems.get(itemId))
+      this.removeItemTable(itemId)
+      this.setState({limitedItems : newLimitedItems})
+    }
   }
 
   closeModal = () => {
