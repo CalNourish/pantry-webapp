@@ -27,6 +27,7 @@ class Cart extends React.Component {
     super(props);
     this.state = {
       items: new Map([]),   /* entries are {barcode: [itemStruct, quantity]} */
+      limitedItems: new Map([]),  /* entries */
       itemsInCart: 0,
       error: null,
       success: null,
@@ -305,7 +306,15 @@ class Cart extends React.Component {
   }
 
   removeItemTable = (itemId) => {
- 
+    let newlimitedItems = this.state.limitedItems;
+    let item = newlimitedItems.get(itemId);
+    if (!item) {
+      this.showError('Data corruption: please try again or refresh page', 20000)
+      return
+    }
+    newlimitedItems.delete(itemId);
+    this.setState({limitedItems : newlimitedItems});
+
   }
 
   addItemTable = (itemId, noDependent, Dependent) => {
