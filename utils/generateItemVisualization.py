@@ -28,7 +28,8 @@ new_url = convert_google_sheet_url(url)
 # print(new_url)
 # https://docs.google.com/spreadsheets/d/1mSEJtzy5L0nuIMRlY9rYdC5s899Ptu2gdMJcIalr5pg/export?gid=1606352415&format=csv
 
-df = pd.read_csv(new_url)
+# df = pd.read_csv(new_url)
+df = pd.read_csv("utils/data.csv")
 df
 
 
