@@ -7,7 +7,6 @@ import SearchModal from "../components/SearchModal";
 import { useUser } from "../context/userContext";
 import ReactMarkdown from "react-markdown";
 import { markdownStyle } from "../utils/markdownStyle";
-import { useState } from "react";
 
 const MAX_ITEM_QUANTITY = 100000;
 
@@ -39,8 +38,19 @@ class Cart extends React.Component {
       isEditingLimitedItem: false,
       dependence: 0,
       noDependence: 0,
+      tempDependence: 0,
+      tempNoDependence: 0,
+      /* [{name: {dep: 1, noDep: 2}}, {name: {dep: 1, noDep: 2}}] */
+      /* [{name: {dep: 1, noDep: 2, tempDep: 0, tempNoDep: 0}}, {name: {dep: 1, noDep: 2}}] */
+      // props.checkoutInfo gives us all limtedItems
     };
-    console.log(props);
+
+    console.log(props.checkoutInfo);
+    console.log(
+      Object.entries(props.checkoutInfo).map(([key, value]) => ({
+        [key]: value,
+      }))
+    );
     let defaultCart = [];
     for (let item in props.inventory) {
       if (props.inventory[item]["defaultCart"]) {
@@ -599,31 +609,47 @@ class Cart extends React.Component {
           </div>
 
           {/*Right-hand Column*/}
-          <div className='flex-none lg:w-90'>
+          <div className='flex-none lg:w-150'>
             <Sidebar className='sm:min-h-0 lg:min-h-screen'>
               {/* Editing the information */}
               <div className='w-full'>
-                <table className='w-full border-collapse'>
+                <table style={{ width: "30rem" }}>
                   <thead>
-                    <tr>
-                      <th>Limited Item</th>
-                      <th>No Dependents</th>
-                      <th>Dependents</th>
+                    <tr className='w-full'>
+                      <th className='w-1/3'>Limited Item</th>
+                      <th className='w-1/3'>No Dependents</th>
+                      <th className='w-1/3'>Dependents</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td className='pl-4'>Milk:</td>
-                      <td className='pl-5'>
+                      <td className='pl-5'>Milk:</td>
+                      <td className='pl-3'>
                         {this.state.isEditingLimitedItem ? (
-                          <input value={this.state.noDependence}></input>
+                          <input
+                            className='w-28'
+                            type='number'
+                            defaultValue={this.state.noDependence}
+                            onChange={(e) =>
+                              this.setState({
+                                noDependence: e.target.value,
+                              })
+                            }
+                          ></input>
                         ) : (
                           <span>{this.state.noDependence}</span>
                         )}
                       </td>
-                      <td className='pl-4'>
+                      <td className='pl-6'>
                         {this.state.isEditingLimitedItem ? (
-                          <input value={this.state.dependence}></input>
+                          <input
+                            className='w-24'
+                            type='number'
+                            defaultValue={this.state.dependence}
+                            onChange={(e) =>
+                              this.setState({ dependence: e.target.value })
+                            }
+                          ></input>
                         ) : (
                           <span>{this.state.dependence}</span>
                         )}
@@ -632,22 +658,34 @@ class Cart extends React.Component {
                         {this.state.isEditingLimitedItem ? (
                           <>
                             <button
-                              onClick={() =>
-                                this.setState({ isEditingLimitedItem: false })
-                              }
+                              className='mr-2 text-blue-700 hover:text-green-500'
+                              onClick={() => {
+                                return this.setState({
+                                  isEditingLimitedItem: false,
+                                  dependence: this.state.tempDependence,
+                                  noDependence: this.state.tempNoDependence,
+                                });
+                              }}
                             >
                               save
                             </button>
+                            <br />
                             <button
-                              onClick={() =>
-                                this.setState({ isEditingLimitedItem: false })
-                              }
+                              className='text-blue-700 hover:text-red-500'
+                              onClick={() => {
+                                return this.setState({
+                                  isEditingLimitedItem: false,
+                                  tempDependence: this.state.dependence,
+                                  tempNoDependence: this.state.noDependence,
+                                });
+                              }}
                             >
                               cancel
                             </button>
                           </>
                         ) : (
                           <button
+                            className='text-blue-700 hover:text-blue-500 mr-2'
                             onClick={() =>
                               this.setState({ isEditingLimitedItem: true })
                             }
