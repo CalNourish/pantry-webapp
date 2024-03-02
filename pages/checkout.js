@@ -305,43 +305,43 @@ class Cart extends React.Component {
     )
   }
 
-  removeItemTable = (itemId) => {
+  removeItemTable = (name) => {
     let newlimitedItems = this.state.limitedItems;
-    let item = newlimitedItems.get(itemId);
+    let item = newlimitedItems.get(name);
     if (!item) {
       this.showError('Data corruption: please try again or refresh page', 20000)
       return
     }
-    newlimitedItems.delete(itemId);
+    newlimitedItems.delete(name);
     this.setState({limitedItems : newlimitedItems});
 
   }
 
-  addItemTable = (itemId, noDependent, Dependent) => {
+  addItemTable = (name, noDependent, Dependent) => {
     let newLimitedItems = this.state.limitedItems
-    if (newLimitedItems.get(itemId)) {
+    if (newLimitedItems.get(name)) {
       this.showError('Item already exists', 20000)
       return
     }
-    newLimitedItems.set(itemId, [noDependent, Dependent])
+    newLimitedItems.set(name, [noDependent, Dependent])
     this.setState({limitedItems : newLimitedItems})
   }
 
-  editItemTable = (itemId, newName, newNoDependent, newDependent) => {
+  editItemTable = (name, newName, newNoDependent, newDependent) => {
     let newLimitedItems = this.state.limitedItems
-    let oldNoDependent = limitedItems.get(itemID)[0]
-    let oldDependent = limitedItems.get(itemID)[1]
+    let oldNoDependent = limitedItems.get(name)[0]
+    let oldDependent = limitedItems.get(name)[1]
     if (newNoDependent != oldNoDependent) {
-      newLimitedItems.set(itemId, [newNoDependent, oldNoDependent])
+      newLimitedItems.set(name, [newNoDependent, oldNoDependent])
       this.setState({limitedItems : newLimitedItems})
     }
     if (newDependent != oldDependent) {
-      newLimitedItems.set(itemId, [oldDependent, newDependent])
+      newLimitedItems.set(name, [oldDependent, newDependent])
       this.setState({limitedItems : newLimitedItems})
     }
     if (newName) {
-      newLimitedItems.set(newName, limitedItems.get(itemId))
-      this.removeItemTable(itemId)
+      newLimitedItems.set(newName, limitedItems.get(name))
+      this.removeItemTable(name)
       this.setState({limitedItems : newLimitedItems})
     }
   }
