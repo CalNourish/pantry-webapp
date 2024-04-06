@@ -36,24 +36,32 @@ class Cart extends React.Component {
       showPreview: false,
       loading: false,
       isEditingLimitedItem: false,
-      dependence: 0,
-      noDependence: 0,
-
-      tempDependence: 0,
-      tempNoDependence: 0,
       /* [{name: {dep: 1, noDep: 2}}, {name: {dep: 1, noDep: 2}}] */
       /* [{name: {dep: 1, noDep: 2, tempDep: 0, tempNoDep: 0}}, {name: {dep: 1, noDep: 2}}] */
       // props.checkoutInfo gives us all limtedItems
-
-      limitedItems: [{ id: 1, name: "Milk", noDependence: 1, dependence: 2 }] /*edit to add limited items????*/
+      noDependence: 0,
+      dependence: 0,
+      tempDependence: 0,
+      tempNoDependence: 0,
+      limitedItems: [
+        {
+          id: 1,
+          name: "Milk",
+          noDependence: 0,
+          dependence: 0,
+          tempDependence: 0,
+          tempNoDependence: 0,
+        },
+      ] /*edit to add limited items????*/,
+      isAdding: false, // for adding new limited items
     };
 
-    console.log(props.checkoutInfo);
-    console.log(
-      Object.entries(props.checkoutInfo).map(([key, value]) => ({
-        [key]: value,
-      }))
-    );
+    // console.log(props.checkoutInfo);
+    // console.log(
+    //   Object.entries(props.checkoutInfo).map(([key, value]) => ({
+    //     [key]: value,
+    //   }))
+    // );
     let defaultCart = [];
     for (let item in props.inventory) {
       if (props.inventory[item]["defaultCart"]) {
@@ -152,7 +160,9 @@ class Cart extends React.Component {
   };
 
   deleteLimitedItem = (id) => {
-    const updatedItems = this.state.limitedItems.filter(item => item.id !== id);
+    const updatedItems = this.state.limitedItems.filter(
+      (item) => item.id !== id
+    );
     this.setState({ limitedItems: updatedItems });
   };
 
@@ -376,6 +386,21 @@ class Cart extends React.Component {
       document.getElementById("barcode").focus();
     }, 0);
   };
+
+  // removeItemTable = (itemId) => {
+  //   let newlimitedItems = this.state.limitedItems;
+  //   let item = newlimitedItems.find((item) => item.id === itemId);
+  //   console.log(item)
+  //   if (!item) {
+  //     this.showError(
+  //       "Data corruption: please try again or refresh page",
+  //       20000
+  //     );
+  //     return;
+  //   }
+  //   newlimitedItems.delete(itemId);
+  //   this.setState({ limitedItems: newlimitedItems });
+  // };
 
   render() {
     /* Hotkeys*/
@@ -623,174 +648,168 @@ class Cart extends React.Component {
               <div className='w-full'>
                 <table style={{ width: "30rem" }}>
                   <thead>
- 
                     <tr className='w-full'>
+                      <th className=''></th>
                       <th className='w-1/3'>Limited Item</th>
                       <th className='w-1/3'>No Dependents</th>
                       <th className='w-1/3'>Dependents</th>
-
                     </tr>
                   </thead>
-                  {/* <tbody>
-                    <tr>
+                  {/* {Object.entries(this.props.checkoutInfo).map(
+                    ([key, value]) => {
+                      console.log(key, value);
+                    }
+                  )} */}
+                  <tbody className='relative'>
+                    {Object.entries(this.props.checkoutInfo).map(
+                      ([key, value]) => (
+                        <tr key={value.id}>
+                          <td
+                            className='absolute'
+                            style={{ left: "-2%", top: "-7%" }}
+                          >
+                            <button
+                              className='align-middle py-1 focus:outline-none float-left mr-2 ml-1'
+                              tabIndex='-1'
+                              onClick={() => this.deleteLimitedItem(value.id)} // Handle delete on click
+                            >
+                              <img
+                                className='w-6 h-6'
+                                src='/images/trash-can.svg'
+                                alt='Delete'
+                              />
+                            </button>
+                          </td>
+                          <td className='justify-content-center pl-5'>{key}</td>
+                          <td className='pl-3.5'>
+                            {this.state.isEditingLimitedItem ? (
+                              <input
+                                className='w-full'
+                                type='number'
+                                defaultValue={value.noDependence}
+                                onChange={(e) =>
+                                  (value.tempNoDependence = e.target.value)
+                                }
+                              ></input>
+                            ) : (
+                              <span>{value.noDependence}</span>
+                            )}
+                          </td>
+                          <td className='pl-7'>
+                            {this.state.isEditingLimitedItem ? (
+                              <input
+                                className='w-full'
+                                type='number'
+                                defaultValue={value.dependence}
+                                onChange={(e) =>
+                                  (value.tempDependence = e.target.value)
+                                }
+                              ></input>
+                            ) : (
+                              <span>{value.dependence}</span>
+                            )}
+                          </td>
+                          <td className='pl-4'>
+                            {this.state.isEditingLimitedItem ? (
+                              <>
+                                <button
+                                  onClick={() => {
+                                    this.setState({
+                                      isEditingLimitedItem: false,
+                                    });
+                                    value.dependence = value.tempDependence;
+                                    value.noDependence = value.tempNoDependence;
+                                    return;
+                                  }}
+                                >
+                                  save
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    this.setState({
+                                      isEditingLimitedItem: false,
+                                    });
+                                    value.tempDependence = value.dependence;
+                                    value.tempNoDependence = value.noDependence;
+                                    return;
+                                  }}
+                                >
+                                  cancel
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                onClick={() =>
+                                  this.setState({ isEditingLimitedItem: true })
+                                }
+                              >
+                                edit
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      )
+                    )}
+                    {/* // adding new limited items */}
+                    <tr className='relative'>
+                      <td className='absolute' style={{ top: "-7%" }}>
+                        <button className='font-bold text-xl'>+</button>
+                      </td>
 
-                      <td className='pl-5'>Milk:</td>
-                      <td className='pl-3'>
-
-                      <button
-                className='align-middle py-1 focus:outline-none float-left mr-2 ml-1'
-                tabIndex='-1'>
-                      <img
-                  className='w-6 h-6'
-                  src='/images/trash-can.svg'
-                  // onClick={() => this.deleteItem(barcode)} edit this
-                ></img>
-                    </button>
-                      <td className='pl-4'>Milk:</td>
                       <td className='pl-5'>
-                        {this.state.isEditingLimitedItem ? (
-                          <input
-                            className='w-28'
-                            type='number'
-                            defaultValue={this.state.noDependence}
-                            onChange={(e) =>
-                              this.setState({
-                                noDependence: e.target.value,
-                              })
-                            }
-                          ></input>
-                        ) : (
-                          <span>{this.state.noDependence}</span>
-                        )}
+                        <input
+                          className='w-full'
+                          type='text'
+                          placeholder='Name:'
+                        ></input>
                       </td>
-                      <td className='pl-6'>
-                        {this.state.isEditingLimitedItem ? (
-                          <input
-                            className='w-24'
-                            type='number'
-                            defaultValue={this.state.dependence}
-                            onChange={(e) =>
-                              this.setState({ dependence: e.target.value })
-                            }
-                          ></input>
-                        ) : (
-                          <span>{this.state.dependence}</span>
-                        )}
+                      <td className='pl-3.5'>
+                        <input
+                          className='w-full'
+                          type='number'
+                          placeholder='No-dependence:'
+                        ></input>
                       </td>
-                      <td className='pl-4'>
-                        {this.state.isEditingLimitedItem ? (
-                          <>
-                            <button
-                              className='mr-2 text-blue-700 hover:text-green-500'
-                              onClick={() => {
-                                return this.setState({
-                                  isEditingLimitedItem: false,
-                                  dependence: this.state.tempDependence,
-                                  noDependence: this.state.tempNoDependence,
-                                });
-                              }}
-                            >
-                              save
-                            </button>
-                            <br />
-                            <button
-                              className='text-blue-700 hover:text-red-500'
-                              onClick={() => {
-                                return this.setState({
-                                  isEditingLimitedItem: false,
-                                  tempDependence: this.state.dependence,
-                                  tempNoDependence: this.state.noDependence,
-                                });
-                              }}
-                            >
-                              cancel
-                            </button>
-                          </>
-                        ) : (
-                          <button
-                            className='text-blue-700 hover:text-blue-500 mr-2'
-                            onClick={() =>
-                              this.setState({ isEditingLimitedItem: true })
-                            }
-                          >
-                            edit
-                          </button>
-                        )}
+                      <td className='pl-7'>
+                        <input
+                          className='w-full'
+                          type='number'
+                          placeholder='Dependence:'
+                        ></input>
                       </td>
+                      <td className='pl-4  hover:cursor-pointer'>add</td>
                     </tr>
-                  </tbody>*/}
-                  <tbody>
-                    {this.state.limitedItems.map(item => (
-                      <tr key={item.id}>
-                        <td>
-                          <button
-                            className='align-middle py-1 focus:outline-none float-left mr-2 ml-1'
-                            tabIndex='-1'
-                            onClick={() => this.deleteLimitedItem(item.id)} // Handle delete on click
-                          >
-                            <img
-                              className='w-6 h-6'
-                              src='/images/trash-can.svg'
-                              alt='Delete'
-                            />
-                          </button>
-                        </td>
-                        <td className="justify-content-center">{item.name}</td>
-                        <td>
-                          {this.state.isEditingLimitedItem ? (
-                            <input value={item.noDependence}></input>
-                          ) : (
-                            <span>{item.noDependence}</span>
-                          )}
-                        </td>
-                        <td>
-                          {this.state.isEditingLimitedItem ? (
-                            <input value={item.dependence}></input>
-                          ) : (
-                            <span>{item.dependence}</span>
-                          )}
-                        </td>
-                        <td className='pl-4'>
-                          {this.state.isEditingLimitedItem ? (
-                            <>
-                              <button
-                                onClick={() =>
-                                  this.setState({ isEditingLimitedItem: false })
-                                }
-                              >
-                                save
-                              </button>
-                              <button
-                                onClick={() =>
-                                  this.setState({ isEditingLimitedItem: false })
-                                }
-                              >
-                                cancel
-                              </button>
-                            </>
-                          ) : (
-                            <button
-                              onClick={() =>
-                                this.setState({ isEditingLimitedItem: true })
-                              }
-                            >
-                              edit
-                            </button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
                   </tbody>
                 </table>
+                <div className='add-new-row flex justify-between w-full bg-black'>
+                  {/* <div className='add-button'>
+                    <button>
+                      <img
+                        className='w-6 h-6'
+                        src='/images/add-icon.svg'
+                        alt='Add'
+                      />
+                    </button>
+                  </div> */}
+                  {/* <div className='input-name w-1'>
+                    <input type='text' placeholder='Name:'></input>
+                  </div>
+                  <div className='input-no-dependence w-3/12'>
+                    <input type='text' placeholder='No-dependence:'></input>
+                  </div>
+                  <div className='input-dependence w-3/12'>
+                    <input type='text' placeholder='Dependence:'></input>
+                  </div> */}
+                </div>
               </div>
-              {!this.state.isEditing && (
+              {/* {!this.state.isEditing && (
                 <button
                   className='text-blue-700 hover:text-blue-500'
                   onClick={() => this.setState({ isEditing: true })}
                 >
                   edit
                 </button>
-              )}
+              )} */}
 
               {/* cancel edit */}
               {this.state.isEditing && (
@@ -800,6 +819,7 @@ class Cart extends React.Component {
                     this.setState({ isEditing: false });
                     fetch(`/api/admin/GetCheckoutInfo`).then((result) => {
                       result.json().then((data) => {
+                        console.log(data.markdown);
                         this.setState({ checkoutInfo: data.markdown });
                       });
                     });
