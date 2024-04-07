@@ -22,17 +22,26 @@ Chart.register(
 Chart.defaults.font.family = "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif"
 Chart.defaults.font.size = 14
 
-export default function BarGraph(data) {
-    const xAxis = data.xAxis
-    const yAxis = data.yAxis
-    data = JSON.parse(data.data)
+export default function BarGraph({ data, xAxis, yAxis }) {
+    // const xAxis = data.xAxis
+    // const yAxis = data.yAxis
+    // data = JSON.parse(data.data)
     const chart = useRef(null)
     const chartTitle = data.title
 
     delete data.title
 
-    const labels = Object.keys(data);
-    const values = Object.values(data);
+    let labels = Object.keys(data);
+    let values = Object.values(data);
+    const combined = labels.map((weekday, index) => ({ weekday, value: values[index] }));
+
+    combined.sort((a, b) => {
+        let weekdaysOrder = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        return weekdaysOrder.indexOf(a.weekday) - weekdaysOrder.indexOf(b.weekday);
+    });
+
+    labels = combined.map(item => item.weekday);
+    values = combined.map(item => item.value);
 
     const exportVisualization = () => {
         const chartInstance = chart.current

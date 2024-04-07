@@ -55,18 +55,20 @@ class Visualization extends React.Component {
             data: null
         })
 
-        fetch("/api/visualizations/GenerateItemVisualization?weekHistory=" + this.selectedWeekHistory + "&item=" + this.selectedItem, {
+        fetch("https://generate-item-visualization-3v6ppefuxq-uc.a.run.app?week-history=" + this.selectedWeekHistory + "&item=" + this.selectedItem, {
             method: "GET",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+                "Content-Type": "application/json",
+            },
             }).then((res) => {
-                console.log("API Call: /GenerateItemVisualization")
-
-                res.json().then((data) => {
-                    this.setState({
-                        data: data
-                    })
+                console.log("Cloud Function API Call: Generate Item Visualization")
+                return res.json()
+            }).then((data) => {
+                console.log(data)
+                this.setState({
+                    data: data
                 })
-            });
+            })
     }
 
     generatePPHVisualization() {
@@ -76,18 +78,20 @@ class Visualization extends React.Component {
             data: null
         })
 
-        fetch("/api/visualizations/GeneratePPHVisualization?weekHistory=" + this.selectedWeekHistory + "&onWeekday=" + this.selectedWeekday, {
+        fetch("https://generate-hourly-visits-visualization-3v6ppefuxq-uc.a.run.app?week-history=" + this.selectedWeekHistory + "&on-weekday=" + this.selectedWeekday, {
             method: "GET",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+                "Content-Type": "application/json"
+            },
             }).then((res) => {
-                console.log("API Call: /GeneratePersonVisualization")
-
-                res.json().then((data) => {
-                    this.setState({
-                        data: data
-                    })
+                console.log("Cloud Function API Call: Generate Hourly Visits Visualization")
+                return res.json()
+            }).then((data) => {
+                console.log(data)
+                this.setState({
+                    data: data
                 })
-            });
+            })
     }
 
     generatePPDVisualization() {
@@ -97,18 +101,20 @@ class Visualization extends React.Component {
             data: null
         })
 
-        fetch("/api/visualizations/GeneratePPDVisualization?weekHistory=" + this.selectedWeekHistory, {
+        fetch("https://generate-daily-visits-visualization-3v6ppefuxq-uc.a.run.app?week-history=" + this.selectedWeekHistory, {
             method: "GET",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+                "Content-Type": "application/json"
+            },
             }).then((res) => {
-                console.log("API Call: /GeneratePersonVisualization")
-
-                res.json().then((data) => {
-                    this.setState({
-                        data: data
-                    })
+                console.log("Cloud Function API Call: Generate Daily Visits Visualization")
+                return res.json()
+            }).then((data) => {
+                console.log(data)
+                this.setState({
+                    data: data
                 })
-            });
+            })
     }
 
     setSearch(item) {
@@ -156,11 +162,11 @@ class Visualization extends React.Component {
             )
         } else {
             if (this.state.visualizationType == 0) {
-                return <BarGraph data={this.state.data.requested} xAxis="Day" yAxis="Item Count" />
+                return <BarGraph data={this.state.data} xAxis="Day" yAxis="Item Count" />
             } else if (this.state.visualizationType == 1) {
-                return <BarGraph data={this.state.data.requested} xAxis="Hour" yAxis="Average Number of People" />
+                return <BarGraph data={this.state.data} xAxis="Hour" yAxis="Average Number of People" />
             } else if (this.state.visualizationType == 2) {
-                return <BarGraph data={this.state.data.requested} xAxis="Day" yAxis="Average Number of People" />
+                return <BarGraph data={this.state.data} xAxis="Day" yAxis="Average Number of People" />
             }
         }
     }
