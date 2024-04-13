@@ -1,16 +1,10 @@
-export default function handler(req, res) {
-    console.log("Cron job: fetch latest pantry data run")
+import { NextApiRequest, NextApiResponse } from 'next';
 
-    const { body } = req;
+export default async function handler(request, response) {
+    const result = await fetch(
+        'https://fetch-upload-data-3v6ppefuxq-uc.a.run.app',
+    );
+    const data = await result.json();
 
-    return new Promise((resolve, reject) =>  {
-        let spawn = require("child_process").spawn;
-
-        let process = spawn("python3", [
-            "utils/fetchLatestPantryData.py"
-        ])
-
-        res.status(200).end("Cron job: fetch latest pantry data completed");
-        resolve();
-    })
+    return response.json({ datetime: data.datetime });
 }
