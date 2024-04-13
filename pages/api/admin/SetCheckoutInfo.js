@@ -14,7 +14,7 @@ function requireParams(body) {
   return false;
 }
 
-export default async function(req,res) {
+export default async function(req, res) {
 
   const token = req.headers.authorization
 

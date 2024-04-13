@@ -39,29 +39,17 @@ class Cart extends React.Component {
       /* [{name: {dep: 1, noDep: 2}}, {name: {dep: 1, noDep: 2}}] */
       /* [{name: {dep: 1, noDep: 2, tempDep: 0, tempNoDep: 0}}, {name: {dep: 1, noDep: 2}}] */
       // props.checkoutInfo gives us all limtedItems
-      noDependence: 0,
-      dependence: 0,
-      tempDependence: 0,
-      tempNoDependence: 0,
-      limitedItems: [
-        {
-          id: 1,
-          name: "Milk",
-          noDependence: 0,
-          dependence: 0,
-          tempDependence: 0,
-          tempNoDependence: 0,
-        },
-      ] /*edit to add limited items????*/,
+      newLimitedItem: {
+        name: "",
+        noDependence: 0,
+        dependence: 0,
+        tempNoDependence: 0,
+        tempDependence: 0,
+      },
+      /*edit to add limited items????*/
       isAdding: false, // for adding new limited items
     };
 
-    // console.log(props.checkoutInfo);
-    // console.log(
-    //   Object.entries(props.checkoutInfo).map(([key, value]) => ({
-    //     [key]: value,
-    //   }))
-    // );
     let defaultCart = [];
     for (let item in props.inventory) {
       if (props.inventory[item]["defaultCart"]) {
@@ -649,7 +637,7 @@ class Cart extends React.Component {
                 <table style={{ width: "30rem" }}>
                   <thead>
                     <tr className='w-full'>
-                      <th className=''></th>
+                      <th className='w-1'></th>
                       <th className='w-1/3'>Limited Item</th>
                       <th className='w-1/3'>No Dependents</th>
                       <th className='w-1/3'>Dependents</th>
@@ -662,27 +650,26 @@ class Cart extends React.Component {
                   )} */}
                   <tbody className='relative'>
                     {Object.entries(this.props.checkoutInfo).map(
-                      ([key, value]) => (
-                        <tr key={value.id}>
-                          <td
-                            className='absolute'
-                            style={{ left: "-2%", top: "-7%" }}
-                          >
-                            <button
-                              className='align-middle py-1 focus:outline-none float-left mr-2 ml-1'
-                              tabIndex='-1'
-                              onClick={() => this.deleteLimitedItem(value.id)} // Handle delete on click
-                            >
-                              <img
-                                className='w-6 h-6'
-                                src='/images/trash-can.svg'
-                                alt='Delete'
-                              />
-                            </button>
-                          </td>
-                          <td className='justify-content-center pl-5'>{key}</td>
-                          <td className='pl-3.5'>
-                            {this.state.isEditingLimitedItem ? (
+                      ([key, value]) => {
+                        return (
+                          <tr key={value.id}>
+                            <span className='absolute' style={{ left: "-2%" }}>
+                              <button
+                                className='align-middle py-1 focus:outline-none float-left mr-2 ml-1'
+                                tabIndex='-1'
+                                onClick={() => this.deleteLimitedItem(value.id)} // Handle delete on click
+                              >
+                                <img
+                                  className='w-6 h-6'
+                                  src='/images/trash-can.svg'
+                                  alt='Delete'
+                                />
+                              </button>
+                            </span>
+                            <td className='justify-content-center pl-5'>
+                              {value.name}
+                            </td>
+                            <td className='pl-3.5'>
                               <input
                                 className='w-full'
                                 type='number'
@@ -691,12 +678,8 @@ class Cart extends React.Component {
                                   (value.tempNoDependence = e.target.value)
                                 }
                               ></input>
-                            ) : (
-                              <span>{value.noDependence}</span>
-                            )}
-                          </td>
-                          <td className='pl-7'>
-                            {this.state.isEditingLimitedItem ? (
+                            </td>
+                            <td className='pl-7'>
                               <input
                                 className='w-full'
                                 type='number'
@@ -705,50 +688,39 @@ class Cart extends React.Component {
                                   (value.tempDependence = e.target.value)
                                 }
                               ></input>
-                            ) : (
-                              <span>{value.dependence}</span>
-                            )}
-                          </td>
-                          <td className='pl-4'>
-                            {this.state.isEditingLimitedItem ? (
-                              <>
-                                <button
-                                  onClick={() => {
-                                    this.setState({
-                                      isEditingLimitedItem: false,
-                                    });
-                                    value.dependence = value.tempDependence;
-                                    value.noDependence = value.tempNoDependence;
-                                    return;
-                                  }}
-                                >
-                                  save
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    this.setState({
-                                      isEditingLimitedItem: false,
-                                    });
-                                    value.tempDependence = value.dependence;
-                                    value.tempNoDependence = value.noDependence;
-                                    return;
-                                  }}
-                                >
-                                  cancel
-                                </button>
-                              </>
-                            ) : (
+                            </td>
+                            <td className='pl-4'>
                               <button
-                                onClick={() =>
-                                  this.setState({ isEditingLimitedItem: true })
-                                }
+                                onClick={() => {
+                                  value.dependence = value.tempDependence;
+                                  value.noDependence = value.tempNoDependence;
+                                  let token = this.props.user.authToken;
+                                  fetch("/api/admin/SetLimitedItem", {
+                                    method: "POST",
+                                    body: JSON.stringify({
+                                      limitedItems: this.state.checkoutInfo,
+                                    }),
+                                    headers: {
+                                      "Content-Type": "application/json",
+                                      Authorization: token,
+                                    },
+                                  })
+                                    .then((res) => {
+                                      return res.json();
+                                    })
+                                    .then(console.log);
+                                  this.setState({
+                                    isEditingLimitedItem: false,
+                                  });
+                                  return;
+                                }}
                               >
-                                edit
+                                save
                               </button>
-                            )}
-                          </td>
-                        </tr>
-                      )
+                            </td>
+                          </tr>
+                        );
+                      }
                     )}
                     {/* // adding new limited items */}
                     <tr className='relative'>
@@ -758,6 +730,9 @@ class Cart extends React.Component {
 
                       <td className='pl-5'>
                         <input
+                          onChange={(e) => {
+                            this.state.newLimitedItem.name = e.target.value;
+                          }}
                           className='w-full'
                           type='text'
                           placeholder='Name:'
@@ -765,6 +740,10 @@ class Cart extends React.Component {
                       </td>
                       <td className='pl-3.5'>
                         <input
+                          onChange={(e) => {
+                            this.state.newLimitedItem.noDependence =
+                              e.target.value;
+                          }}
                           className='w-full'
                           type='number'
                           placeholder='No-dependence:'
@@ -772,12 +751,29 @@ class Cart extends React.Component {
                       </td>
                       <td className='pl-7'>
                         <input
+                          onChange={(e) => {
+                            this.state.newLimitedItem.dependence =
+                              e.target.value;
+                          }}
                           className='w-full'
                           type='number'
                           placeholder='Dependence:'
                         ></input>
                       </td>
-                      <td className='pl-4  hover:cursor-pointer'>add</td>
+                      <td className='pl-4  hover:cursor-pointer'>
+                        <button
+                          onClick={() => {
+                            this.state.newLimitedItem.tempDependence =
+                              this.state.newLimitedItem.dependence;
+                            this.state.newLimitedItem.tempNoDependence =
+                              this.state.newLimitedItem.noDependence;
+                            let token = this.props.user.authToken;
+                            fetch("/api/admin/AddNewLimitedItem").then();
+                          }}
+                        >
+                          add
+                        </button>
+                      </td>
                     </tr>
                   </tbody>
                 </table>
