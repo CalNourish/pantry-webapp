@@ -147,11 +147,36 @@ class Cart extends React.Component {
     }
   };
 
-  deleteLimitedItem = (id) => {
-    const updatedItems = this.state.limitedItems.filter(
-      (item) => item.id !== id
+  deleteLimitedItem = (name, id) => {
+    const updatedItems = this.state.checkoutInfo.filter(
+      (item) => item.name !== name
     );
-    this.setState({ limitedItems: updatedItems });
+    this.setState({
+      checkoutInfo: updatedItems,
+      limitedItems: updatedItems,
+    });
+    let token = this.props.user.authToken;
+    fetch("/api/admin/DeleteLimitedItem", {
+      method: "DELETE",
+      body: JSON.stringify({ itemId: id }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token,
+      },
+    })
+      .then((res) => {
+        if (res.ok) {
+          return res.json();
+        } else {
+          throw new Error("Failed to delete item");
+        }
+      })
+      .then(() => {
+        console.log(`Item with name ${name} deleted from the server`);
+      })
+      .catch((error) => {
+        console.error(`Error deleting item with name ${name}:`, error);
+      });
   };
 
   upItemQuantity = (barcode, refocusBarcode = false) => {
@@ -649,7 +674,7 @@ class Cart extends React.Component {
                     }
                   )} */}
                   <tbody className='relative'>
-                    {Object.entries(this.props.checkoutInfo).map(
+                    {Object.entries(this.state.checkoutInfo).map(
                       ([key, value]) => {
                         return (
                           <tr key={value.id}>
@@ -657,7 +682,9 @@ class Cart extends React.Component {
                               <button
                                 className='align-middle py-1 focus:outline-none float-left mr-2 ml-1'
                                 tabIndex='-1'
-                                onClick={() => this.deleteLimitedItem(value.id)} // Handle delete on click
+                                onClick={() =>
+                                  this.deleteLimitedItem(value.name, key)
+                                } // Handle delete on click
                               >
                                 <img
                                   className='w-6 h-6'
@@ -768,7 +795,26 @@ class Cart extends React.Component {
                             this.state.newLimitedItem.tempNoDependence =
                               this.state.newLimitedItem.noDependence;
                             let token = this.props.user.authToken;
-                            fetch("/api/admin/AddNewLimitedItem").then();
+                            fetch("/api/admin/AddNewLimitedItem", {
+                              method: "POST",
+                              body: JSON.stringify({
+                                newLimitedItem: this.state.newLimitedItem,
+                              }),
+                              headers: {
+                                "Content-Type": "application/json",
+                                Authorization: token,
+                              },
+                            })
+                              .then((res) => {
+                                this.state.checkoutInfo.push(
+                                  this.state.newLimitedItem
+                                );
+                                this.setState({
+                                  checkoutInfo: this.state.checkoutInfo,
+                                });
+                                return res.json();
+                              })
+                              .then(console.log);
                           }}
                         >
                           add
