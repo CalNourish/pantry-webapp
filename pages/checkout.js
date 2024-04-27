@@ -660,10 +660,10 @@ class Cart extends React.Component {
               {/* Editing the information */}
               <div className='w-full'>
                 <table style={{ width: "30rem" }}>
-                  <thead>
+                  <thead> 
                     <tr className='w-full'>
                       <th className='w-1'></th>
-                      <th className='w-1/3'>Limited Item</th>
+                      <th className='w-1/3'>Limited Items</th>
                       <th className='w-1/3'>No Dependents</th>
                       <th className='w-1/3'>Dependents</th>
                     </tr>
@@ -674,7 +674,7 @@ class Cart extends React.Component {
                     }
                   )} */}
                   <tbody className='relative'>
-                    {Object.entries(this.state.checkoutInfo).map(
+                    {Object?.entries(this.state.checkoutInfo).map(
                       ([key, value]) => {
                         return (
                           <tr key={value.id}>
