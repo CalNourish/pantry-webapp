@@ -6,13 +6,13 @@ import firebase from '../../../firebase/clientApp'
 
 /*
  * /api/admin/CheckPreviousVisit
- * req.body = { string calID, boolean isGrad }
+ * req.body = { string calID, boolean isGrabnGo }
  */
 
 function requireParams(body) {
   // makes sure that the input is in the right format
   // returns false and an error if not a good input
-  if (body.calID && body.isGrad != null) return true;
+  if (body.calID && body.isGrabnGo != null) return true;
   return false;
 }
 
@@ -69,13 +69,13 @@ function scanTableForVisitInPastWeek(values, startOfWeek, calId) {
   return visitedTimes;
 }
 
-function getSheetsLink(isGrad) {
+function getSheetsLink(isGrabnGo) {
   return new Promise((resolve, reject) => {
     firebase.database().ref('/sheetIDs')
     .once('value', snapshot => {
         let val = snapshot.val();
-        if (isGrad) {
-            return resolve(val.checkInGrad)
+        if (isGrabnGo) {
+            return resolve(val.checkInGrabnGo)
         }
         return resolve(val.checkIn)
     })
@@ -93,7 +93,7 @@ export default async function (req, res) {
     // verify parameters
     let ok = requireParams(body, res);
     if (!ok) {
-      res.status(400).json({ message: "Missing CalID or grad boolean" });
+      res.status(400).json({ message: "Missing CalID or grabngo boolean" });
       return resolve();
     }
 
@@ -109,7 +109,7 @@ export default async function (req, res) {
       );
       const sheets = google.sheets({ version: "v4", auth: sheets_auth });
 
-      getSheetsLink(body.isGrad)
+      getSheetsLink(body.isGrabnGo)
       .then(({spreadsheetId, sheetName}) => {
         var numRows = 0;
         var calID = body.calID
