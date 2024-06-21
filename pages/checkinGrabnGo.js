@@ -1,7 +1,7 @@
-import Layout from '../components/Layout'
+import Layout from '../components/Layout.js'
 import React from 'react';
 
-import { useUser } from '../context/userContext'
+import { useUser } from '../context/userContext.js'
 import { server } from './_app.js'
 
 const fetcher = (url) => fetch(url).then((res) => res.json())
@@ -114,53 +114,58 @@ class Checkin extends React.Component {
 
   writeIDtoSheet = async (id) => {
     fetch('/api/admin/WriteCheckIn', { method: 'POST',
-    body: JSON.stringify({calID: id, isGrad:true}),
+    body: JSON.stringify({calID: id, isGrabnGo:true}),
     headers: {'Content-Type': "application/json", 'Authorization': this.props.user.authToken}
     })
     .then(() => {
       this.showSuccess("Sucessfully logged ID: " + id,1000)
     })
   }
+
+  validateCalId = (calIdValue) => {
+    const regexes = { 
+      'isStudent': /^(30\d{8}|[1278]\d{7})$/,
+      'isEmployeeOrAffiliate': /^(01\d{6}|10\d{6})$/,
+      'isValidEncrypted': /^810:\d{8}$/,
+      'isCommunity': /^1$/
+    };
+  
+    if (calIdValue.trim() === '') {
+      this.showError("Can't submit blank ID: " + calIdValue, 1000);
+      return false;
+    }
+  
+    for (const regex in regexes) {
+      if (regexes[regex].test(calIdValue)) {
+        return true;
+      }
+    }
+  
+    this.showError("Invalid ID. Please try again.");
+    return false;
+  }
    
   handleScanSubmit = async (e) => {
-    var fieldset = document.getElementById("calIDFieldset")
-    fieldset.disabled = true
+    var fieldset = document.getElementById("calIDFieldset");
+    fieldset.disabled = true;
     e.preventDefault();
-    if (e.target.calID.value.length == 0 || e.target.calID.value == null) {
-      this.showError("Can't submit blank ID: " + e.target.calID.value,1000)
-      return
+
+    const { value: calIdValue } = e.target.calID;
+    if (!this.validateCalId(calIdValue)) {
+      return;
     }
-    fetch('/api/admin/CheckPreviousVisit', { method: 'POST',
-      body: JSON.stringify({calID: e.target.calID.value, isGrad:true}),
-      headers: {'Content-Type': "application/json", 'Authorization': this.props.user.authToken}
-    })
-    .then((result) => {
-      result.json()
-      .then((lastVisitedTimes) => {
-        if (lastVisitedTimes.error) {
-          this.showError(lastVisitedTimes.error)
-        }
-        else {
-          this.setState({lastScannedID:e.target.calID.value, visitsLastWeek:lastVisitedTimes, lastScannedTime:new Date().toLocaleTimeString()})
-          if (lastVisitedTimes.length == 0) {
-            this.writeIDtoSheet(e.target.calID.value)
-          }
-          else {
-            this.showError("Failed scanning ID: " + e.target.calID.value + ". This visitor has visited already.",3000)
-          }
-          document.getElementById("calID").value = null;
-          document.getElementById("calID").focus();
-        }
-      })
-      .catch((err) => {
-        this.showError("Failed scanning ID: " + e.target.calID.value + err,3000)
-      });
-    })
-    .catch((err) => {
-      this.showError("Failed scanning ID: " + e.target.calID.value + err,300)
-    })
-    
-  
+
+    // Directly update the state and proceed with other actions
+    this.setState({
+      lastScannedID: calIdValue,
+      visitsLastWeek: [], // Placeholder if you need this state, otherwise you can remove it
+      lastScannedTime: new Date().toLocaleTimeString()
+    });
+
+    this.writeIDtoSheet(calIdValue);
+
+    document.getElementById("calID").value = null;
+    document.getElementById("calID").focus();  
   }
 
   
@@ -180,11 +185,11 @@ class Checkin extends React.Component {
   }
 
   return (
-    <Layout pageName="Grad Check-In">
+    <Layout pageName="GrabnGo Check-In">
       <div className='m-6'>
       {this.state.error && errorBanner}
       {this.state.success && successBanner}
-        <h1 className='text-3xl font-medium mb-2'>Grad Pantry Check-In</h1>
+        <h1 className='text-3xl font-medium mb-2'>GrabnGo Check-In</h1>
         <div className='flex flex-row space-x-16 my-8'>
           <form onSubmit={(e) => this.handleScanSubmit(e)}>
             <fieldset id="calIDFieldset" disabled={false}>
@@ -210,7 +215,7 @@ class Checkin extends React.Component {
 }
 
 
-export default function checkinGrad() {
+export default function checkinGrabnGo() {
   const { user, loadingUser } = useUser();
 
   /* Display loading message */
@@ -225,7 +230,7 @@ export default function checkinGrad() {
   let authToken = (user && user.authorized) ? user.authToken : null;
   if (!authToken) {
     return (
-      <Layout pageName="Grad Check-In">
+      <Layout pageName="GrabnGo Check-In">
         <h1 className='text-xl m-6'>Sorry, you are not authorized to view this page.</h1>
       </Layout>
     )

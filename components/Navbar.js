@@ -29,8 +29,8 @@ const AUTH_SIGNEDIN_ROUTES = [
   { title: "Inventory", route: "/inventory" },
   { title: "Hours", route: "/hours" },
   { title: "Order", route: "/order"},
-  { title: "Check in", route: "/checkin"},
-  //{ title: "Grad Check in", route: "/checkinGrad"},
+  { title: "Pantry Check in", route: "/checkin"},
+  { title: "GrabnGo Check in", route: "/checkinGrabnGo"},
   { title: "Checkout", route: "/checkout"},
   { title: "Bag Packing", route: "/bagPacking"}, 
   { title: "Visualizations", route: "/visualizations"}
