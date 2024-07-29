@@ -13,8 +13,8 @@ export default async function (_, res) {
       .ref("/info/limitedItem/")
       .once("value")
       .then(function (resp) {
-        var markdown = resp.val();
-        res.status(200).json({ markdown: markdown });
+        var checkoutInfo = resp.val();
+        res.status(200).json(checkoutInfo);
         return resolve();
       })
       .catch(function (error) {

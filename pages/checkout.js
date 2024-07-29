@@ -149,7 +149,7 @@ class Cart extends React.Component {
 
   deleteLimitedItem = (name, id) => {
     const updatedItems = this.state.checkoutInfo.filter(
-      (item) => item.name !== name
+      (item) => item != null &&  item.name !== name
     );
     this.setState({
       checkoutInfo: updatedItems,
@@ -674,8 +674,9 @@ class Cart extends React.Component {
                     }
                   )} */}
                   <tbody className='relative'>
-                    {Object?.entries(this.state.checkoutInfo).map(
+                    {Object?.entries(this.state.checkoutInfo.filter((obj) => obj != null)).map(
                       ([key, value]) => {
+                        console.log(this.state.checkoutInfo)
                         return (
                           <tr key={value.id}>
                             <span className='absolute' style={{ left: "-2%" }}>
@@ -854,45 +855,9 @@ class Cart extends React.Component {
               )} */}
 
               {/* cancel edit */}
-              {this.state.isEditing && (
-                <button
-                  className='text-blue-700 hover:text-blue-500'
-                  onClick={() => {
-                    this.setState({ isEditing: false });
-                    fetch(`/api/admin/GetCheckoutInfo`).then((result) => {
-                      result.json().then((data) => {
-                        console.log(data.markdown);
-                        this.setState({ checkoutInfo: data.markdown });
-                      });
-                    });
-                  }}
-                >
-                  cancel
-                </button>
-              )}
 
               {/* save edit */}
-              {this.state.isEditing && (
-                <button
-                  className='ml-5 text-blue-700 hover:text-blue-500'
-                  onClick={async () => {
-                    let token = this.props.user.authToken;
-                    this.setState({ isEditing: false });
-                    fetch("/api/admin/SetCheckoutInfo", {
-                      method: "POST",
-                      body: JSON.stringify({
-                        markdown: this.state.checkoutInfo,
-                      }),
-                      headers: {
-                        "Content-Type": "application/json",
-                        Authorization: token,
-                      },
-                    }).then((res) => {});
-                  }}
-                >
-                  save
-                </button>
-              )}
+
 
               {/* show/hide preview */}
               {this.state.isEditing && (
@@ -920,14 +885,7 @@ class Cart extends React.Component {
               )}
 
               {/* Information Display or Preview (rendered markdown) */}
-              {(!this.state.isEditing || this.state.showPreview) &&
-                this.state.checkoutInfo && (
-                  <ReactMarkdown
-                    className='mb-4 text-zinc-900'
-                    components={markdownStyle}
-                    children={this.state.checkoutInfo}
-                  ></ReactMarkdown>
-                )}
+
             </Sidebar>
           </div>
         </div>
@@ -961,10 +919,11 @@ export default function Checkout() {
       </Layout>
     );
   } else {
+    console.log("checkout", data[0]);
     return (
       <Cart
         inventory={data[1]}
-        checkoutInfo={data[0].markdown}
+        checkoutInfo={data[0]}
         user={user}
       ></Cart>
     );
