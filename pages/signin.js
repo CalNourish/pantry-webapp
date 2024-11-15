@@ -40,6 +40,7 @@ export default function SignIn() {
         itp_support: true,
         ux_mode: 'redirect',
         login_uri: `${server}/api/signin`,
+        enable_redirect_uri_validation: true,
       });
       google.accounts.id.renderButton(
         document.getElementById("buttonDiv"),
