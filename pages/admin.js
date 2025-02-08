@@ -509,6 +509,22 @@ function Categories(props) {
   )
 }
 
+function OrderToggle(props) {
+  const [status, setStatus] = useState(props.status);
+
+  return (
+    <div>
+      <div className='font-semibold text-3xl mb-4'>Order Status</div>
+      <input 
+        type="checkbox"
+        checked={status}
+        onChange={() => setStatus(!status)}
+      />
+    </div>
+  )
+
+}
+
 export default function Admin() {
   const { user, loadingUser } = useUser();
 
