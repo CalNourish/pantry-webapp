@@ -27,7 +27,6 @@ if (DISABLE_PUBLIC_INVENTORY) {
 const AUTH_SIGNEDIN_ROUTES = [
   { title: "Home", route: "/" },
   { title: "Inventory", route: "/inventory" },
-  { title: "Hours", route: "/hours" },
   { title: "Order", route: "/order"},
   { title: "Pantry Check in", route: "/checkin"},
   { title: "GrabnGo Check in", route: "/checkinGrabnGo"},
