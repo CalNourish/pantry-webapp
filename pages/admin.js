@@ -1,8 +1,9 @@
 import Layout from '../components/Layout'
 import useSWR from 'swr'
 
-import { useState } from 'react'
+import { useState, useContext } from 'react'
 import { useUser } from '../context/userContext'
+import { StateCartContext, DispatchCartContext, ACTIONS } from "../context/cartContext";
 import { server } from './_app.js'
 
 import { daysInOrder } from './hours';
@@ -509,20 +510,27 @@ function Categories(props) {
   )
 }
 
-function OrderToggle(props) {
-  const [status, setStatus] = useState(props.status);
+function OrderToggle() {
+  const state = useContext(StateCartContext);
+  const dispatch = useContext(DispatchCartContext)
+
+  const handleToggle = () => {
+    dispatch({
+      type: ACTIONS.TOGGLE_OPEN,
+      payload: !state.open
+    })
+  }
 
   return (
     <div>
       <div className='font-semibold text-3xl mb-4'>Order Status</div>
       <input 
         type="checkbox"
-        checked={status}
-        onChange={() => setStatus(!status)}
+        checked={state.open}
+        onChange={() => handleToggle()}
       />
     </div>
   )
-
 }
 
 export default function Admin() {
@@ -552,6 +560,7 @@ export default function Admin() {
       <AddAdmin authToken={authToken}/>
       <DeliveryTimes authToken={authToken}/>
       <Categories authToken={authToken}/>
+      <OrderToggle/>
     </Layout>
   )
 }

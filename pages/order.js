@@ -13,7 +13,8 @@ import ReactMarkdown from 'react-markdown';
 import { markdownStyle } from '../utils/markdownStyle';
 
 export default function Order() {
-  let { cart, personal, delivery } = useContext(StateCartContext)
+  let { cart, personal, delivery, open } = useContext(StateCartContext);
+  console.log("lolll", open)
 
   const cartDispatch = useContext(DispatchCartContext)
   let [formStep, setFormStep] = useState(0);     // page number
@@ -276,44 +277,58 @@ export default function Order() {
   //
   //START
   // Personal Info or Delivery Details page
-  return ( 
-    <Layout pageName="Order">
-      <div className="sm:container mx-auto mt-8 mb-16 px-4">
-        { topBar }
-        { formStep == 4 ? false : progressBar }
-        <div className="flex justify-center m-8 flex-col lg:flex-row">
-          { infoDiv }
-          <div className="py-8 px-16 xl:w-1/2 max-w-2xl shadow rounded">
-            <div id="form-header">
-            </div>
-            <div className="mb-8">
-              { formStep == 0 &&
-                <PersonInfo showMissing={showMissing} />
-              }
-              { formStep == 1 &&
-                <DeliveryDetails showMissing={showMissing} />
-              } 
-            </div>
-            <div className="flex justify-between" id="form-footer">
-              <div>
-                { formStep > 0 &&
-                  <button  onClick={() => {setFormStep(formStep - 1); setShowMissing(false);}} className="btn btn-outline py-2 px-4">
-                    Back
-                  </button>
-                }
+  return (
+    open ? (
+      <Layout pageName="Order">
+        <div className="sm:container mx-auto mt-8 mb-16 px-4">
+          { topBar }
+          { formStep == 4 ? false : progressBar }
+          <div className="flex justify-center m-8 flex-col lg:flex-row">
+            { infoDiv }
+            <div className="py-8 px-16 xl:w-1/2 max-w-2xl shadow rounded">
+              <div id="form-header">
               </div>
-              {showMissing && !checkNextable() && <div className='flex-grow text-right mx-4 my-auto text-red-600 font-semibold'>Missing required fields!</div>}
-              {showMissing && checkNextable() && <div className='flex-grow text-right mx-4 my-auto text-2xl font-extrabold text-green-600'>✓</div>}
-              <div>
-                { formStep < 2 &&
-                  <button className="btn btn-pantry-blue py-2 px-4" onClick={handleNext}>Next</button>
+              <div className="mb-8">
+                { formStep == 0 &&
+                  <PersonInfo showMissing={showMissing} />
                 }
+                { formStep == 1 &&
+                  <DeliveryDetails showMissing={showMissing} />
+                } 
+              </div>
+              <div className="flex justify-between" id="form-footer">
+                <div>
+                  { formStep > 0 &&
+                    <button  onClick={() => {setFormStep(formStep - 1); setShowMissing(false);}} className="btn btn-outline py-2 px-4">
+                      Back
+                    </button>
+                  }
+                </div>
+                {showMissing && !checkNextable() && <div className='flex-grow text-right mx-4 my-auto text-red-600 font-semibold'>Missing required fields!</div>}
+                {showMissing && checkNextable() && <div className='flex-grow text-right mx-4 my-auto text-2xl font-extrabold text-green-600'>✓</div>}
+                <div>
+                  { formStep < 2 &&
+                    <button className="btn btn-pantry-blue py-2 px-4" onClick={handleNext}>Next</button>
+                  }
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </Layout>
+      </Layout>
+    ) : (
+      <Layout pageName="Order">
+        <p className='text-xl m-6'>Pantry Deliveries are currently on pause.</p>
+        <p className='text-xl m-6'>Please see
+        <a href="https://foodnow.net/do-you-need-food-delivered-to-your-home/" className="font-medium text-blue-600 dark:text-blue-500 hover:underline"> foodnow.net/do-you-need-food-delivered-to-your-home </a>
+        for pantry food delivery while we are on break.</p>
+        <p className='text-xl m-6'>If you have any questions or concerns, please email us at 
+        <a href="mailto: foodpantry@berkeley.edu" className="font-medium text-blue-600 dark:text-blue-500 hover:underline"> foodpantry@berkeley.edu</a>
+        .</p>
+      </Layout>
+    )
+
+    
   )
   //END
 }

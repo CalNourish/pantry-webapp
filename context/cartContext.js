@@ -1,4 +1,4 @@
-import { useReducer, createContext } from "react";
+import { useReducer, createContext, useEffect } from "react";
 
 export const DispatchCartContext = createContext();
 export const StateCartContext = createContext(); 
@@ -14,7 +14,8 @@ export const ACTIONS = {
   REMOVE_ITEM: "REMOVE_ITEM",
   CLEAR_CART: "CLEAR_CART",
   UPDATE_PERSONAL: "UPDATE_PERSONAL",
-  UPDATE_DELIVERY: "UPDATE_DELIVERY"
+  UPDATE_DELIVERY: "UPDATE_DELIVERY",
+  TOGGLE_OPEN: "TOGGLE_OPEN"
 };
 
 /**
@@ -59,7 +60,8 @@ const initialState = {
   delivery: {
     pickup:false, pickupNotes:"", streetAddress:"", address2:"", city:"", zip:"", phone:"", notes:"", deliveryTimes:[]
   },
-  cart: {}
+  cart: {},
+  open: true
 };
 
 // Updates the quantity of an item in the cart
@@ -104,6 +106,10 @@ const updateDelivery = (info, state) => {
   return {...state, delivery: updatedDelivery}
 }
 
+const toggleOpen = (info, state) => {
+  return {...state, open: info}
+}
+
 const reducer = (state, action) => {
   switch (action.type) {
     case ACTIONS.UPDATE_CART:
@@ -116,12 +122,29 @@ const reducer = (state, action) => {
       return updatePersonal(action.payload, state)
     case ACTIONS.UPDATE_DELIVERY:
       return updateDelivery(action.payload, state)
+    case ACTIONS.TOGGLE_OPEN:
+      return toggleOpen(action.payload, state)
     default:
       throw new Error(`Unhandled action type: ${action.type}`)
   }
 };
 const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  useEffect(() => {
+    const savedStatus = localStorage.getItem("status");
+    if (savedStatus !== null) {
+      dispatch({
+        type: ACTIONS.TOGGLE_OPEN,
+        payload: savedStatus
+      })
+    }
+    console.log("Status: ", savedStatus)
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem("status", state.open);
+  }, [state.open])
 
   return (
       <StateCartContext.Provider value={state}>
