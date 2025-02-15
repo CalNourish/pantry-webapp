@@ -7,7 +7,6 @@ const DISABLE_PUBLIC_INVENTORY = true;
 
 let UNAUTH_ROUTES = [
   { title: "Home", route: "/" },
-  { title: "Inventory", route: "/inventory" },
 ]
 
 let UNAUTH_SIGNEDIN_ROUTES = [
