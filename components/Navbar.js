@@ -7,13 +7,10 @@ const DISABLE_PUBLIC_INVENTORY = true;
 
 let UNAUTH_ROUTES = [
   { title: "Home", route: "/" },
-  { title: "Hours", route: "/hours" },
-  { title: "Inventory", route: "/inventory" },
 ]
 
 let UNAUTH_SIGNEDIN_ROUTES = [
   { title: "Home", route: "/" },
-  { title: "Hours", route: "/hours" },
   { title: "Inventory", route: "/inventory" },
   { title: "Order", route: "/order"},
 ]
@@ -27,7 +24,6 @@ if (DISABLE_PUBLIC_INVENTORY) {
 const AUTH_SIGNEDIN_ROUTES = [
   { title: "Home", route: "/" },
   { title: "Inventory", route: "/inventory" },
-  { title: "Hours", route: "/hours" },
   { title: "Order", route: "/order"},
   { title: "Pantry Check in", route: "/checkin"},
   { title: "GrabnGo Check in", route: "/checkinGrabnGo"},
