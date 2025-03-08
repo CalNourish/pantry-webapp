@@ -287,12 +287,12 @@ class Cart extends React.Component {
           {/* number spinner [-| 1 |+] */}
           <div className="border border-solid border-gray-200 p-px w-32 h-8 flex flex-row">
             {/* minus */}
-            <button className="font-light p-1 bg-gray-100 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.downItemQuantity(barcode, true)} tabIndex="-1">–</button>
+            <button className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.downItemQuantity(barcode, true)} tabIndex="-1">–</button>
             {/* quantity input */}
             <input id={barcode + "-quantity"} className="quantity-input w-6 flex-grow mx-1 text-center focus:outline-none" autoComplete="off"
               value={value[1]} onChange={e => this.updateItemQuantity(barcode, e.target.value)}/>
             {/* plus */}
-            <button className="font-light p-1 bg-gray-100 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.upItemQuantity(barcode, true)} tabIndex="-1">+</button>
+            <button className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.upItemQuantity(barcode, true)} tabIndex="-1">+</button>
           </div>
         </td>
         {/* Item name */}
