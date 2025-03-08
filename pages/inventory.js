@@ -27,6 +27,7 @@ export default function Inventory() {
     lowStock: "",
     displayPublic: true,
     defaultCart: false,
+    grabnGoDefaultCart: false,
   };
 
   const emptyErrors = {
@@ -74,6 +75,12 @@ export default function Inventory() {
         return {
           ...state,
           defaultCart: action.value
+        }
+      }
+      case 'editItemGrabnGoDefaultCart': {
+        return {
+          ...state,
+          grabnGoDefaultCart: action.value
         }
       }
       case 'editItemCount': {
@@ -252,7 +259,8 @@ export default function Inventory() {
         lowStock: data.lowStock,
         categoryName: categories,
         displayPublic: data.displayPublic,
-        defaultCart: data.defaultCart
+        defaultCart: data.defaultCart,
+        grabnGoDefaultCart: data.grabnGoDefaultCart
       };
       dispatch({type:'itemLookup', value: payload});
     })
@@ -291,7 +299,8 @@ export default function Inventory() {
     const lowStock = state.lowStock ? state.lowStock : -1;                                                  // defaults to -1
     const categories = Object.keys(state.categoryName).length ? Object.keys(state.categoryName) : undefined;// defaults to "no change"
     const displayPublic = Boolean(state.displayPublic)                                                      // defaults to true
-    const defaultCart = Boolean(state.defaultCart)                                                          // defaults to false
+    const defaultCart = Boolean(state.defaultCart)
+    const grabnGoDefaultCart = Boolean(state.grabnGoDefaultCart)                                                             // defaults to false
 
 
     const payload = JSON.stringify({
@@ -302,7 +311,8 @@ export default function Inventory() {
       "lowStock": lowStock,
       "categoryName": categories,
       "displayPublic": displayPublic,
-      "defaultCart": defaultCart
+      "defaultCart": defaultCart,
+      "grabnGoDefaultCart": grabnGoDefaultCart
     });
     
     fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
@@ -355,7 +365,8 @@ export default function Inventory() {
     const count = state.count * (document.getElementById("packOption").value == "packs" ? packSize : 1)     // defaults to 0
     const lowStock = state.lowStock ? state.lowStock : -1;                                                  // defaults to -1
     const displayPublic = Boolean(state.displayPublic);                                                     // defaults to true
-    const defaultCart = Boolean(state.defaultCart);                                                         // defaults to false
+    const defaultCart = Boolean(state.defaultCart);
+    const grabnGoDefaultCart = Boolean(state.grabnGoDefaultCart);                                                         // defaults to false
     const categories = state.categoryName;                                                                  // required
     let catNum = Object.keys(categories).length;
 
@@ -378,7 +389,8 @@ export default function Inventory() {
       "categoryName": categories,
       "lowStock": lowStock,
       "displayPublic": displayPublic,
-      "defaultCart": defaultCart
+      "defaultCart": defaultCart,
+      "grabnGoDefaultCart": grabnGoDefaultCart
       /* created by? */
     };
 

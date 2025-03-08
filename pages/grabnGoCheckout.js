@@ -39,7 +39,7 @@ class Cart extends React.Component {
 
     let defaultCart = []
     for (let item in props.inventory) {
-      if (props.inventory[item]["defaultCart"]) {
+      if (props.inventory[item]["grabnGoDefaultCart"]) {
         defaultCart.push(props.inventory[item]["barcode"])
       }
     }
@@ -387,7 +387,7 @@ class Cart extends React.Component {
     const successBanner = <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-3">{this.state.success}</div>;
 
     return (
-      <Layout pageName="Checkout">
+      <Layout pageName="GrabnGo Checkout">
         <Modal id="search-modal" isOpen={this.state.showSearch} ariaHideApp={false} onRequestClose={this.closeModal}>
           <SearchModal items={this.props.inventory} addItemFunc={this.addItem} onCloseHandler={this.closeModal} submitHotkey={searchSubmitHotkey}/>
         </Modal>
@@ -479,7 +479,7 @@ class Cart extends React.Component {
             {this.state.isEditing && <button className='text-blue-700 hover:text-blue-500'
               onClick={() => {
                 this.setState({isEditing:false});
-                fetch(`/api/admin/GetCheckoutInfo`)
+                fetch(`/api/admin/GetGrabnGoCheckoutInfo`)
                 .then((result) => {
                   result.json().then((data) => {
                     this.setState({checkoutInfo:data.markdown})
@@ -495,7 +495,7 @@ class Cart extends React.Component {
                 let token = this.props.user.authToken
                 this.setState({isEditing:false});
                 fetch('/api/admin/SetCheckoutInfo', { method: 'POST',
-                  body: JSON.stringify({markdown: this.state.checkoutInfo, isPantryCheckout: true}),
+                  body: JSON.stringify({markdown: this.state.checkoutInfo, isPantryCheckout: false}),
                   headers: {'Content-Type': "application/json", 'Authorization': token}
                 }).then((res) => {
                 })
@@ -534,14 +534,14 @@ class Cart extends React.Component {
 // Wrapper for useSWR hook. Apparently can't use hooks in class-style definition for react components.
 export default function Checkout() {
   const { data } = useSWR(
-    ["/api/admin/GetCheckoutInfo", "/api/inventory/GetAllItems"],
+    ["/api/admin/GetGrabnGoCheckoutInfo", "/api/inventory/GetAllItems"],
     fetcher
   );
   const { user, loadingUser } = useUser();
 
   if (loadingUser) {
     return (
-      <Layout pageName="Checkout">
+      <Layout pageName="GrabnGo Checkout">
           <h1 className='text-xl m-6'>Loading...</h1>
       </Layout>
     )
@@ -549,7 +549,7 @@ export default function Checkout() {
   
   if (!data || !user) {
     return (
-      <Layout pageName="Checkout">
+      <Layout pageName="GrabnGo Checkout">
           <h1 className='text-xl m-6'>Sorry, you are not authorized to view this page.</h1>
       </Layout>
     )
