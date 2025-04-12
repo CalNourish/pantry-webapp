@@ -1,13 +1,13 @@
 import Layout from '../components/Layout'
 import useSWR from 'swr'
 
-import { useState, useContext } from 'react'
+import { useState, useEffect } from 'react'
 import { useUser } from '../context/userContext'
-import { StateCartContext, DispatchCartContext, ACTIONS } from "../context/cartContext";
 import { server } from './_app.js'
 
 import { daysInOrder } from './hours';
 import firebase from '../firebase/clientApp';
+import { set } from 'mongoose'
 
 function AddAdmin(props) {
   const [userName, setUserName] = useState("");
@@ -260,7 +260,6 @@ function DeliveryTimes(props) {
   }
 
   if (Object.keys(formData).length == 0 && Object.keys(data).length > 0) {
-    // TODO: might need to change this?
     setFormData(data)
   }
 
@@ -510,25 +509,47 @@ function Categories(props) {
   )
 }
 
-function OrderToggle() {
-  const state = useContext(StateCartContext);
-  const dispatch = useContext(DispatchCartContext)
+function OrderToggle(props) {
+  const [ orderStatus, setOrderStatus ] = useState(false);
 
-  const handleToggle = () => {
-    dispatch({
-      type: ACTIONS.TOGGLE_OPEN,
-      payload: !state.open
+  let getOrderStatus = () => {
+    fetch(`${server}/api/admin/GetOrderStatus`)
+    .then((result) => {
+      result.json().then((data) => {
+        setOrderStatus(data);
+      })
+    })
+    .catch((error) => {
+      console.log("Error fetching order status:", error);
     })
   }
 
+  let updateOrderStatus = (status) => {
+    fetch(`${server}/api/admin/UpdateOrderStatus`, { method: 'POST',
+      body: JSON.stringify({"status": status}),
+      headers: {'Content-Type': "application/json", 'Authorization': props.authToken}
+    })
+    .then(() => {
+      setOrderStatus(status);
+    })
+    .catch((error) => {
+      console.log("Error updating order status:", error);
+    })
+  }
+
+  useEffect(() => {
+    getOrderStatus();
+  }, [])
+
   return (
-    <div>
+    <div className='m-8'>
       <div className='font-semibold text-3xl mb-4'>Order Status</div>
-      <input 
-        type="checkbox"
-        checked={state.open}
-        onChange={() => handleToggle()}
-      />
+      <button
+        className="font-bold text-xl w-5 h-5"
+        onClick={() => updateOrderStatus(!orderStatus)}
+      >
+        {orderStatus ? "O" : "X"}
+      </button>
     </div>
   )
 }
@@ -560,7 +581,7 @@ export default function Admin() {
       <AddAdmin authToken={authToken}/>
       <DeliveryTimes authToken={authToken}/>
       <Categories authToken={authToken}/>
-      <OrderToggle/>
+      <OrderToggle authToken={authToken}/>
     </Layout>
   )
 }
