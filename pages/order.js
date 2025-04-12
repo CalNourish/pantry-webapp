@@ -23,11 +23,13 @@ export default function Order() {
   let [showPreviewInfo, setShowPreview] = useState(false);
 
   let [orderStatus, setOrderStatus] = useState(false);
+  let [loading, setLoading] = useState(true);
   let getOrderStatus = () => {
     fetch(`${server}/api/admin/GetOrderStatus`)
     .then((result) => {
       result.json().then((data) => {
         setOrderStatus(data);
+        setLoading(false);
       })
     })
   }
@@ -269,6 +271,16 @@ export default function Order() {
     </div>
   </div>
 
+  if (loading) {
+    return (
+      <Layout pageName="Order">
+        <div className="sm:container mx-auto mt-8 mb-16 px-4">
+          <h1 className='text-xl m-6'>Loading...</h1>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     orderStatus ? (
       // orders enabled
@@ -279,8 +291,6 @@ export default function Order() {
           <div className="flex justify-center m-8 flex-col lg:flex-row">
             { infoDiv }
             <div className="py-8 px-16 xl:w-1/2 max-w-2xl shadow rounded">
-              <div id="form-header">
-              </div>
               <div className="mb-8">
                 { formStep == 0 &&
                   <PersonInfo showMissing={showMissing} />
