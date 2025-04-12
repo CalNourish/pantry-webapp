@@ -271,6 +271,12 @@ export default function Order() {
     </div>
   </div>
 
+  let closedInfoDiv = <div className='py-8 px-16 xl:w-1/2 max-w-2xl rounded'>
+    {/* 1. create a key in database for storing this paragraph*/}
+    {/* 2. fetch and set this paragraph from database by creating a SetClosedOrderInfo and GetClosedOrderInfo endpoint */}
+    {/* 3. display this paragraph with save, edit, cancel, and show preview buttons */}
+  </div>
+
   if (loading) {
     return (
       <Layout pageName="Order">
