@@ -8,13 +8,12 @@ import { useUser } from '../context/userContext'
 import { StateCartContext, DispatchCartContext } from '../context/cartContext';
 import { server } from './_app.js'
 
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { markdownStyle } from '../utils/markdownStyle';
 
 export default function Order() {
-  let { cart, personal, delivery, open } = useContext(StateCartContext);
-  console.log("lolll", open)
+  let { cart, personal, delivery } = useContext(StateCartContext);
 
   const cartDispatch = useContext(DispatchCartContext)
   let [formStep, setFormStep] = useState(0);     // page number
@@ -22,6 +21,20 @@ export default function Order() {
   let [info, setInfo] = useState(false);
   let [isEditingInfo, setIsEditingInfo] = useState(false);
   let [showPreviewInfo, setShowPreview] = useState(false);
+
+  let [orderStatus, setOrderStatus] = useState(false);
+  let getOrderStatus = () => {
+    fetch(`${server}/api/admin/GetOrderStatus`)
+    .then((result) => {
+      result.json().then((data) => {
+        setOrderStatus(data);
+      })
+    })
+  }
+
+  useEffect(() => {
+    getOrderStatus();
+  }, [])
 
   // Enforce bounds between 0 and 4 (inclusive)
   if (formStep < 0) {
@@ -256,29 +269,9 @@ export default function Order() {
     </div>
   </div>
 
-
-  // Uncomment this code to disable orders.
-  //
-  //START
-  // return (
-  //   <Layout pageName="Order">
-  //     <p className='text-xl m-6'>Pantry Deliveries are currently on pause while we seek out funding.</p>
-  //     <p className='text-xl m-6'>Please see
-  //     <a href="https://foodnow.net/do-you-need-food-delivered-to-your-home/" className="font-medium text-blue-600 dark:text-blue-500 hover:underline"> foodnow.net/do-you-need-food-delivered-to-your-home </a>
-  //     for pantry food delivery while we are on break.</p>
-  //     <p className='text-xl m-6'>If you have any questions or concerns, you can email us at 
-  //     <a href="mailto: foodpantry@berkeley.edu" className="font-medium text-blue-600 dark:text-blue-500 hover:underline"> foodpantry@berkeley.edu</a>
-  //     .</p>
-  //   </Layout>
-  // )
-  //END
-
-  //Comment this code to disable orders.
-  //
-  //START
-  // Personal Info or Delivery Details page
   return (
-    open ? (
+    orderStatus ? (
+      // orders enabled
       <Layout pageName="Order">
         <div className="sm:container mx-auto mt-8 mb-16 px-4">
           { topBar }
@@ -317,6 +310,7 @@ export default function Order() {
         </div>
       </Layout>
     ) : (
+      // orders disabled
       <Layout pageName="Order">
         <p className='text-xl m-6'>Pantry Deliveries are currently on pause.</p>
         <p className='text-xl m-6'>Please see
@@ -327,8 +321,5 @@ export default function Order() {
         .</p>
       </Layout>
     )
-
-    
   )
-  //END
 }
