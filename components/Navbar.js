@@ -20,8 +20,8 @@ let UNAUTH_SIGNEDIN_ROUTES = [
 
 // Hide "inventory" route if public inventory is disabled
 if (DISABLE_PUBLIC_INVENTORY) {
-  UNAUTH_ROUTES.splice(2)
-  UNAUTH_SIGNEDIN_ROUTES.splice(3)
+  UNAUTH_ROUTES.splice(2, 1)
+  UNAUTH_SIGNEDIN_ROUTES.splice(2, 1)
 }
 
 const AUTH_SIGNEDIN_ROUTES = [
