@@ -7,7 +7,10 @@ import { server } from './_app.js'
 
 import { daysInOrder } from './hours';
 import firebase from '../firebase/clientApp';
-import { set } from 'mongoose'
+import Switch from '@mui/material/Switch';
+import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
+import resolveConfig from 'tailwindcss/resolveConfig';
+import tailwindConfig from '../tailwind.config.js';
 
 function AddAdmin(props) {
   const [userName, setUserName] = useState("");
@@ -521,7 +524,7 @@ function OrderToggle(props) {
     })
     .catch((error) => {
       console.log("Error fetching order status:", error);
-    })
+    });
   }
 
   let updateOrderStatus = (status) => {
@@ -534,24 +537,42 @@ function OrderToggle(props) {
     })
     .catch((error) => {
       console.log("Error updating order status:", error);
-    })
+    });
   }
+
+  const { theme: twTheme } = resolveConfig(tailwindConfig);
+
+  const theme = createTheme({
+    palette: {
+      pantryBlue500: {
+        main: twTheme.colors['pantry-blue']['500'],
+      },
+    },
+  });
+
+  const BlueSwitch = styled(Switch)(({ theme }) => ({
+    '& .MuiSwitch-switchBase.Mui-checked': {
+      color: theme.palette.pantryBlue500.main,
+      '& + .MuiSwitch-track': {
+        backgroundColor: theme.palette.pantryBlue500.main,
+      },
+    },
+  }));
 
   useEffect(() => {
     getOrderStatus();
-  }, [])
+  }, []);
 
   return (
     <div className='m-8'>
       <div className='font-semibold text-3xl mb-4'>Order Status</div>
-      <button
-        className="font-bold text-xl w-5 h-5"
-        onClick={() => updateOrderStatus(!orderStatus)}
-      >
-        {orderStatus ? "O" : "X"}
-      </button>
+      <ThemeProvider theme={theme}> 
+        <BlueSwitch checked={orderStatus} onChange={() => updateOrderStatus(!orderStatus)} />
+      </ThemeProvider>
+      {orderStatus && <span className='text-green-600 font-semibold'>Orders are open!</span>}
+      {!orderStatus && <span className='text-red-600 font-semibold'>Orders are closed!</span>}
     </div>
-  )
+  );
 }
 
 export default function Admin() {
