@@ -51,8 +51,8 @@ export default async function(req, res) {
             return resolve("Error updating firebase: " + err);
           });
         })
-        .catch(error =>{
-          res.status(500).json({error: error})
+        .catch(error => {
+          res.status(500).json({error: "server error", errorstack: error});
           return resolve("Error signing in to firebase: " + error);
         });
       })
