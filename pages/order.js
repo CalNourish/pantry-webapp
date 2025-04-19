@@ -24,6 +24,8 @@ export default function Order() {
 
   let [orderStatus, setOrderStatus] = useState(false);
   let [loading, setLoading] = useState(true);
+
+  let [closedInfo, setClosedInfo] = useState(false);
   let getOrderStatus = () => {
     fetch(`${server}/api/admin/GetOrderStatus`)
     .then((result) => {
@@ -271,12 +273,76 @@ export default function Order() {
     </div>
   </div>
 
+  let getClosedInfo = () => {
+    fetch(`${server}/api/orders/GetClosedOrderInfo`)
+    .then((result) => {
+      result.json().then((data) => {
+        setClosedInfo(data.markdown);
+      })
+    })
+  }
+
+  if (closedInfo === false) {
+    getClosedInfo();
+    console.log("closedInfo: ", closedInfo)
+  }
+
   let closedInfoDiv = <div className='py-8 px-16 xl:w-1/2 max-w-2xl rounded'>
-    {/* 1. create a key in database for storing this paragraph*/}
-    {/* 2. fetch and set this paragraph from database by creating a SetClosedOrderInfo and GetClosedOrderInfo endpoint */}
-    {/* 3. display this paragraph with save, edit, cancel, and show preview buttons */}
+    
+    {closedInfo}
+    
+    {/* Editing the information */}
+      {!isEditingInfo && authToken && <button className='text-blue-700 hover:text-blue-500'
+      onClick={() => setIsEditingInfo(true)}>
+      edit
+    </button>}
+
+    {/* cancel edit */}
+    {isEditingInfo && <button className='text-blue-700 hover:text-blue-500'
+      onClick={() => {
+        setIsEditingInfo(false);
+        getClosedInfo(); // reset to original
+      }}>
+      cancel
+    </button>}
+
+    {/* save edit */}
+    {isEditingInfo && <button className='ml-5 text-blue-700 hover:text-blue-500'
+      onClick={() => {
+        setIsEditingInfo(false);
+        fetch('/api/orders/SetClosedOrderInfo', { method: 'POST',
+          body: JSON.stringify({markdown: closedInfo}),
+          headers: {'Content-Type': "application/json", 'Authorization': authToken}
+        }).then((res) => {
+          console.log(res)
+        })
+      }}>
+      save
+    </button>}
+
+    {/* show/hide preview */}
+    {isEditingInfo && <button className='ml-5 text-blue-700 hover:text-blue-500'
+      onClick={() => {
+        setShowPreview(!showPreviewInfo);
+      }}>
+      {showPreviewInfo ? "hide" : "show"} preview
+    </button>}
+
+    {/* Edit message box */}
+    {isEditingInfo &&
+      <textarea className="form-control w-full h-64 block px-3 py-1 text-base font-normal text-gray-600 bg-white
+        border border-solid border-gray-200 rounded mb-4
+      focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" value={closedInfo}
+        onChange={(e) => {
+          setClosedInfo(e.target.value);
+        }}>
+      </textarea>}
+
+    {/* Information Display or Preview (rendered markdown) */}
+    {(!isEditingInfo || showPreviewInfo) && closedInfo && <ReactMarkdown className="mb-4 text-zinc-900" components={markdownStyle} children={closedInfo}></ReactMarkdown>}
   </div>
 
+  {/* Loading */}
   if (loading) {
     return (
       <Layout pageName="Order">
@@ -328,6 +394,7 @@ export default function Order() {
     ) : (
       // orders disabled
       <Layout pageName="Order">
+        { closedInfoDiv }
         <p className='text-xl m-6'>Pantry Deliveries are currently on pause.</p>
         <p className='text-xl m-6'>Please see
         <a href="https://foodnow.net/do-you-need-food-delivered-to-your-home/" className="font-medium text-blue-600 dark:text-blue-500 hover:underline"> foodnow.net/do-you-need-food-delivered-to-your-home </a>

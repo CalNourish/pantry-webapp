@@ -9,11 +9,11 @@ export default async function(_, res) {
     return new Promise((resolve) => {
       // no need to sign in since we're just reading
       firebase.database()
-      .ref('/info/order/')
+      .ref('/info/orderClosedMessage/')
       .once('value')
       .then(function(resp) {
-        var orderClosedMessage = resp.val();
-        res.status(200).json({orderClosedMessage: orderClosedMessage});
+        var markdown = resp.val();
+        res.status(200).json({markdown: markdown});
         return resolve();
       })
       .catch(function(error) {

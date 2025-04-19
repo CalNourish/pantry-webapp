@@ -8,19 +8,25 @@ import { validateFunc } from '../validate'
 * Updates the closed order page message
 */
 
-function requireParams(body) {
+function requireParams(body, res) {
     // makes sure that the input is in the right format
     // returns false and an error if not a good input
-    if (body.markdown !== undefined) return true;
-    return false;
+    if (body.markdown === undefined) {
+      res.status(400).json({message: "Missing markdown string."});
+      return false;
+    }
+    return true;
 }
 
 export default async function(req, res) {
 
   const token = req.headers.authorization;
-
+  
   return new Promise((resolve) => {
-    if (!requireParams(req, res)) {
+    const { body } = req;
+
+    let ok = requireParams(body, res);
+    if (!ok) {
       res.status(400).json({message: "bad request parameters"});
       return resolve();
     }
@@ -30,11 +36,10 @@ export default async function(req, res) {
       const auth = getAuth();
       signInAnonymously(auth)
       .then(() => {
-        let ref = firebase.database().ref('/info')
-        ref.update({orderClosedMessage: body.markdown})
+        let ref = firebase.database().ref('/info/')
+        ref.once('value')
         .then(() => {
-          res.status(200).json({message: "success"})
-          return resolve();
+          ref.update({orderClosedMessage: body.markdown})
         })
         .catch((err) => {
           res.status(500).json({error: "server error", errorstack: err});
