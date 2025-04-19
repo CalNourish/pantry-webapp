@@ -1,7 +1,7 @@
 import firebase from '../../../firebase/clientApp';
 
 /*
-* /api/orders/GetOrderInfo
+* /api/orders/GetClosedOrderInfo
 * Returns stored message for closed order page
 */
 
