@@ -3,8 +3,9 @@ import firebase from '../../../firebase/clientApp'
 import { validateFunc } from '../validate'
 
 /*
-* /api/admin/UpdateOrderStatus
-* updates the status of the order page
+* /api/admin/SetOrderStatus
+* req.body = { boolean status }
+* Updates the status of the order page
 */
 
 export const config = {
@@ -22,7 +23,7 @@ function requireParams(req, res) {
   return true;
 }
 
-export default async function(req,res) {   
+export default async function(req, res) {
     // verify this request is legit
     const token = req.headers.authorization;
 
