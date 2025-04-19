@@ -5,6 +5,7 @@ import { validateFunc } from '../validate'
 /*
 * /api/orders/SetOrderInfo
 * req.body = { string markdown }
+* Updates the closed order page message
 */
 
 function requireParams(body) {
