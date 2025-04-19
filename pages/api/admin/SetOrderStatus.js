@@ -14,8 +14,7 @@ export const config = {
     },
   }
 
-function requireParams(req, res) {
-  let { body } = req;
+function requireParams(body, res) {
   if (typeof body.status === 'undefined') {
     res.status(400).json({ error: "Missing status in request." });
     return false;
@@ -28,14 +27,15 @@ export default async function(req, res) {
     const token = req.headers.authorization;
 
     return new Promise((resolve) => {
-      if (!requireParams(req, res)) {
+      const { body } = req;
+
+      if (!requireParams(body, res)) {
         res.status(400).json({message: "bad request parameters"});
         return resolve();
       }
       
       validateFunc(token)
       .then(() => {
-        const { body } = req;
         const auth = getAuth();
         signInAnonymously(auth)
         .then(() => {
