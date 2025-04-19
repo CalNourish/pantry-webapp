@@ -3,7 +3,7 @@ import firebase from '../../../firebase/clientApp'
 import { validateFunc } from '../validate'
 
 /*
-* /api/orders/SetOrderInfo
+* /api/orders/SetClosedOrderInfo
 * req.body = { string markdown }
 * Updates the closed order page message
 */
