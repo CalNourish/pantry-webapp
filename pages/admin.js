@@ -515,7 +515,7 @@ function Categories(props) {
 function OrderToggle(props) {
   const [ orderStatus, setOrderStatus ] = useState(false);
 
-  let getOrderStatus = () => {
+  const getOrderStatus = () => {
     fetch(`${server}/api/admin/GetOrderStatus`)
     .then((result) => {
       result.json().then((data) => {
@@ -527,8 +527,8 @@ function OrderToggle(props) {
     });
   }
 
-  let updateOrderStatus = (status) => {
-    fetch(`${server}/api/admin/UpdateOrderStatus`, { method: 'POST',
+  const updateOrderStatus = (status) => {
+    fetch(`${server}/api/admin/SetOrderStatus`, { method: 'POST',
       body: JSON.stringify({"status": status}),
       headers: {'Content-Type': "application/json", 'Authorization': props.authToken}
     })
