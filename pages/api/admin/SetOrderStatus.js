@@ -39,7 +39,7 @@ export default async function(req, res) {
         const auth = getAuth();
         signInAnonymously(auth)
         .then(() => {
-          var orderStatusRef = firebase.database().ref('/orderStatus/');
+          var orderStatusRef = firebase.database().ref('/info/orderStatus/');
           orderStatusRef.set(body.status)
           .then(() => {
             res.status(200);

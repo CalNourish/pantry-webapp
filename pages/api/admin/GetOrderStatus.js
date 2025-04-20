@@ -8,7 +8,7 @@ import firebase from '../../../firebase/clientApp'
 export default async function (_, res) {
     return new Promise((resolve) => {
         // no need to sign in since we're just reading
-        firebase.database().ref('/orderStatus/').once('value')
+        firebase.database().ref('/info/orderStatus/').once('value')
         .then(function(resp){
             var orderStatus = resp.val();
             res.status(200).json(orderStatus);
