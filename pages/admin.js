@@ -513,7 +513,7 @@ function Categories(props) {
 }
 
 function OrderToggle(props) {
-  const [ orderStatus, setOrderStatus ] = useState(false);
+  const [ orderStatus, setOrderStatus ] = useState(null);
 
   const getOrderStatus = () => {
     fetch(`${server}/api/admin/GetOrderStatus`)
@@ -563,14 +563,25 @@ function OrderToggle(props) {
     getOrderStatus();
   }, []);
 
+  if (orderStatus === null) {
+    return (
+      <div className='m-8'>
+        <div className='font-semibold text-3xl mb-4'>Order Status</div>
+        <span className='m-4'>Loading...</span>
+      </div>
+    )
+  }
+
   return (
     <div className='m-8'>
       <div className='font-semibold text-3xl mb-4'>Order Status</div>
-      <ThemeProvider theme={theme}> 
-        <BlueSwitch checked={orderStatus} onChange={() => updateOrderStatus(!orderStatus)} />
-      </ThemeProvider>
-      {orderStatus && <span className='text-green-600 font-semibold'>Orders are open!</span>}
-      {!orderStatus && <span className='text-red-600 font-semibold'>Orders are closed!</span>}
+      <div className="flex items-center gap-2">
+        <ThemeProvider theme={theme}> 
+          <BlueSwitch checked={orderStatus} onChange={() => updateOrderStatus(!orderStatus)} />
+        </ThemeProvider>
+        {orderStatus && <span className='text-green-600 font-semibold'>Orders are open!</span>}
+        {!orderStatus && <span className='text-red-600 font-semibold'>Orders are closed!</span>}
+      </div>
     </div>
   );
 }
