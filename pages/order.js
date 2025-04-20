@@ -18,14 +18,13 @@ export default function Order() {
   const cartDispatch = useContext(DispatchCartContext)
   let [formStep, setFormStep] = useState(0);     // page number
   let [showMissing, setShowMissing] = useState(false);
-  let [info, setInfo] = useState(false);
+  let [openInfo, setOpenInfo] = useState(false);
+  let [closedInfo, setClosedInfo] = useState(false);
   let [isEditingInfo, setIsEditingInfo] = useState(false);
   let [showPreviewInfo, setShowPreview] = useState(false);
-
   let [orderStatus, setOrderStatus] = useState(false);
   let [loading, setLoading] = useState(true);
-
-  let [closedInfo, setClosedInfo] = useState(false);
+  
   let getOrderStatus = () => {
     fetch(`${server}/api/admin/GetOrderStatus`)
     .then((result) => {
@@ -170,23 +169,23 @@ export default function Order() {
     )
   }
 
-  let getInfo = () => {
+  let getOpenInfo = () => {
     fetch(`${server}/api/orders/GetEligibilityInfo`)
     .then((result) => {
       result.json().then((data) => {
-        setInfo(data.markdown);
+        setOpenInfo(data.markdown);
       })
     })
   }
 
-  if (info === false) {
-    getInfo();
+  if (openInfo === false) {
+    getOpenInfo();
   }
 
   const { user } = useUser();
   let authToken = (user && user.authorized) ? user.authToken : null;
 
-  let infoDiv = <div className='py-8 px-16 xl:w-1/2 max-w-2xl rounded'>
+  let openInfoDiv = <div className='py-8 px-16 xl:w-1/2 max-w-2xl rounded'>
     {/* Editing the information */}
     {!isEditingInfo && authToken && <button className='text-blue-700 hover:text-blue-500'
       onClick={() => setIsEditingInfo(true)}>
@@ -197,7 +196,7 @@ export default function Order() {
     {isEditingInfo && <button className='text-blue-700 hover:text-blue-500'
       onClick={() => {
         setIsEditingInfo(false);
-        getInfo(); // reset to original
+        getOpenInfo(); // reset to original
       }}>
       cancel
     </button>}
@@ -207,7 +206,7 @@ export default function Order() {
       onClick={() => {
         setIsEditingInfo(false);
         fetch('/api/orders/SetEligibilityInfo', { method: 'POST',
-          body: JSON.stringify({markdown: info}),
+          body: JSON.stringify({markdown: openInfo}),
           headers: {'Content-Type': "application/json", 'Authorization': authToken}
         }).then((res) => {
           console.log(res)
@@ -226,16 +225,18 @@ export default function Order() {
 
     {/* Edit message box */}
     {isEditingInfo &&
-      <textarea className="form-control w-full h-64 block px-3 py-1 text-base font-normal text-gray-600 bg-white
-        border border-solid border-gray-200 rounded mb-4
-      focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" value={info}
+      <textarea
+        className="form-control w-full h-64 block px-3 py-1 text-base font-normal text-gray-600 bg-white
+        border border-solid border-gray-200 rounded mb-4 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" 
+        value={openInfo}
         onChange={(e) => {
-          setInfo(e.target.value);
-        }}>
-      </textarea>}
+          setOpenInfo(e.target.value);
+        }}
+      />
+    }
 
     {/* Information Display or Preview (rendered markdown) */}
-    {(!isEditingInfo || showPreviewInfo) && info && <ReactMarkdown className="mb-4 text-zinc-900" components={markdownStyle} children={info}></ReactMarkdown>}
+    {(!isEditingInfo || showPreviewInfo) && openInfo && <ReactMarkdown className="mb-4 text-zinc-900" components={markdownStyle} children={openInfo}></ReactMarkdown>}
 
     {/* Eligibility and info sharing confirmation checkboxes */}
     <div>
@@ -284,13 +285,9 @@ export default function Order() {
 
   if (closedInfo === false) {
     getClosedInfo();
-    console.log("closedInfo: ", closedInfo)
   }
 
-  let closedInfoDiv = <div className='py-8 px-16 xl:w-1/2 max-w-2xl rounded'>
-    
-    {closedInfo}
-    
+  let closedInfoDiv = <div className='rounded m-6'>
     {/* Editing the information */}
       {!isEditingInfo && authToken && <button className='text-blue-700 hover:text-blue-500'
       onClick={() => setIsEditingInfo(true)}>
@@ -330,16 +327,18 @@ export default function Order() {
 
     {/* Edit message box */}
     {isEditingInfo &&
-      <textarea className="form-control w-full h-64 block px-3 py-1 text-base font-normal text-gray-600 bg-white
-        border border-solid border-gray-200 rounded mb-4
-      focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" value={closedInfo}
+      <textarea
+        className="form-control w-full h-64 block px-3 py-1 text-base font-normal text-gray-600 bg-white
+        border border-solid border-gray-200 rounded mb-4 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" 
+        value={closedInfo}
         onChange={(e) => {
           setClosedInfo(e.target.value);
-        }}>
-      </textarea>}
+        }}
+      />
+    }
 
     {/* Information Display or Preview (rendered markdown) */}
-    {(!isEditingInfo || showPreviewInfo) && closedInfo && <ReactMarkdown className="mb-4 text-zinc-900" components={markdownStyle} children={closedInfo}></ReactMarkdown>}
+    {(!isEditingInfo || showPreviewInfo) && closedInfo && <ReactMarkdown className="mb-4 text-zinc-900 text-2xl" components={markdownStyle} children={closedInfo}></ReactMarkdown>}
   </div>
 
   {/* Loading */}
@@ -361,7 +360,7 @@ export default function Order() {
           { topBar }
           { formStep == 4 ? false : progressBar }
           <div className="flex justify-center m-8 flex-col lg:flex-row">
-            { infoDiv }
+            { openInfoDiv }
             <div className="py-8 px-16 xl:w-1/2 max-w-2xl shadow rounded">
               <div className="mb-8">
                 { formStep == 0 &&
@@ -395,13 +394,6 @@ export default function Order() {
       // orders disabled
       <Layout pageName="Order">
         { closedInfoDiv }
-        <p className='text-xl m-6'>Pantry Deliveries are currently on pause.</p>
-        <p className='text-xl m-6'>Please see
-        <a href="https://foodnow.net/do-you-need-food-delivered-to-your-home/" className="font-medium text-blue-600 dark:text-blue-500 hover:underline"> foodnow.net/do-you-need-food-delivered-to-your-home </a>
-        for pantry food delivery while we are on break.</p>
-        <p className='text-xl m-6'>If you have any questions or concerns, please email us at 
-        <a href="mailto: foodpantry@berkeley.edu" className="font-medium text-blue-600 dark:text-blue-500 hover:underline"> foodpantry@berkeley.edu</a>
-        .</p>
       </Layout>
     )
   )
