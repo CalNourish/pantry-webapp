@@ -1,16 +1,12 @@
 import Layout from '../components/Layout'
 import useSWR from 'swr'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useUser } from '../context/userContext'
 import { server } from './_app.js'
 
 import { daysInOrder } from './hours';
 import firebase from '../firebase/clientApp';
-import Switch from '@mui/material/Switch';
-import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
-import resolveConfig from 'tailwindcss/resolveConfig';
-import tailwindConfig from '../tailwind.config.js';
 
 function AddAdmin(props) {
   const [userName, setUserName] = useState("");
@@ -263,6 +259,7 @@ function DeliveryTimes(props) {
   }
 
   if (Object.keys(formData).length == 0 && Object.keys(data).length > 0) {
+    // TODO: might need to change this?
     setFormData(data)
   }
 
@@ -512,80 +509,6 @@ function Categories(props) {
   )
 }
 
-function OrderToggle(props) {
-  const [ orderStatus, setOrderStatus ] = useState(null);
-
-  const getOrderStatus = () => {
-    fetch(`${server}/api/admin/GetOrderStatus`)
-    .then((result) => {
-      result.json().then((data) => {
-        setOrderStatus(data);
-      })
-    })
-    .catch((error) => {
-      console.log("Error fetching order status:", error);
-    });
-  }
-
-  const updateOrderStatus = (status) => {
-    fetch(`${server}/api/admin/SetOrderStatus`, { method: 'POST',
-      body: JSON.stringify({"status": status}),
-      headers: {'Content-Type': "application/json", 'Authorization': props.authToken}
-    })
-    .then(() => {
-      setOrderStatus(status);
-    })
-    .catch((error) => {
-      console.log("Error updating order status:", error);
-    });
-  }
-
-  const { theme: twTheme } = resolveConfig(tailwindConfig);
-
-  const theme = createTheme({
-    palette: {
-      pantryBlue500: {
-        main: twTheme.colors['pantry-blue']['500'],
-      },
-    },
-  });
-
-  const BlueSwitch = styled(Switch)(({ theme }) => ({
-    '& .MuiSwitch-switchBase.Mui-checked': {
-      color: theme.palette.pantryBlue500.main,
-      '& + .MuiSwitch-track': {
-        backgroundColor: theme.palette.pantryBlue500.main,
-      },
-    },
-  }));
-
-  useEffect(() => {
-    getOrderStatus();
-  }, []);
-
-  if (orderStatus === null) {
-    return (
-      <div className='m-8'>
-        <div className='font-semibold text-3xl mb-4'>Order Status</div>
-        <span className='m-4'>Loading...</span>
-      </div>
-    )
-  }
-
-  return (
-    <div className='m-8'>
-      <div className='font-semibold text-3xl mb-4'>Order Status</div>
-      <div className="flex items-center gap-2">
-        <ThemeProvider theme={theme}>
-          <BlueSwitch checked={orderStatus} onChange={() => updateOrderStatus(!orderStatus)} />
-        </ThemeProvider>
-        {orderStatus && <span className='text-green-600 font-semibold'>Orders are open!</span>}
-        {!orderStatus && <span className='text-red-600 font-semibold'>Orders are closed!</span>}
-      </div>
-    </div>
-  );
-}
-
 export default function Admin() {
   const { user, loadingUser } = useUser();
 
@@ -613,7 +536,6 @@ export default function Admin() {
       <AddAdmin authToken={authToken}/>
       <DeliveryTimes authToken={authToken}/>
       <Categories authToken={authToken}/>
-      <OrderToggle authToken={authToken}/>
     </Layout>
   )
 }
