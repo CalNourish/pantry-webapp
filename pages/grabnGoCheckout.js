@@ -249,10 +249,10 @@ class Cart extends React.Component {
       this.setState({loading: false})
       return;
     }
-    
+
     fetch('/api/inventory/CheckoutItems', { method: 'POST',
       body: reqbody,
-      headers: {'Content-Type': "application/json", 'Authorization': token}
+      headers: {'Content-Type': "application/json", 'Authorization': token, isPantryCheckout: false, isGrabnGoCheckout: true}
     })
     .then(resp => {
       if (resp.ok) {
@@ -282,24 +282,25 @@ class Cart extends React.Component {
 
   displayCartRow = (barcode, value) => {
     return (
-      <tr className="h-10 even:bg-gray-50" key={barcode}>
-        <td className="text-left pr-10">{value[0].itemName}</td>
+      <tr className="h-10 even:bg-gray-100 whitespace-nowrap" key={barcode}>
         <td>
           {/* number spinner [-| 1 |+] */}
-          <div className="border border-solid border-gray-200 p-px w-32 h-8 flex flex-row float-left">
+          <div className="border border-solid border-gray-200 p-px w-32 h-8 flex flex-row">
             {/* minus */}
-            <button className="font-light p-1 bg-gray-200 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.downItemQuantity(barcode, true)} tabIndex="-1">–</button>
+            <button className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.downItemQuantity(barcode, true)} tabIndex="-1">–</button>
             {/* quantity input */}
             <input id={barcode + "-quantity"} className="quantity-input w-6 flex-grow mx-1 text-center focus:outline-none" autoComplete="off"
               value={value[1]} onChange={e => this.updateItemQuantity(barcode, e.target.value)}/>
             {/* plus */}
-            <button className="font-light p-1 bg-gray-200 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.upItemQuantity(barcode, true)} tabIndex="-1">+</button>
+            <button className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.upItemQuantity(barcode, true)} tabIndex="-1">+</button>
           </div>
-          {/* Trash can symbol */}
-          <button className="float-right align-middle py-1 focus:outline-none" tabIndex="-1">
-            <img className="w-6 h-6" src="/images/trash-can.svg" onClick={() => this.deleteItem(barcode)}></img>
-          </button>
         </td>
+        {/* Item name */}
+        <td className="text-left pr-10">{value[0].itemName}</td>
+        {/* Trash can symbol */}
+        <button className="float-right align-middle py-1 focus:outline-none pr-2" tabIndex="-1">
+          <img className="w-6 h-6" src="/images/trash-can.svg" onClick={() => this.deleteItem(barcode)}></img>
+        </button>
       </tr>
     )
   }
@@ -439,19 +440,18 @@ class Cart extends React.Component {
             <table className="w-full my-5 table-fixed" id="mycart">
               <thead>
                 <tr className="border-b-2">
-                  <th className="w-auto text-left text-lg">Item</th>
+                  {/* <th className="w-auto text-left text-lg">Item</th> */}
                   <th className="text-left w-48 text-lg">
                     <div className="w-32 text-center">
                       Quantity
                     </div>
                   </th>
+                  <th className="w-auto text-left text-lg">Item</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {Array.from(this.state.items)
-                .sort((a, b) =>
-                a[1][0].itemName.localeCompare(b[1][0].itemName)
-              )
+                .sort((a, b) => a[1][0].itemName.localeCompare(b[1][0].itemName))
                 .map(([barcode, value]) => (this.displayCartRow(barcode, value)))}
                 <tr className="bg-blue-50 h-10 m-3" key="totals">
                   <td className="text-lg font-medium text-right pr-10">Total Items</td>

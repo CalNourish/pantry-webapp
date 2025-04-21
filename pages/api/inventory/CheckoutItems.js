@@ -47,12 +47,20 @@ function requireParams(body, res) {
 }
 
 // Gets the spreadsheetID and sheetName from firebase. These can be changed in the admin page.
-function getCheckoutSheet() {
+// *kwargs and iterate through each one ?
+function getCheckoutSheet(isPantryCheckout) {
   return new Promise((resolve, reject) => {
     firebase.database().ref('/sheetIDs')
     .once('value', snapshot => {
       let val = snapshot.val();
-      return resolve(val.checkoutLog)
+
+      // Send to correct checkout log 
+      if (isPantryCheckout) {
+        return resolve(val.checkoutLog)
+      } else if (isGrabnGoCheckout) {
+        return resolve(val.grabnGoCheckoutLog)
+      }
+      return resolve(val.grabnGoCheckoutLog)
     })
     .catch((err) => {
       console.log("error getting google sheet links from firebase")
@@ -61,9 +69,9 @@ function getCheckoutSheet() {
   })
 }
 
-function writeLog(log) {
+// log: Checked out items. isPantryCheckout: Boolean whether it is for pantry or not.
+function writeLog(log, isPantryCheckout) {
   let { client_email, private_key } = service_info;
-
   return new Promise((resolve, reject) => {
     const target = ['https://www.googleapis.com/auth/spreadsheets'];
     var sheets_auth = new google.auth.JWT(
@@ -74,7 +82,7 @@ function writeLog(log) {
     );
     const sheets = google.sheets({ version: 'v4', auth: sheets_auth });
 
-    getCheckoutSheet()
+    getCheckoutSheet(isPantryCheckout)
     .then(({ spreadsheetId, sheetName, pageId }) => {
       let now = new Date();
 
@@ -149,6 +157,9 @@ export default async function (req, res) {
       return resolve();
     }
 
+
+    const isPantryCheckout = (req.headers.ispantrycheckout == 'true')
+    const isGrabnGoCheckout = (req.headers.isgrabngocheckout == 'true')    
     const token = req.headers.authorization
     validateFunc(token)
     .then(() => {
@@ -190,7 +201,7 @@ export default async function (req, res) {
           })
         ).then(() => {
           // perform checkout logging
-          writeLog(log).then((msg) => {
+          writeLog(log, isPantryCheckout).then((msg) => {
             res.status(200);
             res.json({ success: msg });
             return resolve();
