@@ -48,7 +48,7 @@ function requireParams(body, res) {
 
 // Gets the spreadsheetID and sheetName from firebase. These can be changed in the admin page.
 // *kwargs and iterate through each one ?
-function getCheckoutSheet(isPantryCheckout) {
+function getCheckoutSheet(isPantryCheckout, isGrabnGoCheckout) {
   return new Promise((resolve, reject) => {
     firebase.database().ref('/sheetIDs')
     .once('value', snapshot => {
@@ -60,7 +60,7 @@ function getCheckoutSheet(isPantryCheckout) {
       } else if (isGrabnGoCheckout) {
         return resolve(val.grabnGoCheckoutLog)
       }
-      return resolve(val.grabnGoCheckoutLog)
+      return resolve(val.checkoutLog)
     })
     .catch((err) => {
       console.log("error getting google sheet links from firebase")
@@ -70,7 +70,7 @@ function getCheckoutSheet(isPantryCheckout) {
 }
 
 // log: Checked out items. isPantryCheckout: Boolean whether it is for pantry or not.
-function writeLog(log, isPantryCheckout) {
+function writeLog(log, isPantryCheckout, isGrabnGoCheckout) {
   let { client_email, private_key } = service_info;
   return new Promise((resolve, reject) => {
     const target = ['https://www.googleapis.com/auth/spreadsheets'];
@@ -82,7 +82,7 @@ function writeLog(log, isPantryCheckout) {
     );
     const sheets = google.sheets({ version: 'v4', auth: sheets_auth });
 
-    getCheckoutSheet(isPantryCheckout)
+    getCheckoutSheet(isPantryCheckout, isGrabnGoCheckout)
     .then(({ spreadsheetId, sheetName, pageId }) => {
       let now = new Date();
 
@@ -201,7 +201,7 @@ export default async function (req, res) {
           })
         ).then(() => {
           // perform checkout logging
-          writeLog(log, isPantryCheckout).then((msg) => {
+          writeLog(log, isPantryCheckout, isGrabnGoCheckout).then((msg) => {
             res.status(200);
             res.json({ success: msg });
             return resolve();

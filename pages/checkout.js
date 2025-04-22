@@ -252,7 +252,7 @@ class Cart extends React.Component {
     
     fetch('/api/inventory/CheckoutItems', { method: 'POST',
       body: reqbody,
-      headers: {'Content-Type': "application/json", 'Authorization': token, isPantryCheckout: true}
+      headers: {'Content-Type': "application/json", 'Authorization': token, isPantryCheckout: true, isGrabnGoCheckout: false}
     })
     .then(resp => {
       if (resp.ok) {
