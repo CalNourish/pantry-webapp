@@ -440,7 +440,7 @@ class Cart extends React.Component {
             <table className="w-full my-5 table-fixed" id="mycart">
               <thead>
                 <tr className="border-b-2">
-                  {/* <th className="w-auto text-left text-lg">Item</th> */}
+                  <th className="w-auto text-left text-lg">Item</th>
                   <th className="text-left w-48 text-lg">
                     <div className="w-32 text-center">
                       Quantity

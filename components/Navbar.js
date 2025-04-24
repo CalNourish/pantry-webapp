@@ -20,8 +20,8 @@ let UNAUTH_SIGNEDIN_ROUTES = [
 
 // Hide "inventory" route if public inventory is disabled
 if (DISABLE_PUBLIC_INVENTORY) {
-  UNAUTH_ROUTES.splice(2)
-  UNAUTH_SIGNEDIN_ROUTES.splice(3)
+  UNAUTH_ROUTES.splice(2, 1)
+  UNAUTH_SIGNEDIN_ROUTES.splice(2, 1)
 }
 
 const AUTH_SIGNEDIN_ROUTES = [
@@ -114,10 +114,10 @@ export default function Navbar() {
               </div>
               <ul className="py-1" aria-labelledby="dropdown">
               {userType === "Administrator" ? <li>
-                <a href="/admin" className="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-500 dark:text-gray-100 dark:hover:text-white">Admin Page</a>
+                <a href="/admin" className="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-500 dark:text-gray-600 dark:hover:text-white">Admin Page</a>
               </li> : ""}
               <li>
-                <button onClick={logout} className="block w-full py-2 px-4 text-left text-sm text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-500 dark:text-gray-100 dark:hover:text-white">Sign out</button>
+                <button onClick={logout} className="block w-full py-2 px-4 text-left text-sm text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-500 dark:text-gray-600 dark:hover:text-white">Sign out</button>
               </li>
               </ul>
             </div>
