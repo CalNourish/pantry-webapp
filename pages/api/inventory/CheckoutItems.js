@@ -47,20 +47,20 @@ function requireParams(body, res) {
 }
 
 // Gets the spreadsheetID and sheetName from firebase. These can be changed in the admin page.
-// *kwargs and iterate through each one ?
 function getCheckoutSheet(isPantryCheckout, isGrabnGoCheckout) {
   return new Promise((resolve, reject) => {
     firebase.database().ref('/sheetIDs')
     .once('value', snapshot => {
       let val = snapshot.val();
 
-      // Send to correct checkout log 
-      if (isPantryCheckout) {
-        return resolve(val.checkoutLog)
-      } else if (isGrabnGoCheckout) {
-        return resolve(val.grabnGoCheckoutLog)
+      // Send to correct checkout log & make sure there are not more than 1 true value.
+      if (!(isPantryCheckout & isGrabnGoCheckout)) {
+        if (isPantryCheckout) {
+          return resolve(val.checkoutLog)
+        } else if (isGrabnGoCheckout) {
+          return resolve(val.grabnGoCheckoutLog)
+        }
       }
-      return resolve(val.checkoutLog)
     })
     .catch((err) => {
       console.log("error getting google sheet links from firebase")

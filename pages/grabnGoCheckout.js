@@ -282,24 +282,57 @@ class Cart extends React.Component {
 
   displayCartRow = (barcode, value) => {
     return (
-      <tr className="h-10 even:bg-gray-100 whitespace-nowrap" key={barcode}>
+      <tr 
+        className="h-10 even:bg-gray-100 whitespace-nowrap" 
+        key={barcode}>
         <td>
+          
           {/* number spinner [-| 1 |+] */}
           <div className="border border-solid border-gray-200 p-px w-32 h-8 flex flex-row">
+            
             {/* minus */}
-            <button className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.downItemQuantity(barcode, true)} tabIndex="-1">–</button>
+            <button 
+              className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" 
+              onClick={() => this.downItemQuantity(barcode, true)} 
+              tabIndex="-1"
+            >
+              –
+            </button>
+            
             {/* quantity input */}
-            <input id={barcode + "-quantity"} className="quantity-input w-6 flex-grow mx-1 text-center focus:outline-none" autoComplete="off"
-              value={value[1]} onChange={e => this.updateItemQuantity(barcode, e.target.value)}/>
+            <input 
+              id={barcode + "-quantity"}
+              className="quantity-input w-6 flex-grow mx-1 text-center focus:outline-none" 
+              autoComplete="off"
+              value={value[1]}
+              onChange={e => this.updateItemQuantity(barcode, e.target.value)}
+              />
+               
             {/* plus */}
-            <button className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.upItemQuantity(barcode, true)} tabIndex="-1">+</button>
+            <button 
+              className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" 
+              onClick={() => this.upItemQuantity(barcode, true)} 
+              tabIndex="-1"
+            >
+              +
+            </button>
           </div>
         </td>
+        
         {/* Item name */}
         <td className="text-left pr-10">{value[0].itemName}</td>
+        
         {/* Trash can symbol */}
-        <button className="float-right align-middle py-1 focus:outline-none pr-2" tabIndex="-1">
-          <img className="w-6 h-6" src="/images/trash-can.svg" onClick={() => this.deleteItem(barcode)}></img>
+        <button 
+          className="float-right align-middle py-1 focus:outline-none pr-2" 
+          tabIndex="-1"
+        >
+          <img 
+            className="w-6 h-6" 
+            src="/images/trash-can.svg" 
+            onClick={() => this.deleteItem(barcode)}
+          >
+          </img>
         </button>
       </tr>
     )
@@ -394,6 +427,7 @@ class Cart extends React.Component {
         </Modal>
 
         <div className="flex flex-col h-full lg:flex-row">
+
           {/* Left-hand column */}
           <div className="flex-none lg:w-64">
             <Sidebar className="sm:min-h-0 lg:min-h-screen">
@@ -418,14 +452,19 @@ class Cart extends React.Component {
                 </div>
 
                 {/* Add Item Button */}
-                <button className="my-1 btn btn-pantry-blue w-full uppercase tracking-wide text-xs font-semibold focus:shadow-none" id="add-item-btn" type="submit">
+                <button 
+                  className="my-1 btn btn-pantry-blue w-full uppercase tracking-wide text-xs font-semibold focus:shadow-none" 
+                  id="add-item-btn" 
+                  type="submit">
                   Add Item <span className="font-normal hidden lg:inline-block">(Enter)</span>
                 </button>
               </form>
 
               {/* Search Item Button */}
               <div>
-                <button className="btn btn-outline w-full uppercase tracking-wide text-xs font-semibold focus:shadow-none" onClick={this.toggleShowSearch}>
+                <button 
+                  className="btn btn-outline w-full uppercase tracking-wide text-xs font-semibold focus:shadow-none" 
+                  onClick={this.toggleShowSearch}>
                   Search item by name <span className="font-normal hidden lg:inline-block">({searchHotkey})</span>
                 </button>
               </div>
@@ -461,7 +500,9 @@ class Cart extends React.Component {
                 </tr>
               </tbody>
             </table>
-            <button className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" onClick={(e) => this.submitCart(e)} disabled={this.state.loading}>
+            <button 
+              className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" 
+              onClick={(e) => this.submitCart(e)} disabled={this.state.loading}>
               Checkout <span className="font-normal hidden lg:inline-block">(Shift+Enter)</span>
             </button>
           </div>

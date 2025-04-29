@@ -134,15 +134,15 @@ export default function Navbar() {
       </button>
       
       {/* Tab links */}
-      <div className={(showTabs ? "" : "hidden ") + "justify-between w-full xl:flex xl:w-auto xl:order-1 xl:flex-grow xl:ml-10"}>
-          <ul className="flex flex-col w-full mt-4 xl:flex-row xl:space-x-8 xl:mt-0 xl:text-sm xl:font-medium">
+      <div className={(showTabs ? "" : "hidden ") + "justify-between w-full xl:flex xl:w-4/5 xl:order-1 xl:flex-grow xl:ml-0.5"}>
+          <ul className="flex flex-col w-full mt-4 xl:flex-row xl:space-x-0.25 xl:mt-0 xl:text-sm xl:font-medium">
             {routes.map(navigationItem => (
               <li key={navigationItem.title}>
                 <a className={navigationItem.route == router.pathname ? activeLink : inactiveLink} href={navigationItem.route}>
                   {navigationItem.title}
                   {
                     navigationItem.title == "Bag Packing" && numNewOrders && numNewOrders > 0 &&
-                    <span className="ml-4 my-auto items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full xl:ml-0 xl:py-1 xl:absolute xl:top-0 xl:right-0 xl:inline-flex xl:transform xl:translate-x-1/2 xl:-translate-y-1/2">
+                    <span className="ml-4 my-auto items-center justify-center px-1 py-0.5 text-[10px] font-bold leading-none text-red-100 bg-red-600 rounded-full xl:ml-0 xl:py-1 xl:absolute xl:top-0 xl:right-4 xl:inline-flex xl:transform xl:translate-x-1/2 xl:-translate-y-1/2">
                       {numNewOrders + " New"}
                     </span>
                   }
