@@ -35,7 +35,7 @@ const AUTH_SIGNEDIN_ROUTES = [
   { title: "Bag Packing", route: "/bagPacking"}, 
   { title: "Visualizations", route: "/visualizations"}
 ]
-
+// a
 export default function Navbar() {
   const linkStyle = "w-full relative inline-block py-2 pr-3 pl-3 text-white rounded hover:bg-pantry-blue-400 " +
     "xl:ml-4 xl:px-3 xl:py-2 xl:text-sm xl:font-medium xl:hover:bg-pantry-blue-500"
