@@ -31,7 +31,7 @@ const AUTH_SIGNEDIN_ROUTES = [
   { title: "Order", route: "/order"},
   { title: "Pantry Check in", route: "/checkin"},
   { title: "GrabnGo Check in", route: "/checkinGrabnGo"},
-  { title: "Checkout", route: "/checkout"},
+  { title: "Pantry Checkout", route: "/checkout"},
   { title: "GrabnGo Checkout", route: "/grabnGoCheckout"},
   { title: "Bag Packing", route: "/bagPacking"}, 
   { title: "Visualizations", route: "/visualizations"}
@@ -134,8 +134,8 @@ export default function Navbar() {
       </button>
       
       {/* Tab links */}
-      <div className={(showTabs ? "" : "hidden ") + "justify-between w-full xl:flex xl:w-4/5 xl:order-1 xl:flex-grow xl:ml-0.5"}>
-          <ul className="flex flex-col w-full mt-4 xl:flex-row xl:space-x-0.25 xl:mt-0 xl:text-sm xl:font-medium">
+      <div className={(showTabs ? "" : "hidden ") + "justify-between w-full xl:flex xl:w-auto xl:order-1 xl:flex-grow xl:ml-10"}>
+          <ul className="flex flex-col w-full mt-4 xl:flex-row xl:space-x-1 xl:mt-0 xl:text-sm xl:font-medium">
             {routes.map(navigationItem => (
               <li key={navigationItem.title}>
                 <a className={navigationItem.route == router.pathname ? activeLink : inactiveLink} href={navigationItem.route}>
