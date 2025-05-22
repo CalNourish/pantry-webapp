@@ -85,10 +85,18 @@ export default function InventoryModal(props) {
                             </input>
                         </div>
                         <div className='mb-4'>
-                            <label className='mr-2' htmlFor="display-public">Make part of default cart:</label>
+                            <label className='mr-2' htmlFor="display-public">Add to Pantry Checkout Cart:</label>
                             <input type="checkbox" checked={props.parentState.defaultCart} id="display-public" className='w-4 h-4 align-middle'
                                 onChange={(e) => {
                                     props.dispatch({type: 'editItemDefaultCart', value: e.currentTarget.checked})
+                                }}>
+                            </input>
+                        </div>
+                        <div className='mb-4'>
+                            <label className='mr-2' htmlFor="display-public">Add to GrabnGo Checkout Cart:</label>
+                            <input type="checkbox" checked={props.parentState.grabnGoDefaultCart} id="display-public" className='w-4 h-4 align-middle'
+                                onChange={(e) => {
+                                    props.dispatch({type: 'editItemGrabnGoDefaultCart', value: e.currentTarget.checked})
                                 }}>
                             </input>
                         </div>
