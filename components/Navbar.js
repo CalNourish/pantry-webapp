@@ -31,6 +31,7 @@ const AUTH_SIGNEDIN_ROUTES = [
   { title: "Order", route: "/order"},
   { title: "Pantry Check in", route: "/checkin"},
   { title: "GrabnGo Check in", route: "/checkinGrabnGo"},
+  { title: "GrabnGo Check out", route: "/checkoutGrabnGo"},
   { title: "Checkout", route: "/checkout"},
   { title: "Bag Packing", route: "/bagPacking"}, 
   { title: "Visualizations", route: "/visualizations"}
@@ -38,7 +39,7 @@ const AUTH_SIGNEDIN_ROUTES = [
 
 export default function Navbar() {
   const linkStyle = "w-full relative inline-block py-2 pr-3 pl-3 text-white rounded hover:bg-pantry-blue-400 " +
-    "xl:ml-4 xl:px-3 xl:py-2 xl:text-sm xl:font-medium xl:hover:bg-pantry-blue-500"
+    "xl:ml-4 xl:px-3 xl:py-2 xl:text-xs xl:font-medium xl:hover:bg-pantry-blue-500"
   const activeLink = `${linkStyle} text-white`;
   const inactiveLink = `${linkStyle} text-gray-300 hover:text-white`;
   const router = useRouter();
@@ -87,7 +88,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="bg-pantry-blue-500 text-white p-4 flex flex-wrap justify-between items-center overflow-visible flex-shrink-0">
+    <nav className="bg-pantry-blue-500 text-white p-4 flex flex-nowrap justify-between items-center overflow-visible flex-shrink-0">  
       {/* Pantry Logo */}
       <a className="h-10" href="/">
         <img className="block h-full w-auto" src="/images/pantry_logo.png" alt="Pantry logo" priority="true" height="32" width="32"/>
@@ -134,7 +135,7 @@ export default function Navbar() {
       
       {/* Tab links */}
       <div className={(showTabs ? "" : "hidden ") + "justify-between w-full xl:flex xl:w-auto xl:order-1 xl:flex-grow xl:ml-10"}>
-          <ul className="flex flex-col w-full mt-4 xl:flex-row xl:space-x-8 xl:mt-0 xl:text-sm xl:font-medium">
+          <ul className="flex flex-col w-full mt-4 xl:flex-row xl:space-x-4 xl:mt-0 xl:text-sm xl:font-medium">
             {routes.map(navigationItem => (
               <li key={navigationItem.title}>
                 <a className={navigationItem.route == router.pathname ? activeLink : inactiveLink} href={navigationItem.route}>
