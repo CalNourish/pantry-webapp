@@ -15,7 +15,7 @@ import { getAuth, signInAnonymously } from 'firebase/auth'
 * }
 */
 
-const sheetTags = ['checkoutLog', 'pantryMaster', 'bagPacking', 'doordash', 'checkIn', 'checkInGrabnGo'];
+const sheetTags = ['checkoutLog', 'pantryMaster', 'bagPacking', 'doordash', 'checkIn', 'checkInGrabnGo', 'grabnGoCheckoutLog'];
 
 function requireParams(req, res) {
   let {body} = req;

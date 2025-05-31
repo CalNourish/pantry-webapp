@@ -32,7 +32,16 @@ export default async function(req,res) {
       signInAnonymously(auth)
       .then(() => {
         let ref = firebase.database().ref('/info')
-        ref.update({checkout: body.markdown})
+      
+        function pantryOrGrabnGo(temp) {
+          if (temp.isPantryCheckout) {
+            ref.update({checkout: body.markdown})
+          } else {
+            ref.update({grabngocheckout: body.markdown})
+          }
+        }
+        
+        pantryOrGrabnGo(body)
         .then(() => {
           res.status(200).json({message: "success"})
           return resolve();
