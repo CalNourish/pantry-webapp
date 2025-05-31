@@ -38,8 +38,8 @@ const AUTH_SIGNEDIN_ROUTES = [
 ]
 
 export default function Navbar() {
-  const linkStyle = "w-full relative inline-block py-2 pr-3 pl-3 text-white rounded hover:bg-pantry-blue-400 whitespace-nowrap shrink-0" +
-    "xl:ml-4 xl:px-3 xl:py-2 xl:text-sm xl:font-medium xl:hover:bg-pantry-blue-500"
+  const linkStyle = "w-full relative inline-block py-2 pr-3 pl-3 text-white rounded whitespace-nowrap shrink-0" +
+    "xl:ml-4 xl:px-3 xl:py-2 xl:text-sm xl:font-medium"
   const activeLink = `${linkStyle} text-white`;
   const inactiveLink = `${linkStyle} text-gray-300 hover:text-white`;
   const router = useRouter();
@@ -135,7 +135,7 @@ export default function Navbar() {
       
       {/* Tab links */}
       <div className={(showTabs ? "" : "hidden ") + "justify-between w-full xl:flex xl:w-auto xl:order-1 xl:flex-grow xl:ml-10"}>
-          <ul className="flex flex-col w-full mt-4 xl:flex-row xl:space-x-4 xl:mt-0 xl:text-sm xl:font-medium">
+          <ul className="flex flex-col w-full mt-4 xl:flex-row xl:space-x-2 xl:mt-0 xl:text-sm xl:font-medium">
             {routes.map(navigationItem => (
               <li key={navigationItem.title}>
                 <a className={navigationItem.route == router.pathname ? activeLink : inactiveLink} href={navigationItem.route}>
