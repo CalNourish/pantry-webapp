@@ -10,7 +10,7 @@ import {validateFunc} from '../validate'
 function requireParams(body) {
   // makes sure that the input is in the right format
   // returns false and an error if not a good input 
-  if (body.markdown !== undefined) return true;
+  if (body.markdown !== undefined && body.isPantryCheckout !== undefined) return true;
   return false;
 }
 

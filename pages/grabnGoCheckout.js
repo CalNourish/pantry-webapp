@@ -535,10 +535,19 @@ class Cart extends React.Component {
                 onClick={async () => {
                 let token = this.props.user.authToken
                 this.setState({isEditing:false});
-                fetch('/api/admin/SetCheckoutInfo', { method: 'POST',
-                  body: JSON.stringify({markdown: this.state.checkoutInfo, isPantryCheckout: false}),
+                fetch('/api/admin/SetCheckoutInfo',
+                  { method: 'POST',
+                  body: JSON.stringify({
+                    markdown: this.state.checkoutInfo,
+                    isPantryCheckout: false
+                  }),
                   headers: {'Content-Type': "application/json", 'Authorization': token}
-                }).then((res) => {
+                })
+                .then((res) => {
+                  console.log(res)
+                })
+                .catch((err) => {
+                  console.log("Error saving grabngo checkout info: ", err)
                 })
               }}>
               save
