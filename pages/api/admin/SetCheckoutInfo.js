@@ -14,6 +14,14 @@ function requireParams(body) {
   return false;
 }
 
+async function updateInfo(ref, body) {
+  if (body.isPantryCheckout) {
+    await ref.update({checkout: body.markdown})
+  } else {
+    await ref.update({grabngocheckout: body.markdown})
+  }
+}
+
 export default async function(req,res) {
 
   const token = req.headers.authorization
@@ -32,16 +40,8 @@ export default async function(req,res) {
       signInAnonymously(auth)
       .then(() => {
         let ref = firebase.database().ref('/info')
-      
-        function pantryOrGrabnGo(temp) {
-          if (temp.isPantryCheckout) {
-            ref.update({checkout: body.markdown})
-          } else {
-            ref.update({grabngocheckout: body.markdown})
-          }
-        }
         
-        pantryOrGrabnGo(body)
+        updateInfo(ref, body)
         .then(() => {
           res.status(200).json({message: "success"})
           return resolve();
