@@ -7,10 +7,11 @@ import {validateFunc} from '../validate'
 * req.body = { string markdown }
 */
 
-function requireParams(body) {
+function requireParams(body, res) {
   // makes sure that the input is in the right format
   // returns false and an error if not a good input 
   if (body.markdown !== undefined && body.isPantryCheckout !== undefined) return true;
+  res.status(400).json({message: "Missing markdown string or isPantryCheckout."});
   return false;
 }
 
