@@ -494,7 +494,7 @@ class Cart extends React.Component {
                 let token = this.props.user.authToken
                 this.setState({isEditing:false});
                 fetch('/api/admin/SetCheckoutInfo', { method: 'POST',
-                  body: JSON.stringify({markdown: this.state.checkoutInfo}),
+                  body: JSON.stringify({markdown: this.state.checkoutInfo, isPantryCheckout: true}),
                   headers: {'Content-Type': "application/json", 'Authorization': token}
                 }).then((res) => {
                 })
