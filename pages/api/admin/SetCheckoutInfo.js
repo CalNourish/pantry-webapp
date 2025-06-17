@@ -7,11 +7,20 @@ import {validateFunc} from '../validate'
 * req.body = { string markdown }
 */
 
-function requireParams(body) {
+function requireParams(body, res) {
   // makes sure that the input is in the right format
   // returns false and an error if not a good input 
-  if (body.markdown !== undefined) return true;
+  if (body.markdown !== undefined && body.isPantryCheckout !== undefined) return true;
+  res.status(400).json({message: "Missing markdown string or isPantryCheckout."});
   return false;
+}
+
+async function updateInfo(ref, body) {
+  if (body.isPantryCheckout) {
+    await ref.update({checkout: body.markdown})
+  } else {
+    await ref.update({grabngocheckout: body.markdown})
+  }
 }
 
 export default async function(req,res) {
@@ -32,16 +41,8 @@ export default async function(req,res) {
       signInAnonymously(auth)
       .then(() => {
         let ref = firebase.database().ref('/info')
-      
-        function pantryOrGrabnGo(temp) {
-          if (temp.isPantryCheckout) {
-            ref.update({checkout: body.markdown})
-          } else {
-            ref.update({grabngocheckout: body.markdown})
-          }
-        }
         
-        pantryOrGrabnGo(body)
+        updateInfo(ref, body)
         .then(() => {
           res.status(200).json({message: "success"})
           return resolve();

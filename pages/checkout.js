@@ -493,10 +493,19 @@ class Cart extends React.Component {
                 onClick={async () => {
                 let token = this.props.user.authToken
                 this.setState({isEditing:false});
-                fetch('/api/admin/SetCheckoutInfo', { method: 'POST',
-                  body: JSON.stringify({markdown: this.state.checkoutInfo}),
+                fetch('/api/admin/SetCheckoutInfo', { 
+                  method: 'POST',
+                  body: JSON.stringify({
+                    markdown: this.state.checkoutInfo, 
+                    isPantryCheckout: true
+                  }),
                   headers: {'Content-Type': "application/json", 'Authorization': token}
-                }).then((res) => {
+                })
+                .then((res) => {
+                  console.log(res)
+                })
+                .catch(err => {
+                  console.log("Error saving checkout info: ", err)
                 })
               }}>
               save
