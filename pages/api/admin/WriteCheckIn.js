@@ -12,7 +12,7 @@ import firebase from '../../../firebase/clientApp'
 function requireParams(body) {
   // makes sure that the input is in the right format
   // returns false and an error if not a good input
-  if (body.calID && body.isGrabnGo != null) return true;
+  if (body.calID && body.mealCount && body.isGrabnGo != null) return true;
   return false;
 }
 
@@ -66,6 +66,7 @@ export default async function (req, res) {
       getSheetsLink(body.isGrabnGo)
       .then(({spreadsheetId, sheetName}) => {
         var calID = body.calID
+        var mealCount = body.mealCount
         var checkInTime = new Date();
         var rangeQuery = sheetName + "!A:B";
         const request = {
@@ -76,7 +77,7 @@ export default async function (req, res) {
           resource: {
             range: rangeQuery,
             majorDimension: "ROWS",
-            values: [[formatTime(checkInTime), "'" + calID]],
+            values: [[formatTime(checkInTime), "'" + calID, "'" + mealCount]],
           },
         };
         sheets.spreadsheets.values.append(request)
