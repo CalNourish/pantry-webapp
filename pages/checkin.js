@@ -109,13 +109,13 @@ class Checkin extends React.Component {
   };
 
   writeIDtoSheet = async (id) => {
-    fetch("/api/admin/WriteCheckIn", {
-      method: "POST",
+    fetch('/api/admin/WriteCheckIn', {
+      method: 'POST',
       body: JSON.stringify({ calID: id, isGrabnGo: false }),
       headers: {
         "Content-Type": "application/json",
-        Authorization: this.props.user.authToken,
-      },
+        "Authorization": this.props.user.authToken
+      }
     })
       .then((resp) => {
         resp.json().then((json) => {

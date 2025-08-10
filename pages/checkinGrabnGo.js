@@ -31,7 +31,12 @@ class Checkin extends React.Component {
     clearTimeout(this.errorTimer);
     this.errorTimer = setTimeout(() => this.setState({error: null}), t);
     document.getElementById("calIDFieldset").disabled = false;
-    document.getElementById("calID").focus();
+    document.getElementById("mealCountFieldset").disabled = false;
+    if (errorText.includes("ID")) {
+      document.getElementById("calID").focus();
+    } else {
+      document.getElementById("mealCount").focus();
+    }
   }
 
   showSuccess = (msg, t) => {
@@ -47,6 +52,7 @@ class Checkin extends React.Component {
     document.getElementById("calIDFieldset").disabled = false;
     document.getElementById("mealCountFieldset").disabled = false;
     document.getElementById("calID").focus();
+
   }
 
   
@@ -65,7 +71,7 @@ class Checkin extends React.Component {
 
 
   overrideHandler = () => {
-    this.writeIDtoSheet(this.state.lastScannedID);
+    this.writeIDandMealsToSheet(this.state.lastScannedID, this.state.lastMealCount);
     this.setState({lastScannedID: "N/A", lastMealCount: null,
     visitsLastWeek: [], lastScannedTime: "N/A"});
     this.showLastVisitInfo();
@@ -115,9 +121,13 @@ class Checkin extends React.Component {
   };
 
   writeIDandMealsToSheet = async (id, meals) => {
-    fetch('/api/admin/WriteCheckIn', { method: 'POST',
-    body: JSON.stringify({calID: id, mealCount: meals, isGrabnGo:true}),
-    headers: {'Content-Type': "application/json", 'Authorization': this.props.user.authToken}
+    fetch('/api/admin/WriteCheckIn', { 
+      method: 'POST',
+      body: JSON.stringify({ calID: id, mealCount: meals, isGrabnGo: true }),
+      headers: {
+        'Content-Type': "application/json",
+        'Authorization': this.props.user.authToken
+      }
     })
     .then(() => {
       this.showSuccess("Sucessfully logged ID: " + id,1000)
@@ -153,9 +163,9 @@ class Checkin extends React.Component {
         'notNull': /^\d$/
       }
 
-      if (mealCount == 0) {
-      this.showError("Can't submit blank Meal Count: " + mealCount, 1000);
-      return false;
+      if (mealCount == null) {
+        this.showError("Can't submit blank Meal Count: " + mealCount, 1000);
+        return false;
     }
     
     for (const regex in regexes) {
@@ -166,7 +176,6 @@ class Checkin extends React.Component {
   
     this.showError("Invalid Meal Count. Please try again.");
     return false;
-
     };
 
   handleScanSubmit = async (e) => {
@@ -178,14 +187,14 @@ class Checkin extends React.Component {
 
     const { value: calIdValue } = e.target.calID;
     const { value: mealCountValue } = e.target.mealCount;
-    if (!this.validateCalId(calIdValue)) {
+    if (!this.validateCalId(calIdValue) || !this.validateMealCount(mealCountValue)) {
       return;
     }
 
     // Directly update the state and proceed with other actions
     this.setState({
       lastScannedID: calIdValue,
-      lastMealCount: null,
+      lastMealCount: mealCountValue,
       visitsLastWeek: [], // Placeholder if you need this state, otherwise you can remove it
       lastScannedTime: new Date().toLocaleTimeString()
     });
@@ -227,6 +236,7 @@ class Checkin extends React.Component {
         
         <div className='flex flex-row space-x-16 my-8'>
           <form onSubmit={(e) => this.handleScanSubmit(e)}>
+            
             <fieldset id="calIDFieldset" disabled={false}>
             <div>
             <div className='flex-grow'>Use scanner or manually enter Cal ID (put 1 if general community member)</div>
@@ -234,13 +244,8 @@ class Checkin extends React.Component {
               placeholder="Cal ID"
               id="calID" autoComplete="off" autoFocus></input>
             </div>
-            <input type="submit" id = "submitButton" className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold flex-grow disabled:bg-pantry-blue-400" value="Submit (Enter)" />
             </fieldset>
-          </form>
-          <div className = "w-1/3">
-          
-        <div className='flex flex-row space-x-16 my-8'>
-          <form onSubmit={(e) => this.handleScanSubmit(e)}>
+
             <fieldset id="mealCountFieldset" disabled={false}>
             <div>
             <div className='flex-grow'>Number of Meals</div>
@@ -250,10 +255,9 @@ class Checkin extends React.Component {
             </div>
             <input type="submit" id = "submitButton" className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold flex-grow disabled:bg-pantry-blue-400" value="Submit (Enter)" />
             </fieldset>
+            
           </form>
           <div className = "w-1/3">
-          </div>
-          </div>
           
           {this.showLastScannedInfo()}
           {this.showLastVisitInfo()}
