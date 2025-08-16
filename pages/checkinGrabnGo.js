@@ -63,7 +63,7 @@ class Checkin extends React.Component {
     else {
       return (
         <>
-        <div className='flex-grow text-left'>Last Scanned ID: {this.state.lastScannedID} at {this.state.lastScannedTime}.</div>
+        <div className='flex-grow text-left'>Last Scanned ID: {this.state.lastScannedID} with {this.state.lastMealCount} meal(s) at {this.state.lastScannedTime}.</div>
         </>
       )
     }
@@ -130,7 +130,7 @@ class Checkin extends React.Component {
       }
     })
     .then(() => {
-      this.showSuccess("Sucessfully logged ID: " + id,1000)
+      this.showSuccess("Sucessfully logged ID: " + id + " and Number of Meals: " + meals,3000)
     })
   }
 
