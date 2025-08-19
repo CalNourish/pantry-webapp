@@ -134,8 +134,7 @@ class Checkin extends React.Component {
 
   validateCalId = (calIdValue) => {
     const regexes = { 
-      // old: 'isStudent': /^(30\d{8}|[1278]\d{7})$/,
-      'isStudent': /^(\d{8}|\d{10})$/,
+      'isStudent': /^(30\d{8}|[1278]\d{7})$/,
       'isEmployeeOrAffiliate': /^(01\d{6}|10\d{6})$/,
       'isValidEncrypted': /^810:\d{8}$/,
       'isCommunity': /^1$/
