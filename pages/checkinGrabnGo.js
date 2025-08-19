@@ -136,8 +136,7 @@ class Checkin extends React.Component {
 
   validateCalId = (calIdValue) => {
     const regexes = { 
-      // old: 'isStudent': /^(30\d{8}|[1278]\d{7})$/,
-      'isStudent': /^(\d{8}|\d{10})$/,
+      'isStudent': /^(30\d{8}|[1278]\d{7})$/,
       'isEmployeeOrAffiliate': /^(01\d{6}|10\d{6})$/,
       'isValidEncrypted': /^810:\d{8}$/,
       'isCommunity': /^1$/
@@ -178,6 +177,11 @@ class Checkin extends React.Component {
     return false;
     };
 
+  updateID = (id) => {
+      if (['3', '4', '5', '6'].includes(id[0])) {
+        return '30' + id;
+    } return id; };
+
   handleScanSubmit = async (e) => {
     var IdFieldset = document.getElementById("calIDFieldset");
     var mealFieldset = document.getElementById("mealCountFieldset");
@@ -185,7 +189,8 @@ class Checkin extends React.Component {
     mealFieldset.disabled = true;
     e.preventDefault();
 
-    const { value: calIdValue } = e.target.calID;
+    var { value: calIdValue } = e.target.calID;
+    var calIdValue = this.updateID(calIdValue);
     const { value: mealCountValue } = e.target.mealCount;
     if (!this.validateCalId(calIdValue) || !this.validateMealCount(mealCountValue)) {
       return;
