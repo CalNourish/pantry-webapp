@@ -12,9 +12,12 @@ import firebase from '../../../firebase/clientApp'
 function requireParams(body) {
   // makes sure that the input is in the right format
   // returns false and an error if not a good input
-  if (body.calID && body.isGrabnGo != null) return true;
-  return false;
-}
+  if (body.calID && body.isGrabnGo != null) {
+    if (body.isGrabnGo) {
+      return body.mealCount != null;
+    }
+    return true;
+} return false; }
 
 //converts from 2022-07-23T20:35:41.935Z to 7/23/2022 12:15:52
 function formatTime(timeToConvert) {
@@ -75,10 +78,15 @@ export default async function (req, res) {
           insertDataOption: "INSERT_ROWS",
           resource: {
             range: rangeQuery,
-            majorDimension: "ROWS",
-            values: [[formatTime(checkInTime), "'" + calID]],
+            majorDimension: "ROWS"
           },
-        };
+        }
+        if (body.isGrabnGo) {
+          request.resource.values = [[formatTime(checkInTime), "'" + calID, "'" + body.mealCount]];
+        } else {
+          request.resource.values = [[formatTime(checkInTime), "'" + calID]];
+        }
+
         sheets.spreadsheets.values.append(request)
         .then(() => {
           res.status(200);
@@ -87,7 +95,7 @@ export default async function (req, res) {
         }
         )
         .catch((error) => {
-          res.status(500).json({error: "error writing to Pantry data sheet: " +  error})
+          res.status(500).json({error: "error writing to Pantry or GrabnGo data sheet: " +  error})
           return resolve();
         });    
         })
