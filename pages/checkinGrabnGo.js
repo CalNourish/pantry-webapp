@@ -178,7 +178,7 @@ class Checkin extends React.Component {
     };
 
   updateID = (id) => {
-      if (['3', '4', '5', '6'].includes(id[0])) {
+      if (['3', '4', '5', '6'].includes(id[0]) && id.length == 8) {
         return '30' + id;
     } return id; };
 
