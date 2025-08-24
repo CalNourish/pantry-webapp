@@ -16,7 +16,12 @@ class Checkin extends React.Component {
       lastScannedID: "N/A",
       lastMealCount: null,
       visitsLastWeek: [],
-      lastScannedTime: "N/A"
+      lastScannedTime: "N/A",
+      referred: ["3039256430", "3036634046", "3039181004", "3039227817", "3039257249", "3039209968", "3039084947", "3035933900", "3033882739", "3039079266", "3039221239", "11325345", "3039121438", "3038120334", "3035833839", "3034907240", "3040544172", "3037996873", "3040345545", "3040430617", 
+        "3039851584", "3037660758", "3040512426", "3038094646", "3039117486", "3037976359", "3040574163", "3040559590", "3040413574", "3037860412", "3037415289", "3040430617", "3040338278", "3040565635", "3040332974", "3040438118", "3040390499", "3040519303", "3034359553", "3040493303", 
+        "3040323731", "3040767109", "3038331389", "3040485802", "3037810453", "3040564504", "3032972321", "3040335366", "3037071832", "3040383544", "3040469604", "3036846453", "3040331570", "3040457722", "3040514610", "3040501025", "3040430058", "3040836204", "3040501506", "3040496189", 
+        "3040388653", "3038327606", "3038068438", "3038054437", "3040526167", "3040345597", "3040424169", "3039101756", "3040509202", "3040455876", "3037627413", "3040863010", "3037282270", "3040560877", "3037765148", "3040542664", "3038366216", "3040388328", "3040369478", "3039335171", 
+        "3039431917", "3036252725", "3037242795", "3039270756", "3039482253", "3039449740", "3039369868", "3039309132", "3035051891", "3038851792", "3038900204", "3039393476", "3037255592", "3040611850", "3039821801", "3036120944", "3038441642", "3036066058", "3040822710"]
     }
   }
 
@@ -83,37 +88,18 @@ class Checkin extends React.Component {
       return <div className='flex-grow'>{messageToReturn}</div>;
     }
     else {
-      var numVisits = this.state.visitsLastWeek.length
-      if (numVisits == 0) {
-        messageToReturn= "This visitor has not visited the pantry this week."  
-        return <div className='flex-grow text-left'>{messageToReturn}</div>;
-      }
-      else if (numVisits == 1) {
-        messageToReturn= "This visitor has already visited the pantry this week on  " + this.state.visitsLastWeek[0] +"."
-      }
-      else if (numVisits == 2) {
-        messageToReturn= "This visitor has already visited the pantry twice this week on  " + this.state.visitsLastWeek[0] + " and " + this.state.visitsLastWeek[1] + "."
-      }
-      else if (numVisits > 2) {
-        var messageToReturn = "This visitor has visited the pantry multiple times this week on "
-        for (var i = 0; i < numVisits; i++) {
-          if (i == numVisits - 1) {
-            messageToReturn = messageToReturn + this.state.visitsLastWeek[i] +"."
-          }
-          else if (i == numVisits - 2) {
-            messageToReturn = messageToReturn + this.state.visitsLastWeek[i] +", and "
-          }
-          else {
-            messageToReturn = messageToReturn + this.state.visitsLastWeek[i] +", "
-          }
-        }
+      if (this.isReferred(this.state.lastScannedID)) {
+        messageToReturn = "This visitor is a referred student."
+      } else {
+        messageToReturn = "This visitor is NOT a referred student."
       }
       return (
         <>
-        <div className='flex-grow text-left bg-amber-400'>{messageToReturn}</div>
-        <button type="submit" id = "submitButton" className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold flex-grow disabled:bg-pantry-blue-400" onClick={() => {this.overrideHandler()}}>
+        <div className='flex-grow text-left'>{messageToReturn}</div>
+        {/* Override Button */}
+        {/* <button type="submit" id = "submitButton" className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold flex-grow disabled:bg-pantry-blue-400" onClick={() => {this.overrideHandler()}}>
         Override
-        </button>
+        </button> */}
         </>
       )
 
@@ -130,8 +116,11 @@ class Checkin extends React.Component {
       }
     })
     .then(() => {
-      this.showSuccess("Sucessfully logged ID: " + id + " and Number of Meals: " + meals,3000)
-    })
+      if (this.isReferred(id)) {
+        this.showSuccess("ID: " + id + " is a referred student.", 5000)
+      } else {
+      this.showSuccess("ID: " + id + " is NOT a referred student.", 5000)
+  }})
   }
 
   validateCalId = (calIdValue) => {
@@ -181,6 +170,12 @@ class Checkin extends React.Component {
       if (['3', '4', '5', '6'].includes(id[0]) && id.length == 8) {
         return '30' + id;
     } return id; };
+
+  isReferred = (id) => {
+      if (this.state.referred.includes(id)) {
+        return true;
+    } return false; };
+
 
   handleScanSubmit = async (e) => {
     var IdFieldset = document.getElementById("calIDFieldset");
