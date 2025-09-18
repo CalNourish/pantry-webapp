@@ -136,6 +136,7 @@ class Checkin extends React.Component {
     const regexes = { 
       'isStudent': /^(30\d{8}|[1278]\d{7})$/,
       'isPostDoc': /^(E\d{8}$)/,
+      'isVisitingScholar': /^(A\d{8})$/,
       'isEmployeeOrAffiliate': /^(01\d{6}|10\d{6})$/,
       'isValidEncrypted': /^810:\d{8}$/,
       'isCommunity': /^1$/
