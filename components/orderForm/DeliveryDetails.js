@@ -39,6 +39,22 @@ export default function DeliveryDetails(props) {
           <span>I will be picking up in person at the Food Pantry.</span>
         </label>
 
+        {/* Delivery Time */}
+        <div className="form-group mb-4">
+          <div className="mb-2">
+            <label 
+              className="block uppercase tracking-wide text-gray-600 text-xs font-bold" 
+              htmlFor="deliveryTimes" data-required="T"
+            >
+              What times will you be available to accept a delivery next week?
+            </label>
+          <p className="text-gray-500 text-xs italic">Please select all that work, we will send an email for a final confirmation.</p>
+          </div>
+          <Select options={deliveryTimeOptions} isMulti isClearable isSearchable value={delivery.deliveryTimes}
+            onChange={(selections) => cartDispatch({ type: 'UPDATE_DELIVERY', payload: {deliveryTimes: selections} })}
+            className={(props.showMissing && (delivery.deliveryTimes.length == 0)) ? "border rounded" + errorAppearance : "border border-transparent"}/>
+        </div>
+        
         {delivery.pickup &&
           <>
             <div className='mb-2'>
@@ -165,22 +181,6 @@ export default function DeliveryDetails(props) {
               cartDispatch({ type: 'UPDATE_DELIVERY', payload: {phone: e.target.value} })
             }}
             />
-        </div>
-
-        {/* Delivery Time */}
-        <div className="form-group mb-4">
-          <div className="mb-2">
-            <label 
-              className="block uppercase tracking-wide text-gray-600 text-xs font-bold" 
-              htmlFor="deliveryTimes" data-required="T"
-            >
-              What times will you be available to accept a delivery next week?
-            </label>
-          <p className="text-gray-500 text-xs italic">Please select all that work, we will send an email for a final confirmation.</p>
-          </div>
-          <Select options={deliveryTimeOptions} isMulti isClearable isSearchable value={delivery.deliveryTimes}
-            onChange={(selections) => cartDispatch({ type: 'UPDATE_DELIVERY', payload: {deliveryTimes: selections} })}
-            className={(props.showMissing && (delivery.deliveryTimes.length == 0)) ? "border rounded" + errorAppearance : "border border-transparent"}/>
         </div>
         
         {/* Delivery Notes */}

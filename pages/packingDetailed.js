@@ -391,7 +391,8 @@ class PackingOrder extends React.Component {
                 {"Dependents: " + this.state.dependents}
               </div>
               <div className="text-large font-medium">
-                {"Dietary Restrictions: " + this.state.dietaryRestriction}
+                {"Dietary Restrictions: "/* idk if it's convention to leave static strings in curly braces?? */}
+                <span className="text-large font-bold text-red-600">{this.state.dietaryRestriction}</span>
               </div>
               <div className="text-large font-medium">
                 {"Additional Note: " + this.state.guestNote}
