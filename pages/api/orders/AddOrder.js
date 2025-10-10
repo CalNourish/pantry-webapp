@@ -215,12 +215,7 @@ function writeOrder(body, itemNames) {
         )
       );
       
-      if (pickup) {
-        deliveryMMDD = ""
-      }
-      else {
-        deliveryMMDD = (deliveryMMDD.getMonth() + 1) + "/" + deliveryMMDD.getDate()
-      }
+      deliveryMMDD = (deliveryMMDD.getMonth() + 1) + "/" + deliveryMMDD.getDate()
   
       let deliveryWindow = `${deliveryWindowStart} - ${deliveryWindowEnd}`
       
@@ -230,8 +225,10 @@ function writeOrder(body, itemNames) {
         calID,
         orderId,
         email,
-        pickup ? "Pickup" : `${deliveryMMDD} ${deliveryDay} ${deliveryWindow}`,
-        pickup ? pickupNotes : (altDelivery? "(" + altDelivery + ")" : "")
+        deliveryMMDD, // WHY IS THIS HERE ACTUALLY? isnt pantry payload was just for in-person checkout
+        deliveryDay,
+        deliveryWindow,
+        pickup ? pickupNotes : (altDelivery? "(" + altDelivery + ")" : "") // not sure what this does lowk
       ]
 
       const pantryFormatting = [
@@ -261,10 +258,13 @@ function writeOrder(body, itemNames) {
         numberOfBags = 3;
       }
 
+      // why do we need BOTH pantryPayload AND bagPackingPayload??
+      // also even though multiple pickup/delivery dates and windows are selected, only the first ones are actually written to DB
       const bagPackingPayload = [
-        pickup ? "Pickup" : deliveryMMDD,
+        deliveryMMDD,
         firstName + " " + lastName.slice(0,1),
-        pickup ? pickupNotes : deliveryWindow,
+        pickupNotes,
+        deliveryWindow,
         numberOfBags,
         frequency,
         dependents,
@@ -273,7 +273,6 @@ function writeOrder(body, itemNames) {
         orderId,
         JSON.stringify(itemNames)
       ] 
-
       const bagPackingFormatting = [
         [ 0, { type: "DATE", pattern: "m/dd" } ],
         [ [1, 10] ] // default formatting is fine, we just want non-bold text
@@ -318,7 +317,8 @@ function writeOrder(body, itemNames) {
         let newOrder = {
           orderId: orderId,
           status: ORDER_STATUS_OPEN,
-          date: pickup ? "" : deliveryMMDD,
+          date: deliveryMMDD,
+          deliveryWindow: deliveryWindow,
           isPickup: pickup,
           dependents: dependents,
           guestNote: additionalRequests,
@@ -327,9 +327,6 @@ function writeOrder(body, itemNames) {
           firstName: firstName,
           lastInitial: lastName.slice(0, 1),
         };
-
-        if (!pickup)
-          newOrder["deliveryWindow"] = deliveryWindow;
 
         // TODO: do we want to save pickup notes to firebase?
 

@@ -100,6 +100,13 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
             <div className='mb-2'>
               You have elected to pick up in person at the Food Pantry.
             </div>
+            {/* THIS IS THE DELIVERY TIMES COMPONENT IN THE PICKUP DETAILS REVIEW THINGY*/}
+            <div className='mb-2'>
+                <div className='font-semibold'>Delivery Time(s):</div>
+                <div className='list-disc'>
+                  {delivery.deliveryTimes?.map((element) => <li className='pl-2' key={element.value}>{element.label}</li>)}
+                </div>
+              </div>
             {delivery.pickup && <div>
               <span className='font-semibold tracking-wide text-gray-600'>Pickup Notes: </span>
               {delivery.pickupNotes}
