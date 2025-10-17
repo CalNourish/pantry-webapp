@@ -81,6 +81,7 @@ class PackingOrders extends React.Component {
             </td>
             <td className="w-auto">{order.numBags}</td>
             <td className="w-auto">{order.date}</td>
+            <td className="w-auto">{order.deliveryWindow}</td>
             <td className="w-auto">{order.status}</td>
             <td className="w-auto">
               <button
@@ -126,7 +127,8 @@ class PackingOrders extends React.Component {
                   <tr className="border-b-2">
                     <th className="w-1/5 text-left">Name</th>
                     <th className="w-1/5 text-left">Number of Bags</th>
-                    <th className="w-2/5 text-left">Pickup Date</th>
+                    <th className="w-1/5 text-left">Pickup Date</th>
+                    <th className="w-1/5 text-left">Pickup Window</th>
                     <th className="w-1/5 text-left">Status</th>
                   </tr>
                 </thead>

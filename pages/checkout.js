@@ -2,6 +2,7 @@ import Layout from '../components/Layout'
 import Sidebar from '../components/Sidebar'
 import useSWR from 'swr';
 import React from 'react';
+import clsx from 'clsx';
 import Modal from 'react-modal'
 import SearchModal from '../components/SearchModal'
 import { useUser } from '../context/userContext'
@@ -138,6 +139,8 @@ class Cart extends React.Component {
     itemData[1] += 1;
     items.set(barcode, itemData);
     this.setState({items: items})
+    console.log("Items after upItemQuantity happens:")
+    console.log(this.state.items)
     this.updateTotalCount();
   
     // focus back on the barcode field
@@ -305,6 +308,27 @@ class Cart extends React.Component {
     )
   }
 
+  displayReceiptRow = (barcode, value) => {
+    const CHARA_LEN = 8
+    if (value[1] > 0) {
+      return (
+        <tr className="h-10 even:bg-gray-100 whitespace-nowrap" key={barcode}>
+          <td className="w-full">
+            {/* number spinner [-| 1 |+] */}
+            <div className="border border-solid border-gray-200 p-px w-32 h-8 flex flex-row">
+              <p className="">{value[1]}</p> {/*using parameter "value" which will be passed in; this function iterates over the items dict */}
+            </div>
+          </td>
+          {/* Item name */}
+          <td className="text-right pr-10">{value[0].itemName.length > 8 ? value[0].itemName.slice(0, CHARA_LEN) + '...' : value[0].itemName}</td>
+        </tr>
+      )
+    } else {
+      return null // what's good practice here?
+    }
+    
+  }
+
   closeModal = () => {
     this.setState({showSearch: false});
     setTimeout(() => {
@@ -395,7 +419,7 @@ class Cart extends React.Component {
 
         <div className="flex flex-col h-full lg:flex-row">
           {/* Left-hand column */}
-          <div className="flex-none lg:w-64">
+          <div className="flex-none lg:w-1/4">
             <Sidebar className="sm:min-h-0 lg:min-h-screen">
             
               {/* Barcode & Quantity Form */}
@@ -433,7 +457,7 @@ class Cart extends React.Component {
           </div>
 
           {/* Main body (Cart and Checkout Button) */}
-          <div className="p-4 container mx-3">
+          <div className="p-4 container mx-3 w-2/4">
             {this.state.error && errorBanner}
             {this.state.success && successBanner}
             <h1 className="text-3xl font-medium mb-2">Cart</h1>
@@ -466,7 +490,7 @@ class Cart extends React.Component {
           </div>
                       
           {/*Right-hand Column*/}
-          <div className="flex-none lg:w-64">
+          <div className="flex-grow lg:w-1/4"> {/*flex-none lg:w-64*/}
             <Sidebar className="sm:min-h-0 lg:min-h-screen">
             {/* Editing the information */}
             {!this.state.isEditing && <button className='text-blue-700 hover:text-blue-500'
@@ -531,6 +555,18 @@ class Cart extends React.Component {
 
             {/* Information Display or Preview (rendered markdown) */}
             {(!this.state.isEditing || this.state.showPreview) && this.state.checkoutInfo && <ReactMarkdown className="mb-4 text-zinc-900" components={markdownStyle} children={this.state.checkoutInfo}></ReactMarkdown>}
+            
+            { /* "Receipt-like" sidebar table showing items that have been scanned */
+              <div className = "parent w-full">
+                  {Array.from(this.state.items)
+                  .sort((a, b) => a[1][0].itemName.localeCompare(b[1][0].itemName))
+                  .map(([barcode, value]) => (this.displayReceiptRow(barcode, value)))}
+                    <h3>Total items: {this.state.itemsInCart}</h3>
+              </div>
+            }
+
+
+
             </Sidebar>
           </div>
         </div>
