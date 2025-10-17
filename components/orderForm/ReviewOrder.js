@@ -103,11 +103,9 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
             {/* THIS IS THE DELIVERY TIMES COMPONENT IN THE PICKUP DETAILS REVIEW THING*/}
             <div className='mb-2'>
                 <div className='font-semibold'>Delivery Time(s):</div>
-                <div className='list-disc'>
                   <ul className="list-disc pl-4">
                   {delivery.deliveryTimes?.map((element) => <li className='pl-1' key={element.value}>{element.label}</li>)}
                   </ul>
-                </div>
               </div>
             {delivery.pickup && <div>
               <span className='font-semibold tracking-wide text-gray-600'>Pickup Notes: </span>
