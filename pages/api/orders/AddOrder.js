@@ -225,7 +225,7 @@ function writeOrder(body, itemNames) {
         calID,
         orderId,
         email,
-        deliveryMMDD, // WHY IS THIS HERE ACTUALLY? isnt pantry payload was just for in-person checkout
+        deliveryMMDD,
         deliveryDay,
         deliveryWindow,
         pickup ? pickupNotes : (altDelivery? "(" + altDelivery + ")" : "") // not sure what this does lowk

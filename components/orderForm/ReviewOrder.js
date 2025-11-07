@@ -100,7 +100,7 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
             <div className='mb-2'>
               You have elected to pick up in person at the Food Pantry.
             </div>
-            {/* THIS IS THE DELIVERY TIMES COMPONENT IN THE PICKUP DETAILS REVIEW THING*/}
+            {/* Delivery Time(s) Dropdown */}
             <div className='mb-2'>
                 <div className='font-semibold'>Delivery Time(s):</div>
                   <ul className="list-disc pl-4">

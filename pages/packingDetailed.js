@@ -395,7 +395,7 @@ class PackingOrder extends React.Component {
                 <span className="text-large font-bold text-red-600">{this.state.dietaryRestriction}</span>
               </div>
               <div className="text-large font-medium">
-                {"Additional Note: " + this.state.guestNote}
+                {"Additional Note: "} <span className="text-large font-bold text-red-600">{this.state.dietaryRestriction}</span>
               </div>
               </div>
               <table className="w-full table-fixed" id="order">
