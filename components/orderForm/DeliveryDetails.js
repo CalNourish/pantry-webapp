@@ -54,6 +54,30 @@ export default function DeliveryDetails(props) {
             onChange={(selections) => cartDispatch({ type: 'UPDATE_DELIVERY', payload: {deliveryTimes: selections} })}
             className={(props.showMissing && (delivery.deliveryTimes.length == 0)) ? "border rounded" + errorAppearance : "border border-transparent"}/>
         </div>
+
+        {/* Phone # */}
+        <div className="form-group mb-4">
+          <div className="mb-2">
+            <label 
+              className="block uppercase tracking-wide text-gray-600 text-xs font-bold" 
+              htmlFor="phone" data-required="T"
+            >
+              Phone
+            </label>
+          <p className="text-gray-500 text-xs italic">Used to call/text to confirm delivery</p>
+          </div>
+          <input 
+            type="tel" 
+            className={inputAppearance + ((props.showMissing && !delivery.phone) ? errorAppearance : "")}
+            placeholder="510-555-5555"
+            pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+            id="phone"
+            value={delivery.phone}
+            onChange={(e) => {
+              cartDispatch({ type: 'UPDATE_DELIVERY', payload: {phone: e.target.value} })
+            }}
+            />
+        </div>
         
         {delivery.pickup &&
           <>
@@ -157,30 +181,6 @@ export default function DeliveryDetails(props) {
               }}
             />
           </div>
-        </div>
-
-        {/* Phone # */}
-        <div className="form-group mb-4">
-          <div className="mb-2">
-            <label 
-              className="block uppercase tracking-wide text-gray-600 text-xs font-bold" 
-              htmlFor="phone" data-required="T"
-            >
-              Phone
-            </label>
-          <p className="text-gray-500 text-xs italic">Used to call/text to confirm delivery</p>
-          </div>
-          <input 
-            type="tel" 
-            className={inputAppearance + ((props.showMissing && !delivery.phone) ? errorAppearance : "")}
-            placeholder="510-555-5555"
-            pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
-            id="phone"
-            value={delivery.phone}
-            onChange={(e) => {
-              cartDispatch({ type: 'UPDATE_DELIVERY', payload: {phone: e.target.value} })
-            }}
-            />
         </div>
         
         {/* Delivery Notes */}

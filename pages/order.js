@@ -69,7 +69,14 @@ export default function Order() {
       }
     }
     else {
-      required = ["streetAddress", "city", "zip", "phone", "deliveryTimes"]
+      required = ["deliveryTimes", "phone"]
+      for (let field of required) {
+          if (!delivery[field] || delivery[field].length == 0) {
+            return false;
+          }
+      }
+      // now even if they're picking up deliveryTimes and phone still need to be given :]
+      required = ["streetAddress", "city", "zip"]
       if (!delivery.pickup) {
         for (let field of required) {
           if (!delivery[field] || delivery[field].length == 0) {
@@ -77,7 +84,7 @@ export default function Order() {
           }
         }
       }
-      if (!personal.eligibilityConf || (!delivery.pickup && !personal.doordashConf)) {
+      if (!personal.eligibilityConf || /*add condition for phone number, deliveryTimes, */ (!delivery.pickup && !personal.doordashConf)) {
         // don't require doordash confirmation if pickup
         return false;
       }
