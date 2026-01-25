@@ -2,6 +2,7 @@ import Layout from '../components/Layout'
 import Sidebar from '../components/Sidebar'
 import useSWR from 'swr';
 import React from 'react';
+import clsx from 'clsx';
 import Modal from 'react-modal'
 import SearchModal from '../components/SearchModal'
 import { useUser } from '../context/userContext'
@@ -284,7 +285,6 @@ class Cart extends React.Component {
     return (
       <tr className="h-10 even:bg-gray-100 whitespace-nowrap" key={barcode}>
         <td>
-          {/* number spinner [-| 1 |+] */}
           <div className="border border-solid border-gray-200 p-px w-32 h-8 flex flex-row">
             {/* minus */}
             <button className="font-light p-1 bg-gray-300 w-8 h-full text-xl leading-3 focus:outline-none" onClick={() => this.downItemQuantity(barcode, true)} tabIndex="-1">–</button>
@@ -303,6 +303,26 @@ class Cart extends React.Component {
         </button>
       </tr>
     )
+  }
+
+  displayReceiptRow = (barcode, value) => {
+    const CHARA_LEN = 40
+    if (value[1] > 0) {
+      return (
+        <tr className="h-10 whitespace-nowrap" key={barcode}>
+          <td className="w-auto">
+            <div className="border-r border-solid border-black p-px flex flex-row">
+              <p className="font-bold w-5">{value[1]}</p> {/*using parameter "value" which will be passed in; this function iterates over the items dict */}
+            </div>
+          </td>
+          {/* Item name */}
+          <td className="text-left pr-10 pl-4">{value[0].itemName.length > CHARA_LEN ? value[0].itemName.slice(0, CHARA_LEN) + '...' : value[0].itemName}</td>
+        </tr>
+      )
+    } else {
+      return null
+    }
+    
   }
 
   closeModal = () => {
@@ -395,7 +415,7 @@ class Cart extends React.Component {
 
         <div className="flex flex-col h-full lg:flex-row">
           {/* Left-hand column */}
-          <div className="flex-none lg:w-64">
+          <div className="flex-none lg:w-1/4">
             <Sidebar className="sm:min-h-0 lg:min-h-screen">
             
               {/* Barcode & Quantity Form */}
@@ -433,31 +453,28 @@ class Cart extends React.Component {
           </div>
 
           {/* Main body (Cart and Checkout Button) */}
-          <div className="p-4 container mx-3">
+          <div className="p-4 container mx-3 w-2/4">
             {this.state.error && errorBanner}
             {this.state.success && successBanner}
             <h1 className="text-3xl font-medium mb-2">Cart</h1>
+            <div className="text-lg font-medium bg-blue-50 py-3 px-1">Total Items: {this.state.itemsInCart}</div>
             <table className="w-full my-5 table-fixed" id="mycart">
               <thead>
-                <tr className="border-b-2">
+                {/*<tr className="bg-blue-50 h-10 m-3" key="totals">*/}
+                
                   <th className="text-left w-48 text-lg">
                     <div className="w-32 text-center">
                       Quantity
                     </div>
                   </th>
                   <th className="w-auto text-left text-lg">Item</th>
-                </tr>
               </thead>
               <tbody className="divide-y">
+                
                 {Array.from(this.state.items)
                 .sort((a, b) => a[1][0].itemName.localeCompare(b[1][0].itemName))
                 .map(([barcode, value]) => (this.displayCartRow(barcode, value)))}
-                <tr className="bg-blue-50 h-10 m-3" key="totals">
-                  <td className="text-lg font-medium text-right pr-10">Total Items</td>
-                  <td>
-                    <div className="w-32 text-center font-medium">{this.state.itemsInCart}</div>
-                  </td>
-                </tr>
+                
               </tbody>
             </table>
             <button className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" onClick={(e) => this.submitCart(e)} disabled={this.state.loading}>
@@ -466,8 +483,18 @@ class Cart extends React.Component {
           </div>
                       
           {/*Right-hand Column*/}
-          <div className="flex-none lg:w-64">
+          <div className="flex-grow lg:w-1/4"> {/*flex-none lg:w-64*/}
             <Sidebar className="sm:min-h-0 lg:min-h-screen">
+            
+            { /* "Receipt-like" sidebar table showing items that have been scanned */
+              <div className = "parent w-full bg-white rounded-md p-4">
+                <h2 className="font-bold text-xl py-3">Summary <span className="text-blue-700">({this.state.itemsInCart} items)</span></h2>
+                  {Array.from(this.state.items)
+                  .sort((a, b) => a[1][0].itemName.localeCompare(b[1][0].itemName))
+                  .map(([barcode, value]) => (this.displayReceiptRow(barcode, value)))}
+              </div>
+            }
+
             {/* Editing the information */}
             {!this.state.isEditing && <button className='text-blue-700 hover:text-blue-500'
               onClick={() => this.setState({isEditing:true})}>
@@ -531,6 +558,10 @@ class Cart extends React.Component {
 
             {/* Information Display or Preview (rendered markdown) */}
             {(!this.state.isEditing || this.state.showPreview) && this.state.checkoutInfo && <ReactMarkdown className="mb-4 text-zinc-900" components={markdownStyle} children={this.state.checkoutInfo}></ReactMarkdown>}
+            
+
+
+
             </Sidebar>
           </div>
         </div>

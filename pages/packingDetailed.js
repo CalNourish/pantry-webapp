@@ -41,6 +41,7 @@ class PackingOrder extends React.Component {
       orderId: props.data[0].orderId,
       date: props.data[0].date,
       isPickup: props.data[0].isPickup,
+      pickupNotes: props.data[0].pickupNotes,
       dependents: props.data[0].dependents,
       dietaryRestriction: props.data[0].dietaryRestriction ? props.data[0].dietaryRestriction : "N/A",
       pantryNote: props.data[0].pantryNote,
@@ -382,6 +383,8 @@ class PackingOrder extends React.Component {
                 <p className="inline font-medium">Type: </p>
                 <p className="inline">{this.state.isPickup? "Pickup" : "Delivery"}</p>
               </div>
+              
+              {/* THE FOLLOWING DOES NOT SHOW UP: <div className="inline ml-4">{"Additional Pickup Notes: "}<span className="text-large font-bold text-red-600">{this.state.pickupNotes}</span></div> */}
               <div className="inline items-center space-x-4">
                 {this.displayOrderStatus()}
                 {this.displayChangeOrderStatus()}
@@ -391,10 +394,11 @@ class PackingOrder extends React.Component {
                 {"Dependents: " + this.state.dependents}
               </div>
               <div className="text-large font-medium">
-                {"Dietary Restrictions: " + this.state.dietaryRestriction}
+                {"Dietary Restrictions: "}
+                <span className="text-large font-bold text-red-600">{this.state.dietaryRestriction}</span>
               </div>
               <div className="text-large font-medium">
-                {"Additional Note: " + this.state.guestNote}
+                {"Additional Note: "} <span className="text-large font-bold text-red-600">{this.state.guestNote}</span>
               </div>
               </div>
               <table className="w-full table-fixed" id="order">
