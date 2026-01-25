@@ -9,7 +9,7 @@ export default function Footer() {
           <li className="mx-1 flex justify-center items-center text-center">Designed and built with ❤️ by CalNourish</li>
           <li className="mx-1 flex justify-center items-center">•</li>
           <li className="mx-1 flex justify-center items-center">
-            <Link href="/"><a className="hover:underline">Privacy</a></Link>
+            <Link href="/privacy"><a className="hover:underline">Privacy</a></Link>
           </li>
         </ul>
         <div className="relative h-8 p-2">
