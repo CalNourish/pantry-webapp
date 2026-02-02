@@ -269,18 +269,19 @@ function writeOrder(body, itemNames) {
       }
 
       const bagPackingPayload = [
-        deliveryMMDD,
+        orderId,
         firstName + " " + lastName.slice(0,1),
-        pickupNotes,
+        deliveryMMDD,
         deliveryWindow,
-        numberOfBags,
-        frequency,
+        deliveryDay,
         dependents,
+        numberOfBags,
+        pickupNotes,
         dietaryRestrictions,
         additionalRequests,
-        orderId,
         JSON.stringify(itemNames)
-      ] 
+      ]
+
       const bagPackingFormatting = [
         [ 0, { type: "DATE", pattern: "m/dd" } ],
         [ [1, 10] ] // default formatting is fine, we just want non-bold text
