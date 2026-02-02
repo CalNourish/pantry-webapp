@@ -26,10 +26,12 @@ export default function DeliveryDetails(props) {
   
   return (
     <>
-      <h2 className="text-lg mb-4 block tracking-wide text-gray-600 font-bold">Delivery/Pickup Details</h2>
+      <h2 className="text-lg mb-4 block tracking-wide text-gray-600 font-bold">Pickup Details</h2>
       {/* Pickup Option */}
       <div className='mb-4'>
-        <label htmlFor="pickup-option"
+
+        {/* For Delivery Option */}
+        {/* <label htmlFor="pickup-option"
           className="block tracking-wide font-bold mb-2"
         >
           <input id="pickup-option" className="mr-2 leading-tight" type="checkbox"
@@ -37,7 +39,7 @@ export default function DeliveryDetails(props) {
             onChange={(e) => cartDispatch({ type: 'UPDATE_DELIVERY', payload: {pickup: e.target.checked}})}
           />
           <span>I will be picking up in person at the Food Pantry.</span>
-        </label>
+        </label> */}
 
         {/* Delivery Time */}
         <div className="form-group mb-4">
@@ -46,13 +48,13 @@ export default function DeliveryDetails(props) {
               className="block uppercase tracking-wide text-gray-600 text-xs font-bold" 
               htmlFor="deliveryTimes" data-required="T"
             >
-              What times will you be available to accept a delivery next week?
+              What time will you be available to pickup this week?
             </label>
-          <p className="text-gray-500 text-xs italic">Please select all that work, we will send an email for a final confirmation.</p>
+          <p className="text-gray-500 text-xs italic">Please select the best day and time window, we will send an email confirmation once we’ve packed your bag and it’s ready.</p>
           </div>
-          <Select options={deliveryTimeOptions} isMulti isClearable isSearchable value={delivery.deliveryTimes}
+          <Select options={deliveryTimeOptions} isClearable isSearchable value={delivery.deliveryTimes}
             onChange={(selections) => cartDispatch({ type: 'UPDATE_DELIVERY', payload: {deliveryTimes: selections} })}
-            className={(props.showMissing && (delivery.deliveryTimes.length == 0)) ? "border rounded" + errorAppearance : "border border-transparent"}/>
+            className={(props.showMissing && (!delivery.deliveryTimes)) ? "border rounded" + errorAppearance : "border border-transparent"}/>
         </div>
 
         {/* Phone # */}
@@ -64,7 +66,7 @@ export default function DeliveryDetails(props) {
             >
               Phone
             </label>
-          <p className="text-gray-500 text-xs italic">Used to call/text to confirm delivery</p>
+          <p className="text-gray-500 text-xs italic">Used to call/text to confirm pickup only if needed</p>
           </div>
           <input 
             type="tel" 
@@ -86,9 +88,9 @@ export default function DeliveryDetails(props) {
                 className="block uppercase tracking-wide text-gray-600 text-xs font-bold mb-1" 
                 htmlFor="pickup-times" data-required="F"
               >
-                Pickup notes: time preference, or any other details
+                PickUp Notes: Provide any other details
               </label>
-              <p className="text-gray-500 text-xs italic">Pantry staff will contact you by email to confirm pickup time.</p>
+              <p className="text-gray-500 text-xs italic">Pantry staff will contact you by email when your groceries are ready.</p>
             </div>
             <textarea
               className="appearance-none block w-full bg-gray-100 text-gray-600 border border-gray-100 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-400" 

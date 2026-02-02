@@ -52,7 +52,29 @@ class PackingOrders extends React.Component {
   }
 
   displayOrderRow(order, delivery) {
-    if (delivery && !order.isPickup) {
+    // if (delivery && !order.isPickup) {
+    //   return (
+    //     <tr className="h-10" key={order.id}>
+    //       <td className="w-auto">
+    //         <a href={order.url}>{order.name}</a>
+    //       </td>
+    //       <td className="w-auto">{order.numBags}</td>
+    //       <td className="w-auto">{order.date}</td>
+    //       <td className="w-auto">{order.deliveryWindow}</td>
+    //       <td className="w-auto">{order.status}</td>
+    //       <td className="w-auto">
+    //         <button
+    //           className="font-bold text-xl w-5 h-5"
+    //           onClick={() => this.deleteOrder(order.id)}
+    //         >
+    //           <img src="/images/trash-can.svg"></img>
+    //           {/* <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> */}
+    //         </button>
+    //       </td>
+    //     </tr>
+    //   );
+    // } else 
+    if (!delivery && order.isPickup) {
       return (
         <tr className="h-10" key={order.id}>
           <td className="w-auto">
@@ -60,6 +82,7 @@ class PackingOrders extends React.Component {
           </td>
           <td className="w-auto">{order.numBags}</td>
           <td className="w-auto">{order.date}</td>
+          <td className="w-auto">{order.day}</td>
           <td className="w-auto">{order.deliveryWindow}</td>
           <td className="w-auto">{order.status}</td>
           <td className="w-auto">
@@ -73,27 +96,6 @@ class PackingOrders extends React.Component {
           </td>
         </tr>
       );
-    } else if (!delivery && order.isPickup) {
-        return (
-          <tr className="h-10" key={order.id}>
-            <td className="w-auto">
-              <a href={order.url}>{order.name}</a>
-            </td>
-            <td className="w-auto">{order.numBags}</td>
-            <td className="w-auto">{order.date}</td>
-            <td className="w-auto">{order.deliveryWindow}</td>
-            <td className="w-auto">{order.status}</td>
-            <td className="w-auto">
-              <button
-                className="font-bold text-xl w-5 h-5"
-                onClick={() => this.deleteOrder(order.id)}
-              >
-                <img src="/images/trash-can.svg"></img>
-                {/* <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> */}
-              </button>
-            </td>
-          </tr>
-        );
     }
   }
 
@@ -103,7 +105,7 @@ class PackingOrders extends React.Component {
         <Layout pageName="Orders">
           <div className="flex justify-center items-center">
             <div className="w-4/5 p-5">
-              <h1 className="text-3xl font-medium mb-2">Delivery</h1>
+              {/* <h1 className="text-3xl font-medium mb-2">Delivery</h1>
               <table className="w-full items-stretch" id="orders">
                 <thead>
                   <tr className="border-b-2">
@@ -120,7 +122,7 @@ class PackingOrders extends React.Component {
                   )}
                 </tbody>
               </table>
-              <br></br>
+              <br></br> */}
               <h1 className="text-3xl font-medium mb-2">Pick-up</h1>
               <table className="w-full items-stretch" id="orders">
                 <thead>
@@ -128,6 +130,7 @@ class PackingOrders extends React.Component {
                     <th className="w-1/5 text-left">Name</th>
                     <th className="w-1/5 text-left">Number of Bags</th>
                     <th className="w-1/5 text-left">Pickup Date</th>
+                    <th className="w-1/5 text-left">Day</th>
                     <th className="w-1/5 text-left">Pickup Window</th>
                     <th className="w-1/5 text-left">Status</th>
                   </tr>
@@ -168,6 +171,7 @@ const createOrderObjects = (results) => {
     }
 
     orderObj.date = value.date ? value.date : "N/A";
+    orderObj.day = value.day
     orderObj.isPickup = value.isPickup;
     orderObj.deliveryWindow = value.deliveryWindow
       ? value.deliveryWindow
