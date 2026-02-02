@@ -57,7 +57,7 @@ const initialState = {
    dependents:"", dietaryRestrictions: "", additionalRequests:""
   },
   delivery: {
-    pickup:false, pickupNotes:"", streetAddress:"", address2:"", city:"", zip:"", phone:"", notes:"", deliveryTimes:[]
+    pickup:true, pickupNotes:"", streetAddress:"", address2:"", city:"", zip:"", phone:"", notes:"", deliveryTimes:[]
   },
   cart: {}
 };

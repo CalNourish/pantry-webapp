@@ -106,7 +106,7 @@ export default function Order() {
   let topBar = 
   <div className='mb-4 flex flex-row items-center'>
       <button onClick={() => {setFormStep(formStep - 1); setShowMissing(false);}} className={"btn btn-outline" + ((formStep == 0 || formStep >= 4) ? " invisible" : "")}>Back</button>
-      <h1 className="text-2xl text-center font-bold flex-grow">Food Resource Delivery Request</h1>
+      <h1 className="text-2xl text-center font-bold flex-grow">Food Resource Pickup Request</h1>
       <button className={"btn btn-pantry-blue py-2 px-4" + (formStep >= 2 ? " invisible" : "")} onClick={handleNext}>Next</button>
   </div>
 
@@ -259,7 +259,8 @@ export default function Order() {
         </span>
       </label>
       
-      { formStep > 0 && !delivery.pickup &&
+      {/* We do not do deliveries anymore! Keeping it just in case  */}
+      {/* { formStep > 0 && !delivery.pickup &&
         <>
           <label htmlFor="doordash-confirmation" data-required={delivery.pickup ? "" : "T"}
             className={"block tracking-wide font-bold p-1.5" + ((showMissing && !personal.doordashConf) ? " border-red-600 border rounded" : " border border-transparent")}
@@ -277,7 +278,8 @@ export default function Order() {
             The information provided includes your name, address, phone number, and delivery notes.
           </p>
         </>
-      }
+      } */}
+
     </div>
   </div>
 

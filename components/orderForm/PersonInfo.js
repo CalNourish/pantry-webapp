@@ -109,7 +109,6 @@ export default function PersonInfo(props) {
             <option value="" disabled>Select status</option>
             <option>Undergraduate Student</option>
             <option>Graduate Student</option>
-            <option>Staff</option>
             <option>Visiting Scholar</option>
             <option>Postdoc</option>
           </select>

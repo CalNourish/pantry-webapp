@@ -197,26 +197,36 @@ function writeOrder(body, itemNames) {
         minute: "2-digit"
       });
 
-      let dayOfWeekIdx = 0;
-      if (!pickup) {
-        dayOfWeekIdx = dayNameToIndex[deliveryDay]
-      }
+      // let dayOfWeekIdx = 0;
+      // if (!pickup) {
+      //   dayOfWeekIdx = dayNameToIndex[deliveryDay]
+      // }
   
-      let d = new Date();
+      // let d = new Date();
 
-      let daysToAdd = dayOfWeekIdx - d.getDay() % 7;
-      if (daysToAdd < 2) {
-        daysToAdd = daysToAdd + 7;
-      }
+      // let daysToAdd = dayOfWeekIdx - d.getDay() % 7;
       
-      let deliveryMMDD = new Date(
-        d.setDate(
-          d.getDate() + daysToAdd
-        )
-      );
-      
-      deliveryMMDD = (deliveryMMDD.getMonth() + 1) + "/" + deliveryMMDD.getDate()
-  
+      // let deliveryMMDD = new Date(
+      //   d.setDate(
+      //     d.getDate() + daysToAdd
+      //   )
+      // );
+      // deliveryMMDD = (deliveryMMDD.getMonth() + 1) + "/" + deliveryMMDD.getDate()
+
+
+      const today = new Date();
+      const todayIdx = today.getDay();
+
+      const chosenIdx = dayNameToIndex[deliveryDay];
+
+      let daysToAdd = (chosenIdx - todayIdx + 7) % 7;
+      if (daysToAdd === 0) daysToAdd = 7;
+
+      const deliveryDate = new Date(today);
+      deliveryDate.setDate(today.getDate() + daysToAdd);
+
+      let deliveryMMDD = `${deliveryDate.getMonth() + 1}/${deliveryDate.getDate()}`;
+            
       let deliveryWindow = `${deliveryWindowStart} - ${deliveryWindowEnd}`
       
       // Schema is [current date, CalID (encrypted), unique order id, email, deliveryDate, alternateDates]
@@ -228,7 +238,7 @@ function writeOrder(body, itemNames) {
         deliveryMMDD,
         deliveryDay,
         deliveryWindow,
-        pickup ? pickupNotes : (altDelivery? "(" + altDelivery + ")" : "") // not sure what this does lowk
+        pickup ? pickupNotes : (altDelivery? "(" + altDelivery + ")" : "") 
       ]
 
       const pantryFormatting = [
@@ -258,8 +268,6 @@ function writeOrder(body, itemNames) {
         numberOfBags = 3;
       }
 
-      // why do we need BOTH pantryPayload AND bagPackingPayload??
-      // also even though multiple pickup/delivery dates and windows are selected, only the first ones are actually written to DB
       const bagPackingPayload = [
         deliveryMMDD,
         firstName + " " + lastName.slice(0,1),
@@ -318,6 +326,7 @@ function writeOrder(body, itemNames) {
           orderId: orderId,
           status: ORDER_STATUS_OPEN,
           date: deliveryMMDD,
+          day: deliveryDay,
           deliveryWindow: deliveryWindow,
           isPickup: pickup,
           dependents: dependents,

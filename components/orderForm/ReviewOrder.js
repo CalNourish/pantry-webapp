@@ -14,11 +14,11 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
       items[barcode] = cart[barcode].quantity
     }
 
-    let altDelivery = delivery.deliveryTimes?.slice(1).map((element) => element.label)
+    let altDelivery = delivery.deliveryTimes?.label;
     
     let deliveryDay = "", timeStart = "", timeEnd = "";
-    if (delivery.deliveryTimes.length > 0) {
-      let firstChoice = delivery.deliveryTimes[0]
+    if (delivery.deliveryTimes) {
+      let firstChoice = delivery.deliveryTimes
       deliveryDay = firstChoice.info.dayOfWeek
       timeStart = firstChoice.info.startTime
       timeEnd = firstChoice.info.endTime
@@ -43,8 +43,7 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
       deliveryDay: deliveryDay,
       deliveryWindowStart: timeStart,
       deliveryWindowEnd: timeEnd,
-      altDelivery: altDelivery.join(","), // list all delivery choices
-
+      altDelivery: altDelivery, // list all delivery choices
       email: personal.email,
       phone: delivery.phone,
       dropoffInstructions: delivery.notes
@@ -102,9 +101,9 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
             </div>
             {/* Delivery Time(s) Dropdown */}
             <div className='mb-2'>
-                <div className='font-semibold'>Delivery Time(s):</div>
+                <div className='font-semibold'>Delivery Time:</div>
                   <ul className="list-disc pl-4">
-                  {delivery.deliveryTimes?.map((element) => <li className='pl-1' key={element.value}>{element.label}</li>)}
+                  {delivery.deliveryTimes && (<li className="pl-1"> {delivery.deliveryTimes.label}</li>)}
                   </ul>
               </div>
             {delivery.pickup && <div>
@@ -128,9 +127,9 @@ export default function ReviewOrder({updatePersonalInfo, updateDeliveryDetails, 
                 <div><span className='font-semibold'>Phone:</span> {delivery.phone}</div>
               </div>
               <div className='mb-2'>
-                <div className='font-semibold'>Delivery Time(s):</div>
+                <div className='font-semibold'>Delivery Time:</div>
                 <div className='list-disc'>
-                  {delivery.deliveryTimes?.map((element) => <li className='pl-2' key={element.value}>{element.label}</li>)}
+                  {delivery.deliveryTimes && (<li className="pl-1"> {delivery.deliveryTimes.label}</li>)}
                 </div>
               </div>
             </div>
