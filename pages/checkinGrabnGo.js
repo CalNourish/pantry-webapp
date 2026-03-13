@@ -94,7 +94,7 @@ class Checkin extends React.Component {
   writeIDandMealsToSheet = async (id) => {
     fetch('/api/admin/WriteCheckIn', { 
       method: 'POST',
-      body: JSON.stringify({ calID: id, mealCount: "NA", isGrabnGo: true }),
+      body: JSON.stringify({ calID: id, mealCount: 1, isGrabnGo: true }),
       headers: {
         'Content-Type': "application/json",
         'Authorization': this.props.user.authToken
@@ -185,7 +185,7 @@ class Checkin extends React.Component {
         <div className='m-6'>
         {this.state.error && errorBanner}
         {this.state.success && successBanner}
-          <h1 className='text-3xl font-medium mb-2'>Pantry Check-In</h1>
+          <h1 className='text-3xl font-medium mb-2'>GrabnGo Check-In</h1>
           <div className='flex flex-row space-x-16 my-8'>
             <form onSubmit={(e) => this.handleScanSubmit(e)}>
               <fieldset id="calIDFieldset" disabled={false}>
