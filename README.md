@@ -25,6 +25,7 @@ cp .env.local.example .env.local
 
 2. Set each variable except the final two in `.env.local` with your Firebase Configuration (found in "Project settings"). For the final two, either ask someone for their values (preferable) or go to "Project Settings" and then "Service accounts" in Firebase Console and hit "Generate new private key" to get a private key.
 
+3. Follow the instructions on this website to download Node.js: [Node.js](https://nodejs.org/en/download/)
 ### Run these comments
 
 ```npm -g install firebase-tools```
