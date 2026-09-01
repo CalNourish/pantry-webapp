@@ -14,7 +14,7 @@ class Checkin extends React.Component {
       error: null,
       success: null,
       lastScannedID: "N/A",
-      visitsLastWeek: [],
+      visitsToday: [],
       lastScannedTime: "N/A",
     }
   }
@@ -49,7 +49,6 @@ class Checkin extends React.Component {
     document.getElementById("calID").focus();
 
   }
-
   
   showLastScannedInfo = () => {
     if (this.state.lastScannedID == "N/A") {
@@ -64,10 +63,9 @@ class Checkin extends React.Component {
     }
   };
 
-
   overrideHandler = () => {
     this.writeIDandMealsToSheet(this.state.lastScannedID);
-    this.setState({lastScannedID: "N/A", visitsLastWeek: [], lastScannedTime: "N/A"});
+    this.setState({lastScannedID: "N/A", visitsToday: [], lastScannedTime: "N/A"});
     this.showLastVisitInfo();
   }
 
@@ -77,14 +75,21 @@ class Checkin extends React.Component {
       return <div className='flex-grow'>{messageToReturn}</div>;
     }
     else {
-      messageToReturn = "This visitor has not visited the kitchen today."
+      var numVisits = this.state.visitsToday.length
+      if (numVisits == 0) {
+        messageToReturn= "This visitor has not visited Grab n Go today."  
+        return <div className='flex-grow text-left'>{messageToReturn}</div>;
+      }
+      else {
+        messageToReturn= "This visitor has already visited Grab n Go on  " + this.state.visitsToday[0] +"."
+      }
+      
       return (
         <>
-        <div className='flex-grow text-left'>{messageToReturn}</div>
-        {/* Override Button */}
-        {/* <button type="submit" id = "submitButton" className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold flex-grow disabled:bg-pantry-blue-400" onClick={() => {this.overrideHandler()}}>
+        <div className='flex-grow text-left bg-amber-400'>{messageToReturn}</div>
+        <button type="submit" id = "submitButton" className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold flex-grow disabled:bg-pantry-blue-400" onClick={() => {this.overrideHandler()}}>
         Override
-        </button> */}
+        </button>
         </>
       )
 
@@ -107,7 +112,7 @@ class Checkin extends React.Component {
         this.showError("Failed scanning ID: " + id + err, 3000);
       });
   }
-
+  
   validateCalId = (calIdValue) => {
     const regexes = { 
       'isStudent': /^(30\d{8}|[1278]\d{7})$/,
@@ -150,14 +155,43 @@ class Checkin extends React.Component {
       return;
     }
 
+    fetch('/api/admin/CheckPreviousVisitGrabnGo', {
+      method: 'POST',
+      body: JSON.stringify({calID: calIdValue, isGrabnGo:true}),
+      headers: {'Content-Type': "application/json", 'Authorization': this.props.user.authToken}
+    })
+    .then((result) => {
+      result.json()
+      .then((lastVisitedTimes) => {
+        if (lastVisitedTimes.error) {
+          this.showError(lastVisitedTimes.error)
+        }
+        else {
+          this.setState({lastScannedID:calIdValue, visitsToday:lastVisitedTimes, lastScannedTime:new Date().toLocaleTimeString()})
+          if (lastVisitedTimes.length == 0) {
+            this.writeIDandMealsToSheet(calIdValue)
+          }
+          else {
+            this.showError("Failed scanning ID: " + calIdValue + ". This visitor has visited already.",3000)
+          }
+          document.getElementById("calID").value = null;
+          document.getElementById("calID").focus();
+        }
+      })
+      .catch((err) => {
+        this.showError("Failed scanning ID: " + calIdValue + err,3000)
+      });
+    })
+    .catch((err) => {
+      this.showError("Failed scanning ID: " + calIdValue + err,300)
+    })
+
     // Directly update the state and proceed with other actions
     this.setState({
       lastScannedID: calIdValue,
-      visitsLastWeek: [], // Placeholder if you need this state, otherwise you can remove it
+      visitsToday: [], // Placeholder if you need this state, otherwise you can remove it
       lastScannedTime: new Date().toLocaleTimeString()
     });
-
-    this.writeIDandMealsToSheet(calIdValue);
 
     document.getElementById("calID").value = null;
     document.getElementById("calID").focus();  
@@ -181,7 +215,7 @@ class Checkin extends React.Component {
     }
   
     return (
-      <Layout pageName="Check-In">
+      <Layout pageName="GrabnGo-Check-In">
         <div className='m-6'>
         {this.state.error && errorBanner}
         {this.state.success && successBanner}
