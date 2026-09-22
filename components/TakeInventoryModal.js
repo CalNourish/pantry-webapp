@@ -58,22 +58,6 @@ class TakeInventory extends React.Component {
     }),
   };
 
-  // updateQuantityInputs = (changes) => {
-  //   this.setState((previous) => {
-  //     let numPacks = Number(
-  //       changes.numPacks ?? previous.numPacks
-  //     ) || 0;
-  //     let individual = Number(
-  //       changes.individual ?? previous.individual) || 0;
-  //     let currentStock = Number(this.props.parentState.count) > 0 ? Number(this.props.parentState.count) : 0
-  //     let packSize = Number(this.props.parentState.packSize) > 0 ? Number(this.props.parentState.packSize) : 0
-  //     return {
-  //       ...changes,
-  //       newQuantity: this.props.isAdd ? currentStock + (numPacks * packSize) + individual : (numPacks * packSize) + individual,
-  //     }
-  //   })
-  // }
-
   render() {
     return (
       <div className="modal-wrapper p-5 h-full flex flex-col">
