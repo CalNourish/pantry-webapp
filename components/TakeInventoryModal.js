@@ -10,6 +10,8 @@ class TakeInventory extends React.Component {
       oldCount: props.parentState.count,
       items: props.data,
       numCases: 0,
+      numPacks: "",
+      individual: "",
       newQuantity: 0,
     };
     this.options = Object.keys(this.state.items).map((key) => {
@@ -24,14 +26,19 @@ class TakeInventory extends React.Component {
     this.props.parentState.count = this.state.newQuantity;
     this.props.onSubmitHandler(e);
     this.setState({
-      numPacks: 0,
-      newQuantity:0,
+      numPacks: "",
+      individual: "",
+      newQuantity: 0
     });
     this.props.parentState.barcode = null;
-    document.getElementById('count').value= ""
   }
 
   selectItem(barcode) {
+    this.setState({
+      numPacks: "",
+      individual: "",
+      newQuantity: 0,
+    })
     this.props.parentState.barcode = barcode
     this.props.barcodeLookup(barcode);
   }
@@ -56,12 +63,12 @@ class TakeInventory extends React.Component {
       <div className="modal-wrapper p-5 h-full flex flex-col">
         <div id="modalExit" className="text-4xl absolute top-0 right-0 cursor-pointer hover:text-gray-500" onClick={this.props.onCloseHandler}>&times; &nbsp;</div>
         <div className="modal-header text-3xl font-bold">
-                {this.props.isAdd ? "Add Inventory" : "Take Inventory"}
+          {this.props.isAdd ? "Add Inventory" : "Take Inventory"}
         </div>
 
         {this.props.status.loading && <div className="bg-yellow-200 border border-yellow-400 text-yellow-700 px-4 py-2 rounded relative mb-3"> Updating ...</div>}
         {this.props.status.error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded relative mb-3">
-        Error: <span className="font-mono font-bold">{this.props.status.error}</span></div>}   
+          Error: <span className="font-mono font-bold">{this.props.status.error}</span></div>}
 
         {/* Item Search Select */}
         <div className="mb-5">
@@ -92,7 +99,7 @@ class TakeInventory extends React.Component {
         {/* Number of packs and updated count */}
         <div className="mb-4">
           <div className="flex relative space-x-10 items-stretch">
-           <div className="ml-3">
+            <div className="ml-3">
               <label className="block text-gray-600 text-sm font-bold mb-2">
                 Number of Packs
               </label>
@@ -100,16 +107,20 @@ class TakeInventory extends React.Component {
                 <input
                   type="number"
                   id="count"
+                  value={this.state.numPacks}
                   autoComplete="off"
                   className={
                     "shadow appearance-none border rounded w-full py-2 px-3 text-gray-600 leading-tight focus:outline-none focus:shadow-outline"
                   }
                   onChange={(e) => {
-                    this.state.numPacks = e.currentTarget.value;
+
+                    const numPacks = Number(e.target.value) > 0 ? Number(e.target.value) : 0;
+                    const individual = Number(this.state.individual) > 0 ? Number(this.state.individual) : 0;
+                    const current = Number(this.props.parentState.count) > 0 ? Number(this.props.parentState.count) : 0;
+                    const packSize = Number(this.props.parentState.packSize) > 0 ? Number(this.props.parentState.packSize) : 1;
                     this.setState({
-                      numPacks: e.currentTarget.value,
-                      newQuantity:
-                      (this.props.isAdd && this.props.parentState.count > 0) ? this.props.parentState.count + this.state.numPacks * this.props.parentState.packSize : this.state.numPacks * this.props.parentState.packSize,
+                      numPacks: e.target.value,
+                      newQuantity: current + (numPacks * packSize) + individual,
                     });
                   }}
                 />
@@ -120,9 +131,37 @@ class TakeInventory extends React.Component {
                 Quantity per Pack
               </label>
               <label className="block text-gray-600 text-sm font-bold mb-2">
-                  {this.props.parentState.packSize}
+                {this.props.parentState.packSize}
               </label>
             </div>
+            <div className="ml-3">
+              <label className="block text-gray-600 text-sm font-bold mb-2">
+                Individual Quantity
+              </label>
+              <div className="flex relative items-stretch">
+                <input
+                  type="number"
+                  id="individual-count"
+                  autoComplete="off"
+                  value={this.state.individual}
+                  className={
+                    "shadow appearance-none border rounded w-full py-2 px-3 text-gray-600 leading-tight focus:outline-none focus:shadow-outline"
+                  }
+                  onChange={(e) => {
+                    const numPacks = Number(this.state.numPacks) > 0 ? Number(this.state.numPacks) : 0;
+                    const individual = Number(e.target.value) > 0 ? Number(e.target.value) : 0;
+                    const current = Number(this.props.parentState.count) > 0 ? Number(this.props.parentState.count) : 0;
+                    const packSize = Number(this.props.parentState.packSize) > 0 ? Number(this.props.parentState.packSize) : 1;
+
+                    this.setState({
+                      individual: e.target.value,
+                      newQuantity: current + (numPacks * packSize) + individual,
+                    });
+                  }}
+                />
+              </div>
+            </div>
+
             <div className="mb-4">
               <label className="block text-gray-600 text-sm font-bold mb-2">
                 New Quantity
@@ -134,7 +173,7 @@ class TakeInventory extends React.Component {
               </div>
             </div>
             <div className="flex justify-center">
-          </div>
+            </div>
           </div>
         </div>
 
@@ -165,8 +204,8 @@ export default function TakeInventoryModal(props) {
         onCloseHandler={props.onCloseHandler}
         barcodeLookup={props.barcodeLookup}
         parentState={props.parentState}
-        status = {props.status}
-        errors = {props.errors}
+        status={props.status}
+        errors={props.errors}
         dispatch={props.dispatch}
         isAdd={props.isAdd}
       ></TakeInventory>
