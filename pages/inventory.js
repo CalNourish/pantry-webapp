@@ -18,7 +18,7 @@ export default function Inventory() {
 
   let authToken = (user && user.authorized) ? user.authToken : null;
 
-  const emptyItem =  {
+  const emptyItem = {
     itemName: "",
     barcode: "",
     count: "",
@@ -48,7 +48,7 @@ export default function Inventory() {
   // A reducer to manage the State of the add-item / edit-item forms. 
   function formReducer(state, action) {
     let packOpt = document.getElementById("packOption");
-    switch (action.type) { 
+    switch (action.type) {
       case "reset":
         if (packOpt) packOpt.value = 'individual'
         return emptyItem
@@ -58,7 +58,7 @@ export default function Inventory() {
           ...state,
           itemName: action.value
         }
-      } 
+      }
       case 'editItemBarcode': {
         return {
           ...state,
@@ -95,27 +95,27 @@ export default function Inventory() {
           ...state,
           packSize: parseInt(action.value)
         }
-      }  
+      }
       case 'editCategories': {
         setCategoryError("");
         return {
           ...state,
           categoryName: action.value
         }
-      }       
+      }
       case 'editItemLowStock': {
         return {
           ...state,
           lowStock: action.value
         }
-      } 
+      }
       case 'itemLookup': {
         if (packOpt) packOpt.value = 'individual'
         return {
           ...state,
           ...action.value
         }
-      } 
+      }
       default:
         break;
     }
@@ -132,44 +132,44 @@ export default function Inventory() {
   const [dataState, changeData] = useState({});
   const [categoryState, setCategories] = useState({});
 
-  const setBarcodeError = (errorMsg) => setErrors({...errors, barcode: errorMsg})
-  const setNameError = (errorMsg) => setErrors({...errors, itemName: errorMsg})
-  const setCountError = (errorMsg) => setErrors({...errors, count: errorMsg})
-  const setCategoryError = (errorMsg) => setErrors({...errors, categoryName: errorMsg})
+  const setBarcodeError = (errorMsg) => setErrors({ ...errors, barcode: errorMsg })
+  const setNameError = (errorMsg) => setErrors({ ...errors, itemName: errorMsg })
+  const setCountError = (errorMsg) => setErrors({ ...errors, count: errorMsg })
+  const setCategoryError = (errorMsg) => setErrors({ ...errors, categoryName: errorMsg })
 
   var successTimeout;
   const setStatusLoading = () => {
-    setStatus({error: "", success: "", loading: true})
+    setStatus({ error: "", success: "", loading: true })
   }
   const setStatusSuccess = (msg) => {
-    setStatus({loading: false, error: "", success: msg});
+    setStatus({ loading: false, error: "", success: msg });
     clearTimeout(successTimeout);             // clear old timeout before starting new one
-    successTimeout = setTimeout(() => setStatus({...status, success: ""}), 5000);
+    successTimeout = setTimeout(() => setStatus({ ...status, success: "" }), 5000);
   }
-  const setStatusError = (msg) => setStatus({error: msg, success: "", loading: false})
+  const setStatusError = (msg) => setStatus({ error: msg, success: "", loading: false })
 
   // Manage form State (look up useReducer tutorials if unfamiliar)
-  const [ state, dispatch ] = useReducer(formReducer, emptyItem)
+  const [state, dispatch] = useReducer(formReducer, emptyItem)
 
   /* initialize dataState value */
   const ref = firebase.database().ref('/inventory')
   if (Object.keys(dataState).length == 0) {
     ref.once("value")
-    .then(function(resp) {
-      let res = resp.val();
-      // Insert new col "Case Count"
-      for (const key in res) {
-        if (parseInt(res[key].packSize) === 1) {
-          res[key].caseCount = null
-        } else if (parseInt(res[key].count) < 0) {
-          // case count is zero
-          res[key].caseCount = 0
-        } else {
-          res[key].caseCount = Number((parseInt(res[key].count) / parseInt(res[key].packSize)).toFixed(2))
+      .then(function (resp) {
+        let res = resp.val();
+        // Insert new col "Case Count"
+        for (const key in res) {
+          if (parseInt(res[key].packSize) === 1) {
+            res[key].caseCount = null
+          } else if (parseInt(res[key].count) < 0) {
+            // case count is zero
+            res[key].caseCount = 0
+          } else {
+            res[key].caseCount = Number((parseInt(res[key].count) / parseInt(res[key].packSize)).toFixed(2))
+          }
         }
-      }
-      changeData(res);
-    })
+        changeData(res);
+      })
   }
 
   /* do this once, after dataState is set */
@@ -185,17 +185,17 @@ export default function Inventory() {
 
   if (Object.keys(categoryState).length == 0) {
     fetch(`${server}/api/categories/ListCategories`)
-    .then((result) => {
-      result.json().then((data) => {
-        setCategories(data);
+      .then((result) => {
+        result.json().then((data) => {
+          setCategories(data);
+        })
       })
-    })
   }
 
   // opens modal with barcode & fields already completed. used by shortcut edit button.
   function editItem(barcode) {
     setShowEditItem(true);
-    dispatch({type: "editItemBarcode", value: barcode});
+    dispatch({ type: "editItemBarcode", value: barcode });
     handleBarcodeEdit(barcode);
   }
 
@@ -206,28 +206,32 @@ export default function Inventory() {
       "displayPublic": newDisplayPublic
     });
 
-    fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
+    fetch(`${server}/api/inventory/UpdateItem`, {
+      method: 'POST',
       body: payload,
-      headers: {'Content-Type': "application/json", 'Authorization': authToken}})
-    .then((response) => response.json())
-    .then(json => {
-      if (json.error) {
-        console.log(json.error);
-      }
+      headers: { 'Content-Type': "application/json", 'Authorization': authToken }
     })
+      .then((response) => response.json())
+      .then(json => {
+        if (json.error) {
+          console.log(json.error);
+        }
+      })
   }
 
   function deleteItem(barcode) {
-    if (confirm(`Deleting item with barcode ${barcode}. Are you sure?`)){
-      fetch(`${server}/api/inventory/DeleteItem`, { method: 'POST',
-        body: JSON.stringify({barcode: barcode}),
-        headers: {'Content-Type': "application/json", 'Authorization': authToken}})
-      .then(() => {
-        // remove something from dataState
-        let { [barcode]: deletedItem, ...newDataState } = dataState
-        changeData(newDataState)
-        setStatusSuccess(`successfully deleted: ${deletedItem.itemName} (${deletedItem.barcode})`)
+    if (confirm(`Deleting item with barcode ${barcode}. Are you sure?`)) {
+      fetch(`${server}/api/inventory/DeleteItem`, {
+        method: 'POST',
+        body: JSON.stringify({ barcode: barcode }),
+        headers: { 'Content-Type': "application/json", 'Authorization': authToken }
       })
+        .then(() => {
+          // remove something from dataState
+          let { [barcode]: deletedItem, ...newDataState } = dataState
+          changeData(newDataState)
+          setStatusSuccess(`successfully deleted: ${deletedItem.itemName} (${deletedItem.barcode})`)
+        })
     }
   }
 
@@ -238,38 +242,38 @@ export default function Inventory() {
       return;
     }
     fetch(`${server}/api/inventory/GetItem/${barcode}`)
-    .then((response) => {
-      if (response.ok) {
-        return response.json()
-      }
-      throw new Error("Cannot find existing item with this barcode.")
-    })
-    .then((data) => {
-      setBarcodeError('');
-      let categories = {};
-      for (let idx in data.categoryName) {
-        let categoryId = data.categoryName[idx];
-        categories[categoryId] = categoryId;
-      }
+      .then((response) => {
+        if (response.ok) {
+          return response.json()
+        }
+        throw new Error("Cannot find existing item with this barcode.")
+      })
+      .then((data) => {
+        setBarcodeError('');
+        let categories = {};
+        for (let idx in data.categoryName) {
+          let categoryId = data.categoryName[idx];
+          categories[categoryId] = categoryId;
+        }
 
-      const payload = {
-        itemName: data.itemName,
-        count: data.count,
-        packSize: data.packSize,
-        lowStock: data.lowStock,
-        categoryName: categories,
-        displayPublic: data.displayPublic,
-        defaultCart: data.defaultCart,
-        grabnGoDefaultCart: data.grabnGoDefaultCart
-      };
-      dispatch({type:'itemLookup', value: payload});
-    })
-    .catch((err) => {
-      /* reset everything except for the barcode */
-      setBarcodeError("cannot find existing item with this barcode");
-      dispatch({type: "reset"})
-      dispatch({type: "editItemBarcode", value: barcode})
-    })
+        const payload = {
+          itemName: data.itemName,
+          count: data.count,
+          packSize: data.packSize,
+          lowStock: data.lowStock,
+          categoryName: categories,
+          displayPublic: data.displayPublic,
+          defaultCart: data.defaultCart,
+          grabnGoDefaultCart: data.grabnGoDefaultCart
+        };
+        dispatch({ type: 'itemLookup', value: payload });
+      })
+      .catch((err) => {
+        /* reset everything except for the barcode */
+        setBarcodeError("cannot find existing item with this barcode");
+        dispatch({ type: "reset" })
+        dispatch({ type: "editItemBarcode", value: barcode })
+      })
   }
 
   // When a barcode is scanned in the add-item-lookup modal, look up this barcode in Firebase.
@@ -314,45 +318,49 @@ export default function Inventory() {
       "defaultCart": defaultCart,
       "grabnGoDefaultCart": grabnGoDefaultCart
     });
-    
-    fetch(`${server}/api/inventory/UpdateItem`, { method: 'POST',
+
+    fetch(`${server}/api/inventory/UpdateItem`, {
+      method: 'POST',
       body: payload,
-      headers: {'Content-Type': "application/json", 'Authorization': authToken}})
-    .then((response) => response.json())
-    .then(json => {
-      if (json.error) {
-        setStatusError(json.error);
-      } else {
-        dispatch({type: 'reset'});
-        closeUpdateItem();
-        setStatusSuccess(`successfully updated: ${itemName} (${barcode})`);
-      }
+      headers: { 'Content-Type': "application/json", 'Authorization': authToken }
     })
+      .then((response) => response.json())
+      .then(json => {
+        if (json.error) {
+          setStatusError(json.error);
+        } else {
+          dispatch({ type: 'reset' });
+          closeUpdateItem();
+          setStatusSuccess(`successfully updated: ${itemName} (${barcode})`);
+        }
+      })
   }
 
   function displayUpdatedInventory() {
     const ref = firebase.database().ref('/inventory')
     ref.once("value")
-    .then(function(resp) {
-      let res = resp.val();
-      changeData(res);
-    })
+      .then(function (resp) {
+        let res = resp.val();
+        changeData(res);
+      })
   }
 
   function resetInventory() {
     if (window.confirm("Reset Inventory?")) {
-    fetch(`${server}/api/inventory/ResetInventory`, { method: 'POST',
-      headers: {'Content-Type': "application/json", 'Authorization': authToken}})
-    .then((response) => response.json())
-    .then(json => {
-      if (json.error) {
-        setStatusError(json.error);
-      } else {
-        displayUpdatedInventory();
-        setStatusSuccess(`Sucessfully reset inventory`);
-      }
-    })
-  }
+      fetch(`${server}/api/inventory/ResetInventory`, {
+        method: 'POST',
+        headers: { 'Content-Type': "application/json", 'Authorization': authToken }
+      })
+        .then((response) => response.json())
+        .then(json => {
+          if (json.error) {
+            setStatusError(json.error);
+          } else {
+            displayUpdatedInventory();
+            setStatusSuccess(`Sucessfully reset inventory`);
+          }
+        })
+    }
   }
 
   function handleAddSubmit(e) {
@@ -394,64 +402,66 @@ export default function Inventory() {
       /* created by? */
     };
 
-    fetch(`${server}/api/inventory/AddItem`, { method: 'POST', 
+    fetch(`${server}/api/inventory/AddItem`, {
+      method: 'POST',
       body: JSON.stringify(payload),
-      headers: {'Content-Type': "application/json", 'Authorization': authToken}})
-    .then((response) => {
-      if (response.status == 500) {
-        setStatusError("Internal server error (make sure you're logged in)");
-      }
-      response.json()
-      .then(json => {
-        if (json.error) {
-          setStatusError(json.error) 
-        } else {
-          dispatch({type: 'reset'});
-          setErrors(emptyErrors);
-          closeAddItem();
-          setStatusSuccess(`successfully added: ${itemName} (${barcode})`);
-          
-          // modify dataState to contain the new item
-          changeData({
-            ...dataState,
-            [barcode]: payload
-          })
-        }
-      })
+      headers: { 'Content-Type': "application/json", 'Authorization': authToken }
     })
+      .then((response) => {
+        if (response.status == 500) {
+          setStatusError("Internal server error (make sure you're logged in)");
+        }
+        response.json()
+          .then(json => {
+            if (json.error) {
+              setStatusError(json.error)
+            } else {
+              dispatch({ type: 'reset' });
+              setErrors(emptyErrors);
+              closeAddItem();
+              setStatusSuccess(`successfully added: ${itemName} (${barcode})`);
+
+              // modify dataState to contain the new item
+              changeData({
+                ...dataState,
+                [barcode]: payload
+              })
+            }
+          })
+      })
   }
 
   function closeTakeInventory() {
-    setShowTakeInventory(false); 
+    setShowTakeInventory(false);
     setErrors(emptyErrors);
-    dispatch({type:'reset'});
+    dispatch({ type: 'reset' });
     setStatus({
       ...status, loading: false, error: ""
     })
   }
 
   function closeAddInventory() {
-    setShowAddInventory(false); 
+    setShowAddInventory(false);
     setErrors(emptyErrors);
-    dispatch({type:'reset'});
+    dispatch({ type: 'reset' });
     setStatus({
       ...status, loading: false, error: ""
     })
   }
 
   function closeAddItem() {
-    setShowAddItem(false); 
+    setShowAddItem(false);
     setErrors(emptyErrors);
-    dispatch({type:'reset'});
+    dispatch({ type: 'reset' });
     setStatus({
       ...status, loading: false, error: ""
     })
   }
 
   function closeUpdateItem() {
-    setShowEditItem(false); 
+    setShowEditItem(false);
     setErrors(emptyErrors);
-    dispatch({type:'reset'});
+    dispatch({ type: 'reset' });
     setStatus({
       ...status, loading: false, error: ""
     })
@@ -460,7 +470,7 @@ export default function Inventory() {
   if (loadingUser) {
     return (
       <Layout pageName="Inventory">
-          <h1 className='text-xl m-6'>Loading...</h1>
+        <h1 className='text-xl m-6'>Loading...</h1>
       </Layout>
     )
   }
@@ -476,38 +486,38 @@ export default function Inventory() {
   return (
     <>
       <Layout pageName="Inventory">
-        { authToken &&
+        {authToken &&
           <>
             {/* Add Item Modal */}
             <Modal id="add-item-modal" isOpen={showAddItem} onRequestClose={closeAddItem} ariaHideApp={false}>
               <InventoryModal
-                  onSubmitHandler={handleAddSubmit} 
-                  onCloseHandler={closeAddItem}
-                  dispatch={dispatch}
-                  parentState={state}
-                  isAdd={true}
-                  barcodeLookup={handleBarcodeAdd}
-                  errors={errors}
-                  status={status}/>
+                onSubmitHandler={handleAddSubmit}
+                onCloseHandler={closeAddItem}
+                dispatch={dispatch}
+                parentState={state}
+                isAdd={true}
+                barcodeLookup={handleBarcodeAdd}
+                errors={errors}
+                status={status} />
             </Modal>
-            
+
             {/*  Edit Item Modal  */}
             <Modal id="edit-item-modal" isOpen={showEditItem} onRequestClose={closeUpdateItem} ariaHideApp={false}>
               <InventoryModal
-                  onSubmitHandler={handleUpdateSubmit} 
-                  onCloseHandler={closeUpdateItem}
-                  dispatch={dispatch}
-                  parentState={state}
-                  isAdd={false}
-                  barcodeLookup={handleBarcodeEdit}
-                  errors={errors}
-                  status={status}/>
+                onSubmitHandler={handleUpdateSubmit}
+                onCloseHandler={closeUpdateItem}
+                dispatch={dispatch}
+                parentState={state}
+                isAdd={false}
+                barcodeLookup={handleBarcodeEdit}
+                errors={errors}
+                status={status} />
             </Modal>
 
             {/* Take Inventory Modal  */}
             <Modal id="take-inventory-modal" isOpen={showTakeInventory} onRequestClose={closeTakeInventory} ariaHideApp={false}>
-            <TakeInventoryModal
-                onSubmitHandler={handleUpdateSubmit} 
+              <TakeInventoryModal
+                onSubmitHandler={handleUpdateSubmit}
                 barcodeLookup={handleBarcodeEdit}
                 onCloseHandler={closeTakeInventory}
                 parentState={state}
@@ -515,13 +525,13 @@ export default function Inventory() {
                 dispatch={dispatch}
                 errors={errors}
                 status={status}
-                />
+              />
             </Modal>
 
             {/* Add Inventory Modal  */}
             <Modal id="add-inventory-modal" isOpen={showAddInventory} onRequestClose={closeAddInventory} ariaHideApp={false}>
-            <TakeInventoryModal
-                onSubmitHandler={handleUpdateSubmit} 
+              <TakeInventoryModal
+                onSubmitHandler={handleUpdateSubmit}
                 barcodeLookup={handleBarcodeEdit}
                 onCloseHandler={closeAddInventory}
                 parentState={state}
@@ -529,33 +539,33 @@ export default function Inventory() {
                 dispatch={dispatch}
                 errors={errors}
                 status={status}
-                />
+              />
             </Modal>
           </>
         }
-        
+
         <div className="flex">
           {!(user && authToken) ? "" :
-              <div className="w-64 items-center">
-                <Sidebar>
-                  <h1 className="text-3xl font-semibold mb-2">Inventory</h1>
-                  <div className="my-4">
-                    <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowAddItem(true)}>Add new item</button>
-                    <button className="my-1 btn-outline w-56 rounded-md p-1" onClick={() => setShowEditItem(true)}>Edit existing item</button>
-                    <hr className="my-2 border-gray-400 border-1"/>
-                    <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowTakeInventory(true)}>Take Inventory</button>
-                    <button className="my-1 btn-outline w-56 rounded-md p-1" onClick={() => setShowAddInventory(true)}>Add Inventory</button>
-                    <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => resetInventory()}>Reset Inventory</button>
-                  </div>
-                  <p className="mb-5 text-sm italic text-gray-600">You can double-click on an item name or count to change the value quickly!</p>
-                </Sidebar>
-              </div>
+            <div className="w-64 items-center">
+              <Sidebar>
+                <h1 className="text-3xl font-semibold mb-2">Inventory</h1>
+                <div className="my-4">
+                  <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowAddItem(true)}>Add new item</button>
+                  <button className="my-1 btn-outline w-56 rounded-md p-1" onClick={() => setShowEditItem(true)}>Edit existing item</button>
+                  <hr className="my-2 border-gray-400 border-1" />
+                  <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => setShowTakeInventory(true)}>Take Inventory</button>
+                  <button className="my-1 btn-outline w-56 rounded-md p-1" onClick={() => setShowAddInventory(true)}>Add Inventory</button>
+                  <button className="my-1 btn-pantry-blue w-56 rounded-md p-1" onClick={() => resetInventory()}>Reset Inventory</button>
+                </div>
+                <p className="mb-5 text-sm italic text-gray-600">You can double-click on an item name or count to change the value quickly!</p>
+              </Sidebar>
+            </div>
           }
           <div className="py-4 px-8">
             {status.success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded relative mb-3">{status.success}</div>}
             {Object.keys(dataState).length > 0
               ? <Table className="table-auto my-1" data={dataState} categories={categoryState} authToken={authToken}
-                       editItemFunc={editItem} deleteItemFunc={deleteItem} showHideItemFunc={showHideItem}></Table>
+                editItemFunc={editItem} deleteItemFunc={deleteItem} showHideItemFunc={showHideItem}></Table>
               : "Loading inventory..."}
           </div>
         </div>
