@@ -33,8 +33,9 @@ const AUTH_SIGNEDIN_ROUTES = [
   { title: "GrabnGo Check In", route: "/checkinGrabnGo" },
   { title: "Pantry Checkout", route: "/checkout" },
   { title: "GrabnGo Checkout", route: "/grabnGoCheckout" },
-  { title: "Bag Packing", route: "/bagPacking" },
-  { title: "Visualizations", route: "/visualizations" }
+  //{ title: "Bag Packing", route: "/bagPacking" },
+  //{ title: "Visualizations", route: "/visualizations" },
+  { title: "Order Calculator", route: "/orderCalculator" }
 ]
 
 export default function Navbar() {
