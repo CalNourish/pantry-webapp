@@ -1,4 +1,4 @@
-export default function OrderCalculatorTable({ items, selectedBarcodes, onToggleItem }) {
+export default function OrderCalculatorTable({ items, selectedBarcodes, onToggleItem, categoryLookup }) {
     const headerClass =
         "px-5 py-3 border-b-2 border-gray-100 bg-gray-50 " +
         "text-xs font-semibold text-gray-500 uppercase " +
@@ -52,6 +52,7 @@ export default function OrderCalculatorTable({ items, selectedBarcodes, onToggle
                                 item={item}
                                 isSelected={selectedBarcodes.includes(item.barcode)}
                                 onToggleItem={onToggleItem}
+                                categoryLookup={categoryLookup}
                             />
                         ))}
                     </tbody>
@@ -61,7 +62,7 @@ export default function OrderCalculatorTable({ items, selectedBarcodes, onToggle
     );
 }
 
-function OrderCalculatorRow({ item, isSelected, onToggleItem }) {
+function OrderCalculatorRow({ item, isSelected, onToggleItem, categoryLookup }) {
     return (
         <tr id={item.barcode}>
             <td className="border-b border-gray-100 bg-white px-5 py-5 text-sm">
@@ -92,7 +93,14 @@ function OrderCalculatorRow({ item, isSelected, onToggleItem }) {
 
             <td className="border-b border-gray-100 bg-white px-5 py-5 text-sm">
                 <p className="max-w-xs text-gray-900">
-                    {item.categoryName?.join(", ")}
+                    {(item.categoryName || [])
+                        .map((categoryId) =>
+                            categoryLookup[categoryId] || categoryId
+                        )
+                        .filter((categoryName) =>
+                            categoryName !== "Uncategorized"
+                        )
+                        .join(", ")}
                 </p>
             </td>
 

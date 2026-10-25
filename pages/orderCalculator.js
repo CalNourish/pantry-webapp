@@ -18,6 +18,13 @@ export default function OrderCalculator() {
         error: inventoryError
     } = useSWR("/api/inventory/GetAllItems", fetcher);
 
+    const {
+        data: categoryData,
+        error: categoryError
+    } = useSWR("/api/categories/ListCategories", fetcher);
+
+
+
     if (loadingUser) {
         return (
             <Layout pageName="Order Calculator">
@@ -35,7 +42,7 @@ export default function OrderCalculator() {
         );
     }
 
-    if (inventoryError) {
+    if (inventoryError || categoryError) {
         return (
             <Layout pageName="Order Calculator">
                 <p className="m-6 text-red-600">
@@ -44,13 +51,20 @@ export default function OrderCalculator() {
             </Layout>
         );
     }
-    if (!inventory) {
+    if (!inventory || !categoryData) {
         return (
             <Layout pageName="Order Calculator">
                 <p className="m-6">Loading inventory...</p>
             </Layout>
         );
     }
+    const categoryLookup = Object.values(
+        categoryData.categories
+    ).reduce((lookup, category) => {
+        lookup[category.id] = category.displayName;
+        return lookup;
+    }, {});
+
     function toggleItem(barcode) {
         setSelectedBarcodes((currentBarcodes) => {
             const isAlreadySelected =
@@ -156,6 +170,7 @@ export default function OrderCalculator() {
                         items={selectedItems}
                         selectedBarcodes={selectedBarcodes}
                         onToggleItem={toggleItem}
+                        categoryLookup={categoryLookup}
                     />
                 )}
 
@@ -216,7 +231,7 @@ export default function OrderCalculator() {
                     items={availableItems}
                     selectedBarcodes={selectedBarcodes}
                     onToggleItem={toggleItem}
-
+                    categoryLookup={categoryLookup}
                 />
 
             </main>
