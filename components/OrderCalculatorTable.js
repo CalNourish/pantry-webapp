@@ -63,6 +63,9 @@ export default function OrderCalculatorTable({ items, selectedBarcodes, onToggle
 }
 
 function OrderCalculatorRow({ item, isSelected, onToggleItem, categoryLookup }) {
+    const itemCategories = Array.isArray(item.categoryName)
+        ? item.categoryName
+        : [];
     return (
         <tr id={item.barcode}>
             <td className="border-b border-gray-100 bg-white px-5 py-5 text-sm">
@@ -93,7 +96,7 @@ function OrderCalculatorRow({ item, isSelected, onToggleItem, categoryLookup }) 
 
             <td className="border-b border-gray-100 bg-white px-5 py-5 text-sm">
                 <p className="max-w-xs text-gray-900">
-                    {(item.categoryName || [])
+                    {itemCategories
                         .map((categoryId) =>
                             categoryLookup[categoryId] || categoryId
                         )
@@ -147,7 +150,11 @@ function OrderCalculatorRow({ item, isSelected, onToggleItem, categoryLookup }) 
 
 function StockStatus({ count, lowStock }) {
     const itemCount = Number(count);
-    const lowStockThreshold = Number(lowStock) || 10;
+    const parsedLowStock = Number(lowStock);
+
+    const lowStockThreshold = Number.isFinite(parsedLowStock)
+        ? parsedLowStock
+        : 10;
 
     if (itemCount <= 0) {
         return (

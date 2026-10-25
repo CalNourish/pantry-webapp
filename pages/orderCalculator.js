@@ -10,6 +10,8 @@ const fetcher = (url) => fetch(url).then((response) => response.json());
 export default function OrderCalculator() {
     const [selectedBarcodes, setSelectedBarcodes] = useState([]);
     const [searchFilter, setSearchFilter] = useState("");
+    const [categoryFilter, setCategoryFilter] = useState("");
+    const [defaultCartFilter, setDefaultCartFilter] = useState(false);
     const [step, setStep] = useState("select");
     const { user, loadingUser } = useUser();
 
@@ -105,8 +107,34 @@ export default function OrderCalculator() {
             itemName.includes(normalizedSearch) ||
             barcode.includes(normalizedSearch);
 
-        return !isSelected && matchesSearch;
+        const itemCategories = Array.isArray(item.categoryName)
+            ? item.categoryName
+            : [];
+
+        const matchesCategory =
+            !categoryFilter ||
+            itemCategories.includes(categoryFilter);
+
+        const matchesDefaultCart =
+            !defaultCartFilter ||
+            Boolean(item.defaultCart);
+
+        return (
+            !isSelected &&
+            matchesSearch &&
+            matchesCategory &&
+            matchesDefaultCart
+        );
     });
+    function clearFilters() {
+        setSearchFilter("");
+        setCategoryFilter("");
+        setDefaultCartFilter(false);
+    }
+    const hasActiveFilters =
+        searchFilter !== "" ||
+        categoryFilter !== "" ||
+        defaultCartFilter;
     if (step === "calculate") {
         return (
             <Layout pageName="Order Calculator">
@@ -123,11 +151,7 @@ export default function OrderCalculator() {
                         Calculate Order
                     </h1>
 
-                    <p className="mb-4 text-gray-600">
-                        Selected items:
-                    </p>
-
-                    <ul className="list-disc pl-6">
+                    <ul>
                         {selectedItems.map((item) => (
                             <li key={item.barcode}>
                                 {item.itemName}
@@ -176,36 +200,106 @@ export default function OrderCalculator() {
 
                 <div className="mb-4 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                     <div>
-                        <label
-                            htmlFor="inventory-search"
-                            className="mb-1 block font-semibold"
-                        >
-                            Filter:
-                        </label>
+                        <div>
+                            <p className="mb-2 font-semibold">
+                                Filter:
+                            </p>
+                            <label
+                                htmlFor="category-filter"
+                                className="sr-only"
+                            >
+                                Filter by category
+                            </label>
 
-                        <div className="relative">
-                            <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2">
-                                <svg
-                                    viewBox="0 0 24 24"
-                                    aria-hidden="true"
-                                    className="h-4 w-4 fill-current text-gray-400"
-                                >
-                                    <path d="M10 4a6 6 0 100 12 6 6 0 000-12zm-8 6a8 8 0 1114.32 4.906l5.387 5.387a1 1 0 01-1.414 1.414l-5.387-5.387A8 8 0 012 10z" />
-                                </svg>
-                            </span>
 
-                            <input
-                                id="inventory-search"
-                                type="search"
-                                value={searchFilter}
-                                onChange={(event) =>
-                                    setSearchFilter(event.target.value)
-                                }
-                                placeholder="Search name or barcode"
-                                className="block w-full rounded border border-gray-300 bg-white py-2 pl-8 pr-6 text-sm text-gray-600 placeholder-gray-300 focus:border-gray-400 focus:outline-none sm:w-64"
-                            />
+                            <div className="flex flex-col sm:flex-row">
+                                <div className="relative">
+                                    <select
+                                        value={categoryFilter}
+                                        onChange={(event) =>
+                                            setCategoryFilter(event.target.value)
+                                        }
+                                        className="h-full w-full appearance-none rounded border border-gray-300 bg-white px-4 py-2 pr-8 leading-tight text-gray-600 focus:border-gray-400 focus:outline-none sm:w-auto sm:rounded-r-none"
+                                    >
+                                        <option value="">
+                                            All Categories
+                                        </option>
+
+                                        {Object.values(categoryData.categories).map(
+                                            (category) => (
+                                                <option
+                                                    key={category.id}
+                                                    value={category.id}
+                                                >
+                                                    {category.displayName}
+                                                </option>
+                                            )
+                                        )}
+                                    </select>
+
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-600">
+                                        <svg
+                                            className="h-4 w-4 fill-current"
+                                            viewBox="0 0 20 20"
+                                            aria-hidden="true"
+                                        >
+                                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <div className="relative">
+                                    <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2">
+                                        <svg
+                                            viewBox="0 0 24 24"
+                                            aria-hidden="true"
+                                            className="h-4 w-4 fill-current text-gray-400"
+                                        >
+                                            <path d="M10 4a6 6 0 100 12 6 6 0 000-12zm-8 6a8 8 0 1114.32 4.906l5.387 5.387a1 1 0 01-1.414 1.414l-5.387-5.387A8 8 0 012 10z" />
+                                        </svg>
+                                    </span>
+
+                                    <input
+                                        id="inventory-search"
+                                        type="search"
+                                        value={searchFilter}
+                                        onChange={(event) =>
+                                            setSearchFilter(event.target.value)
+                                        }
+                                        placeholder="Search name or barcode"
+                                        className="block w-full appearance-none rounded border border-gray-300 bg-white py-2 pl-8 pr-6 text-sm text-gray-600 placeholder-gray-300 focus:outline-none sm:w-64 sm:rounded-l-none"
+                                    />
+                                </div>
+
+                                {hasActiveFilters && (
+                                    <button
+                                        type="button"
+                                        onClick={clearFilters}
+                                        className="mt-2 text-left text-gray-500 sm:ml-3 sm:mt-0"
+                                    >
+                                        clear filters
+                                    </button>
+                                )}
+                            </div>
+
+                            <label className="mt-3 flex items-center text-gray-600">
+                                <input
+                                    type="checkbox"
+                                    checked={defaultCartFilter}
+                                    onChange={(event) =>
+                                        setDefaultCartFilter(event.target.checked)
+                                    }
+                                    className="mr-2 h-4 w-4"
+                                />
+
+                                Show Default Cart Items
+                            </label>
                         </div>
+
+
+
                     </div>
+
 
                     <button
                         type="button"
@@ -235,7 +329,7 @@ export default function OrderCalculator() {
                 />
 
             </main>
-        </Layout>
+        </Layout >
     )
 
 }
