@@ -53,7 +53,7 @@ function requireParams(body, res) {
 export default async function (req, res) {
   // verify this request is legit
   const token = req.headers.authorization
-  
+
   return new Promise((resolve) => {
     validateFunc(token).then(() => {
       const { body } = req
@@ -75,65 +75,66 @@ export default async function (req, res) {
         "packSize": body.packSize ? body.packSize.toString() : "1",
         "displayPublic": body.displayPublic !== undefined ? body.displayPublic : true, // default true
         "defaultCart": body.defaultCart !== undefined ? body.defaultCart : false, // default false
-        "grabnGoDefaultCart": body.grabnGoDefaultCart !== undefined ? body.grabnGoDefaultCart : false // default false
+        "grabnGoDefaultCart": body.grabnGoDefaultCart !== undefined ? body.grabnGoDefaultCart : false, // default false
+        "favorited": body.favorited !== undefined ? body.favorited : false //default false
       };
 
       // check that all the categories are valid
       firebase.database().ref('/category')
-      .once('value', snapshot => {
-        let verifiedCategories = Object.keys(snapshot.val());
-        for (const category in body.categoryName) {
-          if (!verifiedCategories.includes(category)) {
-            res.status(400).json({ error: "not all provided cateogries were valid" });
-            return resolve();
-          }
-        }
-      })
-      .catch((err) => {
-        res.status(500).json({error: "Error accessing firebase categories ref:" + err});
-        return resolve();
-      })
-      .then(() => {
-        // if no category issues, perform the write
-        const auth = getAuth()
-        signInAnonymously(auth)
-        .then(() => {
-          let itemRef = firebase.database().ref('/inventory/' + barcode);
-
-          itemRef.once('value')
-          .then(function (resp) {
-            // the version of the item in the database
-            var dbItem = resp.val();
-            // this item already exists
-            if (dbItem != null) {
-              res.status(400).json({ error: "an item with barcode " + barcode + " already exists" })
+        .once('value', snapshot => {
+          let verifiedCategories = Object.keys(snapshot.val());
+          for (const category in body.categoryName) {
+            if (!verifiedCategories.includes(category)) {
+              res.status(400).json({ error: "not all provided cateogries were valid" });
               return resolve();
             }
-            // otherwise the item doesn't exist and we can create it
-            itemRef.update(newItem)
-            .then(() => {
-              res.status(200).json({ message: "success" });
-              return resolve();
-            })
-            .catch(function (error) {
-              res.status(500).json({ error: "error writing new item to inventory database", errorstack: error });
-              return resolve();
-            });
-          })
-          .catch(function (error) {
-            res.status(500).json({ error: "server error getting reference to that item from the database", errorstack: error });
-            return resolve();
-          });
+          }
         })
         .catch((err) => {
-          res.status(500).json({error: "Error writing to firebase:" + err});
+          res.status(500).json({ error: "Error accessing firebase categories ref:" + err });
           return resolve();
-        });
-      })        
+        })
+        .then(() => {
+          // if no category issues, perform the write
+          const auth = getAuth()
+          signInAnonymously(auth)
+            .then(() => {
+              let itemRef = firebase.database().ref('/inventory/' + barcode);
+
+              itemRef.once('value')
+                .then(function (resp) {
+                  // the version of the item in the database
+                  var dbItem = resp.val();
+                  // this item already exists
+                  if (dbItem != null) {
+                    res.status(400).json({ error: "an item with barcode " + barcode + " already exists" })
+                    return resolve();
+                  }
+                  // otherwise the item doesn't exist and we can create it
+                  itemRef.update(newItem)
+                    .then(() => {
+                      res.status(200).json({ message: "success" });
+                      return resolve();
+                    })
+                    .catch(function (error) {
+                      res.status(500).json({ error: "error writing new item to inventory database", errorstack: error });
+                      return resolve();
+                    });
+                })
+                .catch(function (error) {
+                  res.status(500).json({ error: "server error getting reference to that item from the database", errorstack: error });
+                  return resolve();
+                });
+            })
+            .catch((err) => {
+              res.status(500).json({ error: "Error writing to firebase:" + err });
+              return resolve();
+            });
+        })
     })
-    .catch(() => {
-      res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an administrator account." });
-      return resolve();
-    });
+      .catch(() => {
+        res.status(401).json({ error: "You are not authorized to perform this action. Make sure you are logged in to an administrator account." });
+        return resolve();
+      });
   })
 }

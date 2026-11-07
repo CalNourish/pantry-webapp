@@ -12,12 +12,14 @@ export default function OrderCalculator() {
     const [searchFilter, setSearchFilter] = useState("");
     const [categoryFilter, setCategoryFilter] = useState("");
     const [defaultCartFilter, setDefaultCartFilter] = useState(false);
+    const [favoriteFilter, setFavoriteFilter] = useState(false)
     const [step, setStep] = useState("select");
     const { user, loadingUser } = useUser();
 
     const {
         data: inventory,
-        error: inventoryError
+        error: inventoryError,
+        mutate: refreshInventory,
     } = useSWR("/api/inventory/GetAllItems", fetcher);
 
     const {
@@ -81,6 +83,38 @@ export default function OrderCalculator() {
             return [...currentBarcodes, barcode];
         });
     }
+
+    async function favoriteItem(item) {
+        const new_value = !Boolean(item.favorited)
+        const response = await fetch("/api/inventory/UpdateItem", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": user.authToken
+            },
+            body: JSON.stringify({
+                barcode: item.barcode,
+                favorited: new_value
+            })
+        }
+        )
+        const result = await response.json();
+        if (!response.ok) {
+            console.error(result.error || "Unable to update favorite");
+            return;
+        }
+        refreshInventory(
+            {
+                ...inventory,
+                [item.barcode]: {
+                    ...inventory[item.barcode],
+                    favorited: new_value
+                }
+            },
+            false
+        );
+    }
+
     function reset() {
         setSelectedBarcodes((currentBarcodes) => {
             return []
@@ -119,22 +153,31 @@ export default function OrderCalculator() {
             !defaultCartFilter ||
             Boolean(item.defaultCart);
 
+        const matchesFavorited =
+            !favoriteFilter ||
+            Boolean(item.favorited);
+
+
+
         return (
             !isSelected &&
             matchesSearch &&
             matchesCategory &&
-            matchesDefaultCart
+            matchesDefaultCart &&
+            matchesFavorited
         );
     });
     function clearFilters() {
         setSearchFilter("");
         setCategoryFilter("");
         setDefaultCartFilter(false);
+        setFavoriteFilter(false);
     }
     const hasActiveFilters =
         searchFilter !== "" ||
         categoryFilter !== "" ||
-        defaultCartFilter;
+        defaultCartFilter ||
+        favoriteFilter;
     if (step === "calculate") {
         return (
             <Layout pageName="Order Calculator">
@@ -195,6 +238,7 @@ export default function OrderCalculator() {
                         selectedBarcodes={selectedBarcodes}
                         onToggleItem={toggleItem}
                         categoryLookup={categoryLookup}
+                        onFavorite={favoriteItem}
                     />
                 )}
 
@@ -281,19 +325,32 @@ export default function OrderCalculator() {
                                     </button>
                                 )}
                             </div>
+                            <div className="mt-3 flex items-center gap-6">
+                                <label className="mt-3 flex items-center text-gray-600">
+                                    <input
+                                        type="checkbox"
+                                        checked={defaultCartFilter}
+                                        onChange={(event) =>
+                                            setDefaultCartFilter(event.target.checked)
+                                        }
+                                        className="mr-2 h-4 w-4"
+                                    />
 
-                            <label className="mt-3 flex items-center text-gray-600">
-                                <input
-                                    type="checkbox"
-                                    checked={defaultCartFilter}
-                                    onChange={(event) =>
-                                        setDefaultCartFilter(event.target.checked)
-                                    }
-                                    className="mr-2 h-4 w-4"
-                                />
+                                    Show Default Cart Items
+                                </label>
+                                <label className="mt-3 flex items-center text-gray-600">
+                                    <input
+                                        type="checkbox"
+                                        checked={favoriteFilter}
+                                        onChange={(event) =>
+                                            setFavoriteFilter(event.target.checked)
+                                        }
+                                        className="mr-2 h-4 w-4"
+                                    />
 
-                                Show Default Cart Items
-                            </label>
+                                    Favorited
+                                </label>
+                            </div>
                         </div>
 
 
@@ -326,6 +383,7 @@ export default function OrderCalculator() {
                     selectedBarcodes={selectedBarcodes}
                     onToggleItem={toggleItem}
                     categoryLookup={categoryLookup}
+                    onFavorite={favoriteItem}
                 />
 
             </main>

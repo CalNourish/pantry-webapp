@@ -28,6 +28,7 @@ export default function Inventory() {
     displayPublic: true,
     defaultCart: false,
     grabnGoDefaultCart: false,
+    favorited: false,
   };
 
   const emptyErrors = {
@@ -114,6 +115,12 @@ export default function Inventory() {
         return {
           ...state,
           ...action.value
+        }
+      }
+      case 'editItemFavorited': {
+        return {
+          ...state,
+          favorited: action.value
         }
       }
       default:
@@ -264,7 +271,8 @@ export default function Inventory() {
           categoryName: categories,
           displayPublic: data.displayPublic,
           defaultCart: data.defaultCart,
-          grabnGoDefaultCart: data.grabnGoDefaultCart
+          grabnGoDefaultCart: data.grabnGoDefaultCart,
+          favorited: data.favorited,
         };
         dispatch({ type: 'itemLookup', value: payload });
       })
@@ -305,7 +313,7 @@ export default function Inventory() {
     const displayPublic = Boolean(state.displayPublic)                                                      // defaults to true
     const defaultCart = Boolean(state.defaultCart)
     const grabnGoDefaultCart = Boolean(state.grabnGoDefaultCart)                                                             // defaults to false
-
+    const favorited = Boolean(state.favorited)
 
     const payload = JSON.stringify({
       "barcode": barcode,
@@ -316,7 +324,9 @@ export default function Inventory() {
       "categoryName": categories,
       "displayPublic": displayPublic,
       "defaultCart": defaultCart,
-      "grabnGoDefaultCart": grabnGoDefaultCart
+      "grabnGoDefaultCart": grabnGoDefaultCart,
+      "favorited": favorited,
+
     });
 
     fetch(`${server}/api/inventory/UpdateItem`, {
@@ -375,7 +385,8 @@ export default function Inventory() {
     const displayPublic = Boolean(state.displayPublic);                                                     // defaults to true
     const defaultCart = Boolean(state.defaultCart);
     const grabnGoDefaultCart = Boolean(state.grabnGoDefaultCart);                                                         // defaults to false
-    const categories = state.categoryName;                                                                  // required
+    const categories = state.categoryName;                   
+    const favorited = state.favorited;                                               // required
     let catNum = Object.keys(categories).length;
 
     if (!barcode || !itemName || !catNum) {
@@ -398,7 +409,8 @@ export default function Inventory() {
       "lowStock": lowStock,
       "displayPublic": displayPublic,
       "defaultCart": defaultCart,
-      "grabnGoDefaultCart": grabnGoDefaultCart
+      "grabnGoDefaultCart": grabnGoDefaultCart,
+      "favorited": favorited,
       /* created by? */
     };
 
