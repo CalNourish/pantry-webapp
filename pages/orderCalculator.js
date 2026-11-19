@@ -163,9 +163,13 @@ export default function OrderCalculator() {
     }
 
     function reset() {
-        setSelectedBarcodes((currentBarcodes) => {
-            return []
-        })
+        setSelectedBarcodes([]);
+        setCalculatorInputs({});
+    }
+
+    function finishOrder() {
+        reset();
+        setStep("select");
     }
     const inventoryItems = Object.values(inventory);
     const selectedItems = inventoryItems.filter((item) =>
@@ -442,6 +446,7 @@ export default function OrderCalculator() {
                         <div className="mt-6 flex justify-end">
                             <button
                                 type="button"
+                                onClick={finishOrder}
                                 disabled={!allItemsHaveDays}
                                 className={
                                     "btn btn-pantry-blue px-10 py-2 font-semibold " +
