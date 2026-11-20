@@ -1,3 +1,5 @@
+import { calculateCurrentCaseStock } from "../lib/orderCalculator.mjs";
+
 export default function OrderCalculatorTable({ items, selectedBarcodes, onToggleItem, categoryLookup, onFavorite }) {
     const headerClass =
         "px-5 py-3 border-b-2 border-gray-100 bg-gray-50 " +
@@ -29,7 +31,13 @@ export default function OrderCalculatorTable({ items, selectedBarcodes, onToggle
 
                             <th className={headerClass}>
                                 <div className="text-center">
-                                    Count
+                                    Current stock (individual units)
+                                </div>
+                            </th>
+
+                            <th className={headerClass}>
+                                <div className="text-center">
+                                    Current stock (cases)
                                 </div>
                             </th>
 
@@ -115,6 +123,12 @@ function OrderCalculatorRow({ item, isSelected, onToggleItem, categoryLookup, on
             <td className="border-b border-gray-100 bg-white px-3 py-3 text-center text-sm">
                 <p className="whitespace-nowrap font-bold text-gray-900">
                     {item.count}
+                </p>
+            </td>
+
+            <td className="border-b border-gray-100 bg-white px-3 py-3 text-center text-sm">
+                <p className="whitespace-nowrap font-bold text-gray-900">
+                    {calculateCurrentCaseStock(item.count, item.packSize)}
                 </p>
             </td>
 

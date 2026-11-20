@@ -5,6 +5,7 @@ import useSWR from "swr"
 import { useState } from "react";
 import {
     calculateCasesToOrder as getCasesToOrder,
+    calculateCurrentCaseStock,
     calculateOrderQuantity as getOrderQuantity,
     calculateProjectedStock,
     normalizePackSize,
@@ -180,6 +181,10 @@ export default function OrderCalculator() {
         const inputs = calculatorInputs[item.barcode] || {};
         const days = inputs.days || [];
         const currentStock = Number(item.count) || 0;
+        const currentCaseStock = calculateCurrentCaseStock(
+            currentStock,
+            item.packSize
+        );
         const quantityToOrder = calculateOrderQuantity(item);
         const packSize = normalizePackSize(item.packSize);
         const casesToOrder = calculateCasesToOrder(item, quantityToOrder);
@@ -188,6 +193,7 @@ export default function OrderCalculator() {
             barcode: item.barcode,
             itemName: item.itemName,
             currentStock,
+            currentCaseStock,
             days,
             packSize,
             quantityToOrder,
@@ -295,7 +301,10 @@ export default function OrderCalculator() {
                                             </h2>
 
                                             <p className="text-gray-500">
-                                                Current stock: {item.count}
+                                                Current stock (individual units): {item.count}
+                                            </p>
+                                            <p className="text-gray-500">
+                                                Current stock (cases): {calculateCurrentCaseStock(item.count, item.packSize)}
                                             </p>
                                         </div>
 
@@ -345,7 +354,7 @@ export default function OrderCalculator() {
                                         </fieldset>
                                         <label className="block">
                                             <span className="mb-2 block font-semibold">
-                                                Extra quantity
+                                                Extra quantity in individual units
                                             </span>
 
                                             <input
@@ -383,7 +392,11 @@ export default function OrderCalculator() {
                                         </th>
 
                                         <th className="px-5 py-3 text-center text-xs font-semibold uppercase text-gray-500">
-                                            Current stock
+                                            Current stock (individual units)
+                                        </th>
+
+                                        <th className="px-5 py-3 text-center text-xs font-semibold uppercase text-gray-500">
+                                            Current stock (cases)
                                         </th>
 
                                         <th className="px-5 py-3 text-center text-xs font-semibold uppercase text-gray-500">
@@ -413,6 +426,10 @@ export default function OrderCalculator() {
 
                                             <td className="border-t px-5 py-4 text-center">
                                                 {summaryItem.currentStock}
+                                            </td>
+
+                                            <td className="border-t px-5 py-4 text-center">
+                                                {summaryItem.currentCaseStock}
                                             </td>
 
                                             <td className="border-t px-5 py-4 text-center">

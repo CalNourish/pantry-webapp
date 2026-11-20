@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
     calculateCasesToOrder,
+    calculateCurrentCaseStock,
     calculateOrderQuantity,
     calculateProjectedStock,
     normalizePackSize,
@@ -56,6 +57,12 @@ test("cases to order round up to a whole case", () => {
     assert.equal(calculateCasesToOrder(25, 12), 3);
     assert.equal(calculateCasesToOrder(24, 12), 2);
     assert.equal(calculateCasesToOrder(0, 12), 0);
+});
+
+test("current case stock converts individual units using the pack size", () => {
+    assert.equal(calculateCurrentCaseStock(25, 12), 2.08);
+    assert.equal(calculateCurrentCaseStock(24, 12), 2);
+    assert.equal(calculateCurrentCaseStock(-4, 12), -0.33);
 });
 
 test("missing or invalid pack sizes safely default to one", () => {
