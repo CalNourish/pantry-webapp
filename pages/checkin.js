@@ -248,6 +248,10 @@ class Checkin extends React.Component {
         </div>
         </div>
       </div>
+
+      <a className="h-10" href="/">
+              <img className="block h-64 w-auto ml-4" src="/images/pantry-checkin-photo.jpg" alt="Pantry Check In" priority="true" height="6612" width="4410" />
+            </a>
     </Layout>
   )
   }
