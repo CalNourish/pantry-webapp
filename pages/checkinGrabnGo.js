@@ -239,6 +239,8 @@ class Checkin extends React.Component {
           </div>
           </div>
         </div>
+        <img className="block h-64 w-auto ml-4" src="/images/grabngo-checkin-photo.jpg" alt="GrabnGo Check In" priority="true" height="7862" width="5244"/>
+
       </Layout>
     )
     }
