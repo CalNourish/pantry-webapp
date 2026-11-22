@@ -458,6 +458,9 @@ class Cart extends React.Component {
             {this.state.success && successBanner}
             <h1 className="text-3xl font-medium mb-2">Cart</h1>
             <div className="text-lg font-medium bg-blue-50 py-3 px-1">Total Items: {this.state.itemsInCart}</div>
+            <button className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" onClick={(e) => this.submitCart(e)} disabled={this.state.loading}>
+              Checkout <span className="font-normal hidden lg:inline-block">(Shift+Enter)</span>
+            </button>
             <table className="w-full my-5 table-fixed" id="mycart">
               <thead>
                 {/*<tr className="bg-blue-50 h-10 m-3" key="totals">*/}
@@ -477,9 +480,6 @@ class Cart extends React.Component {
                 
               </tbody>
             </table>
-            <button className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" onClick={(e) => this.submitCart(e)} disabled={this.state.loading}>
-              Checkout <span className="font-normal hidden lg:inline-block">(Shift+Enter)</span>
-            </button>
           </div>
                       
           {/*Right-hand Column*/}
