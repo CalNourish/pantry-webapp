@@ -476,6 +476,11 @@ class Cart extends React.Component {
             {this.state.error && errorBanner}
             {this.state.success && successBanner}
             <h1 className="text-3xl font-medium mb-2">Cart</h1>
+              <button 
+              className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" 
+              onClick={(e) => this.submitCart(e)} disabled={this.state.loading}>
+              Checkout <span className="font-normal hidden lg:inline-block">(Shift+Enter)</span>
+            </button>
             <table className="w-full my-5 table-fixed" id="mycart">
               <thead>
                 <tr className="border-b-2">
@@ -500,11 +505,6 @@ class Cart extends React.Component {
                 </tr>
               </tbody>
             </table>
-            <button 
-              className="btn my-1 btn-pantry-blue uppercase tracking-wide text-xs font-semibold" 
-              onClick={(e) => this.submitCart(e)} disabled={this.state.loading}>
-              Checkout <span className="font-normal hidden lg:inline-block">(Shift+Enter)</span>
-            </button>
           </div>
                       
           {/*Right-hand Column*/}
